@@ -1,0 +1,15 @@
+<resources>
+    <string name="email_placeholder">Email</string>
+    <string name="password_placeholder">Password</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="login_title">Login</string>
+    <string name="login_button">Login</string>
+    <string name="show_password_button_description">Show password</string>
+    <string name="hide_password_button_description">Hide password</string>
+    <string name="email_password_required">Email or password is empty. Please fill in the form.</string>
+    <string name="invalid_credentials">Invalid email or password. Please try again.</string>
+    <string name="bottom_nav_home">Home</string>
+    <string name="bottom_nav_dashboard">Dashboard</string>
+    <string name="bottom_nav_devices">Devices</string>
+    <string name="bottom_nav_more">More</string>
+</resources>
