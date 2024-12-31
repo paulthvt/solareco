@@ -9,9 +9,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
+import kotlinx.datetime.plus
 import net.thevenot.comwatt.client.ComwattApi
 import net.thevenot.comwatt.client.Session
 
@@ -55,11 +57,17 @@ class HomeViewModel(private val session: Session, private val client: ComwattApi
                     _consumption.value = fetchSiteTimeSeries.consumptions.last().toString()
                     _injection.value = fetchSiteTimeSeries.injections.last().toString()
                     _withdrawals.value = fetchSiteTimeSeries.withdrawals.last().toString()
-                    _updateDate.value = Instant.parse(fetchSiteTimeSeries.timestamps.last().toString()).format(DateTimeComponents.Formats.RFC_1123)
+
+                    val lastUpdateTimestamp = Instant.parse(fetchSiteTimeSeries.timestamps.last().toString())
+                    _updateDate.value = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123)
                     _lastRefreshDate.value = Clock.System.now().format(DateTimeComponents.Formats.RFC_1123)
+
+                    val nextUpdateTimestamp = lastUpdateTimestamp.plus(2, DateTimeUnit.MINUTE)
+                    val delayMillis = nextUpdateTimestamp.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds()
+
+                    _isLoading.value = false
+                    delay(delayMillis)
                 }
-                _isLoading.value = false
-                delay(10000)
             }
         }
     }
