@@ -3,7 +3,7 @@ package net.thevenot.comwatt.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class UserResponse(
+data class User(
     val id: Int,
     val login: String,
     val firstName: String,

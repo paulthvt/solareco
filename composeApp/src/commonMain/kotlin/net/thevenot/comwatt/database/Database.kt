@@ -5,10 +5,6 @@ import androidx.sqlite.driver.bundled.BundledSQLiteDriver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
-expect class Database {
-    fun getDatabaseBuilder(): RoomDatabase.Builder<UserDatabase>
-}
-
 fun getUserDatabase(
     builder: RoomDatabase.Builder<UserDatabase>
 ): UserDatabase {

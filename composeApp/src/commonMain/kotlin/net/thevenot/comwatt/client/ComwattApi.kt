@@ -19,7 +19,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import net.thevenot.comwatt.model.Site
 import net.thevenot.comwatt.model.SiteTimeSeries
-import net.thevenot.comwatt.model.UserResponse
+import net.thevenot.comwatt.model.User
 import net.thevenot.comwatt.utils.toZoneString
 
 class ComwattApi(val client: HttpClient) {
@@ -64,7 +64,7 @@ class ComwattApi(val client: HttpClient) {
         }.body()
     }
 
-    suspend fun makeAuthenticatedRequest(sessionToken: String) : UserResponse? {
+    suspend fun authenticated(sessionToken: String) : User? {
         return client.get("$BASE_URL/users/authenticated") {
             header("Cookie", "cwt_session=$sessionToken")
         }.body()
