@@ -7,7 +7,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import net.thevenot.comwatt.database.Database
+import net.thevenot.comwatt.di.Factory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
             App(
                 darkTheme = isSystemInDarkTheme(),
                 dynamicColor = false,
-                AppContainer(Database(this))
+                AppContainer(Factory(this))
             )
         }
     }
@@ -29,6 +29,6 @@ fun AppAndroidPreview() {
     App(
         darkTheme = isSystemInDarkTheme(),
         dynamicColor = false,
-        AppContainer(Database(LocalContext.current))
+        AppContainer(Factory(LocalContext.current))
     )
 }
