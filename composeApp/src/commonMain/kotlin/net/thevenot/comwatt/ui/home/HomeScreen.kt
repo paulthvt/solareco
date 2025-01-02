@@ -25,6 +25,7 @@ fun HomeScreen(
         viewModel.load()
     }
 
+    val callNumber by viewModel.callNumber.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val production by viewModel.production.collectAsState()
     val consumption by viewModel.consumption.collectAsState()
@@ -33,11 +34,12 @@ fun HomeScreen(
     val updateDate by viewModel.updateDate.collectAsState()
     val lastRefreshDate by viewModel.lastRefreshDate.collectAsState()
 
-    HomeScreenContent(isLoading, production, consumption, injection, withdrawals, updateDate, lastRefreshDate)
+    HomeScreenContent(callNumber, isLoading, production, consumption, injection, withdrawals, updateDate, lastRefreshDate)
 }
 
 @Composable
 private fun HomeScreenContent(
+    callNumber: Int,
     isLoading: Boolean,
     production: String,
     consumption: String,
@@ -81,6 +83,9 @@ private fun HomeScreenContent(
             Text(
                 text = if (production.isEmpty()) "Loading..." else "Last refresh: $lastRefreshDate"
             )
+            Text(
+                text = if (production.isEmpty()) "Loading..." else "Call number: $callNumber",
+            )
         }
 //    }
 }
@@ -91,6 +96,7 @@ private fun HomeScreenPreview() {
     ComwattTheme(darkTheme = true, dynamicColor = false) {
         Surface {
             HomeScreenContent(
+                callNumber = 123,
                 isLoading = false,
                 production = "123",
                 consumption = "456",
