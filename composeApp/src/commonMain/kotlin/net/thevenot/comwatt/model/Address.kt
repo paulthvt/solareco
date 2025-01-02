@@ -8,4 +8,8 @@ data class Address(
     val postalCode: String,
     val city: String,
     val country: String
-)
+) {
+    fun formatAddress(): String {
+        return "$address, $postalCode $city, $country"
+    }
+}

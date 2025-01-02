@@ -1,7 +1,7 @@
 package net.thevenot.comwatt
 
 import androidx.compose.ui.window.ComposeUIViewController
-import net.thevenot.comwatt.database.Database
+import net.thevenot.comwatt.di.Factory
 import platform.UIKit.UIScreen
 import platform.UIKit.UIUserInterfaceStyle
 
@@ -12,6 +12,6 @@ fun MainViewController() = ComposeUIViewController {
     App(
         darkTheme = isDarkTheme,
         dynamicColor = false,
-        AppContainer(Database())
+        AppContainer(Factory())
     )
 }

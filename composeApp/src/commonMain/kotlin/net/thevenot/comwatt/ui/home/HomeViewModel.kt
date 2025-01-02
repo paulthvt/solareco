@@ -6,6 +6,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -14,10 +15,10 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.plus
-import net.thevenot.comwatt.client.ComwattApi
+import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.client.Session
 
-class HomeViewModel(private val session: Session, private val client: ComwattApi) : ViewModel() {
+class HomeViewModel(private val session: Session, private val dataRepository: DataRepository) : ViewModel() {
     private var autoRefreshJob: Job? = null
 
     private val _isLoading = MutableStateFlow(false)
@@ -49,10 +50,10 @@ class HomeViewModel(private val session: Session, private val client: ComwattApi
         autoRefreshJob = viewModelScope.launch {
             while (isActive) {
                 _isLoading.value = true
-                val sites = client.sites(session.token)
-                sites.first().id.let {
-                    val fetchSiteTimeSeries = client.fetchSiteTimeSeries(session.token, it)
-                    println("Sites: $fetchSiteTimeSeries")
+                val siteId = dataRepository.getSettings().firstOrNull()?.siteId
+                siteId?.let {
+                    val fetchSiteTimeSeries = dataRepository.api.fetchSiteTimeSeries(session.token, it)
+                    println("Sites data: $fetchSiteTimeSeries")
                     _production.value = fetchSiteTimeSeries.productions.last().toString()
                     _consumption.value = fetchSiteTimeSeries.consumptions.last().toString()
                     _injection.value = fetchSiteTimeSeries.injections.last().toString()

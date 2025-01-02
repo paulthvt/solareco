@@ -10,7 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
-import net.thevenot.comwatt.client.ComwattApi
+import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -18,8 +18,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun HomeScreen(
     session: Session,
-    client: ComwattApi,
-    viewModel: HomeViewModel = viewModel { HomeViewModel(session, client) }
+    dataRepository: DataRepository,
+    viewModel: HomeViewModel = viewModel { HomeViewModel(session, dataRepository) }
 ) {
     LaunchedEffect(Unit) {
         viewModel.load()

@@ -10,6 +10,9 @@ import net.thevenot.comwatt.client.Session
 
 sealed interface Screen {
     @Serializable
+    data class SiteChooser(val session: Session?) : Screen
+
+    @Serializable
     data class Main(val session: Session?) : Screen
 
     @Serializable
