@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -20,6 +22,9 @@ import net.thevenot.comwatt.client.Session
 
 class HomeViewModel(private val session: Session, private val dataRepository: DataRepository) : ViewModel() {
     private var autoRefreshJob: Job? = null
+    private val mutex = Mutex()
+    private val _callNumber = MutableStateFlow(0)
+    val callNumber: StateFlow<Int> get() = _callNumber
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> get() = _isLoading
@@ -47,27 +52,33 @@ class HomeViewModel(private val session: Session, private val dataRepository: Da
     }
 
     private fun startAutoRefresh() {
+        println("startAutoRefresh")
+        if(autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
             while (isActive) {
-                _isLoading.value = true
-                val siteId = dataRepository.getSettings().firstOrNull()?.siteId
-                siteId?.let {
-                    val fetchSiteTimeSeries = dataRepository.api.fetchSiteTimeSeries(session.token, it)
-                    println("Sites data: $fetchSiteTimeSeries")
-                    _production.value = fetchSiteTimeSeries.productions.last().toString()
-                    _consumption.value = fetchSiteTimeSeries.consumptions.last().toString()
-                    _injection.value = fetchSiteTimeSeries.injections.last().toString()
-                    _withdrawals.value = fetchSiteTimeSeries.withdrawals.last().toString()
+                mutex.withLock {
+                    _isLoading.value = true
+                    val siteId = dataRepository.getSettings().firstOrNull()?.siteId
+                    siteId?.let {
+                        println("calling site time series")
+                        _callNumber.value++
+                        val fetchSiteTimeSeries = dataRepository.api.fetchSiteTimeSeries(session.token, it)
+                        _production.value = fetchSiteTimeSeries.productions.last().toString()
+                        _consumption.value = fetchSiteTimeSeries.consumptions.last().toString()
+                        _injection.value = fetchSiteTimeSeries.injections.last().toString()
+                        _withdrawals.value = fetchSiteTimeSeries.withdrawals.last().toString()
 
-                    val lastUpdateTimestamp = Instant.parse(fetchSiteTimeSeries.timestamps.last().toString())
-                    _updateDate.value = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123)
-                    _lastRefreshDate.value = Clock.System.now().format(DateTimeComponents.Formats.RFC_1123)
+                        val lastUpdateTimestamp = Instant.parse(fetchSiteTimeSeries.timestamps.last().toString())
+                        _updateDate.value = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123)
+                        _lastRefreshDate.value = Clock.System.now().format(DateTimeComponents.Formats.RFC_1123)
 
-                    val nextUpdateTimestamp = lastUpdateTimestamp.plus(2, DateTimeUnit.MINUTE)
-                    val delayMillis = nextUpdateTimestamp.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds()
+                        val nextUpdateTimestamp = lastUpdateTimestamp.plus(2, DateTimeUnit.MINUTE)
+                        val delayMillis = nextUpdateTimestamp.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds()
 
-                    _isLoading.value = false
-                    delay(delayMillis)
+                        _isLoading.value = false
+                        println("waiting for $delayMillis milliseconds")
+                        delay(delayMillis)
+                    }
                 }
             }
         }
