@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.client
 
 import arrow.core.Either
+import arrow.core.flatMap
 import io.ktor.client.HttpClient
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -29,7 +30,10 @@ import net.thevenot.comwatt.model.safeRequest
 import net.thevenot.comwatt.utils.toZoneString
 
 class ComwattApi(val client: HttpClient, val baseUrl: String) {
-    suspend fun authenticate(email: String, password: Password): Session? {
+    suspend fun authenticate(
+        email: String,
+        password: Password
+    ): Either<ApiError<HttpResponse>, Session> {
         val url = "$baseUrl/v1/authent"
         val encodedPassword = password.encodedValue
         val data = AuthRequest(email, encodedPassword)
@@ -44,21 +48,16 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
             }
         }
 
-        when(response) {
-            is Either.Left -> {
-                return null
-            }
-            is Either.Right -> {
-                val setCookieHeader = response.value.headers["set-cookie"]
-                val sessionToken = setCookieHeader?.substringAfter("cwt_session=")?.substringBefore(";")
-                val expiresString = response.value.headers["x-cwt-token"]
-                val expires = expiresString?.let { Instant.parse(it).toLocalDateTime(TimeZone.UTC) }
+        return response.flatMap { resp ->
+            val setCookieHeader = resp.headers["set-cookie"]
+            val sessionToken = setCookieHeader?.substringAfter("cwt_session=")?.substringBefore(";")
+            val expiresString = resp.headers["x-cwt-token"]
+            val expires = expiresString?.let { Instant.parse(it).toLocalDateTime(TimeZone.UTC) }
 
-                return sessionToken?.let { token ->
-                    expires?.let { exp ->
-                        Session(token, exp)
-                    }
-                }
+            if (sessionToken != null && expires != null) {
+                Either.Right(Session(sessionToken, expires))
+            } else {
+                Either.Left(ApiError.GenericError("Invalid session data", "Session token or expiration date is missing"))
             }
         }
     }

@@ -2,6 +2,7 @@ package net.thevenot.comwatt.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.Either
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.email_password_required
 import comwatt.composeapp.generated.resources.invalid_credentials
@@ -48,26 +49,28 @@ class LoginViewModel(
             if (validateForm()) {
                 _isLoggingIn.value = true
                 val password = Password(_password.value)
-                val session = try {
-                    dataRepository.api.authenticate(
+                val authenticateResponse = dataRepository.api.authenticate(
                         email = _email.value,
                         password = password
                     )
-                } catch (e: Exception) {
-                    _snackbarMessage.value = getString(Res.string.invalid_credentials)
-                    _isLoggingIn.value = false
-                    null
-                }
-                session?.let {
-                    if(_rememberMe.value) {
-                        dataRepository.addUser(
-                            User(
-                                _email.value,
-                                password.encodedValue
-                            )
-                        )
+
+                when(authenticateResponse) {
+                    is Either.Left -> {
+                        _snackbarMessage.value = getString(Res.string.invalid_credentials)
+                        _isLoggingIn.value = false
+                        return@launch
                     }
-                    onLogin(it)
+                    is Either.Right -> {
+                        if(_rememberMe.value) {
+                            dataRepository.addUser(
+                                User(
+                                    _email.value,
+                                    password.encodedValue
+                                )
+                            )
+                        }
+                        onLogin(authenticateResponse.value)
+                    }
                 }
             } else {
                 _snackbarMessage.value = getString(Res.string.email_password_required)

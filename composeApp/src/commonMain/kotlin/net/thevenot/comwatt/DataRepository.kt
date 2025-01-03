@@ -31,9 +31,9 @@ class DataRepository(
         scope.launch {
             val user = getUser()
             user?.let {
-                api.authenticate(it.email, Password(it.password))?.let { session ->
+                api.authenticate(it.email, Password(it.password)).onRight {
                     withContext(Dispatchers.Main) {
-                        onLogin(session)
+                        onLogin(it)
                     }
                 }
             } ?: run {
