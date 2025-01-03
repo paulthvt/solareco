@@ -29,11 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.client.Session
-import net.thevenot.comwatt.model.Address
+import net.thevenot.comwatt.model.AddressDto
 import net.thevenot.comwatt.model.Agreements
 import net.thevenot.comwatt.model.Phone
 import net.thevenot.comwatt.model.Profile
-import net.thevenot.comwatt.model.Site
+import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.User
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -62,7 +62,7 @@ fun SiteChooserScreen(
 }
 
 @Composable
-fun SiteChooserContent(sites: List<Site>, user: User?, onSiteClick: (Site) -> Unit = {}) {
+fun SiteChooserContent(sites: List<SiteDto>, user: User?, onSiteClick: (SiteDto) -> Unit = {}) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(
             AppTheme.dimens.paddingSmall,
@@ -80,7 +80,7 @@ fun SiteChooserContent(sites: List<Site>, user: User?, onSiteClick: (Site) -> Un
 }
 
 @Composable
-fun SiteCard(site: Site, user: User?, onSiteClick: (Site) -> Unit = {}) {
+fun SiteCard(site: SiteDto, user: User?, onSiteClick: (SiteDto) -> Unit = {}) {
     Card(
         modifier = Modifier.fillMaxWidth()
             .clickable { onSiteClick(site) }
@@ -118,7 +118,7 @@ fun SiteCard(site: Site, user: User?, onSiteClick: (Site) -> Unit = {}) {
 @Composable
 private fun SiteChooserPreview() {
     val sampleSites = listOf(
-        Site(
+        SiteDto(
             id = 1,
             name = "Site 1",
             description = "Description 1",
@@ -126,7 +126,7 @@ private fun SiteChooserPreview() {
             updateDate = "2021-01-02",
             ownerAssignDate = "2021-01-03",
             threePhase = true,
-            address = Address("123 Main St", "12345", "Paris", "France"),
+            address = AddressDto("123 Main St", "12345", "Paris", "France"),
             currency = "USD",
             language = "en",
             metric = "metric",
@@ -139,7 +139,7 @@ private fun SiteChooserPreview() {
             state = "State 1",
             siteKind = "Kind 1"
         ),
-        Site(
+        SiteDto(
             id = 2,
             name = "Site 2",
             description = "Description 2",
@@ -147,7 +147,7 @@ private fun SiteChooserPreview() {
             updateDate = "2021-02-02",
             ownerAssignDate = "2021-02-03",
             threePhase = false,
-            address = Address("456 Elm St", "67890", "Montreal", "Canada"),
+            address = AddressDto("456 Elm St", "67890", "Montreal", "Canada"),
             currency = "EUR",
             language = "fr",
             metric = "metric",
@@ -175,7 +175,7 @@ private fun SiteChooserPreview() {
             code = "ADMIN",
             authorities = null
         ),
-        address = Address("789 Oak St", "54321", "City", "Country"),
+        address = AddressDto("789 Oak St", "54321", "City", "Country"),
         phone = Phone("1234567890", "1"),
         mobilePhone = "0987654321",
         currency = "USD",

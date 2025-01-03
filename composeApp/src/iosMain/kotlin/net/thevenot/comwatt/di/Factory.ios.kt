@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import kotlinx.cinterop.ExperimentalForeignApi
+import net.thevenot.comwatt.client.ComwattApi
 import net.thevenot.comwatt.database.UserDatabase
 import net.thevenot.comwatt.database.createDataStore
 import net.thevenot.comwatt.database.dataStoreFileName
@@ -47,4 +48,6 @@ actual class Factory {
             requireNotNull(documentDirectory).path + "/$dataStoreFileName"
         }
     )
+
+    actual fun createApi(): ComwattApi = commonCreateApi()
 }

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SiteTimeSeries(
+data class SiteTimeSeriesDto(
     val timestamps: List<String>,
     val productions: List<Double>,
     val consumptions: List<Double>,
