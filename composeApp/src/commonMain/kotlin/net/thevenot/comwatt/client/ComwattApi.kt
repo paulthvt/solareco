@@ -2,8 +2,6 @@ package net.thevenot.comwatt.client
 
 import arrow.core.Either
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -35,21 +33,32 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         val url = "$baseUrl/v1/authent"
         val encodedPassword = password.encodedValue
         val data = AuthRequest(email, encodedPassword)
-        val response: HttpResponse = withContext(Dispatchers.IO) {
-            client.post(url) {
-                contentType(ContentType.Application.Json)
-                setBody(data)
+        val response: Either<ApiError<HttpResponse>, HttpResponse> = withContext(Dispatchers.IO) {
+            try {
+                Either.Right(client.post(url) {
+                    contentType(ContentType.Application.Json)
+                    setBody(data)
+                })
+            } catch (e: Exception) {
+                Either.Left(ApiError.GenericError(e.message, "Something went wrong"))
             }
         }
 
-        val setCookieHeader = response.headers["set-cookie"]
-        val sessionToken = setCookieHeader?.substringAfter("cwt_session=")?.substringBefore(";")
-        val expiresString = response.headers["x-cwt-token"]
-        val expires = expiresString?.let { Instant.parse(it).toLocalDateTime(TimeZone.UTC) }
+        when(response) {
+            is Either.Left -> {
+                return null
+            }
+            is Either.Right -> {
+                val setCookieHeader = response.value.headers["set-cookie"]
+                val sessionToken = setCookieHeader?.substringAfter("cwt_session=")?.substringBefore(";")
+                val expiresString = response.value.headers["x-cwt-token"]
+                val expires = expiresString?.let { Instant.parse(it).toLocalDateTime(TimeZone.UTC) }
 
-        return sessionToken?.let { token ->
-            expires?.let { exp ->
-                Session(token, exp)
+                return sessionToken?.let { token ->
+                    expires?.let { exp ->
+                        Session(token, exp)
+                    }
+                }
             }
         }
     }
@@ -90,11 +99,15 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         }
     }
 
-    suspend fun authenticated(sessionToken: String) : User? {
+    suspend fun authenticated(sessionToken: String): Either<ApiError<User?>, User?> {
         return withContext(Dispatchers.IO) {
-            client.get("$baseUrl/users/authenticated") {
-                header("Cookie", "cwt_session=$sessionToken")
-            }.body()
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/users/authenticated")
+                    header("Cookie", "cwt_session=$sessionToken")
+                }
+            }
         }
     }
 }

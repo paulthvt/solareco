@@ -38,14 +38,21 @@ class SiteChooserViewModel(
         viewModelScope.launch {
             when (val siteResponse = dataRepository.api.sites(session.token)) {
                 is Either.Left -> {
-                    Napier.e(tag = "SiteChooserViewModel") { "Error loading sites: ${siteResponse.value}" }
+                    Napier.e(tag = TAG) { "Error loading sites: ${siteResponse.value}" }
                 }
                 is Either.Right -> {
                     _sites.value = siteResponse.value
                 }
             }
 
-            _user.value = dataRepository.api.authenticated(session.token)
+            when (val userResponse = dataRepository.api.authenticated(session.token)) {
+                is Either.Left -> {
+                    Napier.e(tag = TAG) { "Error loading user: ${userResponse.value}" }
+                }
+                is Either.Right -> {
+                    _user.value = userResponse.value
+                }
+            }
         }
     }
 
@@ -53,5 +60,9 @@ class SiteChooserViewModel(
         viewModelScope.launch {
             dataRepository.saveSiteId(siteId)
         }
+    }
+
+    companion object {
+        const val TAG = "SiteChooserViewModel"
     }
 }
