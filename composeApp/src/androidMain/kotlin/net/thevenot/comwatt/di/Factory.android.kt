@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import net.thevenot.comwatt.client.ComwattApi
 import net.thevenot.comwatt.database.UserDatabase
 import net.thevenot.comwatt.database.createDataStore
 import net.thevenot.comwatt.database.dataStoreFileName
@@ -22,4 +23,6 @@ actual class Factory(private val ctx: Context) {
     actual fun createDataStore(): DataStore<Preferences> = createDataStore(
         producePath = { ctx.filesDir.resolve(dataStoreFileName).absolutePath }
     )
+
+    actual fun createApi(): ComwattApi = commonCreateApi()
 }

@@ -3,7 +3,7 @@ package net.thevenot.comwatt.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Site(
+data class SiteDto(
     val id: Int,
     val name: String,
     val description: String?,
@@ -11,7 +11,7 @@ data class Site(
     val updateDate: String,
     val ownerAssignDate: String,
     val threePhase: Boolean,
-    val address: Address,
+    val address: AddressDto,
     val currency: String,
     val language: String,
     val metric: String,

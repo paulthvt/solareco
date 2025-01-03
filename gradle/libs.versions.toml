@@ -23,6 +23,8 @@ ksp = "2.0.10-1.0.24"
 sqlite = "2.5.0-alpha12"
 androidx-room = "2.7.0-alpha12"
 dataStoreVersion = "1.1.1"
+arrow = "2.0.0"
+napier = "2.7.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -56,6 +58,9 @@ lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifec
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uriKmp" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
+arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

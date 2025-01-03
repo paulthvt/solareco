@@ -5,6 +5,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -15,6 +18,7 @@ import androidx.navigation.toRoute
 import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
+import net.thevenot.comwatt.ui.home.HomeViewModel
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
@@ -47,6 +51,9 @@ fun App(
 @Composable
 fun MainAppNavHost(appContainer: AppContainer, navController: NavHostController = rememberNavController()) {
     val dataRepository = appContainer.dataRepository
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
+        "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
+    }
 
     NavHost(navController, startDestination = Screen.Login) {
         composable<Screen.Login> {
@@ -66,11 +73,15 @@ fun MainAppNavHost(appContainer: AppContainer, navController: NavHostController 
                 }
             } ?: navController.navigate(Screen.Login)
         }
-        mainGraph(navController, dataRepository)
+        mainGraph(navController, dataRepository, viewModelStoreOwner)
     }
 }
 
-fun NavGraphBuilder.mainGraph(navController: NavHostController, dataRepository: DataRepository) {
+fun NavGraphBuilder.mainGraph(
+    navController: NavHostController,
+    dataRepository: DataRepository,
+    viewModelStoreOwner: ViewModelStoreOwner
+) {
     navigation<Screen.Main>(
         typeMap = mapOf(typeOf<Session?>() to SessionNavType),
         startDestination = Screen.Home()
@@ -79,7 +90,15 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController, dataRepository: 
             val mainParam: Screen.Home = backStackEntry.toRoute()
             mainParam.session?.let {
                 NestedAppScaffold(navController, it) {
-                    HomeScreen(it, dataRepository)
+                    HomeScreen(
+                        session = it,
+                        dataRepository = dataRepository,
+                        viewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner) {
+                            HomeViewModel(
+                                it,
+                                dataRepository
+                            )
+                        })
                 }
             } ?: navController.navigate(Screen.Login)
         }
@@ -95,7 +114,7 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController, dataRepository: 
             val mainParam: Screen.Devices = backStackEntry.toRoute()
             mainParam.session?.let {
                 NestedAppScaffold(navController, it) {
-                    HomeScreen(it, dataRepository)
+                    DashboardScreen()
                 }
             } ?: navController.navigate(Screen.Login)
         }
@@ -103,7 +122,7 @@ fun NavGraphBuilder.mainGraph(navController: NavHostController, dataRepository: 
             val mainParam: Screen.More = backStackEntry.toRoute()
             mainParam.session?.let {
                 NestedAppScaffold(navController, it) {
-                    HomeScreen(it, dataRepository)
+                    DashboardScreen()
                 }
             } ?: navController.navigate(Screen.Login)
         }

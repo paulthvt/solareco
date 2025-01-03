@@ -12,7 +12,7 @@ data class User(
     val newEmail: String?,
     val pseudonym: String?,
     val profile: Profile,
-    val address: Address,
+    val address: AddressDto,
     val phone: Phone,
     val mobilePhone: String?,
     val currency: String,
