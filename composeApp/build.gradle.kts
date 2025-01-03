@@ -60,6 +60,9 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
             implementation(libs.androidx.datastore.preferences.core)
+            implementation(libs.arrow.core)
+            implementation(libs.arrow.fx.coroutines)
+            implementation(libs.napier)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

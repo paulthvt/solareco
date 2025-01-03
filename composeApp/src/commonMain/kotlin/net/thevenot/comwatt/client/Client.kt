@@ -2,21 +2,21 @@ package net.thevenot.comwatt.client
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.logging.SIMPLE
+import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-const val BASE_URL = "https://energy.comwatt.com/api"
-
 expect fun engine(): HttpClientEngine
 
-val client = HttpClient(engine()) {
+fun createClient() = HttpClient(engine()) {
     expectSuccess = true
     install(ContentNegotiation) {
         json(
@@ -30,6 +30,14 @@ val client = HttpClient(engine()) {
                 ignoreUnknownKeys = true
             },
         )
+    }
+    install(DefaultRequest) {
+        apply {
+            url {
+                protocol = URLProtocol.HTTPS
+                host = "energy.comwatt.com"
+            }
+        }
     }
     install(Logging) {
         logger = Logger.SIMPLE

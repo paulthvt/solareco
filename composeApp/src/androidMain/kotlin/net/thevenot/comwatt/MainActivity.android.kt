@@ -12,6 +12,7 @@ import net.thevenot.comwatt.di.Factory
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initLogger()
 
         setContent {
             App(
