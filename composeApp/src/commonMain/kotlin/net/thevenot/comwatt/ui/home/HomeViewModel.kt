@@ -30,32 +30,9 @@ class HomeViewModel(
 ) : ViewModel() {
     private var autoRefreshJob: Job? = null
     private val mutex = Mutex()
-    private val _callNumber = MutableStateFlow(0)
-    val callNumber: StateFlow<Int> get() = _callNumber
 
-    private val _errorNumber = MutableStateFlow(0)
-    val errorNumber: StateFlow<Int> get() = _errorNumber
-
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> get() = _isLoading
-
-    private val _production = MutableStateFlow("")
-    val production: StateFlow<String> = _production
-
-    private val _consumption = MutableStateFlow("")
-    val consumption: StateFlow<String> = _consumption
-
-    private val _injection = MutableStateFlow("")
-    val injection: StateFlow<String> = _injection
-
-    private val _withdrawals = MutableStateFlow("")
-    val withdrawals: StateFlow<String> = _withdrawals
-
-    private val _updateDate = MutableStateFlow("")
-    val updateDate: StateFlow<String> = _updateDate
-
-    private val _lastRefreshDate = MutableStateFlow("")
-    val lastRefreshDate: StateFlow<String> = _lastRefreshDate
+    private val _uiState = MutableStateFlow(HomeScreenState())
+    val uiState: StateFlow<HomeScreenState> get() = _uiState
 
     fun load() {
         startAutoRefresh()
@@ -70,33 +47,36 @@ class HomeViewModel(
                 Napier.d(tag = TAG) { "Site id: $id" }
                 while (isActive) {
                     mutex.withLock {
-                        _isLoading.value = true
+                        _uiState.value = _uiState.value.copy(isLoading = true)
                         Napier.d(tag = TAG) { "calling site time series" }
-                        _callNumber.value++
+                        _uiState.value = _uiState.value.copy(callCount = _uiState.value.callCount + 1)
                         val response = dataRepository.api.fetchSiteTimeSeries(session.token, id)
                         when (response) {
                             is Left -> {
                                 Napier.d(tag = TAG) { "error: ${response.value}" }
-                                _errorNumber.value++
+                                _uiState.value = _uiState.value.copy(errorCount = _uiState.value.errorCount + 1)
                                 delay(FALLBACK_DELAY)
                             }
 
                             is Right -> {
-                                _production.value = response.value.productions.last().toString()
-                                _consumption.value = response.value.consumptions.last().toString()
-                                _injection.value = response.value.injections.last().toString()
-                                _withdrawals.value = response.value.withdrawals.last().toString()
-
                                 val lastUpdateTimestamp =
                                     Instant.parse(response.value.timestamps.last().toString())
-                                _updateDate.value =
-                                    lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123)
-                                _lastRefreshDate.value =
-                                    Clock.System.now().format(DateTimeComponents.Formats.RFC_1123)
+
+                                _uiState.value = _uiState.value.copy(
+                                    production = response.value.productions.last(),
+                                    consumption = response.value.consumptions.last(),
+                                    injection = response.value.injections.last(),
+                                    withdrawals = response.value.withdrawals.last(),
+                                    consumptionRate = response.value.consumptions.last() / MAX_POWER,
+                                    productionRate = response.value.productions.last() / MAX_POWER,
+                                    injectionRate = response.value.injections.last() / MAX_POWER,
+                                    withdrawalsRate = response.value.withdrawals.last() / MAX_POWER,
+                                    updateDate = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123),
+                                    lastRefreshDate = Clock.System.now().format(DateTimeComponents.Formats.RFC_1123),
+                                    isLoading = false
+                                )
 
                                 val delayMillis = computeDelay(lastUpdateTimestamp)
-
-                                _isLoading.value = false
                                 Napier.d(tag = TAG) { "waiting for $delayMillis milliseconds" }
                                 delay(delayMillis)
                             }
@@ -129,6 +109,7 @@ class HomeViewModel(
 
     companion object {
         private const val FALLBACK_DELAY = 10_000L
+        const val MAX_POWER = 7000.0
         private const val TAG = "HomeViewModel"
     }
 }

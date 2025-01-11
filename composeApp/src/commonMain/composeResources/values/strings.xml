@@ -12,4 +12,8 @@
     <string name="bottom_nav_dashboard">Dashboard</string>
     <string name="bottom_nav_devices">Devices</string>
     <string name="bottom_nav_more">More</string>
+    <string name="gauge_subtitle_production">Production</string>
+    <string name="gauge_subtitle_consumption">Consumption</string>
+    <string name="gauge_subtitle_withdrawals">Withdrawals</string>
+    <string name="gauge_subtitle_injection">Injection</string>
 </resources>
