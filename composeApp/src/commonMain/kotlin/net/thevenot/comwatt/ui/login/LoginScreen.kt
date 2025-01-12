@@ -99,14 +99,11 @@ fun LoginScreen(
     ) {
         if(isLoading) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .navigationBarsPadding(),
+                modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
                 CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.onPrimary,
                     strokeCap = StrokeCap.Round,
                 )
             }
