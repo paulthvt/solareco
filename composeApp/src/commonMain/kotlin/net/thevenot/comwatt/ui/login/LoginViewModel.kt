@@ -38,8 +38,11 @@ class LoginViewModel(
 
     fun tryAutoLogin(onLogin: (Session) -> Unit) {
         viewModelScope.launch {
-            dataRepository.tryAutoLogin(onLogin) {
+            dataRepository.tryAutoLogin(onLogin) { error ->
                 _isLoading.value = false
+                error?.let {
+                    _snackbarMessage.value = it
+                }
             }
         }
     }

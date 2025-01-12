@@ -36,7 +36,7 @@ class SiteChooserViewModel(
 
     fun loadSites() {
         viewModelScope.launch {
-            when (val siteResponse = dataRepository.api.sites(session.token)) {
+            when (val siteResponse = dataRepository.api.sites()) {
                 is Either.Left -> {
                     Napier.e(tag = TAG) { "Error loading sites: ${siteResponse.value}" }
                 }

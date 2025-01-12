@@ -217,8 +217,18 @@ val surfaceContainerDarkHighContrast = Color(0xFF1E201A)
 val surfaceContainerHighDarkHighContrast = Color(0xFF282B24)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF33362E)
 
-
-
+val powerProductionGaugeStart = Color(0xFF81C784) // Green 300
+val powerProductionGauge = Color(0xFF9CCC65) // Green 400
+val powerProductionGaugeEnd = Color(0xFF4CAF50) // Green 500
+val powerConsumptionGaugeStart = Color(0xFFE57373) // Red 300
+val powerConsumptionGauge = Color(0xFFEF5350) // Red 400
+val powerConsumptionGaugeEnd = Color(0xFFF44336) // Red 500
+val powerInjectionGaugeStart = Color(0xFF64B5F6) // Blue 300
+val powerInjectionGauge = Color(0xFF42A5F5) // Blue 400
+val powerInjectionGaugeEnd = Color(0xFF2196F3) // Blue 500
+val powerWithdrawalsGaugeStart = Color(0xFFFFB74D) // Orange 300
+val powerWithdrawalsGauge = Color(0xFFFFA726) // Orange 400
+val powerWithdrawalsGaugeEnd = Color(0xFFFF9800) // Orange 500
 
 
 
