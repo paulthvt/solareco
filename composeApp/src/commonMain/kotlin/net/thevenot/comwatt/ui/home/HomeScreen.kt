@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,11 +34,13 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
+import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumptionGauge
 import net.thevenot.comwatt.ui.theme.powerInjectionGauge
 import net.thevenot.comwatt.ui.theme.powerProductionGauge
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGauge
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
@@ -51,13 +54,16 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    HomeScreenContent(uiState, viewModel)
+    HomeScreenContent(uiState, viewModel::enableProductionGauge, viewModel::enableConsumptionGauge, viewModel::enableInjectionGauge, viewModel::enableWithdrawalsGauge)
 }
 
 @Composable
 private fun HomeScreenContent(
     uiState: HomeScreenState,
-    viewModel: HomeViewModel
+    onProductionChecked: (Boolean) -> Unit = {},
+    onConsumptionChecked: (Boolean) -> Unit = {},
+    onInjectionChecked: (Boolean) -> Unit = {},
+    onWithdrawalsChecked: (Boolean) -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
 //    if(isLoading) {
@@ -102,10 +108,10 @@ private fun HomeScreenContent(
                 GaugeSettingsDialog(
                     onDismiss = { showDialog = false },
                     uiState = uiState,
-                    onProductionChecked = { viewModel.enableProductionGauge(it) },
-                    onConsumptionChecked = { viewModel.enableConsumptionGauge(it) },
-                    onInjectionChecked = { viewModel.enableInjectionGauge(it) },
-                    onWithdrawalsChecked = { viewModel.enableWithdrawalsGauge(it) }
+                    onProductionChecked = onProductionChecked,
+                    onConsumptionChecked = onConsumptionChecked,
+                    onInjectionChecked = onInjectionChecked,
+                    onWithdrawalsChecked = onWithdrawalsChecked
                 )
             }
         }
@@ -182,24 +188,24 @@ fun DialogSettingsRow(
     }
 }
 
-//@Preview
-//@Composable
-//private fun HomeScreenPreview() {
-//    ComwattTheme(darkTheme = true, dynamicColor = false) {
-//        Surface {
-//            HomeScreenContent(
-//                HomeScreenState(
-//                    callCount = 123,
-//                    errorCount = 0,
-//                    isLoading = false,
-//                    production = 123.0,
-//                    consumption = 456.0,
-//                    injection = 789.0,
-//                    withdrawals = 951.0,
-//                    updateDate = "2021-09-01T12:00:00Z",
-//                    lastRefreshDate = "2021-09-01T12:00:00Z"
-//                )
-//            )
-//        }
-//    }
-//}
+@Preview
+@Composable
+private fun HomeScreenPreview() {
+    ComwattTheme(darkTheme = true, dynamicColor = false) {
+        Surface {
+            HomeScreenContent(
+                uiState = HomeScreenState(
+                    callCount = 123,
+                    errorCount = 0,
+                    isLoading = false,
+                    production = 123.0,
+                    consumption = 456.0,
+                    injection = 789.0,
+                    withdrawals = 951.0,
+                    updateDate = "2021-09-01T12:00:00Z",
+                    lastRefreshDate = "2021-09-01T12:00:00Z"
+                )
+            )
+        }
+    }
+}
