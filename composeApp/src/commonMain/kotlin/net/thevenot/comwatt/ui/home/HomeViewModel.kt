@@ -22,6 +22,7 @@ import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.plus
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.client.Session
+import net.thevenot.comwatt.model.ApiError
 
 
 class HomeViewModel(
@@ -33,6 +34,22 @@ class HomeViewModel(
 
     private val _uiState = MutableStateFlow(HomeScreenState())
     val uiState: StateFlow<HomeScreenState> get() = _uiState
+
+    fun enableProductionGauge(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(productionGaugeEnabled = enabled)
+    }
+
+    fun enableConsumptionGauge(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(consumptionGaugeEnabled = enabled)
+    }
+
+    fun enableInjectionGauge(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(injectionGaugeEnabled = enabled)
+    }
+
+    fun enableWithdrawalsGauge(enabled: Boolean) {
+        _uiState.value = _uiState.value.copy(withdrawalsGaugeEnabled = enabled)
+    }
 
     fun load() {
         startAutoRefresh()
@@ -54,7 +71,23 @@ class HomeViewModel(
                         when (response) {
                             is Left -> {
                                 Napier.d(tag = TAG) { "error: ${response.value}" }
-                                _uiState.value = _uiState.value.copy(errorCount = _uiState.value.errorCount + 1)
+
+                                _uiState.value = _uiState.value.copy(
+                                    errorCount = _uiState.value.errorCount + 1,
+                                    lastErrorMessage = when (val value = response.value) {
+                                        is ApiError.HttpError -> {
+                                            value.errorBody
+                                        }
+
+                                        is ApiError.SerializationError -> {
+                                            value.message
+                                        }
+
+                                        is ApiError.GenericError -> {
+                                            value.message
+                                        }
+                                    } ?: "Unknown error"
+                                )
                                 delay(FALLBACK_DELAY)
                             }
 

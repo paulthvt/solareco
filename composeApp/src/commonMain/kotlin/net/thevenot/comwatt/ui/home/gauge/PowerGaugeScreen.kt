@@ -76,7 +76,6 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
-import kotlin.math.max
 import kotlin.math.sin
 
 suspend fun startAnimation(animation: Animatable<Float, AnimationVector1D>, targetValue: Float) {
@@ -89,13 +88,17 @@ suspend fun startAnimation(animation: Animatable<Float, AnimationVector1D>, targ
     )
 }
 
-fun Animatable<Float, AnimationVector1D>.toUiState(wattValue: Int) = GaugeState(
+fun Animatable<Float, AnimationVector1D>.toUiState(wattValue: Int, enabled: Boolean) = GaugeState(
     arcValue = value,
-    value = "$wattValue"
+    value = "$wattValue",
+    enabled = enabled
 )
 
 @Composable
-fun SpeedTestScreen(homeScreenState: HomeScreenState, onSettingsButtonClick: () -> Unit = {}) {
+fun PowerGaugeScreen(
+    homeScreenState: HomeScreenState,
+    onSettingsButtonClick: () -> Unit = {}
+) {
     val productionAnimation = remember { Animatable(0f) }
     val consumptionAnimation = remember { Animatable(0f) }
     val injectionAnimation = remember { Animatable(0f) }
@@ -122,17 +125,17 @@ fun SpeedTestScreen(homeScreenState: HomeScreenState, onSettingsButtonClick: () 
         }
     }
 
-    SpeedTestScreen(
-        production = productionAnimation.toUiState(homeScreenState.production.toInt()),
-        consumption = consumptionAnimation.toUiState(homeScreenState.consumption.toInt()),
-        injection = injectionAnimation.toUiState(homeScreenState.injection.toInt()),
-        withdrawals = withdrawalsAnimation.toUiState(homeScreenState.withdrawals.toInt()),
+    PowerGaugeScreen(
+        production = productionAnimation.toUiState(homeScreenState.production.toInt(), homeScreenState.productionGaugeEnabled),
+        consumption = consumptionAnimation.toUiState(homeScreenState.consumption.toInt(), homeScreenState.consumptionGaugeEnabled),
+        injection = injectionAnimation.toUiState(homeScreenState.injection.toInt(), homeScreenState.injectionGaugeEnabled),
+        withdrawals = withdrawalsAnimation.toUiState(homeScreenState.withdrawals.toInt(), homeScreenState.withdrawalsGaugeEnabled),
         onSettingsButtonClick = onSettingsButtonClick
     )
 }
 
 @Composable
-private fun SpeedTestScreen(
+private fun PowerGaugeScreen(
     production: GaugeState,
     consumption: GaugeState,
     injection: GaugeState,
@@ -144,12 +147,12 @@ private fun SpeedTestScreen(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        SpeedIndicator(production, consumption, injection, withdrawals, onSettingsButtonClick)
+        PowerIndicator(production, consumption, injection, withdrawals, onSettingsButtonClick)
     }
 }
 
 @Composable
-fun SpeedIndicator(
+fun PowerIndicator(
     production: GaugeState,
     consumption: GaugeState,
     injection: GaugeState,
@@ -163,12 +166,16 @@ fun SpeedIndicator(
             .aspectRatio(1f)
     ) {
         SettingsButton(onSettingsButtonClick)
-        CircularSpeedIndicator(
+        CircularPowerIndicator(
             production = production.arcValue,
             consumption = consumption.arcValue,
             injection = injection.arcValue,
             withdrawals = withdrawals.arcValue,
-            angle = 240f
+            angle = 240f,
+            productionChecked = production.enabled,
+            consumptionChecked = consumption.enabled,
+            injectionChecked = injection.enabled,
+            withdrawalsChecked = withdrawals.enabled
         )
         WattValues(
             production = production.value,
@@ -248,16 +255,19 @@ fun SourceTitle(
 }
 
 @Composable
-fun CircularSpeedIndicator(
+fun CircularPowerIndicator(
     production: Float,
     consumption: Float,
     injection: Float,
     withdrawals: Float,
-    angle: Float
+    angle: Float,
+    productionChecked: Boolean,
+    consumptionChecked: Boolean,
+    injectionChecked: Boolean,
+    withdrawalsChecked: Boolean
 ) {
     val textMeasurer = rememberTextMeasurer()
     val blurColor = MaterialTheme.colorScheme.primary
-    val arcColor = MaterialTheme.colorScheme.secondary
     val linesColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     val consumptionGradientColor = createGradient(powerConsumptionGaugeStart, powerConsumptionGaugeEnd)
@@ -265,22 +275,44 @@ fun CircularSpeedIndicator(
     val injectionGradientColor = createGradient(powerInjectionGaugeStart, powerInjectionGaugeEnd)
     val withdrawalsGradientColor = createGradient(powerWithdrawalsGaugeStart, powerWithdrawalsGaugeEnd)
 
+    val maxEnabledValue = listOf(
+        production to productionChecked,
+        consumption to consumptionChecked,
+        injection to injectionChecked,
+        withdrawals to withdrawalsChecked
+    ).filter { it.second }
+        .maxOfOrNull { it.first } ?: 0f
+
     Canvas(
         modifier = Modifier
             .fillMaxSize()
             .padding(40.dp)
     ) {
         drawLines(
-            max(production, max(consumption, injection)),
+            maxEnabledValue,
             angle,
             linesColor,
             MAX_POWER.toInt(),
             textMeasurer
         )
-        drawArcs(consumption, angle, blurColor, powerConsumptionGaugeEnd, consumptionGradientColor)
-        drawArcs(production, angle, blurColor, powerProductionGaugeEnd, productionGradientColor)
-        drawArcs(injection, angle, blurColor, powerInjectionGaugeEnd, injectionGradientColor)
-        drawArcs(withdrawals, angle, blurColor, powerWithdrawalsGaugeEnd, withdrawalsGradientColor)
+        if(consumptionChecked){
+            drawArcs(consumption, angle, blurColor, powerConsumptionGaugeEnd, consumptionGradientColor)
+        }
+        if(withdrawalsChecked) {
+            drawArcs(
+                withdrawals,
+                angle,
+                blurColor,
+                powerWithdrawalsGaugeEnd,
+                withdrawalsGradientColor
+            )
+        }
+        if(productionChecked){
+            drawArcs(production, angle, blurColor, powerProductionGaugeEnd, productionGradientColor)
+        }
+        if(injectionChecked){
+            drawArcs(injection, angle, blurColor, powerInjectionGaugeEnd, injectionGradientColor)
+        }
     }
 }
 
@@ -331,7 +363,6 @@ fun DrawScope.drawArcs(
             style = Stroke(width = 86f, cap = StrokeCap.Round)
         )
     }
-
 
     fun drawGradient() {
         drawArc(
@@ -409,7 +440,7 @@ fun toRadians(deg: Double): Double = deg / 180.0 * PI
 fun DefaultPreview() {
     ComwattTheme(darkTheme = true, dynamicColor = false) {
         Surface {
-            SpeedTestScreen(
+            PowerGaugeScreen(
                 HomeScreenState(
                     production = 256.0,
                     consumption = 0.3,

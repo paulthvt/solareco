@@ -13,5 +13,10 @@ data class HomeScreenState(
     val injectionRate: Double = Double.NaN,
     val withdrawalsRate: Double = Double.NaN,
     val updateDate: String = "",
-    val lastRefreshDate: String = ""
+    val lastRefreshDate: String = "",
+    val lastErrorMessage: String = "",
+    val productionGaugeEnabled: Boolean = true,
+    val consumptionGaugeEnabled: Boolean = true,
+    val injectionGaugeEnabled: Boolean = true,
+    val withdrawalsGaugeEnabled: Boolean = true,
 )
