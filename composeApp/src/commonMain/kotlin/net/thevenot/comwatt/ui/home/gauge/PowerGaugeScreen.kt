@@ -177,12 +177,43 @@ fun PowerIndicator(
             injectionChecked = injection.enabled,
             withdrawalsChecked = withdrawals.enabled
         )
-        WattValues(
+        ProductionValue(
             production = production.value,
+        )
+        OtherValues(
             consumption = consumption.value,
             injection = injection.value,
             withdrawals = withdrawals.value
         )
+    }
+}
+
+@Composable
+fun OtherValues(consumption: String, injection: String, withdrawals: String) {
+    Row(modifier = Modifier.fillMaxSize().padding(40.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
+        SingleValueTitle(
+            title = Res.string.gauge_subtitle_consumption,
+            color = powerConsumptionGauge,
+            value = consumption
+        )
+        SingleValueTitle(
+            title = Res.string.gauge_subtitle_withdrawals,
+            color = powerWithdrawalsGauge,
+            value = withdrawals
+        )
+        SingleValueTitle(
+            title = Res.string.gauge_subtitle_injection,
+            color = powerInjectionGauge,
+            value = injection
+        )
+    }
+}
+
+@Composable
+fun SingleValueTitle(title: StringResource, color: Color, value: String) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        SourceTitle(title = title, color = color)
+        Text(text = "$value W", fontWeight = FontWeight.Bold)
     }
 }
 
@@ -200,7 +231,7 @@ private fun SettingsButton(onSettingsButtonClick: () -> Unit) {
 }
 
 @Composable
-fun WattValues(production: String, consumption: String, injection: String, withdrawals: String) {
+fun ProductionValue(production: String) {
     Column(
         Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
@@ -213,30 +244,6 @@ fun WattValues(production: String, consumption: String, injection: String, withd
         Text(
             text = "$production W",
             style = MaterialTheme.typography.headlineLarge,
-        )
-        SourceTitle(
-            title = Res.string.gauge_subtitle_consumption,
-            color = powerConsumptionGauge
-        )
-        Text(
-            text = "$consumption W",
-            fontWeight = FontWeight.Bold
-        )
-        SourceTitle(
-            title = Res.string.gauge_subtitle_injection,
-            color = powerInjectionGauge
-        )
-        Text(
-            text = "$injection W",
-            fontWeight = FontWeight.Bold
-        )
-        SourceTitle(
-            title = Res.string.gauge_subtitle_withdrawals,
-            color = powerWithdrawalsGauge
-        )
-        Text(
-            text = "$withdrawals W",
-            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -298,6 +305,9 @@ fun CircularPowerIndicator(
         if(consumptionChecked){
             drawArcs(consumption, angle, blurColor, powerConsumptionGaugeEnd, consumptionGradientColor)
         }
+        if(productionChecked){
+            drawArcs(production, angle, blurColor, powerProductionGaugeEnd, productionGradientColor)
+        }
         if(withdrawalsChecked) {
             drawArcs(
                 withdrawals,
@@ -306,9 +316,6 @@ fun CircularPowerIndicator(
                 powerWithdrawalsGaugeEnd,
                 withdrawalsGradientColor
             )
-        }
-        if(productionChecked){
-            drawArcs(production, angle, blurColor, powerProductionGaugeEnd, productionGradientColor)
         }
         if(injectionChecked){
             drawArcs(injection, angle, blurColor, powerInjectionGaugeEnd, injectionGradientColor)
