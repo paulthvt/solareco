@@ -1,9 +1,8 @@
-package net.thevenot.comwatt.ui.home
+package net.thevenot.comwatt.domain.model
 
-data class HomeScreenState(
-    val isRefreshing: Boolean = false,
-    val callCount: Int = 0,
-    val errorCount: Int = 0,
+import kotlinx.datetime.Instant
+
+data class SiteTimeSeries(
     val production: Double = Double.NaN,
     val consumption: Double = Double.NaN,
     val injection: Double = Double.NaN,
@@ -12,11 +11,7 @@ data class HomeScreenState(
     val productionRate: Double = Double.NaN,
     val injectionRate: Double = Double.NaN,
     val withdrawalsRate: Double = Double.NaN,
+    val lastUpdateTimestamp: Instant = Instant.DISTANT_PAST,
     val updateDate: String = "",
     val lastRefreshDate: String = "",
-    val lastErrorMessage: String = "",
-    val productionGaugeEnabled: Boolean = true,
-    val consumptionGaugeEnabled: Boolean = true,
-    val injectionGaugeEnabled: Boolean = true,
-    val withdrawalsGaugeEnabled: Boolean = true,
 )

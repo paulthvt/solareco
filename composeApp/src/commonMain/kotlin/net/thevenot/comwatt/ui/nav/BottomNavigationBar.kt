@@ -9,11 +9,10 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
-import net.thevenot.comwatt.client.Session
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun BottomNavigationBar(navController: NavController, session: Session?) {
+fun BottomNavigationBar(navController: NavController) {
     NavigationBar {
         val currentBackStackEntry = navController.currentBackStackEntryAsState().value
         val currentDestination = currentBackStackEntry?.destination
@@ -28,10 +27,10 @@ fun BottomNavigationBar(navController: NavController, session: Session?) {
                 },
                 label = { Text(stringResource(item.label)) },
                 selected = currentDestination?.hierarchy?.any {
-                    it.hasRoute(item.screen(session)::class)
+                    it.hasRoute(item.screen::class)
                 } == true,
                 onClick = {
-                    navController.navigate(item.screen(session)) {
+                    navController.navigate(item.screen) {
                         popUpTo(navController.graph.startDestinationId) {
                             saveState = true
                         }

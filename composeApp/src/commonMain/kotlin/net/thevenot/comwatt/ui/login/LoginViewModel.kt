@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.client.Password
-import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.database.User
 import org.jetbrains.compose.resources.getString
 
@@ -36,7 +35,7 @@ class LoginViewModel(
     private val _isLoggingIn = MutableStateFlow(false)
     val isLoggingIn: StateFlow<Boolean> get() = _isLoggingIn
 
-    fun tryAutoLogin(onLogin: (Session) -> Unit) {
+    fun tryAutoLogin(onLogin: () -> Unit) {
         viewModelScope.launch {
             dataRepository.tryAutoLogin(onLogin) { error ->
                 _isLoading.value = false
@@ -47,7 +46,7 @@ class LoginViewModel(
         }
     }
 
-    fun login(onLogin: (Session) -> Unit) {
+    fun login(onLogin: () -> Unit) {
         viewModelScope.launch {
             if (validateForm()) {
                 _isLoggingIn.value = true
@@ -72,7 +71,7 @@ class LoginViewModel(
                                 )
                             )
                         }
-                        onLogin(authenticateResponse.value)
+                        onLogin()
                     }
                 }
             } else {

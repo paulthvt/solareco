@@ -6,12 +6,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import net.thevenot.comwatt.client.Session
 
 @Composable
 fun NestedAppScaffold(
     navController: NavController,
-    session: Session?,
     fab: @Composable () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
@@ -28,7 +26,7 @@ fun NestedAppScaffold(
 //            })
         },
         floatingActionButton = fab,
-        bottomBar = { BottomNavigationBar(navController, session) },
+        bottomBar = { BottomNavigationBar(navController) },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             content()
