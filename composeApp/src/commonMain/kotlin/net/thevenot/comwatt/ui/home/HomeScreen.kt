@@ -7,18 +7,24 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +37,7 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.client.Session
+import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
 import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -44,9 +50,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
-    session: Session,
     dataRepository: DataRepository,
-    viewModel: HomeViewModel = viewModel { HomeViewModel(session, dataRepository) }
+    viewModel: HomeViewModel = viewModel { HomeViewModel(
+        fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository)
+    ) }
 ) {
     LaunchedEffect(Unit) {
         viewModel.load()
@@ -54,16 +61,25 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    HomeScreenContent(uiState, viewModel::enableProductionGauge, viewModel::enableConsumptionGauge, viewModel::enableInjectionGauge, viewModel::enableWithdrawalsGauge)
+    HomeScreenContent(
+        uiState,
+        viewModel::enableProductionGauge,
+        viewModel::enableConsumptionGauge,
+        viewModel::enableInjectionGauge,
+        viewModel::enableWithdrawalsGauge,
+        viewModel::singleRefresh
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenContent(
     uiState: HomeScreenState,
     onProductionChecked: (Boolean) -> Unit = {},
     onConsumptionChecked: (Boolean) -> Unit = {},
     onInjectionChecked: (Boolean) -> Unit = {},
-    onWithdrawalsChecked: (Boolean) -> Unit = {}
+    onWithdrawalsChecked: (Boolean) -> Unit = {},
+    launchSingleDataRefresh: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
 //    if(isLoading) {
@@ -80,8 +96,15 @@ private fun HomeScreenContent(
 //        }
 //    }
 //    else {
+    val coroutineScope = rememberCoroutineScope()
+
+    val scrollState = rememberScrollState()
+    val state = rememberPullToRefreshState()
+    PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
+        launchSingleDataRefresh()
+    }) {
         Column(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
         ) {
             Text(
                 text = if (uiState.updateDate.isEmpty()) "Loading..." else "Update date: ${uiState.updateDate}"
@@ -115,6 +138,7 @@ private fun HomeScreenContent(
                 )
             }
         }
+    }
 //    }
 }
 
@@ -127,52 +151,45 @@ fun GaugeSettingsDialog(
     onInjectionChecked: (Boolean) -> Unit,
     onWithdrawalsChecked: (Boolean) -> Unit
 ) {
-    AlertDialog(onDismissRequest = onDismiss,
-        title = {
-            Text("Gauge Settings")
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Close")
-            }
-        },
-        text = {
-            Column {
-                DialogSettingsRow(
-                    title = Res.string.gauge_subtitle_production,
-                    color = powerProductionGauge,
-                    checked = uiState.productionGaugeEnabled,
-                    onCheckedChange = onProductionChecked
-                )
-                DialogSettingsRow(
-                    title = Res.string.gauge_subtitle_consumption,
-                    color = powerConsumptionGauge,
-                    checked = uiState.consumptionGaugeEnabled,
-                    onCheckedChange = onConsumptionChecked
-                )
-                DialogSettingsRow(
-                    title = Res.string.gauge_subtitle_injection,
-                    color = powerInjectionGauge,
-                    checked = uiState.injectionGaugeEnabled,
-                    onCheckedChange = onInjectionChecked
-                )
-                DialogSettingsRow(
-                    title = Res.string.gauge_subtitle_withdrawals,
-                    color = powerWithdrawalsGauge,
-                    checked = uiState.withdrawalsGaugeEnabled,
-                    onCheckedChange = onWithdrawalsChecked
-                )
-            }
+    AlertDialog(onDismissRequest = onDismiss, title = {
+        Text("Gauge Settings")
+    }, confirmButton = {
+        TextButton(onClick = onDismiss) {
+            Text("Close")
         }
-    )
+    }, text = {
+        Column {
+            DialogSettingsRow(
+                title = Res.string.gauge_subtitle_production,
+                color = powerProductionGauge,
+                checked = uiState.productionGaugeEnabled,
+                onCheckedChange = onProductionChecked
+            )
+            DialogSettingsRow(
+                title = Res.string.gauge_subtitle_consumption,
+                color = powerConsumptionGauge,
+                checked = uiState.consumptionGaugeEnabled,
+                onCheckedChange = onConsumptionChecked
+            )
+            DialogSettingsRow(
+                title = Res.string.gauge_subtitle_injection,
+                color = powerInjectionGauge,
+                checked = uiState.injectionGaugeEnabled,
+                onCheckedChange = onInjectionChecked
+            )
+            DialogSettingsRow(
+                title = Res.string.gauge_subtitle_withdrawals,
+                color = powerWithdrawalsGauge,
+                checked = uiState.withdrawalsGaugeEnabled,
+                onCheckedChange = onWithdrawalsChecked
+            )
+        }
+    })
 }
 
 @Composable
 fun DialogSettingsRow(
-    title: StringResource,
-    color: Color,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    title: StringResource, color: Color, checked: Boolean, onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -180,9 +197,7 @@ fun DialogSettingsRow(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         SourceTitle(
-            title = title,
-            color = color,
-            fontStyle = MaterialTheme.typography.bodyMedium
+            title = title, color = color, fontStyle = MaterialTheme.typography.bodyMedium
         )
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
@@ -197,7 +212,7 @@ private fun HomeScreenPreview() {
                 uiState = HomeScreenState(
                     callCount = 123,
                     errorCount = 0,
-                    isLoading = false,
+                    isRefreshing = false,
                     production = 123.0,
                     consumption = 456.0,
                     injection = 789.0,

@@ -1,7 +1,6 @@
 package net.thevenot.comwatt
 
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -14,19 +13,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import androidx.navigation.toRoute
-import net.thevenot.comwatt.client.Session
+import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.home.HomeViewModel
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
-import net.thevenot.comwatt.ui.nav.SessionNavType
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.reflect.typeOf
 
 @Composable
 @Preview
@@ -40,8 +36,7 @@ fun App(
         dynamicColor = dynamicColor
     ) {
         Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.background
+            modifier = Modifier.fillMaxSize()
         ) {
             MainAppNavHost(appContainer)
         }
@@ -49,7 +44,10 @@ fun App(
 }
 
 @Composable
-fun MainAppNavHost(appContainer: AppContainer, navController: NavHostController = rememberNavController()) {
+fun MainAppNavHost(
+    appContainer: AppContainer,
+    navController: NavHostController = rememberNavController()
+) {
     val dataRepository = appContainer.dataRepository
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
@@ -57,21 +55,18 @@ fun MainAppNavHost(appContainer: AppContainer, navController: NavHostController 
 
     NavHost(navController, startDestination = Screen.Login) {
         composable<Screen.Login> {
-            LoginScreen(dataRepository) { session ->
-                navController.navigate(Screen.SiteChooser(session)) {
+            LoginScreen(dataRepository) {
+                navController.navigate(Screen.SiteChooser) {
                     popUpTo(Screen.Login) { inclusive = true }
                 }
             }
         }
-        composable<Screen.SiteChooser>(typeMap = mapOf(typeOf<Session?>() to SessionNavType)) { backStackEntry ->
-            val mainParam: Screen.SiteChooser = backStackEntry.toRoute()
-            mainParam.session?.let { session ->
-                SiteChooserScreen(session, dataRepository) {
-                    navController.navigate(Screen.Home(session)) {
-                        popUpTo(Screen.SiteChooser(session)) { inclusive = true }
-                    }
+        composable<Screen.SiteChooser> {
+            SiteChooserScreen(dataRepository) {
+                navController.navigate(Screen.Main) {
+                    popUpTo(Screen.SiteChooser) { inclusive = true }
                 }
-            } ?: navController.navigate(Screen.Login)
+            }
         }
         mainGraph(navController, dataRepository, viewModelStoreOwner)
     }
@@ -83,48 +78,32 @@ fun NavGraphBuilder.mainGraph(
     viewModelStoreOwner: ViewModelStoreOwner
 ) {
     navigation<Screen.Main>(
-        typeMap = mapOf(typeOf<Session?>() to SessionNavType),
-        startDestination = Screen.Home()
+        startDestination = Screen.Home
     ) {
-        composable<Screen.Home>(typeMap = mapOf(typeOf<Session?>() to SessionNavType)) { backStackEntry ->
-            val mainParam: Screen.Home = backStackEntry.toRoute()
-            mainParam.session?.let {
-                NestedAppScaffold(navController, it) {
-                    HomeScreen(
-                        session = it,
-                        dataRepository = dataRepository,
-                        viewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner) {
-                            HomeViewModel(
-                                it,
-                                dataRepository
-                            )
-                        })
-                }
-            } ?: navController.navigate(Screen.Login)
+        composable<Screen.Home> {
+            NestedAppScaffold(navController) {
+                HomeScreen(
+                    dataRepository = dataRepository,
+                    viewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner) {
+                        HomeViewModel(FetchSiteTimeSeriesUseCase(dataRepository))
+                    })
+            }
+
         }
-        composable<Screen.Dashboard>(typeMap = mapOf(typeOf<Session?>() to SessionNavType)) { backStackEntry ->
-            val mainParam: Screen.Dashboard = backStackEntry.toRoute()
-            mainParam.session?.let {
-                NestedAppScaffold(navController, it) {
-                    DashboardScreen()
-                }
-            } ?: navController.navigate(Screen.Login)
+        composable<Screen.Dashboard> {
+            NestedAppScaffold(navController) {
+                DashboardScreen()
+            }
         }
-        composable<Screen.Devices>(typeMap = mapOf(typeOf<Session?>() to SessionNavType)) { backStackEntry ->
-            val mainParam: Screen.Devices = backStackEntry.toRoute()
-            mainParam.session?.let {
-                NestedAppScaffold(navController, it) {
-                    DashboardScreen()
-                }
-            } ?: navController.navigate(Screen.Login)
+        composable<Screen.Devices> {
+            NestedAppScaffold(navController) {
+                DashboardScreen()
+            }
         }
-        composable<Screen.More>(typeMap = mapOf(typeOf<Session?>() to SessionNavType)) { backStackEntry ->
-            val mainParam: Screen.More = backStackEntry.toRoute()
-            mainParam.session?.let {
-                NestedAppScaffold(navController, it) {
-                    DashboardScreen()
-                }
-            } ?: navController.navigate(Screen.Login)
+        composable<Screen.More> {
+            NestedAppScaffold(navController) {
+                DashboardScreen()
+            }
         }
     }
 }

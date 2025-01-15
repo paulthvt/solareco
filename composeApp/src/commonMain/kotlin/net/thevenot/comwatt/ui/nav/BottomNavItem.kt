@@ -12,33 +12,32 @@ import comwatt.composeapp.generated.resources.bottom_nav_devices
 import comwatt.composeapp.generated.resources.bottom_nav_home
 import comwatt.composeapp.generated.resources.bottom_nav_more
 import kotlinx.serialization.Serializable
-import net.thevenot.comwatt.client.Session
 import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 enum class BottomNavItem(
     val icon: ImageVector,
     val label: StringResource,
-    val screen: (Session?) -> Screen,
+    val screen: Screen,
 ) {
     Home(
         icon = Icons.Default.Home,
         label = Res.string.bottom_nav_home,
-        screen = { session -> Screen.Home(session) },
+        screen = Screen.Home,
     ),
     Dashboard(
         icon = Icons.Default.Dashboard,
         label = Res.string.bottom_nav_dashboard,
-        screen = { session -> Screen.Dashboard(session) },
+        screen = Screen.Dashboard,
     ),
     Devices(
         icon = Icons.Default.Power,
         label = Res.string.bottom_nav_devices,
-        screen = { session -> Screen.Devices(session) },
+        screen = Screen.Devices,
     ),
     More(
         icon = Icons.Default.Menu,
         label = Res.string.bottom_nav_more,
-        screen = { session -> Screen.More(session) },
+        screen = Screen.More,
     ),
 }

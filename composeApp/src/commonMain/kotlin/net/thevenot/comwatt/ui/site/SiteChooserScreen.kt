@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.model.AddressDto
 import net.thevenot.comwatt.model.Agreements
 import net.thevenot.comwatt.model.Phone
@@ -40,9 +39,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SiteChooserScreen(
-    session: Session,
     dataRepository: DataRepository,
-    viewModel: SiteChooserViewModel = viewModel { SiteChooserViewModel(session, dataRepository) },
+    viewModel: SiteChooserViewModel = viewModel { SiteChooserViewModel(dataRepository) },
     onSiteSelected: (Int) -> Unit = {}
 ) {
     val sites by viewModel.sites.collectAsState()

@@ -57,7 +57,6 @@ import comwatt.composeapp.generated.resources.remember_me
 import comwatt.composeapp.generated.resources.show_password_button_description
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import org.jetbrains.compose.resources.stringResource
@@ -67,7 +66,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun LoginScreen(
     dataRepository: DataRepository,
     viewModel: LoginViewModel = viewModel { LoginViewModel(dataRepository) },
-    onLogin: (Session) -> Unit
+    onLogin: () -> Unit
 ) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
