@@ -13,7 +13,7 @@ import kotlinx.serialization.SerializationException
 
 suspend inline fun <reified T> HttpClient.safeRequest(
     block: HttpRequestBuilder.() -> Unit,
-): Either<ApiError<T>, T> =
+): Either<ApiError, T> =
     try {
         val response = request { block() }
         Either.Right(response.body())
@@ -57,7 +57,7 @@ suspend inline fun <reified T> HttpClient.safeRequest(
         )
     }
 
-sealed class ApiError<E>() {
+sealed class ApiError {
     /**
      * Represents server errors.
      *
@@ -65,11 +65,11 @@ sealed class ApiError<E>() {
      * @param errorBody Response body
      * @param errorMessage Custom error message
      */
-    data class HttpError<E>(
+    data class HttpError(
         val code: Int,
         val errorBody: String?,
         val errorMessage: String?,
-    ) : ApiError<E>()
+    ) : ApiError()
 
     /**
      * Represent SerializationExceptions.
@@ -77,10 +77,10 @@ sealed class ApiError<E>() {
      * @param message Detail exception message
      * @param errorMessage Formatted error message
      */
-    data class SerializationError<E>(
+    data class SerializationError(
         val message: String?,
         val errorMessage: String?,
-    ) : ApiError<E>()
+    ) : ApiError()
 
     /**
      * Represent other exceptions.
@@ -88,10 +88,10 @@ sealed class ApiError<E>() {
      * @param message Detail exception message
      * @param errorMessage Formatted error message
      */
-    data class GenericError<E>(
+    data class GenericError(
         val message: String?,
         val errorMessage: String?,
-    ) : ApiError<E>()
+    ) : ApiError()
 }
 
 class HttpExceptions(

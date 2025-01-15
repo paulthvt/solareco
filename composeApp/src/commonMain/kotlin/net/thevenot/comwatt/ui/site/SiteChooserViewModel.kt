@@ -9,12 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.User
 
 class SiteChooserViewModel(
-    private val session: Session,
     private val dataRepository: DataRepository
 ) : ViewModel() {
     private val _sites = MutableStateFlow<List<SiteDto>>(listOf())
@@ -45,7 +43,7 @@ class SiteChooserViewModel(
                 }
             }
 
-            when (val userResponse = dataRepository.api.authenticated(session.token)) {
+            when (val userResponse = dataRepository.api.authenticated()) {
                 is Either.Left -> {
                     Napier.e(tag = TAG) { "Error loading user: ${userResponse.value}" }
                 }

@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
             App(
                 darkTheme = isSystemInDarkTheme(),
                 dynamicColor = false,
-                AppContainer(Factory(this))
+                appContainer = AppContainer(Factory(this))
             )
         }
     }

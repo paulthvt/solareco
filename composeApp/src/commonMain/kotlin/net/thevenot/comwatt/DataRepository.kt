@@ -1,5 +1,6 @@
 package net.thevenot.comwatt
 
+import arrow.core.Either
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -7,7 +8,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.thevenot.comwatt.client.ComwattApi
 import net.thevenot.comwatt.client.Password
-import net.thevenot.comwatt.client.Session
 import net.thevenot.comwatt.database.SettingsRepository
 import net.thevenot.comwatt.database.SolarEcoSettings
 import net.thevenot.comwatt.database.User
@@ -27,18 +27,24 @@ class DataRepository(
         return settingsRepository.settings
     }
 
-    fun tryAutoLogin(onLogin: (Session) -> Unit, onFail: () -> Unit) {
+    fun tryAutoLogin(onLogin: () -> Unit, onFail: (String?) -> Unit) {
         scope.launch {
             val user = getUser()
             user?.let {
-                api.authenticate(it.email, Password(it.password)).onRight {
-                    withContext(Dispatchers.Main) {
-                        onLogin(it)
+                val authenticateResponse = api.authenticate(it.email, Password(it.password))
+                when (authenticateResponse) {
+                    is Either.Left -> {
+                        onFail(authenticateResponse.value.errorMessage)
+                    }
+                    is Either.Right -> {
+                        withContext(Dispatchers.Main) {
+                            onLogin()
+                        }
                     }
                 }
             } ?: run {
                 withContext(Dispatchers.Main) {
-                    onFail()
+                    onFail(null)
                 }
             }
         }
