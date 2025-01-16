@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
 
 
@@ -57,18 +58,11 @@ class HomeViewModel(
                 }
                 .collect {
                     _uiState.value = _uiState.value.copy(
-                        production = it.production,
-                        consumption = it.consumption,
-                        injection = it.injection,
-                        withdrawals = it.withdrawals,
-                        consumptionRate = it.consumptionRate,
-                        productionRate = it.productionRate,
-                        injectionRate = it.injectionRate,
-                        withdrawalsRate = it.withdrawalsRate,
-                        updateDate = it.updateDate,
-                        lastRefreshDate = it.lastRefreshDate,
-                        callCount = _uiState.value.callCount + 1
+                        siteTimeSeries = it,
+                        callCount = _uiState.value.callCount + 1,
+                        lastRefreshInstant = it.lastUpdateTimestamp
                     )
+                    updateTimeDifference()
                 }
         }
     }
@@ -79,20 +73,20 @@ class HomeViewModel(
             _uiState.value = _uiState.value.copy(isRefreshing = true)
             fetchSiteTimeSeriesUseCase.singleFetch().onRight {
                 _uiState.value = _uiState.value.copy(
-                    production = it.production,
-                    consumption = it.consumption,
-                    injection = it.injection,
-                    withdrawals = it.withdrawals,
-                    consumptionRate = it.consumptionRate,
-                    productionRate = it.productionRate,
-                    injectionRate = it.injectionRate,
-                    withdrawalsRate = it.withdrawalsRate,
-                    updateDate = it.updateDate,
-                    lastRefreshDate = it.lastRefreshDate,
                     isRefreshing = false,
-                    callCount = _uiState.value.callCount + 1
+                    callCount = _uiState.value.callCount + 1,
+                    lastRefreshInstant = it.lastUpdateTimestamp
                 )
+                updateTimeDifference()
             }
+        }
+    }
+
+    fun updateTimeDifference() {
+        _uiState.value.lastRefreshInstant?.let { lastRefreshInstant ->
+            val now = Clock.System.now()
+            val minutesDifference = (now - lastRefreshInstant).inWholeMinutes
+            _uiState.value = _uiState.value.copy(timeDifference = minutesDifference)
         }
     }
 
