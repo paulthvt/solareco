@@ -35,11 +35,11 @@ jobs:
 
       - name: Build iOS
         if: matrix.platform == 'ios'
-        run: ./gradlew linkDebugFrameworkIosFat
+        run: ./gradlew :composeApp:linkDebugFrameworkIosFat
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: release-artifacts
+          name: debug-artifacts
           path: |
-            androidApp/release/*.apk
+            composeApp/build/outputs/apk/debug/*.apk
