@@ -24,7 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +35,10 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
+import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
+import net.thevenot.comwatt.domain.model.SiteTimeSeries
 import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -57,6 +58,12 @@ fun HomeScreen(
 ) {
     LaunchedEffect(Unit) {
         viewModel.load()
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            viewModel.updateTimeDifference()
+            delay(15_000L)
+        }
     }
 
     val uiState by viewModel.uiState.collectAsState()
@@ -82,21 +89,6 @@ private fun HomeScreenContent(
     launchSingleDataRefresh: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
-//    if(isLoading) {
-//        Column(
-//            modifier = Modifier.fillMaxSize(),
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center,
-//        ) {
-//            CircularProgressIndicator(
-//                strokeCap = StrokeCap.Round,
-//                color = MaterialTheme.colorScheme.onPrimary,
-//                modifier = Modifier.size(24.dp)
-//            )
-//        }
-//    }
-//    else {
-    val coroutineScope = rememberCoroutineScope()
 
     val scrollState = rememberScrollState()
     val state = rememberPullToRefreshState()
@@ -107,10 +99,10 @@ private fun HomeScreenContent(
             modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
         ) {
             Text(
-                text = if (uiState.updateDate.isEmpty()) "Loading..." else "Update date: ${uiState.updateDate}"
+                text = if (uiState.siteTimeSeries.updateDate.isEmpty()) "Loading..." else "Update date: ${uiState.siteTimeSeries.updateDate}"
             )
             Text(
-                text = if (uiState.lastRefreshDate.isEmpty()) "Loading..." else "Last refresh: ${uiState.lastRefreshDate}"
+                text = if (uiState.siteTimeSeries.lastRefreshDate.isEmpty()) "Loading..." else "Last refresh: ${uiState.siteTimeSeries.lastRefreshDate}"
             )
             Text(
                 text = "Call number: ${uiState.callCount}",
@@ -126,6 +118,19 @@ private fun HomeScreenContent(
             }
             Spacer(modifier = Modifier.height(16.dp))
             PowerGaugeScreen(uiState, onSettingsButtonClick = { showDialog = true })
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                uiState.timeDifference?.let {
+
+                    Text(
+                        text = when {
+                            it < 1 -> "Updated a moment ago"
+                            it == 1L -> "Updated 1 minute ago"
+                            else -> "Updated $it minutes ago"
+                        },
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
 
             if (showDialog) {
                 GaugeSettingsDialog(
@@ -213,12 +218,14 @@ private fun HomeScreenPreview() {
                     callCount = 123,
                     errorCount = 0,
                     isRefreshing = false,
-                    production = 123.0,
-                    consumption = 456.0,
-                    injection = 789.0,
-                    withdrawals = 951.0,
-                    updateDate = "2021-09-01T12:00:00Z",
-                    lastRefreshDate = "2021-09-01T12:00:00Z"
+                    siteTimeSeries = SiteTimeSeries(
+                        production = 123.0,
+                        consumption = 456.0,
+                        injection = 789.0,
+                        withdrawals = 951.0,
+                        updateDate = "2021-09-01T12:00:00Z",
+                        lastRefreshDate = "2021-09-01T12:00:00Z",
+                    )
                 )
             )
         }
