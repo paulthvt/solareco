@@ -98,6 +98,12 @@ private fun HomeScreenContent(
         Column(
             modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
         ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Text(
+                    text = "Real time auto consumption",
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+            }
             Text(
                 text = if (uiState.siteTimeSeries.updateDate.isEmpty()) "Loading..." else "Update date: ${uiState.siteTimeSeries.updateDate}"
             )
