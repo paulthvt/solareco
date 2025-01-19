@@ -22,7 +22,7 @@ uriKmp = "0.0.18"
 ksp = "2.1.0-1.0.29"
 sqlite = "2.5.0-alpha12"
 androidx-room = "2.7.0-alpha12"
-dataStoreVersion = "1.1.1"
+dataStoreVersion = "1.1.2"
 arrow = "2.0.0"
 napier = "2.7.1"
 
