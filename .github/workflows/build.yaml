@@ -26,6 +26,6 @@ jobs:
         - name: Upload Build Artifacts
           uses: actions/upload-artifact@v3
           with:
-            name: debug-artifacts
+            name: debug-artifacts-${{ github.run_number }}
             path: |
               composeApp/build/outputs/apk/debug/*.apk
