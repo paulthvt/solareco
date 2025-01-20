@@ -13,6 +13,6 @@ data class HomeScreenState(
     val injectionGaugeEnabled: Boolean = true,
     val withdrawalsGaugeEnabled: Boolean = true,
     val lastRefreshInstant: Instant? = null,
-    val timeDifference: Long? = null,
+    val timeDifference: Int? = null,
     val siteTimeSeries: SiteTimeSeries = SiteTimeSeries()
 )

@@ -92,17 +92,17 @@ fun NavGraphBuilder.mainGraph(
         }
         composable<Screen.Dashboard> {
             NestedAppScaffold(navController) {
-                DashboardScreen()
+                DashboardScreen(dataRepository)
             }
         }
         composable<Screen.Devices> {
             NestedAppScaffold(navController) {
-                DashboardScreen()
+                DashboardScreen(dataRepository)
             }
         }
         composable<Screen.More> {
             NestedAppScaffold(navController) {
-                DashboardScreen()
+                DashboardScreen(dataRepository)
             }
         }
     }

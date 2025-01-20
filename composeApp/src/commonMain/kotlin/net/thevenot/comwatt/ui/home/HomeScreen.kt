@@ -31,10 +31,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.gauge_dialog_close_button
+import comwatt.composeapp.generated.resources.gauge_dialog_title
 import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
+import comwatt.composeapp.generated.resources.last_data_refresh_time
+import comwatt.composeapp.generated.resources.last_data_refresh_time_zero
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
@@ -47,14 +51,16 @@ import net.thevenot.comwatt.ui.theme.powerInjectionGauge
 import net.thevenot.comwatt.ui.theme.powerProductionGauge
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGauge
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
     dataRepository: DataRepository,
-    viewModel: HomeViewModel = viewModel { HomeViewModel(
-        fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository)
-    ) }
+    viewModel: HomeViewModel = viewModel {
+        HomeViewModel(fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository))
+    }
 ) {
     LaunchedEffect(Unit) {
         viewModel.load()
@@ -105,12 +111,6 @@ private fun HomeScreenContent(
                 )
             }
             Text(
-                text = if (uiState.siteTimeSeries.updateDate.isEmpty()) "Loading..." else "Update date: ${uiState.siteTimeSeries.updateDate}"
-            )
-            Text(
-                text = if (uiState.siteTimeSeries.lastRefreshDate.isEmpty()) "Loading..." else "Last refresh: ${uiState.siteTimeSeries.lastRefreshDate}"
-            )
-            Text(
                 text = "Call number: ${uiState.callCount}",
             )
             Text(
@@ -126,12 +126,10 @@ private fun HomeScreenContent(
             PowerGaugeScreen(uiState, onSettingsButtonClick = { showDialog = true })
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 uiState.timeDifference?.let {
-
                     Text(
                         text = when {
-                            it < 1 -> "Updated a moment ago"
-                            it == 1L -> "Updated 1 minute ago"
-                            else -> "Updated $it minutes ago"
+                            it < 1 -> stringResource(Res.string.last_data_refresh_time_zero)
+                            else -> pluralStringResource(Res.plurals.last_data_refresh_time, it, it)
                         },
                         style = MaterialTheme.typography.labelSmall
                     )
@@ -150,7 +148,6 @@ private fun HomeScreenContent(
             }
         }
     }
-//    }
 }
 
 @Composable
@@ -163,10 +160,10 @@ fun GaugeSettingsDialog(
     onWithdrawalsChecked: (Boolean) -> Unit
 ) {
     AlertDialog(onDismissRequest = onDismiss, title = {
-        Text("Gauge Settings")
+        Text(stringResource(Res.string.gauge_dialog_title))
     }, confirmButton = {
         TextButton(onClick = onDismiss) {
-            Text("Close")
+            Text(stringResource(Res.string.gauge_dialog_close_button))
         }
     }, text = {
         Column {

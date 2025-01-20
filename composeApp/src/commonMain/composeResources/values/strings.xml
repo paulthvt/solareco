@@ -16,4 +16,11 @@
     <string name="gauge_subtitle_consumption">Consumption</string>
     <string name="gauge_subtitle_withdrawals">Withdrawals</string>
     <string name="gauge_subtitle_injection">Injection</string>
+    <string name="last_data_refresh_time_zero">Updated a few seconds ago</string>"
+    <plurals name="last_data_refresh_time">
+        <item quantity="one">Updated 1 minute ago</item>
+        <item quantity="other">Updated %1$d minutes ago</item>
+    </plurals>
+    <string name="gauge_dialog_title">Gauge Settings</string>
+    <string name="gauge_dialog_close_button">Close</string>
 </resources>
