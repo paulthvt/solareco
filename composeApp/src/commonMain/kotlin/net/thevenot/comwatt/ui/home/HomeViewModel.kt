@@ -85,7 +85,7 @@ class HomeViewModel(
     fun updateTimeDifference() {
         _uiState.value.lastRefreshInstant?.let { lastRefreshInstant ->
             val now = Clock.System.now()
-            val minutesDifference = (now - lastRefreshInstant).inWholeMinutes
+            val minutesDifference = (now - lastRefreshInstant).inWholeMinutes.toInt()
             _uiState.value = _uiState.value.copy(timeDifference = minutesDifference)
         }
     }

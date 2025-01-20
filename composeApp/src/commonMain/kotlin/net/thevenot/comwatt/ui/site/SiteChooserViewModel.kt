@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.model.SiteDto
-import net.thevenot.comwatt.model.User
+import net.thevenot.comwatt.model.UserDto
 
 class SiteChooserViewModel(
     private val dataRepository: DataRepository
@@ -18,8 +18,8 @@ class SiteChooserViewModel(
     private val _sites = MutableStateFlow<List<SiteDto>>(listOf())
     val sites: StateFlow<List<SiteDto>> = _sites
 
-    private val _user = MutableStateFlow<User?>(null)
-    val user: StateFlow<User?> = _user
+    private val _userDto = MutableStateFlow<UserDto?>(null)
+    val userDto: StateFlow<UserDto?> = _userDto
 
     fun checkSiteSelection(onSiteSelected: (Int) -> Unit, onNoSiteSelected: () -> Unit) {
         viewModelScope.launch {
@@ -48,7 +48,7 @@ class SiteChooserViewModel(
                     Napier.e(tag = TAG) { "Error loading user: ${userResponse.value}" }
                 }
                 is Either.Right -> {
-                    _user.value = userResponse.value
+                    _userDto.value = userResponse.value
                 }
             }
         }
