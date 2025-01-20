@@ -27,9 +27,10 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import net.thevenot.comwatt.model.ApiError
+import net.thevenot.comwatt.model.DeviceDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
-import net.thevenot.comwatt.model.User
+import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.model.safeRequest
 import net.thevenot.comwatt.utils.toZoneString
 import kotlin.time.Duration
@@ -110,7 +111,21 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         }
     }
 
-    suspend fun authenticated(): Either<ApiError, User?> {
+    suspend fun fetchDevices(
+        siteId: Int,
+    ): Either<ApiError, List<DeviceDto>> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/devices")
+                    parameter("siteId", siteId)
+                }
+            }
+        }
+    }
+
+    suspend fun authenticated(): Either<ApiError, UserDto?> {
         return withContext(Dispatchers.IO) {
             client.safeRequest {
                 url {
