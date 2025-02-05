@@ -48,6 +48,7 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.navigation.compose)
+            implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.coroutines.test)
 
             // Ktor
@@ -66,6 +67,7 @@ kotlin {
             implementation(libs.arrow.core)
             implementation(libs.arrow.fx.coroutines)
             implementation(libs.napier)
+            implementation(libs.koalaplot.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

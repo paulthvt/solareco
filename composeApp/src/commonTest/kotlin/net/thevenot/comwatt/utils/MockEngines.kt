@@ -20,15 +20,12 @@ fun configureMockEngineWithError(statusCode: HttpStatusCode = HttpStatusCode.Int
 
 fun configureMockEngine(
     expectedResponseBody: String,
-//    token: String,
     url: Url,
     httpMethod: HttpMethod = HttpMethod.Post,
     expectedContentType: ContentType? = ContentType.Application.Json
 ): MockEngine =
     MockEngine { request ->
         assertEquals(url, request.url)
-//        assertEquals("Bearer $token", request.headers["Authorization"])
-
         assertEquals(httpMethod, request.method)
 
         respond(

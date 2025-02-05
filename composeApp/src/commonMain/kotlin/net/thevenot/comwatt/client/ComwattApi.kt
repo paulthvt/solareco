@@ -2,10 +2,8 @@ package net.thevenot.comwatt.client
 
 import arrow.core.Either
 import arrow.core.flatMap
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.addCookie
-import io.ktor.client.plugins.cookies.cookies
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -30,6 +28,7 @@ import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.DeviceDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
+import net.thevenot.comwatt.model.TimeSeriesDto
 import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.model.safeRequest
 import net.thevenot.comwatt.utils.toZoneString
@@ -94,9 +93,6 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
 
         val timeZone = TimeZone.of("Europe/Paris")
         return withContext(Dispatchers.IO) {
-            val cookies = client.cookies("https://energy.comwatt.com/")
-            Napier.d { "cookies $cookies" }
-
             client.safeRequest {
                 url {
                     method = HttpMethod.Get
@@ -120,6 +116,27 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     method = HttpMethod.Get
                     path("api/devices")
                     parameter("siteId", siteId)
+                }
+            }
+        }
+    }
+
+    suspend fun fetchTimeSeries(
+        deviceId: Int,
+        endTime: Instant = Clock.System.now()
+    ): Either<ApiError, TimeSeriesDto> {
+        val timeZone = TimeZone.of("Europe/Paris")
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/aggregations/time-series")
+                    parameter("id", deviceId)
+                    parameter("measureKind", "FLOW")
+                    parameter("aggregationLevel", "NONE")
+                    parameter("timeAgoUnit", "DAY")
+                    parameter("timeAgoValue", "1")
+                    parameter("end", endTime.toZoneString(timeZone))
                 }
             }
         }
