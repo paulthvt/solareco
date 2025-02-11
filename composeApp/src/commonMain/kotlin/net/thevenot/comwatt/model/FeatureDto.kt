@@ -10,7 +10,7 @@ data class FeatureDto(
     val id: Int,
     val feature: FeatureDetailDto,
     val enabled: Boolean,
-    val capacities: List<CapacityDto>
+    val capacities: List<CapacityDto>?
 )
 
 @Serializable

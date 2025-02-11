@@ -28,6 +28,8 @@ import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.DeviceDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
+import net.thevenot.comwatt.model.TileResponseDto
+import net.thevenot.comwatt.model.TileType
 import net.thevenot.comwatt.model.TimeSeriesDto
 import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.model.safeRequest
@@ -102,6 +104,24 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     parameter("aggregationLevel", "NONE")
                     parameter("start", startTime.toZoneString(timeZone))
                     parameter("end", endTime.toZoneString(timeZone))
+                }
+            }
+        }
+    }
+
+    suspend fun fetchTiles(
+        siteId: Int,
+        tileTypes: List<TileType> = TileType.entries,
+    ): Either<ApiError, List<TileResponseDto>> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/tiles")
+                    parameter("siteId", siteId)
+                    tileTypes.forEach {
+                        parameter("tileTypes", it)
+                    }
                 }
             }
         }

@@ -51,4 +51,23 @@ class ComwattApiTest {
             assertEquals(it.values.size, it.timestamps.size)
         }
     }
+
+    @Test
+    fun `fetch tiles`() = runTest {
+        val serverBaseUrl = "http://localhost"
+        val siteId = 132
+        val client = mockHttpClient(
+            configureMockEngine(
+                url = Url("$serverBaseUrl/api/tiles?siteId=$siteId&tileTypes=THIRD_PARTY&tileTypes=VALUATION"),
+                expectedResponseBody = Resource("src/commonTest/resources/api/responses/tiles-response.json").readText(),
+                httpMethod = HttpMethod.Get
+            )
+        )
+
+        val fetchTiles = ComwattApi(client, serverBaseUrl).fetchTiles(siteId)
+        assertTrue { fetchTiles.isRight() }
+        fetchTiles.onRight {
+            assertEquals(11, it.size)
+        }
+    }
 }
