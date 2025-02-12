@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
-import net.thevenot.comwatt.domain.model.DeviceTimeSeries
+import net.thevenot.comwatt.domain.model.ChartTimeSeries
 
 class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseCase): ViewModel() {
     private var autoRefreshJob: Job? = null
 
-    private val _devicesSeries = MutableStateFlow<List<DeviceTimeSeries>>(listOf())
-    val devicesSeries: StateFlow<List<DeviceTimeSeries>> = _devicesSeries
+    private val _charts = MutableStateFlow<List<ChartTimeSeries>>(listOf())
+    val charts: StateFlow<List<ChartTimeSeries>> = _charts
 
     fun load() {
         startAutoRefresh()
@@ -34,7 +34,7 @@ class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseC
                     Napier.e(tag = TAG) { "Error in auto refresh: $it" }
                 }
                 .collect {
-                    _devicesSeries.value = it
+                    _charts.value = it
                 }
         }
     }

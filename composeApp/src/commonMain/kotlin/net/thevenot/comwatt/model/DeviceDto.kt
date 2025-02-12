@@ -14,7 +14,7 @@ data class DeviceDto(
     val id: Int?,
     val name: String?,
     val site: SiteDto?,
-    val deviceKind: DeviceKind?,
+    val deviceKind: DeviceKindDto?,
     val configuration: ConfigurationDto?,
     val capacities: List<CapacityDto>?,
     val archived: Boolean?,
@@ -22,14 +22,14 @@ data class DeviceDto(
     val partNature: PartNature?,
     val threePhase: Boolean?,
     val partChilds: List<DeviceDto>?,
-    val partKind: DeviceKind?,
+    val partKind: DeviceKindDto?,
     val partChild: Boolean?,
     val global: Boolean?,
     val production: Boolean?
 )
 
 @Serializable
-data class DeviceKind(
+data class DeviceKindDto(
     @SerialName("@id")
     val atId: String?,
     val id: Int?,

@@ -65,19 +65,21 @@ fun DashboardScreen(
         viewModel.load()
     }
 
-    val timeSeries by viewModel.devicesSeries.collectAsState()
-    Napier.d { "DashboardScreen: $timeSeries" }
+    val charts by viewModel.charts.collectAsState()
+    Napier.d { "DashboardScreen: $charts" }
     Column(
         modifier = Modifier.fillMaxSize().padding(AppTheme.dimens.paddingLarge)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal, Alignment.Top)
     ) {
-        timeSeries.forEach {
-            if (it.values.isNotEmpty()) {
-                Napier.d { "Creating chart for ${it.name}, values: ${it.values.values}" }
-                createChart(it.name, it.values)
-            } else {
-                Text("No data available for ${it.name}")
+        charts.forEach { chart ->
+            if (chart.devicesTimeSeries.any { it.timeSeriesValues.values.isNotEmpty() }) {
+                createChart(
+                    chartName = chart.name,
+                    chartsData = chart.devicesTimeSeries
+                        .filter { it.timeSeriesValues.values.isNotEmpty() }
+                        .map { it.timeSeriesValues }
+                )
             }
         }
     }
@@ -85,22 +87,29 @@ fun DashboardScreen(
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-fun createChart(chartName: String?, chartData: Map<Instant, Float>) {
+fun createChart(chartName: String?, chartsData: List<Map<Instant, Float>>) {
     ChartLayout(
         modifier = Modifier.height(200.dp).fillMaxWidth(),
         title = { ChartTitle(chartName?.trim() ?: "Unknown") }
     ) {
-        val maxValue = chartData.values.maxOrNull() ?: 0f
+        val maxValue = chartsData.flatMap { it.values }.maxOrNull() ?: 0f
         Napier.d { "chartName: $chartName, maxValue: $maxValue, range values ${ 0f..(ceil(maxValue / 50.0) * 50.0).toFloat()}" }
-        val combinedMap: List<DefaultPoint<Instant, Float>> =
+        val combinedMaps = chartsData.map { chartData ->
             chartData.map { DefaultPoint(it.key, it.value) }
+        }
 
-        val yRange = combinedMap.autoScaleYRange()
+        val yRanges = combinedMaps.map { it.autoScaleYRange() }
+        val yRange = mergeRanges(yRanges)
+
+
         val minMajorTickIncrement = ((yRange.endInclusive - yRange.start) / 5).let {  ((it / 100).roundToInt() * 100).toFloat() }
+        val allKeys = chartsData.flatMap { it.keys }
+        val xRange = allKeys.min()..allKeys.max()
+
         XYGraph(
             xAxisModel = rememberTimeAxisModel(
                 rangeProvider = {
-                    chartData.keys.let { it.first()..it.last() }
+                    xRange
                 },
                 minimumMajorTickSpacing = 50.dp
             ),
@@ -135,11 +144,20 @@ fun createChart(chartName: String?, chartData: Map<Instant, Float>) {
             horizontalMinorGridLineStyle = null,
             verticalMinorGridLineStyle = null
         ) {
-            chart(
-                combinedMap
-            )
+            combinedMaps.forEachIndexed { i, combinedMap ->
+                chart(
+                    data = combinedMap,
+                    color = if(i == 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary
+                )
+            }
         }
     }
+}
+
+fun mergeRanges(ranges: List<ClosedFloatingPointRange<Float>>): ClosedFloatingPointRange<Float> {
+    val start = ranges.minOf { it.start }
+    val end = ranges.maxOf { it.endInclusive }
+    return start..end
 }
 
 fun formatXAxisLabel(timestamp: Instant): String {
@@ -166,16 +184,17 @@ fun formatYAxisLabel(value: Float): String {
 
 @Composable
 private fun XYGraphScope<Instant, Float>.chart(
-    data: List<DefaultPoint<Instant, Float>>
+    data: List<DefaultPoint<Instant, Float>>,
+    color: Color = MaterialTheme.colorScheme.secondary
 ) {
     AreaPlot(
         data = data,
         lineStyle = LineStyle(
-            brush = SolidColor(MaterialTheme.colorScheme.secondary),
+            brush = SolidColor(color),
             strokeWidth = 2.dp
         ),
         areaStyle = AreaStyle(
-            brush = SolidColor(MaterialTheme.colorScheme.secondary),
+            brush = SolidColor(color),
             alpha = 0.5f,
         ),
         areaBaseline = AreaBaseline.ConstantLine(0f)

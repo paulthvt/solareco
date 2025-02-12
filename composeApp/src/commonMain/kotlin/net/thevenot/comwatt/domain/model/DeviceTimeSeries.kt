@@ -2,7 +2,12 @@ package net.thevenot.comwatt.domain.model
 
 import kotlinx.datetime.Instant
 
-data class DeviceTimeSeries(
+data class ChartTimeSeries(
     val name: String?,
-    val values: Map<Instant, Float>,
+    val devicesTimeSeries: List<DeviceTimeSeries>,
+)
+
+data class DeviceTimeSeries(
+    val device: Device,
+    val timeSeriesValues: Map<Instant, Float>,
 )
