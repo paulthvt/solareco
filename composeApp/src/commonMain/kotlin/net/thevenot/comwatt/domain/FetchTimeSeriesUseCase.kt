@@ -1,7 +1,15 @@
 package net.thevenot.comwatt.domain
 
+import Dishwasher
+import Oven
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Blender
 import androidx.compose.material.icons.filled.DeviceUnknown
+import androidx.compose.material.icons.filled.ElectricalServices
+import androidx.compose.material.icons.filled.HeatPump
+import androidx.compose.material.icons.filled.LocalLaundryService
+import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.ui.graphics.vector.ImageVector
 import arrow.core.Either
 import arrow.core.flatMap
 import io.github.aakira.napier.Napier
@@ -73,7 +81,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                                 DeviceTimeSeries(
                                                     device = Device(
                                                         name = device.name ?: "",
-                                                        kind = DeviceKind(icon = Icons.Filled.DeviceUnknown)
+                                                        kind = DeviceKind(icon = mapIcon(device.deviceKind?.icon))
                                                     ),
                                                     timeSeriesValues = series.timestamps.zip(series.values)
                                                         .associate { Instant.parse(it.first) to it.second.toFloat() }
@@ -86,7 +94,10 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     devicesTimeSeries = deviceTimeSeriesList
                                 )
                             }
-                        }.awaitAll()
+                        }
+                        .filter { it.await().devicesTimeSeries.isNotEmpty() }
+                        .awaitAll()
+
                     if (chartTimeSeriesList.isNotEmpty()) {
                         Either.Right(chartTimeSeriesList)
                     } else {
@@ -96,45 +107,20 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         } ?: Either.Left(DomainError.Generic("Site id not found"))
     }
 
-//    private suspend fun refreshTimeSeriesData(): Either<DomainError, List<DeviceTimeSeries>> = withContext(
-//        Dispatchers.IO) {
-//        Napier.d(tag = TAG) { "calling site time series" }
-//        val siteId = dataRepository.getSettings().firstOrNull()?.siteId
-//        return@withContext siteId?.let { id ->
-//            dataRepository.api.fetchTiles(id)
-//                .mapLeft { DomainError.Api(it) }
-//                .flatMap { tiles ->
-//                    val deviceTimeSeriesList = tiles.filter { it.tileType == TileType.VALUATION }
-//                        .flatMap { tile ->
-//                            tile.tileChartDatas
-//                                ?.map { it.measureKey }
-//                                ?.filter { it.device?.id != null }
-//                                ?.map { it.device }
-//                                ?.map { device ->
-//                                    async {
-//                                        device?.id?.let { deviceId ->
-//                                            Napier.d(tag = TAG) { "Fetching time series for device id: $deviceId" }
-//                                            val seriesResult = dataRepository.api.fetchTimeSeries(deviceId)
-//                                            Napier.d(tag = TAG) { "Fetched series for device id $deviceId: $seriesResult" }
-//                                            seriesResult.map { series ->
-//                                                DeviceTimeSeries(
-//                                                    name = tile.name,
-//                                                    values = series.timestamps.zip(series.values)
-//                                                        .associate { Instant.parse(it.first) to it.second.toFloat() }
-//                                                )
-//                                            }.getOrNull()
-//                                        }
-//                                    }
-//                                }?.awaitAll()?.filterNotNull() ?: emptyList()
-//                        }
-//                    if (deviceTimeSeriesList.isNotEmpty()) {
-//                        Either.Right(deviceTimeSeriesList)
-//                    } else {
-//                        Either.Left(DomainError.Generic("No valid devices found"))
-//                    }
-//                }
-//        } ?: Either.Left(DomainError.Generic("Site id not found"))
-//    }
+    private fun mapIcon(icon: String?): ImageVector {
+        return when (icon) {
+            "icon-ico-sun" -> Icons.Default.WbSunny
+            "icon-ap-oven" -> Oven
+            "icon-ap-householdappliance" -> Icons.Default.Blender
+            "icon-ap-heatpump" -> Icons.Default.HeatPump
+            "icon-ap-washingmachine" -> Icons.Default.LocalLaundryService
+            "icon-ap-dishwasher" -> Dishwasher
+            "icon-ap-injection" -> Icons.Default.ElectricalServices
+            "icon-ap-withdrawal" -> Icons.Default.ElectricalServices
+            "icon-ap-plug" -> Icons.Default.ElectricalServices
+            else -> Icons.Default.DeviceUnknown
+        }
+    }
 
     companion object {
         private const val TAG = "FetchTimeSeriesUseCase"

@@ -3,16 +3,20 @@ package net.thevenot.comwatt.ui.dashboard
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absolutePadding
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -33,8 +38,6 @@ import io.github.koalaplot.core.line.AreaPlot
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.util.VerticalRotation
-import io.github.koalaplot.core.util.rotateVertically
 import io.github.koalaplot.core.xygraph.DefaultPoint
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.XYGraphScope
@@ -68,18 +71,27 @@ fun DashboardScreen(
     val charts by viewModel.charts.collectAsState()
     Napier.d { "DashboardScreen: $charts" }
     Column(
-        modifier = Modifier.fillMaxSize().padding(AppTheme.dimens.paddingLarge)
+        modifier = Modifier.fillMaxSize().padding(AppTheme.dimens.paddingNormal)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal, Alignment.Top)
     ) {
         charts.forEach { chart ->
             if (chart.devicesTimeSeries.any { it.timeSeriesValues.values.isNotEmpty() }) {
-                createChart(
-                    chartName = chart.name,
-                    chartsData = chart.devicesTimeSeries
-                        .filter { it.timeSeriesValues.values.isNotEmpty() }
-                        .map { it.timeSeriesValues }
-                )
+                OutlinedCard{
+                    Column {
+                        Card {
+                            createChart(
+                                chartName = chart.name,
+                                chartsData = chart.devicesTimeSeries
+                                    .filter { it.timeSeriesValues.values.isNotEmpty() }
+                                    .map { it.timeSeriesValues }
+                            )
+                        }
+                        Column(modifier = Modifier.padding(AppTheme.dimens.paddingNormal)) {
+                            ChartTitle(chart.devicesTimeSeries.first().device.kind.icon, chart.name?.trim() ?: "Unknown")
+                        }
+                    }
+                }
             }
         }
     }
@@ -89,8 +101,8 @@ fun DashboardScreen(
 @Composable
 fun createChart(chartName: String?, chartsData: List<Map<Instant, Float>>) {
     ChartLayout(
-        modifier = Modifier.height(200.dp).fillMaxWidth(),
-        title = { ChartTitle(chartName?.trim() ?: "Unknown") }
+        modifier = Modifier.height(200.dp).fillMaxWidth().padding(AppTheme.dimens.paddingNormal),
+//        title = { ChartTitle(chartName?.trim() ?: "Unknown") }
     ) {
         val maxValue = chartsData.flatMap { it.values }.maxOrNull() ?: 0f
         Napier.d { "chartName: $chartName, maxValue: $maxValue, range values ${ 0f..(ceil(maxValue / 50.0) * 50.0).toFloat()}" }
@@ -100,7 +112,6 @@ fun createChart(chartName: String?, chartsData: List<Map<Instant, Float>>) {
 
         val yRanges = combinedMaps.map { it.autoScaleYRange() }
         val yRange = mergeRanges(yRanges)
-
 
         val minMajorTickIncrement = ((yRange.endInclusive - yRange.start) / 5).let {  ((it / 100).roundToInt() * 100).toFloat() }
         val allKeys = chartsData.flatMap { it.keys }
@@ -127,18 +138,7 @@ fun createChart(chartName: String?, chartsData: List<Map<Instant, Float>>) {
             yAxisLabels = {
                 AxisLabel(formatYAxisLabel(it), Modifier.absolutePadding(right = 2.dp))
             },
-            yAxisTitle = {
-                Box(
-                    modifier = Modifier.fillMaxHeight(),
-                    contentAlignment = Alignment.TopStart
-                ) {
-                    AxisTitle(
-                        "Power (W)",
-                        modifier = Modifier.rotateVertically(VerticalRotation.COUNTER_CLOCKWISE)
-                            .padding(bottom = AppTheme.dimens.paddingNormal)
-                    )
-                }
-            },
+            yAxisTitle = {},
             horizontalMajorGridLineStyle = null,
             verticalMajorGridLineStyle = null,
             horizontalMinorGridLineStyle = null,
@@ -239,14 +239,14 @@ fun AxisLabel(label: String, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ChartTitle(title: String) {
-    Column {
+fun ChartTitle(icon: ImageVector, title: String) {
+    Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, "device_icon")
+        Spacer(modifier = Modifier.width(AppTheme.dimens.paddingNormal))
         Text(
             title,
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.align(Alignment.CenterHorizontally)
         )
-        Spacer(modifier = Modifier.height(AppTheme.dimens.paddingNormal))
     }
 }
