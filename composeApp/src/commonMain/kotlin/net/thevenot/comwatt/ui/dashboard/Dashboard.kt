@@ -1,5 +1,7 @@
 package net.thevenot.comwatt.ui.dashboard
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,15 +16,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -53,10 +60,13 @@ import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
+import net.thevenot.comwatt.domain.model.ChartTimeSeries
+import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.theme.AppTheme
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     dataRepository: DataRepository,
@@ -69,28 +79,60 @@ fun DashboardScreen(
     }
 
     val charts by viewModel.charts.collectAsState()
-    Napier.d { "DashboardScreen: $charts" }
-    Column(
-        modifier = Modifier.fillMaxSize().padding(AppTheme.dimens.paddingNormal)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal, Alignment.Top)
-    ) {
-        charts.forEach { chart ->
-            if (chart.devicesTimeSeries.any { it.timeSeriesValues.values.isNotEmpty() }) {
-                OutlinedCard{
-                    Column {
-                        Card {
-                            createChart(
-                                chartName = chart.name,
-                                chartsData = chart.devicesTimeSeries
-                                    .filter { it.timeSeriesValues.values.isNotEmpty() }
-                                    .map { it.timeSeriesValues }
-                            )
-                        }
-                        Column(modifier = Modifier.padding(AppTheme.dimens.paddingNormal)) {
-                            ChartTitle(chart.devicesTimeSeries.first().device.kind.icon, chart.name?.trim() ?: "Unknown")
-                        }
+    val uiState by viewModel.uiState.collectAsState()
+    val state = rememberPullToRefreshState()
+
+    LoadingView(uiState.isLoading) {
+        PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
+            viewModel.singleRefresh()
+        }) {
+            Column(
+                modifier = Modifier.fillMaxSize()
+                    .padding(horizontal = AppTheme.dimens.paddingNormal)
+                    .padding(bottom = AppTheme.dimens.paddingNormal)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(
+                    AppTheme.dimens.paddingNormal,
+                    Alignment.Top
+                )
+            ) {
+                charts.forEach { chart ->
+                    if (chart.devicesTimeSeries.any { it.timeSeriesValues.values.isNotEmpty() }) {
+                        GraphCard(chart)
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun GraphCard(chart: ChartTimeSeries) {
+    val visible = remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        visible.value = true
+    }
+
+    AnimatedVisibility(
+        visible = visible.value,
+        enter = slideInVertically(initialOffsetY = { it })
+    ) {
+        OutlinedCard {
+            Column {
+                Card {
+                    Chart(
+                        chartName = chart.name,
+                        chartsData = chart.devicesTimeSeries
+                            .filter { it.timeSeriesValues.values.isNotEmpty() }
+                            .map { it.timeSeriesValues }
+                    )
+                }
+                Column(modifier = Modifier.padding(AppTheme.dimens.paddingNormal)) {
+                    ChartTitle(
+                        chart.devicesTimeSeries.first().device.kind.icon,
+                        chart.name?.trim() ?: "Unknown"
+                    )
                 }
             }
         }
@@ -99,10 +141,9 @@ fun DashboardScreen(
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-fun createChart(chartName: String?, chartsData: List<Map<Instant, Float>>) {
+fun Chart(chartName: String?, chartsData: List<Map<Instant, Float>>) {
     ChartLayout(
-        modifier = Modifier.height(200.dp).fillMaxWidth().padding(AppTheme.dimens.paddingNormal),
-//        title = { ChartTitle(chartName?.trim() ?: "Unknown") }
+        modifier = Modifier.height(200.dp).fillMaxWidth().padding(AppTheme.dimens.paddingNormal)
     ) {
         val maxValue = chartsData.flatMap { it.values }.maxOrNull() ?: 0f
         Napier.d { "chartName: $chartName, maxValue: $maxValue, range values ${ 0f..(ceil(maxValue / 50.0) * 50.0).toFloat()}" }

@@ -43,6 +43,7 @@ import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -74,14 +75,16 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    HomeScreenContent(
-        uiState,
-        viewModel::enableProductionGauge,
-        viewModel::enableConsumptionGauge,
-        viewModel::enableInjectionGauge,
-        viewModel::enableWithdrawalsGauge,
-        viewModel::singleRefresh
-    )
+    LoadingView(uiState.isLoading) {
+        HomeScreenContent(
+            uiState,
+            viewModel::enableProductionGauge,
+            viewModel::enableConsumptionGauge,
+            viewModel::enableInjectionGauge,
+            viewModel::enableWithdrawalsGauge,
+            viewModel::singleRefresh
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

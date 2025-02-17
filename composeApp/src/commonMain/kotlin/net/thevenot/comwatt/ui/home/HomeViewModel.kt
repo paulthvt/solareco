@@ -47,6 +47,7 @@ class HomeViewModel(
         Napier.d(tag = TAG) { "startAutoRefresh ${this@HomeViewModel}" }
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
             fetchSiteTimeSeriesUseCase.invoke()
                 .flowOn(Dispatchers.IO)
                 .catch {
@@ -62,6 +63,7 @@ class HomeViewModel(
                         callCount = _uiState.value.callCount + 1,
                         lastRefreshInstant = it.lastUpdateTimestamp
                     )
+                    _uiState.value = _uiState.value.copy(isLoading = false)
                     updateTimeDifference()
                 }
         }
