@@ -68,7 +68,7 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(
+fun DashboardScreenContent(
     dataRepository: DataRepository,
     viewModel: DashboardViewModel = viewModel {
         DashboardViewModel(FetchTimeSeriesUseCase(dataRepository))
@@ -88,9 +88,8 @@ fun DashboardScreen(
         }) {
             Column(
                 modifier = Modifier.fillMaxSize()
-                    .padding(horizontal = AppTheme.dimens.paddingNormal)
-                    .padding(bottom = AppTheme.dimens.paddingNormal)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(AppTheme.dimens.paddingNormal),
                 verticalArrangement = Arrangement.spacedBy(
                     AppTheme.dimens.paddingNormal,
                     Alignment.Top

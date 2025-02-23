@@ -7,14 +7,17 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
+import net.thevenot.comwatt.ui.dashboard.DashboardScreenContent
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.home.HomeViewModel
 import net.thevenot.comwatt.ui.login.LoginScreen
@@ -22,6 +25,7 @@ import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.user.UserSettingsDialog
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -69,6 +73,7 @@ fun MainAppNavHost(
             }
         }
         mainGraph(navController, dataRepository, viewModelStoreOwner)
+        addUserSettingsDialog(navController)
     }
 }
 
@@ -91,19 +96,23 @@ fun NavGraphBuilder.mainGraph(
 
         }
         composable<Screen.Dashboard> {
-            NestedAppScaffold(navController) {
-                DashboardScreen(dataRepository)
-            }
+            DashboardScreen(navController, dataRepository)
         }
         composable<Screen.Devices> {
             NestedAppScaffold(navController) {
-                DashboardScreen(dataRepository)
+                DashboardScreenContent(dataRepository)
             }
         }
         composable<Screen.More> {
             NestedAppScaffold(navController) {
-                DashboardScreen(dataRepository)
+                DashboardScreenContent(dataRepository)
             }
         }
+    }
+}
+
+fun NavGraphBuilder.addUserSettingsDialog(navController: NavController) {
+    dialog<Screen.UserSettings> {
+        UserSettingsDialog(navController)
     }
 }

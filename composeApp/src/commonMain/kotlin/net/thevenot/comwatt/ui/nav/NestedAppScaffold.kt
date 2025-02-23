@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -21,6 +22,7 @@ import androidx.navigation.NavController
 fun NestedAppScaffold(
     navController: NavController,
     title: String? = null,
+    actionsContent: @Composable () -> Unit = {},
     fab: @Composable () -> Unit = {},
     content: @Composable () -> Unit
 ) {
@@ -42,7 +44,16 @@ fun NestedAppScaffold(
                         Text(it)
                     }
                 },
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    actionsContent()
+                    IconButton(onClick = { navController.navigate(Screen.UserSettings) }) {
+                        Icon(
+                            Icons.Default.AccountCircle,
+                            contentDescription = "account",
+                        )
+                    }
+                }
             )
         },
         floatingActionButton = fab,
