@@ -8,7 +8,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
@@ -34,16 +33,18 @@ class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseC
             _uiState.value = _uiState.value.copy(isLoading = true)
             fetchTimeSeriesUseCase.invoke()
                 .flowOn(Dispatchers.IO)
-                .catch {
-                    Napier.e(tag = TAG) { "Error in auto refresh: $it" }
-                    _uiState.value = _uiState.value.copy(
-                        errorCount = _uiState.value.errorCount + 1
-                    )
-                }
                 .collect {
-                    _charts.value = it
-                    _uiState.value = _uiState.value.copy(isLoading = false)
-                    _uiState.value = _uiState.value.copy(callCount = _uiState.value.callCount + 1)
+                    it.onLeft {
+                        Napier.e(tag = TAG) { "Error in auto refresh: $it" }
+                        _uiState.value = _uiState.value.copy(
+                            errorCount = _uiState.value.errorCount + 1
+                        )
+                    }
+                    it.onRight {
+                        _charts.value = it
+                        _uiState.value = _uiState.value.copy(isLoading = false)
+                        _uiState.value = _uiState.value.copy(callCount = _uiState.value.callCount + 1)
+                    }
                 }
         }
     }

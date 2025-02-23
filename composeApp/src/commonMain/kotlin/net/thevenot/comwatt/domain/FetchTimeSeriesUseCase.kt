@@ -33,9 +33,12 @@ import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.TileType
 
 class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
-    operator fun invoke(): Flow<List<ChartTimeSeries>> = flow {
+    operator fun invoke(): Flow<Either<DomainError, List<ChartTimeSeries>>> = flow {
         while (true) {
-            when (val data = refreshTimeSeriesData()) {
+            val data = refreshTimeSeriesData()
+            emit(data)
+
+            when (data) {
                 is Either.Left -> {
                     Napier.e(tag = TAG) { "Error fetching time series: ${data.value}" }
                     val value = data.value
@@ -45,8 +48,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                     delay(10_000L)
                 }
                 is Either.Right -> {
-                    val delayMillis =  30000L
-                    emit(data.value)
+                    val delayMillis = 30000L
                     Napier.d(tag = TAG) { "waiting for $delayMillis milliseconds" }
                     delay(delayMillis)
                 }
