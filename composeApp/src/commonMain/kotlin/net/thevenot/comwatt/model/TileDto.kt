@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import net.thevenot.comwatt.model.type.MeasureKind
 
 @Serializable
 data class TileResponseDto(
@@ -31,7 +32,7 @@ data class MeasureKeyDto(
     @SerialName("@id")
     val atId: String,
     val id: Int,
-    val measureKind: String,
+    val measureKind: MeasureKind,
     val measureType: MeasureTypeDto,
     val measureKey: String,
     val shared: Boolean,

@@ -33,6 +33,9 @@ import net.thevenot.comwatt.model.TileType
 import net.thevenot.comwatt.model.TimeSeriesDto
 import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.model.safeRequest
+import net.thevenot.comwatt.model.type.AggregationLevel
+import net.thevenot.comwatt.model.type.MeasureKind
+import net.thevenot.comwatt.model.type.TimeAgoUnit
 import net.thevenot.comwatt.utils.toZoneString
 import kotlin.time.Duration
 
@@ -89,7 +92,9 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
 
     suspend fun fetchSiteTimeSeries(
         siteId: Int,
-        startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE)
+        startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
     ): Either<ApiError, SiteTimeSeriesDto> {
         val endTime = Clock.System.now()
 
@@ -100,8 +105,8 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     method = HttpMethod.Get
                     path("api/aggregations/site-time-series")
                     parameter("id", siteId)
-                    parameter("measureKind", "FLOW")
-                    parameter("aggregationLevel", "NONE")
+                    parameter("measureKind", measureKind)
+                    parameter("aggregationLevel", aggregationLevel)
                     parameter("start", startTime.toZoneString(timeZone))
                     parameter("end", endTime.toZoneString(timeZone))
                 }
@@ -143,7 +148,11 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
 
     suspend fun fetchTimeSeries(
         deviceId: Int,
-        endTime: Instant = Clock.System.now()
+        endTime: Instant = Clock.System.now(),
+        timeAgoUnit: TimeAgoUnit = TimeAgoUnit.DAY,
+        timeAgoValue: Int = 1,
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
     ): Either<ApiError, TimeSeriesDto> {
         val timeZone = TimeZone.of("Europe/Paris")
         return withContext(Dispatchers.IO) {
@@ -152,10 +161,10 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     method = HttpMethod.Get
                     path("api/aggregations/time-series")
                     parameter("id", deviceId)
-                    parameter("measureKind", "FLOW")
-                    parameter("aggregationLevel", "NONE")
-                    parameter("timeAgoUnit", "DAY")
-                    parameter("timeAgoValue", "1")
+                    parameter("measureKind", measureKind)
+                    parameter("aggregationLevel", aggregationLevel)
+                    parameter("timeAgoUnit", timeAgoUnit)
+                    parameter("timeAgoValue", timeAgoValue)
                     parameter("end", endTime.toZoneString(timeZone))
                 }
             }
