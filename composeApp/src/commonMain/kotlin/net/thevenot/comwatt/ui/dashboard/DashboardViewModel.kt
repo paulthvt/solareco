@@ -22,11 +22,7 @@ class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseC
     private val _uiState = MutableStateFlow(DashboardScreenState())
     val uiState: StateFlow<DashboardScreenState> get() = _uiState
 
-    fun load() {
-        startAutoRefresh()
-    }
-
-    private fun startAutoRefresh() {
+    fun startAutoRefresh() {
         Napier.d(tag = TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
@@ -47,6 +43,11 @@ class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseC
                     }
                 }
         }
+    }
+
+    fun stopAutoRefresh() {
+        Napier.d(tag = TAG) { "stopAutoRefresh ${this@DashboardViewModel}" }
+        autoRefreshJob?.cancel()
     }
 
     fun singleRefresh() {

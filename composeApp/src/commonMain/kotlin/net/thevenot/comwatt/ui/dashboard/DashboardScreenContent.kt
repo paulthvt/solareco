@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import io.github.aakira.napier.Napier
 import io.github.koalaplot.core.ChartLayout
@@ -74,8 +75,11 @@ fun DashboardScreenContent(
         DashboardViewModel(FetchTimeSeriesUseCase(dataRepository))
     }
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.load()
+    LifecycleResumeEffect(Unit) {
+        viewModel.startAutoRefresh()
+        onPauseOrDispose {
+            viewModel.stopAutoRefresh()
+        }
     }
 
     val charts by viewModel.charts.collectAsState()
