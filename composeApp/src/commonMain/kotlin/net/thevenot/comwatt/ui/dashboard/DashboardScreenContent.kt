@@ -2,6 +2,7 @@ package net.thevenot.comwatt.ui.dashboard
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,8 +21,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
@@ -35,10 +40,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.range_picker_button_custom
+import comwatt.composeapp.generated.resources.range_picker_button_day
+import comwatt.composeapp.generated.resources.range_picker_button_hour
+import comwatt.composeapp.generated.resources.range_picker_button_week
 import io.github.aakira.napier.Napier
 import io.github.koalaplot.core.ChartLayout
 import io.github.koalaplot.core.line.AreaBaseline
@@ -64,6 +76,7 @@ import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.theme.AppTheme
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -99,9 +112,64 @@ fun DashboardScreenContent(
                     Alignment.Top
                 )
             ) {
-                charts.forEach { chart ->
-                    if (chart.devicesTimeSeries.any { it.timeSeriesValues.values.isNotEmpty() }) {
-                        GraphCard(chart)
+                if (charts.isNotEmpty()) {
+                    Row {
+                        val options = listOf(
+                            stringResource(Res.string.range_picker_button_hour),
+                            stringResource(Res.string.range_picker_button_day),
+                            stringResource(Res.string.range_picker_button_week),
+                            stringResource(Res.string.range_picker_button_custom)
+                        )
+                        SingleChoiceSegmentedButtonRow {
+                            options.forEachIndexed { index, label ->
+                                SegmentedButton(
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = index, count = options.size
+                                    ),
+                                    onClick = {
+                                        viewModel.onTimeUnitSelected(index)
+                                    },
+                                    selected = index == uiState.timeUnitSelectedIndex
+                                ) {
+                                    Text(label)
+                                }
+                            }
+                        }
+                    }
+
+                    var dragDirection: HorizontalDragDirection? = null
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                            .pointerInput(Unit) {
+                                detectHorizontalDragGestures(onDragEnd = {
+                                    Napier.d(tag = TAG) { "Drag end $dragDirection" }
+                                }) { _, dragAmount ->
+                                    when {
+                                        dragAmount < -20f -> {
+                                            dragDirection = HorizontalDragDirection.LEFT
+                                        }
+
+                                        dragAmount > 20f -> {
+                                            dragDirection = HorizontalDragDirection.RIGHT
+                                        }
+                                    }
+                                }
+                            },
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        TextButton(onClick = { Napier.d(tag = TAG) { "Click" } }) {
+                            Text(
+                                "Today",
+                                modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
+                                    .fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    charts.forEach { chart ->
+                        if (chart.devicesTimeSeries.any { it.timeSeriesValues.values.isNotEmpty() }) {
+                            GraphCard(chart)
+                        }
                     }
                 }
             }
@@ -294,3 +362,5 @@ fun ChartTitle(icon: ImageVector, title: String) {
         )
     }
 }
+
+private const val TAG = "DashboardScreenContent"

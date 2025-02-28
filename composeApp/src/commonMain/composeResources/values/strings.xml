@@ -23,4 +23,8 @@
     </plurals>
     <string name="gauge_dialog_title">Gauge Settings</string>
     <string name="gauge_dialog_close_button">Close</string>
+    <string name="range_picker_button_hour">Hour</string>
+    <string name="range_picker_button_day">Day</string>
+    <string name="range_picker_button_week">Week</string>
+    <string name="range_picker_button_custom">Custom</string>
 </resources>

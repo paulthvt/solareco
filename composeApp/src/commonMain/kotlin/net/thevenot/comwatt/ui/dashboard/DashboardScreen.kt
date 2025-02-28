@@ -1,10 +1,16 @@
 package net.thevenot.comwatt.ui.dashboard
 
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -12,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import comwatt.composeapp.generated.resources.Res
@@ -53,6 +60,8 @@ fun DashboardScreen(
 
 @Composable
 fun TimeSelectionDialog(onDismiss: () -> Unit) {
+    var selectedIndex by remember { mutableStateOf(0) }
+    val options = listOf("Hour", "Day", "Week", "Month", "Year", "Custom")
     AlertDialog(
         onDismissRequest = onDismiss, title = {
             Text(stringResource(Res.string.gauge_dialog_title))
@@ -61,7 +70,24 @@ fun TimeSelectionDialog(onDismiss: () -> Unit) {
                 Text(stringResource(Res.string.gauge_dialog_close_button))
             }
         }, text = {
-            Text("Time selection dialog content goes here.")
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState())
+            ) {
+                SingleChoiceSegmentedButtonRow {
+                    options.forEachIndexed { index, label ->
+                        SegmentedButton(
+                            shape = SegmentedButtonDefaults.itemShape(
+                                index = index,
+                                count = options.size
+                            ),
+                            onClick = { selectedIndex = index },
+                            selected = index == selectedIndex
+                        ) {
+                            Text(label)
+                        }
+                    }
+                }
+            }
         }
     )
 }

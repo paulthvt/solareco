@@ -12,32 +12,43 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
+import net.thevenot.comwatt.domain.model.TimeUnit
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 
 class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseCase): ViewModel() {
     private var autoRefreshJob: Job? = null
-
     private val _charts = MutableStateFlow<List<ChartTimeSeries>>(listOf())
-    val charts: StateFlow<List<ChartTimeSeries>> = _charts
 
+    val charts: StateFlow<List<ChartTimeSeries>> = _charts
     private val _uiState = MutableStateFlow(DashboardScreenState())
+
     val uiState: StateFlow<DashboardScreenState> get() = _uiState
+    private var selectedTimeUnit =
+        convertSelectedIndexToTimeUnit(_uiState.value.timeUnitSelectedIndex)
 
     fun startAutoRefresh() {
         Napier.d(tag = TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
+        _uiState.value = _uiState.value.copy(isLoading = true)
         autoRefreshJob = viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
-            fetchTimeSeriesUseCase.invoke()
+            fetchTimeSeriesUseCase.invoke(
+                when (selectedTimeUnit) {
+                    DashboardTimeUnit.HOUR -> TimeUnit.HOUR
+                    DashboardTimeUnit.DAY -> TimeUnit.DAY
+                    DashboardTimeUnit.WEEK -> TimeUnit.WEEK
+                    DashboardTimeUnit.CUSTOM -> TODO() // todo handle custom
+                }
+            )
                 .flowOn(Dispatchers.IO)
                 .collect {
-                    it.onLeft {
-                        Napier.e(tag = TAG) { "Error in auto refresh: $it" }
+                    it.onLeft { error ->
+                        Napier.e(tag = TAG) { "Error in auto refresh: $error" }
                         _uiState.value = _uiState.value.copy(
                             errorCount = _uiState.value.errorCount + 1
                         )
                     }
-                    it.onRight {
-                        _charts.value = it
+                    it.onRight { value ->
+                        _charts.value = value
                         _uiState.value = _uiState.value.copy(isLoading = false)
                         _uiState.value = _uiState.value.copy(callCount = _uiState.value.callCount + 1)
                     }
@@ -46,21 +57,38 @@ class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseC
     }
 
     fun stopAutoRefresh() {
-        Napier.d(tag = TAG) { "stopAutoRefresh ${this@DashboardViewModel}" }
+        Napier.d(tag = TAG) { "stopAutoRefresh" }
         autoRefreshJob?.cancel()
     }
 
     fun singleRefresh() {
         viewModelScope.launch {
-            Napier.d(tag = TAG) { "Single refresh ${this@DashboardViewModel}" }
+            Napier.d(tag = TAG) { "Single refresh $selectedTimeUnit" }
             _uiState.value = _uiState.value.copy(isRefreshing = true)
-            fetchTimeSeriesUseCase.singleFetch().onRight {
+            fetchTimeSeriesUseCase.singleFetch(
+                when (selectedTimeUnit) {
+                    DashboardTimeUnit.HOUR -> TimeUnit.HOUR
+                    DashboardTimeUnit.DAY -> TimeUnit.DAY
+                    DashboardTimeUnit.WEEK -> TimeUnit.WEEK
+                    DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK // todo handle custom
+                }
+            ).onRight {
                 _charts.value = it
                 _uiState.value = _uiState.value.copy(
                     isRefreshing = false,
                     callCount = _uiState.value.callCount + 1)
             }
         }
+    }
+
+    fun onTimeUnitSelected(timeUnitSelectedIndex: Int) {
+        _uiState.value = _uiState.value.copy(timeUnitSelectedIndex = timeUnitSelectedIndex)
+        selectedTimeUnit = convertSelectedIndexToTimeUnit(timeUnitSelectedIndex)
+        singleRefresh()
+    }
+
+    private fun convertSelectedIndexToTimeUnit(timeUnitSelectedIndex: Int): DashboardTimeUnit {
+        return DashboardTimeUnit.entries[timeUnitSelectedIndex]
     }
 
     companion object {

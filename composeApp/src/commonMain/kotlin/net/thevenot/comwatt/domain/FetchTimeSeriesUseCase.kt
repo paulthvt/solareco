@@ -29,13 +29,15 @@ import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.Device
 import net.thevenot.comwatt.domain.model.DeviceKind
 import net.thevenot.comwatt.domain.model.DeviceTimeSeries
+import net.thevenot.comwatt.domain.model.TimeUnit
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.TileType
+import net.thevenot.comwatt.model.type.TimeAgoUnit
 
 class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
-    operator fun invoke(): Flow<Either<DomainError, List<ChartTimeSeries>>> = flow {
+    operator fun invoke(timeUnit: TimeUnit = TimeUnit.DAY): Flow<Either<DomainError, List<ChartTimeSeries>>> = flow {
         while (true) {
-            val data = refreshTimeSeriesData()
+            val data = refreshTimeSeriesData(timeUnit)
             emit(data)
 
             when (data) {
@@ -56,11 +58,11 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         }
     }
 
-    suspend fun singleFetch(): Either<DomainError, List<ChartTimeSeries>> {
-        return refreshTimeSeriesData()
+    suspend fun singleFetch(timeUnit: TimeUnit = TimeUnit.DAY): Either<DomainError, List<ChartTimeSeries>> {
+        return refreshTimeSeriesData(timeUnit)
     }
 
-    private suspend fun refreshTimeSeriesData(): Either<DomainError, List<ChartTimeSeries>> = withContext(Dispatchers.IO) {
+    private suspend fun refreshTimeSeriesData(timeUnit: TimeUnit): Either<DomainError, List<ChartTimeSeries>> = withContext(Dispatchers.IO) {
         Napier.d(tag = TAG) { "calling site time series" }
         val siteId = dataRepository.getSettings().firstOrNull()?.siteId
         return@withContext siteId?.let { id ->
@@ -77,7 +79,10 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     ?.mapNotNull { device ->
                                         device?.id?.let { deviceId ->
                                             Napier.d(tag = TAG) { "Fetching time series for device id: $deviceId" }
-                                            val seriesResult = dataRepository.api.fetchTimeSeries(deviceId)
+                                            val seriesResult = dataRepository.api.fetchTimeSeries(
+                                                deviceId = deviceId,
+                                                timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit)
+                                            )
                                             Napier.d(tag = TAG) { "Fetched series for device id $deviceId: $seriesResult" }
                                             seriesResult.map { series ->
                                                 DeviceTimeSeries(
