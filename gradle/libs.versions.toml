@@ -24,7 +24,7 @@ ksp = "2.1.0-1.0.29"
 sqlite = "2.5.0-alpha12"
 androidx-room = "2.7.0-alpha12"
 dataStoreVersion = "1.1.2"
-arrow = "2.0.0"
+arrow = "2.0.1"
 napier = "2.7.1"
 testResources = "0.10.0"
 
