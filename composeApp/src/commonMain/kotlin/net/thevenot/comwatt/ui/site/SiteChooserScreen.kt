@@ -28,11 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.model.AddressDto
-import net.thevenot.comwatt.model.Agreements
-import net.thevenot.comwatt.model.Phone
-import net.thevenot.comwatt.model.Profile
+import net.thevenot.comwatt.model.AgreementsDto
+import net.thevenot.comwatt.model.PhoneDto
+import net.thevenot.comwatt.model.ProfileDto
 import net.thevenot.comwatt.model.SiteDto
-import net.thevenot.comwatt.model.User
+import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -44,7 +44,7 @@ fun SiteChooserScreen(
     onSiteSelected: (Int) -> Unit = {}
 ) {
     val sites by viewModel.sites.collectAsState()
-    val user by viewModel.user.collectAsState()
+    val user by viewModel.userDto.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.checkSiteSelection(onSiteSelected) {
@@ -53,13 +53,15 @@ fun SiteChooserScreen(
     }
 
     SiteChooserContent(sites, user) { site ->
-        viewModel.saveSiteId(site.id)
-        onSiteSelected(site.id)
+        site.id?.let {
+            viewModel.saveSiteId(it)
+            onSiteSelected(it)
+        }
     }
 }
 
 @Composable
-fun SiteChooserContent(sites: List<SiteDto>, user: User?, onSiteClick: (SiteDto) -> Unit = {}) {
+fun SiteChooserContent(sites: List<SiteDto>, userDto: UserDto?, onSiteClick: (SiteDto) -> Unit = {}) {
     LazyColumn(
         verticalArrangement = Arrangement.spacedBy(
             AppTheme.dimens.paddingSmall,
@@ -70,13 +72,13 @@ fun SiteChooserContent(sites: List<SiteDto>, user: User?, onSiteClick: (SiteDto)
             .padding(AppTheme.dimens.paddingNormal)
     ) {
         items(sites) { site ->
-            SiteCard(site, user, onSiteClick)
+            SiteCard(site, userDto, onSiteClick)
         }
     }
 }
 
 @Composable
-fun SiteCard(site: SiteDto, user: User?, onSiteClick: (SiteDto) -> Unit = {}) {
+fun SiteCard(site: SiteDto, userDto: UserDto?, onSiteClick: (SiteDto) -> Unit = {}) {
     Card(
         modifier = Modifier.fillMaxWidth()
             .clickable { onSiteClick(site) }
@@ -91,19 +93,19 @@ fun SiteCard(site: SiteDto, user: User?, onSiteClick: (SiteDto) -> Unit = {}) {
                 )
                 Spacer(modifier = Modifier.width(AppTheme.dimens.paddingSmall))
                 Text(
-                    text = site.name,
+                    text = site.name ?: "",
                     style = MaterialTheme.typography.titleMedium
                 )
             }
             Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
-            user?.let {
+            userDto?.let {
                 Text(
                     text = "${it.firstName} ${it.lastName}",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
             Text(
-                text = site.address.formatAddress(),
+                text = site.address?.formatAddress() ?: "",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -113,6 +115,39 @@ fun SiteCard(site: SiteDto, user: User?, onSiteClick: (SiteDto) -> Unit = {}) {
 @Preview
 @Composable
 private fun SiteChooserPreview() {
+    val userDto = UserDto(
+        id = 1,
+        login = "user1",
+        firstName = "John",
+        lastName = "Doe",
+        email = "john.doe@example.com",
+        newEmail = null,
+        pseudonym = null,
+        profile = ProfileDto(
+            id = 1,
+            label = "Admin",
+            code = "ADMIN",
+            authorities = listOf()
+        ),
+        address = AddressDto("789 Oak St", "54321", "City", "Country"),
+        phone = PhoneDto("1234567890", "1"),
+        mobilePhone = "0987654321",
+        currency = "USD",
+        language = "en",
+        activated = true,
+        deleted = false,
+        company = "Company",
+        createDate = "2021-01-01",
+        updateDate = "2021-01-02",
+        agreements = AgreementsDto(
+            termsAndConditionsEndUser = true,
+            termsAndConditionsInstaller = null,
+            dataProcessing = true,
+            noDisclosure = null,
+            newsletter = true
+        ),
+        uuid = "uuid-1234"
+    )
     val sampleSites = listOf(
         SiteDto(
             id = 1,
@@ -130,7 +165,7 @@ private fun SiteChooserPreview() {
             siteUid = "UID1",
             supplyNumber = "SN1",
             status = "Active",
-            owner = "Owner 1",
+            owner = userDto,
             accessType = "Full",
             state = "State 1",
             siteKind = "Kind 1"
@@ -151,49 +186,16 @@ private fun SiteChooserPreview() {
             siteUid = "UID2",
             supplyNumber = "SN2",
             status = "Inactive",
-            owner = "Owner 2",
+            owner = userDto,
             accessType = "Read",
             state = "State 2",
             siteKind = "Kind 2"
         )
     )
-    val user = User(
-        id = 1,
-        login = "user1",
-        firstName = "John",
-        lastName = "Doe",
-        email = "john.doe@example.com",
-        newEmail = null,
-        pseudonym = null,
-        profile = Profile(
-            id = 1,
-            label = "Admin",
-            code = "ADMIN",
-            authorities = null
-        ),
-        address = AddressDto("789 Oak St", "54321", "City", "Country"),
-        phone = Phone("1234567890", "1"),
-        mobilePhone = "0987654321",
-        currency = "USD",
-        language = "en",
-        activated = true,
-        deleted = false,
-        company = "Company",
-        createDate = "2021-01-01",
-        updateDate = "2021-01-02",
-        agreements = Agreements(
-            termsAndConditionsEndUser = true,
-            termsAndConditionsInstaller = null,
-            dataProcessing = true,
-            noDisclosure = null,
-            newsletter = true
-        ),
-        uuid = "uuid-1234"
-    )
 
     ComwattTheme(darkTheme = true, dynamicColor = false) {
         Surface {
-            SiteChooserContent(sites = sampleSites, user = user)
+            SiteChooserContent(sites = sampleSites, userDto = userDto)
         }
     }
 }

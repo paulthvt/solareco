@@ -3,7 +3,7 @@ package net.thevenot.comwatt.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class User(
+data class UserDto(
     val id: Int,
     val login: String,
     val firstName: String,
@@ -11,9 +11,9 @@ data class User(
     val email: String,
     val newEmail: String?,
     val pseudonym: String?,
-    val profile: Profile,
+    val profile: ProfileDto?,
     val address: AddressDto,
-    val phone: Phone,
+    val phone: PhoneDto,
     val mobilePhone: String?,
     val currency: String,
     val language: String,
@@ -22,26 +22,26 @@ data class User(
     val company: String?,
     val createDate: String,
     val updateDate: String,
-    val agreements: Agreements,
+    val agreements: AgreementsDto,
     val uuid: String
 )
 
 @Serializable
-data class Profile(
+data class ProfileDto(
     val id: Int,
     val label: String,
     val code: String,
-    val authorities: String?
+    val authorities: List<String>
 )
 
 @Serializable
-data class Phone(
+data class PhoneDto(
     val number: String,
     val countryCode: String
 )
 
 @Serializable
-data class Agreements(
+data class AgreementsDto(
     val termsAndConditionsEndUser: Boolean,
     val termsAndConditionsInstaller: Boolean?,
     val dataProcessing: Boolean,

@@ -24,7 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,12 +31,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.gauge_dialog_close_button
+import comwatt.composeapp.generated.resources.gauge_dialog_title
 import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
+import comwatt.composeapp.generated.resources.last_data_refresh_time
+import comwatt.composeapp.generated.resources.last_data_refresh_time_zero
+import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
+import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -46,29 +52,39 @@ import net.thevenot.comwatt.ui.theme.powerInjectionGauge
 import net.thevenot.comwatt.ui.theme.powerProductionGauge
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGauge
 import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.pluralStringResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
     dataRepository: DataRepository,
-    viewModel: HomeViewModel = viewModel { HomeViewModel(
-        fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository)
-    ) }
+    viewModel: HomeViewModel = viewModel {
+        HomeViewModel(fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository))
+    }
 ) {
     LaunchedEffect(Unit) {
         viewModel.load()
     }
+    LaunchedEffect(Unit) {
+        while (true) {
+            viewModel.updateTimeDifference()
+            delay(15_000L)
+        }
+    }
 
     val uiState by viewModel.uiState.collectAsState()
 
-    HomeScreenContent(
-        uiState,
-        viewModel::enableProductionGauge,
-        viewModel::enableConsumptionGauge,
-        viewModel::enableInjectionGauge,
-        viewModel::enableWithdrawalsGauge,
-        viewModel::singleRefresh
-    )
+    LoadingView(uiState.isLoading) {
+        HomeScreenContent(
+            uiState,
+            viewModel::enableProductionGauge,
+            viewModel::enableConsumptionGauge,
+            viewModel::enableInjectionGauge,
+            viewModel::enableWithdrawalsGauge,
+            viewModel::singleRefresh
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -82,21 +98,6 @@ private fun HomeScreenContent(
     launchSingleDataRefresh: () -> Unit = {}
 ) {
     var showDialog by remember { mutableStateOf(false) }
-//    if(isLoading) {
-//        Column(
-//            modifier = Modifier.fillMaxSize(),
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.Center,
-//        ) {
-//            CircularProgressIndicator(
-//                strokeCap = StrokeCap.Round,
-//                color = MaterialTheme.colorScheme.onPrimary,
-//                modifier = Modifier.size(24.dp)
-//            )
-//        }
-//    }
-//    else {
-    val coroutineScope = rememberCoroutineScope()
 
     val scrollState = rememberScrollState()
     val state = rememberPullToRefreshState()
@@ -106,12 +107,12 @@ private fun HomeScreenContent(
         Column(
             modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
         ) {
-            Text(
-                text = if (uiState.updateDate.isEmpty()) "Loading..." else "Update date: ${uiState.updateDate}"
-            )
-            Text(
-                text = if (uiState.lastRefreshDate.isEmpty()) "Loading..." else "Last refresh: ${uiState.lastRefreshDate}"
-            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Text(
+                    text = "Real time auto consumption",
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+            }
             Text(
                 text = "Call number: ${uiState.callCount}",
             )
@@ -126,6 +127,17 @@ private fun HomeScreenContent(
             }
             Spacer(modifier = Modifier.height(16.dp))
             PowerGaugeScreen(uiState, onSettingsButtonClick = { showDialog = true })
+            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                uiState.timeDifference?.let {
+                    Text(
+                        text = when {
+                            it < 1 -> stringResource(Res.string.last_data_refresh_time_zero)
+                            else -> pluralStringResource(Res.plurals.last_data_refresh_time, it, it)
+                        },
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
+            }
 
             if (showDialog) {
                 GaugeSettingsDialog(
@@ -139,7 +151,6 @@ private fun HomeScreenContent(
             }
         }
     }
-//    }
 }
 
 @Composable
@@ -152,10 +163,10 @@ fun GaugeSettingsDialog(
     onWithdrawalsChecked: (Boolean) -> Unit
 ) {
     AlertDialog(onDismissRequest = onDismiss, title = {
-        Text("Gauge Settings")
+        Text(stringResource(Res.string.gauge_dialog_title))
     }, confirmButton = {
         TextButton(onClick = onDismiss) {
-            Text("Close")
+            Text(stringResource(Res.string.gauge_dialog_close_button))
         }
     }, text = {
         Column {
@@ -213,12 +224,14 @@ private fun HomeScreenPreview() {
                     callCount = 123,
                     errorCount = 0,
                     isRefreshing = false,
-                    production = 123.0,
-                    consumption = 456.0,
-                    injection = 789.0,
-                    withdrawals = 951.0,
-                    updateDate = "2021-09-01T12:00:00Z",
-                    lastRefreshDate = "2021-09-01T12:00:00Z"
+                    siteTimeSeries = SiteTimeSeries(
+                        production = 123.0,
+                        consumption = 456.0,
+                        injection = 789.0,
+                        withdrawals = 951.0,
+                        updateDate = "2021-09-01T12:00:00Z",
+                        lastRefreshDate = "2021-09-01T12:00:00Z",
+                    )
                 )
             )
         }

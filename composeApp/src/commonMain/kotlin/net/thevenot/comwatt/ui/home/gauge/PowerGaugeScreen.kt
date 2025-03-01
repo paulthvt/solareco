@@ -54,6 +54,7 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
+import net.thevenot.comwatt.domain.model.SiteTimeSeries
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.home.HomeViewModel.Companion.MAX_POWER
 import net.thevenot.comwatt.ui.theme.AppTheme
@@ -104,32 +105,56 @@ fun PowerGaugeScreen(
     val injectionAnimation = remember { Animatable(0f) }
     val withdrawalsAnimation = remember { Animatable(0f) }
 
-    if (homeScreenState.productionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.productionRate) {
-            startAnimation(productionAnimation, homeScreenState.productionRate.toFloat())
+    if (homeScreenState.siteTimeSeries.productionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteTimeSeries.productionRate) {
+            startAnimation(
+                productionAnimation,
+                homeScreenState.siteTimeSeries.productionRate.toFloat()
+            )
         }
     }
-    if (homeScreenState.consumptionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.consumptionRate) {
-            startAnimation(consumptionAnimation, homeScreenState.consumptionRate.toFloat())
+    if (homeScreenState.siteTimeSeries.consumptionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteTimeSeries.consumptionRate) {
+            startAnimation(
+                consumptionAnimation,
+                homeScreenState.siteTimeSeries.consumptionRate.toFloat()
+            )
         }
     }
-    if (homeScreenState.injectionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.injectionRate) {
-            startAnimation(injectionAnimation, homeScreenState.injectionRate.toFloat())
+    if (homeScreenState.siteTimeSeries.injectionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteTimeSeries.injectionRate) {
+            startAnimation(
+                injectionAnimation,
+                homeScreenState.siteTimeSeries.injectionRate.toFloat()
+            )
         }
     }
-    if (homeScreenState.withdrawalsRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.withdrawalsRate) {
-            startAnimation(withdrawalsAnimation, homeScreenState.withdrawalsRate.toFloat())
+    if (homeScreenState.siteTimeSeries.withdrawalsRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteTimeSeries.withdrawalsRate) {
+            startAnimation(
+                withdrawalsAnimation,
+                homeScreenState.siteTimeSeries.withdrawalsRate.toFloat()
+            )
         }
     }
 
     PowerGaugeScreen(
-        production = productionAnimation.toUiState(homeScreenState.production.toInt(), homeScreenState.productionGaugeEnabled),
-        consumption = consumptionAnimation.toUiState(homeScreenState.consumption.toInt(), homeScreenState.consumptionGaugeEnabled),
-        injection = injectionAnimation.toUiState(homeScreenState.injection.toInt(), homeScreenState.injectionGaugeEnabled),
-        withdrawals = withdrawalsAnimation.toUiState(homeScreenState.withdrawals.toInt(), homeScreenState.withdrawalsGaugeEnabled),
+        production = productionAnimation.toUiState(
+            homeScreenState.siteTimeSeries.production.toInt(),
+            homeScreenState.productionGaugeEnabled
+        ),
+        consumption = consumptionAnimation.toUiState(
+            homeScreenState.siteTimeSeries.consumption.toInt(),
+            homeScreenState.consumptionGaugeEnabled
+        ),
+        injection = injectionAnimation.toUiState(
+            homeScreenState.siteTimeSeries.injection.toInt(),
+            homeScreenState.injectionGaugeEnabled
+        ),
+        withdrawals = withdrawalsAnimation.toUiState(
+            homeScreenState.siteTimeSeries.withdrawals.toInt(),
+            homeScreenState.withdrawalsGaugeEnabled
+        ),
         onSettingsButtonClick = onSettingsButtonClick
     )
 }
@@ -449,10 +474,12 @@ fun DefaultPreview() {
         Surface {
             PowerGaugeScreen(
                 HomeScreenState(
-                    production = 256.0,
-                    consumption = 0.3,
-                    injection = 0.2,
-                    withdrawals = 0.1,
+                    siteTimeSeries = SiteTimeSeries(
+                        production = 256.0,
+                        consumption = 0.3,
+                        injection = 0.2,
+                        withdrawals = 0.1,
+                    )
                 )
             )
         }

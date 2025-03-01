@@ -1,0 +1,1785 @@
+[
+  {
+    "tileType": "THIRD_PARTY",
+    "@id": "1",
+    "id": 321089,
+    "name": "météo",
+    "site": {
+      "@id": "2",
+      "id": 18734,
+      "name": "Doe",
+      "description": null,
+      "createDate": "2024-12-03T10:49:45.072+00:00",
+      "updateDate": "2024-12-03T18:21:15.746+00:00",
+      "ownerAssignDate": "2024-12-03T10:49:45.069+00:00",
+      "threePhase": false,
+      "address": {
+        "address": "30 Wellington Square",
+        "postalCode": "SW3 4NJ",
+        "city": "London",
+        "country": "GB"
+      },
+      "currency": "EUR",
+      "language": "FR",
+      "metric": "SI",
+      "timezone": "Europe/Paris",
+      "siteUid": "981fea0c",
+      "supplyNumber": "25380463000670",
+      "status": "ACTIVATED",
+      "owner": null,
+      "gateways": null,
+      "product": null,
+      "accessType": null,
+      "state": null,
+      "siteKind": "RESIDENTIAL"
+    },
+    "position": 1,
+    "chartType": "weather"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "3",
+    "id": 321101,
+    "name": "solar production",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 3,
+    "tileChartDatas": [
+      {
+        "@id": "4",
+        "id": 311685,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "5",
+          "id": 367318,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@id": "6",
+            "id": 1,
+            "code": "ELECTRICITY",
+            "measureKinds": [
+              "QUANTITY",
+              "STATE",
+              "FLOW"
+            ]
+          },
+          "measureKey": "451a1c5e-22d9-41d8-9c2a-78bc6826b6e2",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "7",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "8",
+                "id": 396663,
+                "feature": {
+                  "@id": "9",
+                  "id": 9,
+                  "code": "PROFILING",
+                  "featureName": "PROFILING"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "10",
+                "id": 396662,
+                "feature": {
+                  "@id": "11",
+                  "id": 5,
+                  "code": "ALERT_ON_VALUE",
+                  "featureName": "ALERT_ON_VALUE"
+                },
+                "enabled": false,
+                "capacities": null
+              }
+            ],
+            "id": 124753,
+            "name": "solar production",
+            "deviceKind": {
+              "@id": "12",
+              "id": 40,
+              "code": "SOLAR_PANEL",
+              "global": true,
+              "icon": "icon-ico-sun",
+              "production": true,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": false,
+              "displayOrder": 200,
+              "category": "SOLAR_PRODUCTION",
+              "features": null,
+              "codeEnum": "SOLAR_PANEL",
+              "eligibleToSgReady": false,
+              "partKindId": 40
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": false,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": null,
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": 10.0,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "13",
+                "id": 318255,
+                "capacityId": "AZUREIOT-co.1.instances.1.sensor.1.data",
+                "type": "SENSOR",
+                "nature": "CLAMP",
+                "sgReady": false,
+                "instance": "co.1.instances.1",
+                "connectedObjectId": 48815,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": true,
+                "production": true,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "12"
+            },
+            "partChild": false,
+            "global": true,
+            "production": true
+          }
+        },
+        "color": "#689F38"
+      },
+      {
+        "@id": "14",
+        "id": 311686,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "15",
+          "id": 367320,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "09f92cd1-1b02-43d3-b942-c6a12353a4f6",
+          "shared": false,
+          "device": {
+            "@ref": "7"
+          }
+        },
+        "color": "#4CAF50"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "16",
+    "id": 321103,
+    "name": "oven",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 4,
+    "tileChartDatas": [
+      {
+        "@id": "17",
+        "id": 311688,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "18",
+          "id": 367323,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "93e511df-3dc9-4a26-b457-f52bf533aa42",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "19",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "20",
+                "id": 396665,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "21",
+                "id": 396664,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              }
+            ],
+            "id": 124754,
+            "name": "oven",
+            "deviceKind": {
+              "@id": "22",
+              "id": 10,
+              "code": "OVEN",
+              "global": false,
+              "icon": "icon-ap-oven",
+              "production": false,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": false,
+              "displayOrder": 506,
+              "category": "ELECTRICAL_APPLIANCES",
+              "features": null,
+              "codeEnum": "OVEN",
+              "eligibleToSgReady": false,
+              "partKindId": 10
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": false,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": "OTHERS",
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "23",
+                "id": 318256,
+                "capacityId": "AZUREIOT-co.1.instances.2.sensor.2.data",
+                "type": "SENSOR",
+                "nature": "CLAMP",
+                "sgReady": false,
+                "instance": "co.1.instances.2",
+                "connectedObjectId": 48815,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "22"
+            },
+            "partChild": false,
+            "global": false,
+            "production": false
+          }
+        },
+        "color": "#AED581"
+      },
+      {
+        "@id": "24",
+        "id": 311687,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "25",
+          "id": 367322,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "d7197b30-c188-4d17-b0b4-1ee584abef66",
+          "shared": false,
+          "device": {
+            "@ref": "19"
+          }
+        },
+        "color": "#388E3C"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "26",
+    "id": 321105,
+    "name": "Cooking Plate",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 5,
+    "tileChartDatas": [
+      {
+        "@id": "27",
+        "id": 311689,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "28",
+          "id": 367324,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "56d01e12-dfce-46c7-9d08-09c0fd1a5062",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "29",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "30",
+                "id": 396666,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              },
+              {
+                "@id": "31",
+                "id": 396667,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              }
+            ],
+            "id": 124755,
+            "name": "Cooking Plate",
+            "deviceKind": {
+              "@id": "32",
+              "id": 1,
+              "code": "HOUSEHOLD_APPLIANCES",
+              "global": false,
+              "icon": "icon-ap-householdappliance",
+              "production": false,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": false,
+              "displayOrder": 515,
+              "category": "ELECTRICAL_APPLIANCES",
+              "features": null,
+              "codeEnum": "HOUSEHOLD_APPLIANCES",
+              "eligibleToSgReady": false,
+              "partKindId": 1
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": false,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": "OTHERS",
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "33",
+                "id": 318257,
+                "capacityId": "AZUREIOT-co.1.instances.3.sensor.3.data",
+                "type": "SENSOR",
+                "nature": "CLAMP",
+                "sgReady": false,
+                "instance": "co.1.instances.3",
+                "connectedObjectId": 48815,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "32"
+            },
+            "partChild": false,
+            "global": false,
+            "production": false
+          }
+        },
+        "color": "#4CAF50"
+      },
+      {
+        "@id": "34",
+        "id": 311690,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "35",
+          "id": 367325,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "aed44327-2a9c-49e2-afc5-be0fe80473e0",
+          "shared": false,
+          "device": {
+            "@ref": "29"
+          }
+        },
+        "color": "#DCE775"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "36",
+    "id": 321107,
+    "name": "heat pump",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 6,
+    "tileChartDatas": [
+      {
+        "@id": "37",
+        "id": 311691,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "38",
+          "id": 367326,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "d73cbf6c-3b62-4810-90ad-a48446e56d1c",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "39",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "40",
+                "id": 396669,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "41",
+                "id": 396668,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              }
+            ],
+            "id": 124756,
+            "name": "heat pump",
+            "deviceKind": {
+              "@id": "42",
+              "id": 47,
+              "code": "PRO_HEAT_PUMP",
+              "global": false,
+              "icon": "icon-ap-heatpump",
+              "production": false,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": false,
+              "displayOrder": 708,
+              "category": "PROFESSIONAL_EQUIPMENT",
+              "features": null,
+              "codeEnum": "PRO_HEAT_PUMP",
+              "eligibleToSgReady": false,
+              "partKindId": 47
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": false,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": "OTHERS",
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "43",
+                "id": 318258,
+                "capacityId": "AZUREIOT-co.1.instances.4.sensor.4.data",
+                "type": "SENSOR",
+                "nature": "CLAMP",
+                "sgReady": false,
+                "instance": "co.1.instances.4",
+                "connectedObjectId": 48815,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "42"
+            },
+            "partChild": false,
+            "global": false,
+            "production": false
+          }
+        },
+        "color": "#388E3C"
+      },
+      {
+        "@id": "44",
+        "id": 311692,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "45",
+          "id": 367327,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "1b1689e7-be5e-4d79-b6c5-b8a9bd8c8108",
+          "shared": false,
+          "device": {
+            "@ref": "39"
+          }
+        },
+        "color": "#388E3C"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "46",
+    "id": 321109,
+    "name": "washing machine",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 7,
+    "tileChartDatas": [
+      {
+        "@id": "47",
+        "id": 311694,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "48",
+          "id": 367329,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "2d90a11b-307d-4e90-a110-6f02bfff2a0a",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "49",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "50",
+                "id": 396673,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "51",
+                "id": 396674,
+                "feature": {
+                  "@id": "52",
+                  "id": 6,
+                  "code": "PLANNING",
+                  "featureName": "PLANNING"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "53",
+                "id": 396671,
+                "feature": {
+                  "@id": "54",
+                  "id": 7,
+                  "code": "TRIGGERING",
+                  "featureName": "TRIGGERING"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "55",
+                "id": 396670,
+                "feature": {
+                  "@id": "56",
+                  "id": 2,
+                  "code": "ASSERVISSEMENT",
+                  "featureName": "ASSERVISSEMENT"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "57",
+                "id": 396672,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              }
+            ],
+            "id": 124757,
+            "name": "washing machine",
+            "deviceKind": {
+              "@id": "58",
+              "id": 9,
+              "code": "WASHING_MACHINE",
+              "global": false,
+              "icon": "icon-ap-washingmachine",
+              "production": false,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": false,
+              "displayOrder": 500,
+              "category": "ELECTRICAL_APPLIANCES",
+              "features": null,
+              "codeEnum": "WASHING_MACHINE",
+              "eligibleToSgReady": false,
+              "partKindId": 9
+            },
+            "configuration": {
+              "triggeringPower": 200,
+              "maxPower": 2500,
+              "maxAutonomy": 600,
+              "maxTimeCharge": 210,
+              "interruption": false,
+              "standbyValue": 15,
+              "inversionOnOff": null,
+              "standbyDuration": 15,
+              "rtClass": "PLUG",
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "59",
+                "id": 318271,
+                "capacityId": "AZUREIOT-co.2.instances.0.switch.0.data",
+                "type": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "sgReady": false,
+                "instance": "co.2.instances.0",
+                "connectedObjectId": 48816,
+                "measureKinds": [
+                  "STATE"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": true,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": null
+              },
+              {
+                "@id": "60",
+                "id": 318270,
+                "capacityId": "AZUREIOT-co.2.instances.0.sensor.0.data",
+                "type": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "sgReady": false,
+                "instance": "co.2.instances.0",
+                "connectedObjectId": 48816,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "58"
+            },
+            "partChild": false,
+            "global": false,
+            "production": false
+          }
+        },
+        "color": "#8BC34A"
+      },
+      {
+        "@id": "61",
+        "id": 311693,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "62",
+          "id": 367328,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "d445bcbd-8403-4e05-a33f-41fa8141fbff",
+          "shared": false,
+          "device": {
+            "@ref": "49"
+          }
+        },
+        "color": "#81C784"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "63",
+    "id": 321114,
+    "name": "dishwasher",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 8,
+    "tileChartDatas": [
+      {
+        "@id": "64",
+        "id": 311698,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "65",
+          "id": 367331,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "53b32a58-505a-4fd8-94b3-43ac5c124b95",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "66",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "67",
+                "id": 396677,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              },
+              {
+                "@id": "68",
+                "id": 396678,
+                "feature": {
+                  "@ref": "56"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "69",
+                "id": 396679,
+                "feature": {
+                  "@ref": "54"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "70",
+                "id": 396681,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "71",
+                "id": 396680,
+                "feature": {
+                  "@ref": "52"
+                },
+                "enabled": true,
+                "capacities": null
+              }
+            ],
+            "id": 124758,
+            "name": "dishwasher",
+            "deviceKind": {
+              "@id": "72",
+              "id": 37,
+              "code": "DISH_WASHER",
+              "global": false,
+              "icon": "icon-ap-dishwasher",
+              "production": false,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": false,
+              "displayOrder": 502,
+              "category": "ELECTRICAL_APPLIANCES",
+              "features": null,
+              "codeEnum": "DISH_WASHER",
+              "eligibleToSgReady": false,
+              "partKindId": 37
+            },
+            "configuration": {
+              "triggeringPower": 200,
+              "maxPower": 2500,
+              "maxAutonomy": 600,
+              "maxTimeCharge": 210,
+              "interruption": false,
+              "standbyValue": 15,
+              "inversionOnOff": null,
+              "standbyDuration": 15,
+              "rtClass": "PLUG",
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "AUTO",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "73",
+                "id": 318273,
+                "capacityId": "AZUREIOT-co.3.instances.0.switch.0.data",
+                "type": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "sgReady": false,
+                "instance": "co.3.instances.0",
+                "connectedObjectId": 48817,
+                "measureKinds": [
+                  "STATE"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": null
+              },
+              {
+                "@id": "74",
+                "id": 318272,
+                "capacityId": "AZUREIOT-co.3.instances.0.sensor.0.data",
+                "type": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "sgReady": false,
+                "instance": "co.3.instances.0",
+                "connectedObjectId": 48817,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "72"
+            },
+            "partChild": false,
+            "global": false,
+            "production": false
+          }
+        },
+        "color": "#FF6F00"
+      },
+      {
+        "@id": "75",
+        "id": 311697,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "76",
+          "id": 367330,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "c3ae6422-9e98-47ce-a739-0f9a3ffa8a0e",
+          "shared": false,
+          "device": {
+            "@ref": "66"
+          }
+        },
+        "color": "#388E3C"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "77",
+    "id": 321141,
+    "name": "échange réseau (soutirage/injection)",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 11,
+    "tileChartDatas": [
+      {
+        "@id": "78",
+        "id": 311716,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "79",
+          "id": 367314,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "5a00c0f6-a423-417f-be52-6a2fe160f2e5",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "80",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "81",
+                "id": 396660,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "82",
+                "id": 396661,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              }
+            ],
+            "id": 124752,
+            "name": "échange réseau (soutirage/injection) - INJECTION",
+            "deviceKind": {
+              "@id": "83",
+              "id": 46,
+              "code": "INJECTION",
+              "global": true,
+              "icon": "icon-ap-injection",
+              "production": false,
+              "onlyInfo": false,
+              "injection": true,
+              "withdrawal": false,
+              "displayOrder": null,
+              "category": null,
+              "features": null,
+              "codeEnum": "INJECTION",
+              "eligibleToSgReady": false,
+              "partKindId": 46
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": null,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": null,
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "84",
+                "id": 318269,
+                "capacityId": "AZUREIOT-co.1.instances.0.sensor.0.injection.data",
+                "type": "SENSOR",
+                "nature": "CLAMP",
+                "sgReady": false,
+                "instance": "co.1.instances.0",
+                "connectedObjectId": 48815,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": true,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "83"
+            },
+            "partChild": true,
+            "global": true,
+            "production": false
+          }
+        },
+        "color": "#FFD54F"
+      },
+      {
+        "@id": "85",
+        "id": 311715,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "86",
+          "id": 367308,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "c10cef6d-be74-4b75-9965-e43c0588a616",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "87",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "88",
+                "id": 396659,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              },
+              {
+                "@id": "89",
+                "id": 396658,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              }
+            ],
+            "id": 124751,
+            "name": "échange réseau (soutirage/injection) - SOUTIRAGE",
+            "deviceKind": {
+              "@id": "90",
+              "id": 45,
+              "code": "WITHDRAWAL",
+              "global": true,
+              "icon": "icon-ap-withdrawal",
+              "production": false,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": true,
+              "displayOrder": null,
+              "category": null,
+              "features": null,
+              "codeEnum": "WITHDRAWAL",
+              "eligibleToSgReady": false,
+              "partKindId": 45
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": null,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": null,
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "91",
+                "id": 318268,
+                "capacityId": "AZUREIOT-co.1.instances.0.sensor.0.withdrawal.data",
+                "type": "SENSOR",
+                "nature": "CLAMP",
+                "sgReady": false,
+                "instance": "co.1.instances.0",
+                "connectedObjectId": 48815,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": true,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "90"
+            },
+            "partChild": true,
+            "global": true,
+            "production": false
+          }
+        },
+        "color": "#33691E"
+      },
+      {
+        "@id": "92",
+        "id": 311718,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "93",
+          "id": 367316,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "4cc2eb4f-0973-46da-9508-667492f2b969",
+          "shared": false,
+          "device": {
+            "@ref": "80"
+          }
+        },
+        "color": "#AED581"
+      },
+      {
+        "@id": "94",
+        "id": 311717,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "95",
+          "id": 367311,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "4ee09e24-e7c6-4e16-8f14-d150d93d9a66",
+          "shared": false,
+          "device": {
+            "@ref": "87"
+          }
+        },
+        "color": "#AED581"
+      }
+    ],
+    "chartType": "column"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "96",
+    "id": 321256,
+    "name": "James PC",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 12,
+    "tileChartDatas": [
+      {
+        "@id": "97",
+        "id": 311819,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "98",
+          "id": 367366,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "95da3fef-d936-492f-8dce-f298f28755c7",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "99",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "100",
+                "id": 396717,
+                "feature": {
+                  "@ref": "54"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "101",
+                "id": 396719,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              },
+              {
+                "@id": "102",
+                "id": 396720,
+                "feature": {
+                  "@ref": "56"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "103",
+                "id": 396716,
+                "feature": {
+                  "@ref": "52"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "104",
+                "id": 396718,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              }
+            ],
+            "id": 124772,
+            "name": "James PC",
+            "deviceKind": {
+              "@id": "105",
+              "id": 52,
+              "code": "PRO_POWER_OUTLET",
+              "global": false,
+              "icon": "icon-ap-plug",
+              "production": false,
+              "onlyInfo": false,
+              "injection": false,
+              "withdrawal": false,
+              "displayOrder": 709,
+              "category": "PROFESSIONAL_EQUIPMENT",
+              "features": null,
+              "codeEnum": "PRO_POWER_OUTLET",
+              "eligibleToSgReady": false,
+              "partKindId": 52
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": false,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": "OTHERS",
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "106",
+                "id": 318312,
+                "capacityId": "AZUREIOT-co.5.instances.0.sensor.0.data",
+                "type": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "sgReady": false,
+                "instance": "co.5.instances.0",
+                "connectedObjectId": 48821,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              },
+              {
+                "@id": "107",
+                "id": 318313,
+                "capacityId": "AZUREIOT-co.5.instances.0.switch.0.data",
+                "type": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "sgReady": false,
+                "instance": "co.5.instances.0",
+                "connectedObjectId": 48821,
+                "measureKinds": [
+                  "STATE"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": null
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "105"
+            },
+            "partChild": false,
+            "global": false,
+            "production": false
+          }
+        },
+        "color": "#FFF176"
+      },
+      {
+        "@id": "108",
+        "id": 311820,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "109",
+          "id": 367365,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "4efd56ed-2f44-47fe-acef-18ec02ac0933",
+          "shared": false,
+          "device": {
+            "@ref": "99"
+          }
+        },
+        "color": "#689F38"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "VALUATION",
+    "@id": "110",
+    "id": 326576,
+    "name": "Kitchen plug",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 13,
+    "tileChartDatas": [
+      {
+        "@id": "111",
+        "id": 315770,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "112",
+          "id": 367332,
+          "measureKind": "VIRTUAL_QUANTITY",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "397d7829-5d6c-4f82-af01-f441aada3f3b",
+          "shared": false,
+          "device": {
+            "@class": "Device",
+            "@id": "113",
+            "sourceIsOnline": false,
+            "features": [
+              {
+                "@id": "114",
+                "id": 396682,
+                "feature": {
+                  "@ref": "11"
+                },
+                "enabled": false,
+                "capacities": null
+              },
+              {
+                "@id": "115",
+                "id": 396684,
+                "feature": {
+                  "@ref": "54"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "116",
+                "id": 396685,
+                "feature": {
+                  "@ref": "9"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "117",
+                "id": 396686,
+                "feature": {
+                  "@ref": "56"
+                },
+                "enabled": true,
+                "capacities": null
+              },
+              {
+                "@id": "118",
+                "id": 396683,
+                "feature": {
+                  "@ref": "52"
+                },
+                "enabled": true,
+                "capacities": null
+              }
+            ],
+            "id": 124759,
+            "name": "Kitchen plug",
+            "deviceKind": {
+              "@ref": "105"
+            },
+            "configuration": {
+              "triggeringPower": null,
+              "maxPower": null,
+              "maxAutonomy": null,
+              "maxTimeCharge": null,
+              "interruption": false,
+              "standbyValue": null,
+              "inversionOnOff": null,
+              "standbyDuration": null,
+              "rtClass": "OTHERS",
+              "brand": null,
+              "model": null,
+              "power": null,
+              "moduleBrand": null,
+              "moduleModel": null,
+              "inverterBrand": null,
+              "inverterModel": null,
+              "generatorOrientation": null,
+              "efficiency": null,
+              "technology": null,
+              "resalePrice": null,
+              "flowRate": null,
+              "controlMode": "MANUAL",
+              "measureType": null
+            },
+            "capacities": [
+              {
+                "@id": "119",
+                "id": 318274,
+                "capacityId": "AZUREIOT-co.4.instances.0.sensor.0.data",
+                "type": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "sgReady": false,
+                "instance": "co.4.instances.0",
+                "connectedObjectId": 48818,
+                "measureKinds": [
+                  "VIRTUAL_QUANTITY",
+                  "FLOW"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": 60
+              },
+              {
+                "@id": "120",
+                "id": 318275,
+                "capacityId": "AZUREIOT-co.4.instances.0.switch.0.data",
+                "type": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "sgReady": false,
+                "instance": "co.4.instances.0",
+                "connectedObjectId": 48818,
+                "measureKinds": [
+                  "STATE"
+                ],
+                "measureType": {
+                  "@ref": "6"
+                },
+                "nativeMeasureType": true,
+                "global": false,
+                "production": false,
+                "enable": false,
+                "tadoCapacity": null,
+                "selectValues": null,
+                "calibration": null
+              }
+            ],
+            "archived": false,
+            "coState": "WORKING",
+            "partNature": "DEVICE",
+            "threePhase": false,
+            "partChilds": [],
+            "partKind": {
+              "@ref": "105"
+            },
+            "partChild": false,
+            "global": false,
+            "production": false
+          }
+        },
+        "color": "#FBC02D"
+      },
+      {
+        "@id": "121",
+        "id": 315769,
+        "measureKey": {
+          "@class": "MeasureKey",
+          "@id": "122",
+          "id": 367333,
+          "measureKind": "FLOW",
+          "measureType": {
+            "@ref": "6"
+          },
+          "measureKey": "360bdf09-61bc-4f7d-9ec5-0deb43337557",
+          "shared": false,
+          "device": {
+            "@ref": "113"
+          }
+        },
+        "color": "#FFA000"
+      }
+    ],
+    "chartType": "area"
+  },
+  {
+    "tileType": "THIRD_PARTY",
+    "@id": "123",
+    "id": 328164,
+    "name": "excess power sale",
+    "site": {
+      "@ref": "2"
+    },
+    "position": 14,
+    "chartType": "excess_power_sale"
+  }
+]
