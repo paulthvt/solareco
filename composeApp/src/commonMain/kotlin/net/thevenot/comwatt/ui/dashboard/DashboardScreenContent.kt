@@ -85,7 +85,7 @@ import kotlin.math.roundToInt
 fun DashboardScreenContent(
     dataRepository: DataRepository,
     viewModel: DashboardViewModel = viewModel {
-        DashboardViewModel(FetchTimeSeriesUseCase(dataRepository))
+        DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
     }
 ) {
     LifecycleResumeEffect(Unit) {

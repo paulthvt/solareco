@@ -8,14 +8,19 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.TimeUnit
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 
-class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseCase): ViewModel() {
+class DashboardViewModel(
+    private val fetchTimeSeriesUseCase: FetchTimeSeriesUseCase,
+    private val dataRepository: DataRepository
+): ViewModel() {
     private var autoRefreshJob: Job? = null
     private val _charts = MutableStateFlow<List<ChartTimeSeries>>(listOf())
 
@@ -31,6 +36,14 @@ class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseC
         if (autoRefreshJob?.isActive == true) return
         _uiState.value = _uiState.value.copy(isLoading = true)
         autoRefreshJob = viewModelScope.launch {
+            val selectedTimeUnitIndex =  dataRepository.getSettings().firstOrNull()?.dashboardSelectedTimeUnitIndex
+            Napier.d(tag = TAG) { "startAutoRefresh selectedTimeUnitIndex $selectedTimeUnitIndex" }
+            selectedTimeUnitIndex?.let {
+                _uiState.value = _uiState.value.copy(timeUnitSelectedIndex = it)
+                selectedTimeUnit = convertSelectedIndexToTimeUnit(it)
+                Napier.d(tag = TAG) { "startAutoRefresh selectedTimeUnit $selectedTimeUnit" }
+            }
+
             fetchTimeSeriesUseCase.invoke(
                 when (selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> TimeUnit.HOUR
@@ -84,7 +97,11 @@ class DashboardViewModel(private val fetchTimeSeriesUseCase: FetchTimeSeriesUseC
     fun onTimeUnitSelected(timeUnitSelectedIndex: Int) {
         _uiState.value = _uiState.value.copy(timeUnitSelectedIndex = timeUnitSelectedIndex)
         selectedTimeUnit = convertSelectedIndexToTimeUnit(timeUnitSelectedIndex)
-        singleRefresh()
+        viewModelScope.launch {
+            dataRepository.saveDashboardSelectedTimeUnitIndex(timeUnitSelectedIndex)
+            stopAutoRefresh()
+            startAutoRefresh()
+        }
     }
 
     private fun convertSelectedIndexToTimeUnit(timeUnitSelectedIndex: Int): DashboardTimeUnit {

@@ -19,7 +19,7 @@ data class SiteDto(
     val siteUid: String?,
     val supplyNumber: String?,
     val status: String?,
-    val owner: String?,
+    val owner: UserDto?,
     val accessType: String?,
     val state: String?,
     val siteKind: String?

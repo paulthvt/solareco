@@ -70,4 +70,41 @@ class ComwattApiTest {
             assertEquals(11, it.size)
         }
     }
+
+    @Test
+    fun `fetch site`() = runTest {
+        val serverBaseUrl = "http://localhost"
+        val client = mockHttpClient(
+            configureMockEngine(
+                url = Url("$serverBaseUrl/api/sites"),
+                expectedResponseBody = Resource("src/commonTest/resources/api/responses/sites-response.json").readText(),
+                httpMethod = HttpMethod.Get
+            )
+        )
+
+        val sites = ComwattApi(client, serverBaseUrl).sites()
+        assertTrue { sites.isRight() }
+        sites.onRight {
+            assertEquals(1, it.size)
+            assertEquals(18734, it[0].id)
+        }
+    }
+
+    @Test
+    fun `fetch user`() = runTest {
+        val serverBaseUrl = "http://localhost"
+        val client = mockHttpClient(
+            configureMockEngine(
+                url = Url("$serverBaseUrl/api/users/authenticated"),
+                expectedResponseBody = Resource("src/commonTest/resources/api/responses/user-response.json").readText(),
+                httpMethod = HttpMethod.Get
+            )
+        )
+
+        val user = ComwattApi(client, serverBaseUrl).authenticated()
+        assertTrue { user.isRight() }
+        user.onRight {
+            assertEquals(23481, it?.id)
+        }
+    }
 }

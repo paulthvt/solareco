@@ -1,0 +1,813 @@
+[
+  {
+    "@id": "1",
+    "id": 18734,
+    "name": "Thevenot ",
+    "description": null,
+    "createDate": "2024-12-03T10:49:45.072+00:00",
+    "updateDate": "2024-12-03T18:21:15.746+00:00",
+    "ownerAssignDate": "2024-12-03T10:49:45.069+00:00",
+    "threePhase": false,
+    "address": {
+      "address": "32 chemin de la plaine",
+      "postalCode": "83560",
+      "city": "La Verdière",
+      "country": "FR"
+    },
+    "currency": "EUR",
+    "language": "FR",
+    "metric": "SI",
+    "timezone": "Europe/Paris",
+    "siteUid": "981fea0c",
+    "supplyNumber": "25380463000670",
+    "status": "ACTIVATED",
+    "owner": {
+      "@id": "2",
+      "id": 23481,
+      "login": "paul.thevenot@gmail.com_1",
+      "firstName": "Paul",
+      "lastName": "Thevenot",
+      "email": "paul.thevenot@gmail.com",
+      "newEmail": null,
+      "pseudonym": null,
+      "address": {
+        "address": "32 chemin de la plaine",
+        "postalCode": "83560",
+        "city": "La Verdière",
+        "country": "FR"
+      },
+      "phone": {
+        "number": "617869283",
+        "countryCode": "FR"
+      },
+      "mobilePhone": null,
+      "currency": "EUR",
+      "language": "FR",
+      "activated": true,
+      "deleted": false,
+      "company": null,
+      "createDate": "2024-12-03T10:47:57.123+00:00",
+      "updateDate": "2024-12-03T10:48:27.909+00:00",
+      "agreements": {
+        "termsAndConditionsEndUser": true,
+        "termsAndConditionsInstaller": null,
+        "dataProcessing": true,
+        "noDisclosure": null,
+        "newsletter": false
+      },
+      "uuid": "13c356ae-6970-4aad-86fc-77ae48327770"
+    },
+    "gateways": [
+      {
+        "@id": "3",
+        "connectedObjectReference": {
+          "@id": "4",
+          "id": 1,
+          "coProductUid": "SMARTPLUG_1C_1R_W",
+          "coType": "AZUREIOT",
+          "instanceAssignment": "LINKED",
+          "capacitiesReference": [
+            {
+              "@id": "5",
+              "id": 1,
+              "capacityReference": {
+                "@id": "6",
+                "id": 3,
+                "capacityType": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "measureType": {
+                  "@id": "7",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            },
+            {
+              "@id": "8",
+              "id": 2,
+              "capacityReference": {
+                "@id": "9",
+                "id": 4,
+                "capacityType": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "measureType": {
+                  "@id": "10",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            }
+          ],
+          "salesCompanyIsRequired": false,
+          "installerIsRequired": false,
+          "phaseIsRequired": false
+        },
+        "id": 67646,
+        "gatewayUid": "SP50730D40",
+        "status": "ASSIGNED_END_USER",
+        "networkConfiguration": {
+          "ipAddress": null,
+          "wifiConnection": true,
+          "ssid": "Winternet is Coming",
+          "signalStrength": null,
+          "wiredConnection": false,
+          "bandwidthDown": null,
+          "bandwidthUp": null
+        },
+        "name": null,
+        "installer": null,
+        "product": {
+          "@id": "11",
+          "id": 8,
+          "name": "MONITOR_GEN_4",
+          "brand": "COMWATT",
+          "cardinality": 0,
+          "features": [
+            {
+              "@id": "12",
+              "id": 9,
+              "code": "PROFILING",
+              "featureName": "PROFILING"
+            },
+            {
+              "@id": "13",
+              "id": 5,
+              "code": "ALERT_ON_VALUE",
+              "featureName": "ALERT_ON_VALUE"
+            },
+            {
+              "@id": "14",
+              "id": 15,
+              "code": "PRODUCTION_DEVICE",
+              "featureName": "PRODUCTION_DEVICE"
+            },
+            {
+              "@id": "15",
+              "id": 6,
+              "code": "PLANNING",
+              "featureName": "PLANNING"
+            },
+            {
+              "@id": "16",
+              "id": 7,
+              "code": "TRIGGERING",
+              "featureName": "TRIGGERING"
+            },
+            {
+              "@id": "17",
+              "id": 17,
+              "code": "PILOT_WIRE",
+              "featureName": "PILOT_WIRE"
+            },
+            {
+              "@id": "18",
+              "id": 8,
+              "code": "THERM_CONTROL",
+              "featureName": "THERM_CONTROL"
+            }
+          ]
+        },
+        "connected": true,
+        "salesCompany": null,
+        "connectionEvent": "2025-03-01T05:04:43.477+00:00",
+        "createDate": "2023-09-07T06:20:30.223+00:00",
+        "updateDate": "2025-03-01T05:11:12.310+00:00",
+        "associateDate": "2024-12-03T14:09:55.669+00:00",
+        "lotId": null,
+        "updating": false
+      },
+      {
+        "@id": "19",
+        "connectedObjectReference": {
+          "@id": "20",
+          "id": 1,
+          "coProductUid": "SMARTPLUG_1C_1R_W",
+          "coType": "AZUREIOT",
+          "instanceAssignment": "LINKED",
+          "capacitiesReference": [
+            {
+              "@id": "21",
+              "id": 1,
+              "capacityReference": {
+                "@id": "22",
+                "id": 3,
+                "capacityType": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "measureType": {
+                  "@id": "23",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            },
+            {
+              "@id": "24",
+              "id": 2,
+              "capacityReference": {
+                "@id": "25",
+                "id": 4,
+                "capacityType": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "measureType": {
+                  "@id": "26",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            }
+          ],
+          "salesCompanyIsRequired": false,
+          "installerIsRequired": false,
+          "phaseIsRequired": false
+        },
+        "id": 74117,
+        "gatewayUid": "SP8E7F6A04",
+        "status": "ASSIGNED_END_USER",
+        "networkConfiguration": {
+          "ipAddress": null,
+          "wifiConnection": true,
+          "ssid": "Winternet is Coming",
+          "signalStrength": null,
+          "wiredConnection": false,
+          "bandwidthDown": null,
+          "bandwidthUp": null
+        },
+        "name": null,
+        "installer": null,
+        "product": {
+          "@id": "27",
+          "id": 8,
+          "name": "MONITOR_GEN_4",
+          "brand": "COMWATT",
+          "cardinality": 0,
+          "features": [
+            {
+              "@id": "28",
+              "id": 9,
+              "code": "PROFILING",
+              "featureName": "PROFILING"
+            },
+            {
+              "@id": "29",
+              "id": 5,
+              "code": "ALERT_ON_VALUE",
+              "featureName": "ALERT_ON_VALUE"
+            },
+            {
+              "@id": "30",
+              "id": 15,
+              "code": "PRODUCTION_DEVICE",
+              "featureName": "PRODUCTION_DEVICE"
+            },
+            {
+              "@id": "31",
+              "id": 6,
+              "code": "PLANNING",
+              "featureName": "PLANNING"
+            },
+            {
+              "@id": "32",
+              "id": 7,
+              "code": "TRIGGERING",
+              "featureName": "TRIGGERING"
+            },
+            {
+              "@id": "33",
+              "id": 17,
+              "code": "PILOT_WIRE",
+              "featureName": "PILOT_WIRE"
+            },
+            {
+              "@id": "34",
+              "id": 8,
+              "code": "THERM_CONTROL",
+              "featureName": "THERM_CONTROL"
+            }
+          ]
+        },
+        "connected": true,
+        "salesCompany": null,
+        "connectionEvent": "2025-03-01T05:04:44.436+00:00",
+        "createDate": "2024-01-24T09:35:18.320+00:00",
+        "updateDate": "2025-03-01T05:05:14.967+00:00",
+        "associateDate": "2024-12-03T12:21:24.665+00:00",
+        "lotId": null,
+        "updating": false
+      },
+      {
+        "@id": "35",
+        "connectedObjectReference": {
+          "@id": "36",
+          "id": 4,
+          "coProductUid": "OCTOPUS_12C_2R_WE",
+          "coType": "AZUREIOT",
+          "instanceAssignment": "INCREMENT",
+          "capacitiesReference": [
+            {
+              "@id": "37",
+              "id": 8,
+              "capacityReference": {
+                "@id": "38",
+                "id": 2,
+                "capacityType": "SWITCH",
+                "nature": "RELAY",
+                "measureType": {
+                  "@id": "39",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 2
+            },
+            {
+              "@id": "40",
+              "id": 7,
+              "capacityReference": {
+                "@id": "41",
+                "id": 1,
+                "capacityType": "SENSOR",
+                "nature": "CLAMP",
+                "measureType": {
+                  "@id": "42",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 12
+            }
+          ],
+          "salesCompanyIsRequired": true,
+          "installerIsRequired": true,
+          "phaseIsRequired": true
+        },
+        "id": 76642,
+        "gatewayUid": "BXC32965EC",
+        "status": "ASSIGNED_END_USER",
+        "networkConfiguration": {
+          "ipAddress": null,
+          "wifiConnection": true,
+          "ssid": "Winternet is Coming",
+          "signalStrength": null,
+          "wiredConnection": false,
+          "bandwidthDown": null,
+          "bandwidthUp": null
+        },
+        "name": null,
+        "installer": null,
+        "product": {
+          "@id": "43",
+          "id": 9,
+          "name": "POWER_GEN_4",
+          "brand": "COMWATT",
+          "cardinality": 99,
+          "features": [
+            {
+              "@id": "44",
+              "id": 2,
+              "code": "ASSERVISSEMENT",
+              "featureName": "ASSERVISSEMENT"
+            },
+            {
+              "@id": "45",
+              "id": 5,
+              "code": "ALERT_ON_VALUE",
+              "featureName": "ALERT_ON_VALUE"
+            },
+            {
+              "@id": "46",
+              "id": 6,
+              "code": "PLANNING",
+              "featureName": "PLANNING"
+            },
+            {
+              "@id": "47",
+              "id": 7,
+              "code": "TRIGGERING",
+              "featureName": "TRIGGERING"
+            },
+            {
+              "@id": "48",
+              "id": 9,
+              "code": "PROFILING",
+              "featureName": "PROFILING"
+            },
+            {
+              "@id": "49",
+              "id": 12,
+              "code": "PREMIUM",
+              "featureName": "PREMIUM"
+            },
+            {
+              "@id": "50",
+              "id": 15,
+              "code": "PRODUCTION_DEVICE",
+              "featureName": "PRODUCTION_DEVICE"
+            },
+            {
+              "@id": "51",
+              "id": 16,
+              "code": "ADD_ACCESSORY",
+              "featureName": "ADD_ACCESSORY"
+            },
+            {
+              "@id": "52",
+              "id": 8,
+              "code": "THERM_CONTROL",
+              "featureName": "THERM_CONTROL"
+            },
+            {
+              "@id": "53",
+              "id": 17,
+              "code": "PILOT_WIRE",
+              "featureName": "PILOT_WIRE"
+            }
+          ]
+        },
+        "connected": true,
+        "salesCompany": null,
+        "connectionEvent": "2025-03-01T05:04:46.187+00:00",
+        "createDate": "2024-05-03T08:16:31.227+00:00",
+        "updateDate": "2025-03-01T05:04:59.934+00:00",
+        "associateDate": "2024-12-03T11:44:21.384+00:00",
+        "lotId": 4,
+        "updating": false
+      },
+      {
+        "@id": "54",
+        "connectedObjectReference": {
+          "@id": "55",
+          "id": 1,
+          "coProductUid": "SMARTPLUG_1C_1R_W",
+          "coType": "AZUREIOT",
+          "instanceAssignment": "LINKED",
+          "capacitiesReference": [
+            {
+              "@id": "56",
+              "id": 1,
+              "capacityReference": {
+                "@id": "57",
+                "id": 3,
+                "capacityType": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "measureType": {
+                  "@id": "58",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            },
+            {
+              "@id": "59",
+              "id": 2,
+              "capacityReference": {
+                "@id": "60",
+                "id": 4,
+                "capacityType": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "measureType": {
+                  "@id": "61",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            }
+          ],
+          "salesCompanyIsRequired": false,
+          "installerIsRequired": false,
+          "phaseIsRequired": false
+        },
+        "id": 77732,
+        "gatewayUid": "SPCC0D4DEB",
+        "status": "ASSIGNED_END_USER",
+        "networkConfiguration": {
+          "ipAddress": null,
+          "wifiConnection": true,
+          "ssid": "Winternet is Coming",
+          "signalStrength": null,
+          "wiredConnection": false,
+          "bandwidthDown": null,
+          "bandwidthUp": null
+        },
+        "name": null,
+        "installer": null,
+        "product": {
+          "@id": "62",
+          "id": 8,
+          "name": "MONITOR_GEN_4",
+          "brand": "COMWATT",
+          "cardinality": 0,
+          "features": [
+            {
+              "@id": "63",
+              "id": 9,
+              "code": "PROFILING",
+              "featureName": "PROFILING"
+            },
+            {
+              "@id": "64",
+              "id": 5,
+              "code": "ALERT_ON_VALUE",
+              "featureName": "ALERT_ON_VALUE"
+            },
+            {
+              "@id": "65",
+              "id": 15,
+              "code": "PRODUCTION_DEVICE",
+              "featureName": "PRODUCTION_DEVICE"
+            },
+            {
+              "@id": "66",
+              "id": 6,
+              "code": "PLANNING",
+              "featureName": "PLANNING"
+            },
+            {
+              "@id": "67",
+              "id": 7,
+              "code": "TRIGGERING",
+              "featureName": "TRIGGERING"
+            },
+            {
+              "@id": "68",
+              "id": 17,
+              "code": "PILOT_WIRE",
+              "featureName": "PILOT_WIRE"
+            },
+            {
+              "@id": "69",
+              "id": 8,
+              "code": "THERM_CONTROL",
+              "featureName": "THERM_CONTROL"
+            }
+          ]
+        },
+        "connected": true,
+        "salesCompany": null,
+        "connectionEvent": "2025-03-01T05:06:03.791+00:00",
+        "createDate": "2024-05-24T13:51:48.273+00:00",
+        "updateDate": "2025-03-01T05:06:49.793+00:00",
+        "associateDate": "2024-12-03T12:18:34.275+00:00",
+        "lotId": 5,
+        "updating": false
+      },
+      {
+        "@id": "70",
+        "connectedObjectReference": {
+          "@id": "71",
+          "id": 1,
+          "coProductUid": "SMARTPLUG_1C_1R_W",
+          "coType": "AZUREIOT",
+          "instanceAssignment": "LINKED",
+          "capacitiesReference": [
+            {
+              "@id": "72",
+              "id": 1,
+              "capacityReference": {
+                "@id": "73",
+                "id": 3,
+                "capacityType": "SENSOR",
+                "nature": "POWER_SENSOR",
+                "measureType": {
+                  "@id": "74",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            },
+            {
+              "@id": "75",
+              "id": 2,
+              "capacityReference": {
+                "@id": "76",
+                "id": 4,
+                "capacityType": "SWITCH",
+                "nature": "POWER_SWITCH",
+                "measureType": {
+                  "@id": "77",
+                  "id": 1,
+                  "code": "ELECTRICITY",
+                  "measureKinds": [
+                    "FLOW",
+                    "QUANTITY",
+                    "STATE"
+                  ]
+                }
+              },
+              "connectedObjectReference": null,
+              "quantity": 1
+            }
+          ],
+          "salesCompanyIsRequired": false,
+          "installerIsRequired": false,
+          "phaseIsRequired": false
+        },
+        "id": 78247,
+        "gatewayUid": "SP5501DC6E",
+        "status": "ASSIGNED_END_USER",
+        "networkConfiguration": {
+          "ipAddress": null,
+          "wifiConnection": true,
+          "ssid": "Winternet is Coming",
+          "signalStrength": null,
+          "wiredConnection": false,
+          "bandwidthDown": null,
+          "bandwidthUp": null
+        },
+        "name": null,
+        "installer": null,
+        "product": {
+          "@id": "78",
+          "id": 8,
+          "name": "MONITOR_GEN_4",
+          "brand": "COMWATT",
+          "cardinality": 0,
+          "features": [
+            {
+              "@id": "79",
+              "id": 9,
+              "code": "PROFILING",
+              "featureName": "PROFILING"
+            },
+            {
+              "@id": "80",
+              "id": 5,
+              "code": "ALERT_ON_VALUE",
+              "featureName": "ALERT_ON_VALUE"
+            },
+            {
+              "@id": "81",
+              "id": 15,
+              "code": "PRODUCTION_DEVICE",
+              "featureName": "PRODUCTION_DEVICE"
+            },
+            {
+              "@id": "82",
+              "id": 6,
+              "code": "PLANNING",
+              "featureName": "PLANNING"
+            },
+            {
+              "@id": "83",
+              "id": 7,
+              "code": "TRIGGERING",
+              "featureName": "TRIGGERING"
+            },
+            {
+              "@id": "84",
+              "id": 17,
+              "code": "PILOT_WIRE",
+              "featureName": "PILOT_WIRE"
+            },
+            {
+              "@id": "85",
+              "id": 8,
+              "code": "THERM_CONTROL",
+              "featureName": "THERM_CONTROL"
+            }
+          ]
+        },
+        "connected": false,
+        "salesCompany": null,
+        "connectionEvent": "2024-12-04T20:01:29.737+00:00",
+        "createDate": "2024-05-24T13:52:45.951+00:00",
+        "updateDate": "2024-12-04T20:02:37.405+00:00",
+        "associateDate": "2024-12-03T12:19:30.692+00:00",
+        "lotId": 5,
+        "updating": false
+      }
+    ],
+    "product": {
+      "@id": "86",
+      "id": 9,
+      "name": "POWER_GEN_4",
+      "brand": "COMWATT",
+      "cardinality": 99,
+      "features": [
+        {
+          "@id": "87",
+          "id": 2,
+          "code": "ASSERVISSEMENT",
+          "featureName": "ASSERVISSEMENT"
+        },
+        {
+          "@id": "88",
+          "id": 5,
+          "code": "ALERT_ON_VALUE",
+          "featureName": "ALERT_ON_VALUE"
+        },
+        {
+          "@id": "89",
+          "id": 6,
+          "code": "PLANNING",
+          "featureName": "PLANNING"
+        },
+        {
+          "@id": "90",
+          "id": 7,
+          "code": "TRIGGERING",
+          "featureName": "TRIGGERING"
+        },
+        {
+          "@id": "91",
+          "id": 9,
+          "code": "PROFILING",
+          "featureName": "PROFILING"
+        },
+        {
+          "@id": "92",
+          "id": 12,
+          "code": "PREMIUM",
+          "featureName": "PREMIUM"
+        },
+        {
+          "@id": "93",
+          "id": 15,
+          "code": "PRODUCTION_DEVICE",
+          "featureName": "PRODUCTION_DEVICE"
+        },
+        {
+          "@id": "94",
+          "id": 16,
+          "code": "ADD_ACCESSORY",
+          "featureName": "ADD_ACCESSORY"
+        },
+        {
+          "@id": "95",
+          "id": 8,
+          "code": "THERM_CONTROL",
+          "featureName": "THERM_CONTROL"
+        },
+        {
+          "@id": "96",
+          "id": 17,
+          "code": "PILOT_WIRE",
+          "featureName": "PILOT_WIRE"
+        }
+      ]
+    },
+    "accessType": "WRITE",
+    "state": "WARNING",
+    "siteKind": "RESIDENTIAL"
+  }
+]

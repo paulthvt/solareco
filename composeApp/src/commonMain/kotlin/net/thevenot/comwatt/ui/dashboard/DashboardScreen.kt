@@ -34,7 +34,7 @@ fun DashboardScreen(
     navController: NavController,
     dataRepository: DataRepository,
     viewModel: DashboardViewModel = viewModel {
-        DashboardViewModel(FetchTimeSeriesUseCase(dataRepository))
+        DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
     }
 ) {
     var showTimeSelectionDialog by remember { mutableStateOf(false) }

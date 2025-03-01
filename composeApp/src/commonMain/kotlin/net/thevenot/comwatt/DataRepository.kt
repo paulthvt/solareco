@@ -23,6 +23,10 @@ class DataRepository(
         settingsRepository.saveSiteId(siteId)
     }
 
+    suspend fun saveDashboardSelectedTimeUnitIndex(index: Int) {
+        settingsRepository.saveDashboardSelectedTimeUnitIndex(index)
+    }
+
     fun getSettings(): Flow<SolarEcoSettings> {
         return settingsRepository.settings
     }

@@ -11,7 +11,7 @@ data class UserDto(
     val email: String,
     val newEmail: String?,
     val pseudonym: String?,
-    val profile: ProfileDto,
+    val profile: ProfileDto?,
     val address: AddressDto,
     val phone: PhoneDto,
     val mobilePhone: String?,
@@ -31,7 +31,7 @@ data class ProfileDto(
     val id: Int,
     val label: String,
     val code: String,
-    val authorities: String?
+    val authorities: List<String>
 )
 
 @Serializable

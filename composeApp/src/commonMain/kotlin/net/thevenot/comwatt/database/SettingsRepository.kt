@@ -11,10 +11,12 @@ class SettingsRepository(
     private val dataStore: DataStore<Preferences>
 ) {
     private val siteKey = intPreferencesKey("site_id")
+    private val dashboardSelectedTimeUnitIndex = intPreferencesKey("dashboard_selected_time_unit_index")
 
     val settings: Flow<SolarEcoSettings> = dataStore.data.map {
         SolarEcoSettings(
             it[siteKey],
+            it[dashboardSelectedTimeUnitIndex]
         )
     }
 
@@ -23,6 +25,14 @@ class SettingsRepository(
     ) {
         dataStore.edit {
             it[siteKey] = siteId
+        }
+    }
+
+    suspend fun saveDashboardSelectedTimeUnitIndex(
+        index: Int,
+    ) {
+        dataStore.edit {
+            it[dashboardSelectedTimeUnitIndex] = index
         }
     }
 }

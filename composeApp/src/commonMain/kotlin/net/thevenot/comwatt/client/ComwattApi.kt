@@ -2,6 +2,7 @@ package net.thevenot.comwatt.client
 
 import arrow.core.Either
 import arrow.core.flatMap
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.addCookie
 import io.ktor.client.request.parameter
@@ -61,6 +62,7 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
 
         return response.flatMap { resp ->
             val sessionToken = response.getOrNull()?.setCookie()?.first()?.value
+            Napier.d { "Session token $sessionToken" }
             val expiresString = resp.headers["x-cwt-token"]
             val expires = expiresString?.let { expires ->
                 response.getOrNull()?.setCookie()?.first()

@@ -115,6 +115,39 @@ fun SiteCard(site: SiteDto, userDto: UserDto?, onSiteClick: (SiteDto) -> Unit = 
 @Preview
 @Composable
 private fun SiteChooserPreview() {
+    val userDto = UserDto(
+        id = 1,
+        login = "user1",
+        firstName = "John",
+        lastName = "Doe",
+        email = "john.doe@example.com",
+        newEmail = null,
+        pseudonym = null,
+        profile = ProfileDto(
+            id = 1,
+            label = "Admin",
+            code = "ADMIN",
+            authorities = listOf()
+        ),
+        address = AddressDto("789 Oak St", "54321", "City", "Country"),
+        phone = PhoneDto("1234567890", "1"),
+        mobilePhone = "0987654321",
+        currency = "USD",
+        language = "en",
+        activated = true,
+        deleted = false,
+        company = "Company",
+        createDate = "2021-01-01",
+        updateDate = "2021-01-02",
+        agreements = AgreementsDto(
+            termsAndConditionsEndUser = true,
+            termsAndConditionsInstaller = null,
+            dataProcessing = true,
+            noDisclosure = null,
+            newsletter = true
+        ),
+        uuid = "uuid-1234"
+    )
     val sampleSites = listOf(
         SiteDto(
             id = 1,
@@ -132,7 +165,7 @@ private fun SiteChooserPreview() {
             siteUid = "UID1",
             supplyNumber = "SN1",
             status = "Active",
-            owner = "Owner 1",
+            owner = userDto,
             accessType = "Full",
             state = "State 1",
             siteKind = "Kind 1"
@@ -153,44 +186,11 @@ private fun SiteChooserPreview() {
             siteUid = "UID2",
             supplyNumber = "SN2",
             status = "Inactive",
-            owner = "Owner 2",
+            owner = userDto,
             accessType = "Read",
             state = "State 2",
             siteKind = "Kind 2"
         )
-    )
-    val userDto = UserDto(
-        id = 1,
-        login = "user1",
-        firstName = "John",
-        lastName = "Doe",
-        email = "john.doe@example.com",
-        newEmail = null,
-        pseudonym = null,
-        profile = ProfileDto(
-            id = 1,
-            label = "Admin",
-            code = "ADMIN",
-            authorities = null
-        ),
-        address = AddressDto("789 Oak St", "54321", "City", "Country"),
-        phone = PhoneDto("1234567890", "1"),
-        mobilePhone = "0987654321",
-        currency = "USD",
-        language = "en",
-        activated = true,
-        deleted = false,
-        company = "Company",
-        createDate = "2021-01-01",
-        updateDate = "2021-01-02",
-        agreements = AgreementsDto(
-            termsAndConditionsEndUser = true,
-            termsAndConditionsInstaller = null,
-            dataProcessing = true,
-            noDisclosure = null,
-            newsletter = true
-        ),
-        uuid = "uuid-1234"
     )
 
     ComwattTheme(darkTheme = true, dynamicColor = false) {
