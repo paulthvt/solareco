@@ -1,0 +1,43 @@
+{
+  "@id": "1",
+  "id": 23481,
+  "login": "paul.thevenot@gmail.com_1",
+  "firstName": "Paul",
+  "lastName": "Thevenot",
+  "email": "paul.thevenot@gmail.com",
+  "newEmail": null,
+  "pseudonym": null,
+  "profile": {
+    "@id": "2",
+    "id": 2,
+    "label": "End User",
+    "code": "END_USER",
+    "authorities": []
+  },
+  "address": {
+    "address": "32 chemin de la plaine",
+    "postalCode": "83560",
+    "city": "La Verdière",
+    "country": "FR"
+  },
+  "phone": {
+    "number": "617869283",
+    "countryCode": "FR"
+  },
+  "mobilePhone": null,
+  "currency": "EUR",
+  "language": "FR",
+  "activated": true,
+  "deleted": false,
+  "company": null,
+  "createDate": "2024-12-03T10:47:57.123+00:00",
+  "updateDate": "2024-12-03T10:48:27.909+00:00",
+  "agreements": {
+    "termsAndConditionsEndUser": true,
+    "termsAndConditionsInstaller": null,
+    "dataProcessing": true,
+    "noDisclosure": null,
+    "newsletter": false
+  },
+  "uuid": "dead4f8c-12cd-4f72-a419-ea3cd4275c81"
+}

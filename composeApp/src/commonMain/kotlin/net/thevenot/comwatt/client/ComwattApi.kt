@@ -5,7 +5,6 @@ import arrow.core.flatMap
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.cookies.addCookie
-import io.ktor.client.plugins.cookies.cookies
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
@@ -27,10 +26,17 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import net.thevenot.comwatt.model.ApiError
+import net.thevenot.comwatt.model.DeviceDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
-import net.thevenot.comwatt.model.User
+import net.thevenot.comwatt.model.TileResponseDto
+import net.thevenot.comwatt.model.TileType
+import net.thevenot.comwatt.model.TimeSeriesDto
+import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.model.safeRequest
+import net.thevenot.comwatt.model.type.AggregationLevel
+import net.thevenot.comwatt.model.type.MeasureKind
+import net.thevenot.comwatt.model.type.TimeAgoUnit
 import net.thevenot.comwatt.utils.toZoneString
 import kotlin.time.Duration
 
@@ -56,6 +62,7 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
 
         return response.flatMap { resp ->
             val sessionToken = response.getOrNull()?.setCookie()?.first()?.value
+            Napier.d { "Session token $sessionToken" }
             val expiresString = resp.headers["x-cwt-token"]
             val expires = expiresString?.let { expires ->
                 response.getOrNull()?.setCookie()?.first()
@@ -87,22 +94,21 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
 
     suspend fun fetchSiteTimeSeries(
         siteId: Int,
-        startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE)
+        startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
     ): Either<ApiError, SiteTimeSeriesDto> {
         val endTime = Clock.System.now()
 
         val timeZone = TimeZone.of("Europe/Paris")
         return withContext(Dispatchers.IO) {
-            val cookies = client.cookies("https://energy.comwatt.com/")
-            Napier.d { "cookies $cookies" }
-
             client.safeRequest {
                 url {
                     method = HttpMethod.Get
                     path("api/aggregations/site-time-series")
                     parameter("id", siteId)
-                    parameter("measureKind", "FLOW")
-                    parameter("aggregationLevel", "NONE")
+                    parameter("measureKind", measureKind)
+                    parameter("aggregationLevel", aggregationLevel)
                     parameter("start", startTime.toZoneString(timeZone))
                     parameter("end", endTime.toZoneString(timeZone))
                 }
@@ -110,7 +116,64 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         }
     }
 
-    suspend fun authenticated(): Either<ApiError, User?> {
+    suspend fun fetchTiles(
+        siteId: Int,
+        tileTypes: List<TileType> = TileType.entries,
+    ): Either<ApiError, List<TileResponseDto>> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/tiles")
+                    parameter("siteId", siteId)
+                    tileTypes.forEach {
+                        parameter("tileTypes", it)
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun fetchDevices(
+        siteId: Int,
+    ): Either<ApiError, List<DeviceDto>> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/devices")
+                    parameter("siteId", siteId)
+                }
+            }
+        }
+    }
+
+    suspend fun fetchTimeSeries(
+        deviceId: Int,
+        endTime: Instant = Clock.System.now(),
+        timeAgoUnit: TimeAgoUnit = TimeAgoUnit.DAY,
+        timeAgoValue: Int = 1,
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+    ): Either<ApiError, TimeSeriesDto> {
+        val timeZone = TimeZone.of("Europe/Paris")
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/aggregations/time-series")
+                    parameter("id", deviceId)
+                    parameter("measureKind", measureKind)
+                    parameter("aggregationLevel", aggregationLevel)
+                    parameter("timeAgoUnit", timeAgoUnit)
+                    parameter("timeAgoValue", timeAgoValue)
+                    parameter("end", endTime.toZoneString(timeZone))
+                }
+            }
+        }
+    }
+
+    suspend fun authenticated(): Either<ApiError, UserDto?> {
         return withContext(Dispatchers.IO) {
             client.safeRequest {
                 url {

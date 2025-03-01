@@ -49,6 +49,7 @@ suspend inline fun <reified T> HttpClient.safeRequest(
             )
         )
     } catch (e: Exception) {
+        println("Exception: $e")
         Either.Left(
             ApiError.GenericError(
                 message = e.message,

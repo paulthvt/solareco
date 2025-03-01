@@ -36,6 +36,8 @@ fun createClient(): HttpClient {
                     prettyPrint = false
                     useArrayPolymorphism = false
                     ignoreUnknownKeys = true
+                    explicitNulls = false
+                    coerceInputValues = true
                 },
             )
         }

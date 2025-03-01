@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
+    alias(libs.plugins.testResources)
 }
 
 kotlin {
@@ -47,10 +48,13 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.navigation.compose)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.coroutines.test)
 
             // Ktor
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.mock)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.datetime)
@@ -63,12 +67,14 @@ kotlin {
             implementation(libs.arrow.core)
             implementation(libs.arrow.fx.coroutines)
             implementation(libs.napier)
+            implementation(libs.koalaplot.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.test.resources)
         }
     }
 }

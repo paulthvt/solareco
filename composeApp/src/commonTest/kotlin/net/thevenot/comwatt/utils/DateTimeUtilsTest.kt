@@ -23,4 +23,10 @@ class DateTimeUtilsTest {
             assertEquals(expected, result, "Failed for input: $input")
         }
     }
+
+    @Test
+    fun testParseTimestamp() {
+        val instant = Instant.parse("2025-01-20T19:49:23.009Z")
+
+    }
 }
