@@ -9,36 +9,36 @@
     "ownerAssignDate": "2024-12-03T10:49:45.069+00:00",
     "threePhase": false,
     "address": {
-      "address": "32 chemin de la plaine",
-      "postalCode": "83560",
-      "city": "La Verdière",
-      "country": "FR"
+      "address": "123 Placeholder St",
+      "postalCode": "00000",
+      "city": "Placeholder City",
+      "country": "XX"
     },
     "currency": "EUR",
     "language": "FR",
     "metric": "SI",
     "timezone": "Europe/Paris",
     "siteUid": "981fea0c",
-    "supplyNumber": "25380463000670",
+    "supplyNumber": "00000000000000",
     "status": "ACTIVATED",
     "owner": {
       "@id": "2",
       "id": 23481,
-      "login": "paul.thevenot@gmail.com_1",
-      "firstName": "Paul",
-      "lastName": "Thevenot",
-      "email": "paul.thevenot@gmail.com",
+      "login": "user@example.com_1",
+      "firstName": "John",
+      "lastName": "Doe",
+      "email": "user@example.com",
       "newEmail": null,
       "pseudonym": null,
       "address": {
-        "address": "32 chemin de la plaine",
-        "postalCode": "83560",
-        "city": "La Verdière",
-        "country": "FR"
+        "address": "123 Placeholder St",
+        "postalCode": "00000",
+        "city": "Placeholder City",
+        "country": "XX"
       },
       "phone": {
-        "number": "617869283",
-        "countryCode": "FR"
+        "number": "0000000000",
+        "countryCode": "XX"
       },
       "mobilePhone": null,
       "currency": "EUR",
@@ -55,7 +55,7 @@
         "noDisclosure": null,
         "newsletter": false
       },
-      "uuid": "13c356ae-6970-4aad-86fc-77ae48327770"
+      "uuid": "00000000-0000-0000-0000-000000000000"
     },
     "gateways": [
       {
@@ -122,7 +122,7 @@
         "networkConfiguration": {
           "ipAddress": null,
           "wifiConnection": true,
-          "ssid": "Winternet is Coming",
+          "ssid": "Placeholder SSID",
           "signalStrength": null,
           "wiredConnection": false,
           "bandwidthDown": null,
@@ -254,7 +254,7 @@
         "networkConfiguration": {
           "ipAddress": null,
           "wifiConnection": true,
-          "ssid": "Winternet is Coming",
+          "ssid": "Placeholder SSID",
           "signalStrength": null,
           "wiredConnection": false,
           "bandwidthDown": null,
@@ -386,7 +386,7 @@
         "networkConfiguration": {
           "ipAddress": null,
           "wifiConnection": true,
-          "ssid": "Winternet is Coming",
+          "ssid": "Placeholder SSID",
           "signalStrength": null,
           "wiredConnection": false,
           "bandwidthDown": null,
@@ -536,7 +536,7 @@
         "networkConfiguration": {
           "ipAddress": null,
           "wifiConnection": true,
-          "ssid": "Winternet is Coming",
+          "ssid": "Placeholder SSID",
           "signalStrength": null,
           "wiredConnection": false,
           "bandwidthDown": null,
@@ -668,7 +668,7 @@
         "networkConfiguration": {
           "ipAddress": null,
           "wifiConnection": true,
-          "ssid": "Winternet is Coming",
+          "ssid": "Placeholder SSID",
           "signalStrength": null,
           "wiredConnection": false,
           "bandwidthDown": null,
