@@ -1,10 +1,10 @@
 {
   "@id": "1",
   "id": 23481,
-  "login": "paul.thevenot@gmail.com_1",
-  "firstName": "Paul",
-  "lastName": "Thevenot",
-  "email": "paul.thevenot@gmail.com",
+  "login": "user@example.com_1",
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "user@example.com",
   "newEmail": null,
   "pseudonym": null,
   "profile": {
@@ -15,18 +15,18 @@
     "authorities": []
   },
   "address": {
-    "address": "32 chemin de la plaine",
-    "postalCode": "83560",
-    "city": "La Verdière",
-    "country": "FR"
+    "address": "123 Main St",
+    "postalCode": "12345",
+    "city": "Anytown",
+    "country": "US"
   },
   "phone": {
-    "number": "617869283",
-    "countryCode": "FR"
+    "number": "0000000000",
+    "countryCode": "US"
   },
   "mobilePhone": null,
-  "currency": "EUR",
-  "language": "FR",
+  "currency": "USD",
+  "language": "EN",
   "activated": true,
   "deleted": false,
   "company": null,
@@ -39,5 +39,5 @@
     "noDisclosure": null,
     "newsletter": false
   },
-  "uuid": "dead4f8c-12cd-4f72-a419-ea3cd4275c81"
+  "uuid": "00000000-0000-0000-0000-000000000000"
 }
