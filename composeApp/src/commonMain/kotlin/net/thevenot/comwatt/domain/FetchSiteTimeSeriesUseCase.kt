@@ -13,25 +13,27 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.plus
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.domain.exception.ApiException
-import net.thevenot.comwatt.domain.exception.ApiGenericException
-import net.thevenot.comwatt.domain.exception.UnauthorizedException
+import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.SiteTimeSeries
 import net.thevenot.comwatt.model.ApiError
 
 class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
-    operator fun invoke(): Flow<SiteTimeSeries> = flow {
+    operator fun invoke(): Flow<Either<DomainError, SiteTimeSeries>> = flow {
         while (true) {
-            when (val data = refreshSiteData()) {
+            val data = refreshSiteData()
+            emit(data)
+
+            when (data) {
                 is Either.Left -> {
-                    if(data.value is UnauthorizedException) {
+                    Napier.e(tag = TAG) { "Error fetching site time services: ${data.value}" }
+                    val value = data.value
+                    if (value is DomainError.Api && value.error is ApiError.HttpError && value.error.code == 401) {
                         dataRepository.tryAutoLogin({}, {})
                     }
-                    else data.value
+                    delay(10_000L)
                 }
                 is Either.Right -> {
                     val delayMillis = computeDelay(data.value.lastUpdateTimestamp)
-                    emit(data.value)
                     Napier.d(tag = TAG) { "waiting for $delayMillis milliseconds" }
                     delay(delayMillis)
                 }
@@ -39,57 +41,35 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
         }
     }
 
-    suspend fun singleFetch(): Either<ApiException, SiteTimeSeries> {
+    suspend fun singleFetch(): Either<DomainError, SiteTimeSeries> {
         return refreshSiteData()
     }
 
-    private suspend fun refreshSiteData(): Either<ApiException, SiteTimeSeries> {
+    private suspend fun refreshSiteData(): Either<DomainError, SiteTimeSeries> {
         Napier.d(tag = TAG) { "calling site time series" }
         val siteId = dataRepository.getSettings().firstOrNull()?.siteId
-        siteId?.let { id ->
-            when (val response = dataRepository.api.fetchSiteTimeSeries(id)) {
-                is Either.Left -> {
-                    val error = response.value
-                    Napier.d(tag = TAG) { "error: $response.value" }
-                    when(error) {
-                        is ApiError.HttpError -> {
-                            if (error.code == 401) {
-                                return Either.Left(UnauthorizedException("Unauthorized"))
-                            }
-                        }
-                        is ApiError.GenericError -> {
-                            return Either.Left(ApiGenericException(error.message))
-                        }
-                        is ApiError.SerializationError -> {
-                            return Either.Left(ApiGenericException(error.message))
-                        }
-                    }
-                }
-
-                is Either.Right -> {
+        return siteId?.let { id ->
+            dataRepository.api.fetchSiteTimeSeries(id)
+                .mapLeft { DomainError.Api(it) }
+                .map { timeSeries ->
                     val lastUpdateTimestamp =
-                        Instant.parse(response.value.timestamps.last().toString())
-
-                    return Either.Right(
-                        SiteTimeSeries(
-                            production = response.value.productions.last(),
-                            consumption = response.value.consumptions.last(),
-                            injection = response.value.injections.last(),
-                            withdrawals = response.value.withdrawals.last(),
-                            consumptionRate = response.value.consumptions.last() / MAX_POWER,
-                            productionRate = response.value.productions.last() / MAX_POWER,
-                            injectionRate = response.value.injections.last() / MAX_POWER,
-                            withdrawalsRate = response.value.withdrawals.last() / MAX_POWER,
-                            lastUpdateTimestamp = lastUpdateTimestamp,
-                            updateDate = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123),
-                            lastRefreshDate = Clock.System.now()
-                                .format(DateTimeComponents.Formats.RFC_1123),
-                        )
+                        Instant.parse(timeSeries.timestamps.last().toString())
+                    SiteTimeSeries(
+                        production = timeSeries.productions.last(),
+                        consumption = timeSeries.consumptions.last(),
+                        injection = timeSeries.injections.last(),
+                        withdrawals = timeSeries.withdrawals.last(),
+                        consumptionRate = timeSeries.consumptions.last() / MAX_POWER,
+                        productionRate = timeSeries.productions.last() / MAX_POWER,
+                        injectionRate = timeSeries.injections.last() / MAX_POWER,
+                        withdrawalsRate = timeSeries.withdrawals.last() / MAX_POWER,
+                        lastUpdateTimestamp = lastUpdateTimestamp,
+                        updateDate = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123),
+                        lastRefreshDate = Clock.System.now()
+                            .format(DateTimeComponents.Formats.RFC_1123),
                     )
                 }
-            }
-        }
-        return Either.Left(ApiGenericException("Site id not found"))
+        } ?: Either.Left(DomainError.Generic("Site id not found"))
     }
 
     private fun computeDelay(lastUpdateTimestamp: Instant): Long {
