@@ -99,7 +99,7 @@ fun DashboardScreenContent(
     val uiState by viewModel.uiState.collectAsState()
     val state = rememberPullToRefreshState()
 
-    LoadingView(uiState.isLoading) {
+    LoadingView(uiState.isDataLoaded.not()) {
         PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
             viewModel.singleRefresh()
         }) {

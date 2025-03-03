@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.gauge_dialog_close_button
@@ -63,8 +64,11 @@ fun HomeScreen(
         HomeViewModel(fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository))
     }
 ) {
-    LaunchedEffect(Unit) {
-        viewModel.load()
+    LifecycleResumeEffect(Unit) {
+        viewModel.startAutoRefresh()
+        onPauseOrDispose {
+            viewModel.stopAutoRefresh()
+        }
     }
     LaunchedEffect(Unit) {
         while (true) {
@@ -75,7 +79,7 @@ fun HomeScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
-    LoadingView(uiState.isLoading) {
+    LoadingView(uiState.isDataLoaded.not()) {
         HomeScreenContent(
             uiState,
             viewModel::enableProductionGauge,
