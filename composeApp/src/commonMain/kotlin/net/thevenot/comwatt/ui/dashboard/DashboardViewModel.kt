@@ -34,7 +34,6 @@ class DashboardViewModel(
     fun startAutoRefresh() {
         Napier.d(tag = TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
-        _uiState.value = _uiState.value.copy(isLoading = true)
         autoRefreshJob = viewModelScope.launch {
             val selectedTimeUnitIndex =  dataRepository.getSettings().firstOrNull()?.dashboardSelectedTimeUnitIndex
             Napier.d(tag = TAG) { "startAutoRefresh selectedTimeUnitIndex $selectedTimeUnitIndex" }
@@ -62,9 +61,9 @@ class DashboardViewModel(
                     }
                     it.onRight { value ->
                         _charts.value = value
-                        _uiState.value = _uiState.value.copy(isLoading = false)
                         _uiState.value = _uiState.value.copy(callCount = _uiState.value.callCount + 1)
                     }
+                    _uiState.value = _uiState.value.copy(isDataLoaded = true, isRefreshing = false)
                 }
         }
     }
@@ -98,10 +97,16 @@ class DashboardViewModel(
         _uiState.value = _uiState.value.copy(timeUnitSelectedIndex = timeUnitSelectedIndex)
         selectedTimeUnit = convertSelectedIndexToTimeUnit(timeUnitSelectedIndex)
         viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isRefreshing = true)
             dataRepository.saveDashboardSelectedTimeUnitIndex(timeUnitSelectedIndex)
             stopAutoRefresh()
             startAutoRefresh()
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        stopAutoRefresh()
     }
 
     private fun convertSelectedIndexToTimeUnit(timeUnitSelectedIndex: Int): DashboardTimeUnit {

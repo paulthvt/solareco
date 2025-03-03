@@ -39,15 +39,10 @@ class HomeViewModel(
         _uiState.value = _uiState.value.copy(withdrawalsGaugeEnabled = enabled)
     }
 
-    fun load() {
-        startAutoRefresh()
-    }
-
-    private fun startAutoRefresh() {
+    fun startAutoRefresh() {
         Napier.d(tag = TAG) { "startAutoRefresh ${this@HomeViewModel}" }
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
-            _uiState.value = _uiState.value.copy(isLoading = true)
             fetchSiteTimeSeriesUseCase.invoke()
                 .flowOn(Dispatchers.IO)
                 .catch {
@@ -58,13 +53,21 @@ class HomeViewModel(
                     )
                 }
                 .collect {
-                    _uiState.value = _uiState.value.copy(
-                        siteTimeSeries = it,
-                        callCount = _uiState.value.callCount + 1,
-                        lastRefreshInstant = it.lastUpdateTimestamp
-                    )
-                    _uiState.value = _uiState.value.copy(isLoading = false)
-                    updateTimeDifference()
+                    it.onLeft { error ->
+                        Napier.e(tag = TAG) { "Error in auto refresh: $error" }
+                        _uiState.value = _uiState.value.copy(
+                            errorCount = _uiState.value.errorCount + 1
+                        )
+                    }
+                    it.onRight { value ->
+                        _uiState.value = _uiState.value.copy(
+                            siteTimeSeries = value,
+                            callCount = _uiState.value.callCount + 1,
+                            lastRefreshInstant = value.lastUpdateTimestamp
+                        )
+                        updateTimeDifference()
+                    }
+                    _uiState.value = _uiState.value.copy(isDataLoaded = true)
                 }
         }
     }
@@ -92,7 +95,7 @@ class HomeViewModel(
         }
     }
 
-    private fun stopAutoRefresh() {
+    fun stopAutoRefresh() {
         Napier.d(tag = TAG) { "stopAutoRefresh" }
         autoRefreshJob?.cancel()
     }
