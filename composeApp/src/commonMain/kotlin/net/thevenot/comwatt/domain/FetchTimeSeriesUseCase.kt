@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.LocalLaundryService
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.ui.graphics.vector.ImageVector
 import arrow.core.Either
+import arrow.core.combine
 import arrow.core.flatMap
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
@@ -66,7 +67,39 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         Napier.d(tag = TAG) { "calling site time series" }
         val siteId = dataRepository.getSettings().firstOrNull()?.siteId
         return@withContext siteId?.let { id ->
-            dataRepository.api.fetchTiles(id)
+            val consumptionProdChartTimeSeries = dataRepository.api.fetchSiteTimeSeries(
+                siteId = id,
+                timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
+                timeAgoValue = 1
+            )
+                .mapLeft { DomainError.Api(it) }
+                .map { siteTimeSeries ->
+                    listOf(
+                        ChartTimeSeries(
+                            name = "Consumption vs Production",
+                            chartTimeValues = listOf(
+                                ChartTimeValues(
+                                    device = Device(
+                                        name = "Production",
+                                        kind = DeviceKind(icon = Icons.Default.ElectricalServices)
+                                    ),
+                                    timeSeriesValues = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
+                                        .associate { Instant.parse(it.first) to it.second.toFloat() }
+                                ),
+                                ChartTimeValues(
+                                    device = Device(
+                                        name = "Consumption",
+                                        kind = DeviceKind(icon = Icons.Default.ElectricalServices)
+                                    ),
+                                    timeSeriesValues = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
+                                        .associate { Instant.parse(it.first) to it.second.toFloat() }
+                                )
+                            )
+                        )
+                    )
+                }
+
+            val tilesEither = dataRepository.api.fetchTiles(id)
                 .mapLeft { DomainError.Api(it) }
                 .flatMap { tiles ->
                     val chartTimeSeriesList = tiles.filter { it.tileType == TileType.VALUATION }
@@ -105,41 +138,19 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                         .filter { it.await().chartTimeValues.isNotEmpty() }
                         .awaitAll()
 
-                    val consumptionProdChartTimeSeries = dataRepository.api.fetchSiteTimeSeries(
-                        siteId = id,
-                        timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
-                        timeAgoValue = 1
-                    ).map { siteTimeSeries ->
-                        ChartTimeSeries(
-                            name = "Consumption vs Production",
-                            chartTimeValues =listOf(
-                                ChartTimeValues(
-                                    device = Device(
-                                        name = "Production",
-                                        kind = DeviceKind(icon = Icons.Default.ElectricalServices)
-                                    ),
-                                    timeSeriesValues = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
-                                        .associate { Instant.parse(it.first) to it.second.toFloat() }
-                                ),
-                                ChartTimeValues(
-                                    device = Device(
-                                        name = "Consumption",
-                                        kind = DeviceKind(icon = Icons.Default.ElectricalServices)
-                                    ),
-                                    timeSeriesValues = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
-                                        .associate { Instant.parse(it.first) to it.second.toFloat() }
-                                )
-                            )
-                        )
-                    }.getOrNull()
-
-
                     if (chartTimeSeriesList.isNotEmpty()) {
-                        Either.Right(if(consumptionProdChartTimeSeries != null)  listOf(consumptionProdChartTimeSeries) + chartTimeSeriesList else chartTimeSeriesList)
+                        Either.Right(chartTimeSeriesList)
                     } else {
                         Either.Left(DomainError.Generic("No valid devices found"))
                     }
                 }
+
+            consumptionProdChartTimeSeries.combine(tilesEither,
+                combineLeft = { a, _ -> a },
+                combineRight = { consumptionProdChart, chartTimeSeriesList ->
+                    consumptionProdChart + chartTimeSeriesList
+                }
+            )
         } ?: Either.Left(DomainError.Generic("Site id not found"))
     }
 
