@@ -26,9 +26,9 @@ import kotlinx.datetime.Instant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
+import net.thevenot.comwatt.domain.model.ChartTimeValues
 import net.thevenot.comwatt.domain.model.Device
 import net.thevenot.comwatt.domain.model.DeviceKind
-import net.thevenot.comwatt.domain.model.DeviceTimeSeries
 import net.thevenot.comwatt.domain.model.TimeUnit
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.TileType
@@ -72,7 +72,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                     val chartTimeSeriesList = tiles.filter { it.tileType == TileType.VALUATION }
                         .map { tile ->
                             async {
-                                val deviceTimeSeriesList = tile.tileChartDatas
+                                val chartTimeValuesList = tile.tileChartDatas
                                     ?.map { it.measureKey }
                                     ?.filter { it.device?.id != null }
                                     ?.map { it.device }
@@ -85,7 +85,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                             )
                                             Napier.d(tag = TAG) { "Fetched series for device id $deviceId: $seriesResult" }
                                             seriesResult.map { series ->
-                                                DeviceTimeSeries(
+                                                ChartTimeValues(
                                                     device = Device(
                                                         name = device.name ?: "",
                                                         kind = DeviceKind(icon = mapIcon(device.deviceKind?.icon))
@@ -98,15 +98,44 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     } ?: emptyList()
                                 ChartTimeSeries(
                                     name = tile.name,
-                                    devicesTimeSeries = deviceTimeSeriesList
+                                    chartTimeValues = chartTimeValuesList
                                 )
                             }
                         }
-                        .filter { it.await().devicesTimeSeries.isNotEmpty() }
+                        .filter { it.await().chartTimeValues.isNotEmpty() }
                         .awaitAll()
 
+                    val consumptionProdChartTimeSeries = dataRepository.api.fetchSiteTimeSeries(
+                        siteId = id,
+                        timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
+                        timeAgoValue = 1
+                    ).map { siteTimeSeries ->
+                        ChartTimeSeries(
+                            name = "Consumption vs Production",
+                            chartTimeValues =listOf(
+                                ChartTimeValues(
+                                    device = Device(
+                                        name = "Production",
+                                        kind = DeviceKind(icon = Icons.Default.ElectricalServices)
+                                    ),
+                                    timeSeriesValues = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
+                                        .associate { Instant.parse(it.first) to it.second.toFloat() }
+                                ),
+                                ChartTimeValues(
+                                    device = Device(
+                                        name = "Consumption",
+                                        kind = DeviceKind(icon = Icons.Default.ElectricalServices)
+                                    ),
+                                    timeSeriesValues = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
+                                        .associate { Instant.parse(it.first) to it.second.toFloat() }
+                                )
+                            )
+                        )
+                    }.getOrNull()
+
+
                     if (chartTimeSeriesList.isNotEmpty()) {
-                        Either.Right(chartTimeSeriesList)
+                        Either.Right(if(consumptionProdChartTimeSeries != null)  listOf(consumptionProdChartTimeSeries) + chartTimeSeriesList else chartTimeSeriesList)
                     } else {
                         Either.Left(DomainError.Generic("No valid devices found"))
                     }

@@ -4,10 +4,10 @@ import kotlinx.datetime.Instant
 
 data class ChartTimeSeries(
     val name: String?,
-    val devicesTimeSeries: List<DeviceTimeSeries>,
+    val chartTimeValues: List<ChartTimeValues>,
 )
 
-data class DeviceTimeSeries(
+data class ChartTimeValues(
     val device: Device,
     val timeSeriesValues: Map<Instant, Float>,
 )

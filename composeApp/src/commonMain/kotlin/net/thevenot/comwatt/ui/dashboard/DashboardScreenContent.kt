@@ -167,7 +167,7 @@ fun DashboardScreenContent(
                         }
                     }
                     charts.forEach { chart ->
-                        if (chart.devicesTimeSeries.any { it.timeSeriesValues.values.isNotEmpty() }) {
+                        if (chart.chartTimeValues.any { it.timeSeriesValues.values.isNotEmpty() }) {
                             GraphCard(chart)
                         }
                     }
@@ -194,14 +194,14 @@ private fun GraphCard(chart: ChartTimeSeries) {
                 Card {
                     Chart(
                         chartName = chart.name,
-                        chartsData = chart.devicesTimeSeries
+                        chartsData = chart.chartTimeValues
                             .filter { it.timeSeriesValues.values.isNotEmpty() }
                             .map { it.timeSeriesValues }
                     )
                 }
                 Column(modifier = Modifier.padding(AppTheme.dimens.paddingNormal)) {
                     ChartTitle(
-                        chart.devicesTimeSeries.first().device.kind.icon,
+                        chart.chartTimeValues.first().device.kind.icon,
                         chart.name?.trim() ?: "Unknown"
                     )
                 }
