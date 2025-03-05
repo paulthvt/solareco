@@ -27,4 +27,7 @@
     <string name="range_picker_button_day">Day</string>
     <string name="range_picker_button_week">Week</string>
     <string name="range_picker_button_custom">Custom</string>
+    <string name="consumption_production_chart_title">Consumption vs Production</string>
+    <string name="production_series_title">Production</string>
+    <string name="consumption_series_title">Consumption</string>
 </resources>
