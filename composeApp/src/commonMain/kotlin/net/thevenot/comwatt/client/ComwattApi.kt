@@ -92,15 +92,17 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         }
     }
 
-    suspend fun fetchSiteTimeSeries(
+    private suspend fun doFetchSiteTimeSeries(
         siteId: Int,
-        startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
+        startTime: Instant? = null,
+        timeAgoUnit: TimeAgoUnit? = null,
+        timeAgoValue: Int? = null,
         measureKind: MeasureKind = MeasureKind.FLOW,
         aggregationLevel: AggregationLevel = AggregationLevel.NONE
     ): Either<ApiError, SiteTimeSeriesDto> {
         val endTime = Clock.System.now()
-
         val timeZone = TimeZone.of("Europe/Paris")
+
         return withContext(Dispatchers.IO) {
             client.safeRequest {
                 url {
@@ -109,11 +111,43 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     parameter("id", siteId)
                     parameter("measureKind", measureKind)
                     parameter("aggregationLevel", aggregationLevel)
-                    parameter("start", startTime.toZoneString(timeZone))
+                    startTime?.let { parameter("start", it.toZoneString(timeZone)) }
+                    timeAgoUnit?.let { parameter("timeAgoUnit", it) }
+                    timeAgoValue?.let { parameter("timeAgoValue", it) }
                     parameter("end", endTime.toZoneString(timeZone))
                 }
             }
         }
+    }
+
+    suspend fun fetchSiteTimeSeries(
+        siteId: Int,
+        startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+    ): Either<ApiError, SiteTimeSeriesDto> {
+        return doFetchSiteTimeSeries(
+            siteId = siteId,
+            startTime = startTime,
+            measureKind = measureKind,
+            aggregationLevel = aggregationLevel
+        )
+    }
+
+    suspend fun fetchSiteTimeSeries(
+        siteId: Int,
+        timeAgoUnit: TimeAgoUnit,
+        timeAgoValue: Int = 1,
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+    ): Either<ApiError, SiteTimeSeriesDto> {
+        return doFetchSiteTimeSeries(
+            siteId = siteId,
+            timeAgoUnit = timeAgoUnit,
+            timeAgoValue = timeAgoValue,
+            measureKind = measureKind,
+            aggregationLevel = aggregationLevel
+        )
     }
 
     suspend fun fetchTiles(

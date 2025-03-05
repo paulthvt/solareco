@@ -2,11 +2,7 @@ package net.thevenot.comwatt.domain.model
 
 import androidx.compose.ui.graphics.vector.ImageVector
 
-data class Device(
+data class TimeSeriesTitle(
     val name: String,
-    val kind: DeviceKind,
-)
-
-data class DeviceKind(
     val icon: ImageVector,
 )

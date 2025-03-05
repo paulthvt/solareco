@@ -11,6 +11,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
+import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
@@ -49,7 +50,7 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
         Napier.d(tag = TAG) { "calling site time series" }
         val siteId = dataRepository.getSettings().firstOrNull()?.siteId
         return siteId?.let { id ->
-            dataRepository.api.fetchSiteTimeSeries(id)
+            dataRepository.api.fetchSiteTimeSeries(siteId = id, startTime = Clock.System.now().minus(5, DateTimeUnit.MINUTE))
                 .mapLeft { DomainError.Api(it) }
                 .map { timeSeries ->
                     val lastUpdateTimestamp =
