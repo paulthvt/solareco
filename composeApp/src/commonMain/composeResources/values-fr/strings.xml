@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="email_placeholder">Email</string>
+    <string name="password_placeholder">Password</string>
+    <string name="remember_me">Remember Me</string>
+    <string name="login_title">Login</string>
+    <string name="login_button">Login</string>
+    <string name="show_password_button_description">Show password</string>
+    <string name="hide_password_button_description">Hide password</string>
+    <string name="email_password_required">Email or password is empty. Please fill in the form.</string>
+    <string name="invalid_credentials">Invalid email or password. Please try again.</string>
+    <string name="bottom_nav_home">Home</string>
+    <string name="bottom_nav_dashboard">Dashboard</string>
+    <string name="bottom_nav_devices">Devices</string>
+    <string name="bottom_nav_more">More</string>
+    <string name="gauge_subtitle_production">Production</string>
+    <string name="gauge_subtitle_consumption">Consumption</string>
+    <string name="gauge_subtitle_withdrawals">Withdrawals</string>
+    <string name="gauge_subtitle_injection">Injection</string>
+    <string name="last_data_refresh_time_zero">Updated a few seconds ago</string>
+    <plurals name="last_data_refresh_time">
+        <item quantity="one">Updated 1 minute ago</item>
+        <item quantity="other">Updated %1$d minutes ago</item>
+    </plurals>
+    <string name="gauge_dialog_title">Gauge Settings</string>
+    <string name="gauge_dialog_close_button">Close</string>
+    <string name="range_picker_button_hour">Hour</string>
+    <string name="range_picker_button_day">Day</string>
+    <string name="range_picker_button_week">Week</string>
+    <string name="range_picker_button_custom">Custom</string>
+</resources>
