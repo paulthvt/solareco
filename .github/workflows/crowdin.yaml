@@ -19,7 +19,7 @@ jobs:
           upload_sources: true
           upload_translations: false
           download_translations: true
-          localization_branch_name: l10n_crowdin_translations
+          localization_branch_name: chore/l10n-crowdin-translations
           create_pull_request: true
           pull_request_title: 'chore(translations): update Crowdin translations'
           pull_request_body: 'This PR includes new translations from Crowdin by [Crowdin GH Action](https://github.com/crowdin/github-action).'
