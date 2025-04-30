@@ -94,6 +94,8 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.pow
 
+private val LegendLabelKey = ExtraStore.Key<Set<String>>()
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreenContent(
@@ -213,8 +215,6 @@ private fun LazyGraphCard(chart: ChartTimeSeries, uiState: DashboardScreenState)
     }
 }
 
-private val LegendLabelKey = ExtraStore.Key<Set<String>>()
-
 @Composable
 fun Chart(
     timeSeries: List<TimeSeries>,
@@ -226,7 +226,11 @@ fun Chart(
         chartsData.flatMap { it.values }.maxOrNull() ?: 0f
     }
     val modelProducer = remember { CartesianChartModelProducer() }
-    val markerValueFormatter = DefaultCartesianMarker.ValueFormatter.default()
+    val markerValueFormatter = DefaultCartesianMarker.ValueFormatter.default(
+        thousandsSeparator = " ",
+        suffix = " W",
+        decimalCount = 0
+    )
 
     LaunchedEffect(chartsData) {
         withContext(Dispatchers.Default) {
