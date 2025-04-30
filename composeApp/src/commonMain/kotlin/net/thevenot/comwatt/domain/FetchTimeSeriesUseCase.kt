@@ -33,6 +33,7 @@ import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
+import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.domain.model.TimeUnit
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.TileType
@@ -106,6 +107,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                             timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit)
                                         )
                                         Napier.d(tag = TAG) { "Fetched series for device id $deviceId: $seriesResult" }
+                                        val kind = device.deviceKind
                                         seriesResult.map { series ->
                                             TimeSeries(
                                                 title = TimeSeriesTitle(
@@ -116,7 +118,13 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                                     data = series.timestamps.zip(series.values)
                                                         .associate { Instant.parse(it.first) to it.second.toFloat() },
                                                     timeUnit = timeUnit
-                                                )
+                                                ),
+                                                type= when {
+                                                    kind?.production == true -> TimeSeriesType.PRODUCTION
+                                                    kind?.injection == true -> TimeSeriesType.INJECTION
+                                                    kind?.withdrawal == true -> TimeSeriesType.WITHDRAWAL
+                                                    else -> TimeSeriesType.CONSUMPTION
+                                                }
                                             )
                                         }.getOrNull()
                                     }
@@ -162,7 +170,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     data = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
                                         .associate { Instant.parse(it.first) to it.second.toFloat() },
                                     timeUnit = timeUnit
-                                )
+                                ),
+                                type= TimeSeriesType.PRODUCTION
                             ),
                             TimeSeries(
                                 title = TimeSeriesTitle(
@@ -173,7 +182,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     data = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
                                         .associate { Instant.parse(it.first) to it.second.toFloat() },
                                     timeUnit = timeUnit
-                                )
+                                ),
+                                type= TimeSeriesType.CONSUMPTION,
                             )
                         )
                     )

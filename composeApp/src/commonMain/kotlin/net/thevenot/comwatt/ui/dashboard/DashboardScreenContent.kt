@@ -84,8 +84,13 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeries
+import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.theme.AppTheme
+import net.thevenot.comwatt.ui.theme.powerConsumption
+import net.thevenot.comwatt.ui.theme.powerInjection
+import net.thevenot.comwatt.ui.theme.powerProduction
+import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.pow
 
@@ -222,6 +227,7 @@ fun Chart(
     }
     val modelProducer = remember { CartesianChartModelProducer() }
     val markerValueFormatter = DefaultCartesianMarker.ValueFormatter.default()
+
     LaunchedEffect(chartsData) {
         withContext(Dispatchers.Default) {
             modelProducer.runTransaction {
@@ -239,6 +245,14 @@ fun Chart(
             }
         }
     }
+    val lineColors = timeSeries.map {
+            when (it.type) {
+                TimeSeriesType.PRODUCTION -> MaterialTheme.colorScheme.powerProduction
+                TimeSeriesType.CONSUMPTION -> MaterialTheme.colorScheme.powerConsumption
+                TimeSeriesType.INJECTION -> MaterialTheme.colorScheme.powerInjection
+                TimeSeriesType.WITHDRAWAL -> MaterialTheme.colorScheme.powerWithdrawals
+            }
+        }
     Column {
         CartesianValueFormatter.decimal()
         val yAxisValueFormatter = CartesianValueFormatter { _, value, _ ->
@@ -260,8 +274,6 @@ fun Chart(
             if (maxValue == 0f) CartesianLayerRangeProvider.auto() else CartesianLayerRangeProvider.fixed(
                 maxY = maxValue.toDouble()
             )
-        val lineColors =
-            listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.tertiary)
         val legendItemLabelComponent =
             rememberTextComponent(MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onBackground))
 
