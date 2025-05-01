@@ -218,15 +218,24 @@ val surfaceContainerHighDarkHighContrast = Color(0xFF282B24)
 val surfaceContainerHighestDarkHighContrast = Color(0xFF33362E)
 
 // PRODUCTION - Keep the vibrant green (representing energy generation)
-val powerProductionLight = Color(0xFF4CAF50)           // Green 500
+val powerProductionLight = Color(0xFF43A047)           // Green 600
 val powerProductionGaugeStartLight = Color(0xFF66BB6A) // Green 400
-val powerProductionGaugeEndLight = Color(0xFF388E3C)   // Green 600
+val powerProductionGaugeEndLight = Color(0xFF2E7D32)   // Green 800
 // Dark mode
 val powerProductionDark = Color(0xFF66BB6A)           // Green 400
 val powerProductionGaugeStartDark = Color(0xFF81C784) // Green 300
-val powerProductionGaugeEndDark = Color(0xFF4CAF50)   // Green 500
+val powerProductionGaugeEndDark = Color(0xFF43A047)   // Green 600
 
-// CONSUMPTION - Change to amber (representing energy usage)
+// INJECTION - Changed to greenish-teal (closer to production green)
+val powerInjectionLight = Color(0xFF00897B)           // Teal 600
+val powerInjectionGaugeStartLight = Color(0xFF26A69A) // Teal 400
+val powerInjectionGaugeEndLight = Color(0xFF00695C)   // Teal 800
+// Dark mode
+val powerInjectionDark = Color(0xFF26A69A)            // Teal 400
+val powerInjectionGaugeStartDark = Color(0xFF4DB6AC)  // Teal 300
+val powerInjectionGaugeEndDark = Color(0xFF00897B)    // Teal 600
+
+// CONSUMPTION - Amber/orange (representing energy usage)
 val powerConsumptionLight = Color(0xFFFF8F00)           // Amber 800
 val powerConsumptionGaugeStartLight = Color(0xFFFFA000) // Amber 700
 val powerConsumptionGaugeEndLight = Color(0xFFFF6F00)   // Amber 900
@@ -235,23 +244,14 @@ val powerConsumptionDark = Color(0xFFFFB300)           // Amber 700
 val powerConsumptionGaugeStartDark = Color(0xFFFFCA28) // Amber 400
 val powerConsumptionGaugeEndDark = Color(0xFFFFA000)   // Amber 700
 
-// INJECTION - Change to teal (representing energy sent to grid)
-val powerInjectionLight = Color(0xFF009688)           // Teal 500
-val powerInjectionGaugeStartLight = Color(0xFF26A69A) // Teal 400
-val powerInjectionGaugeEndLight = Color(0xFF00897B)   // Teal 600
+// WITHDRAWALS - Lighter orange (similar to consumption, but lighter)
+val powerWithdrawalsLight = Color(0xFFEF6C00)           // Orange 800
+val powerWithdrawalsGaugeStartLight = Color(0xFFFF9800) // Orange 500
+val powerWithdrawalsGaugeEndLight = Color(0xFFE65100)   // Orange 900
 // Dark mode
-val powerInjectionDark = Color(0xFF26A69A)            // Teal 400
-val powerInjectionGaugeStartDark = Color(0xFF4DB6AC)  // Teal 300
-val powerInjectionGaugeEndDark = Color(0xFF009688)    // Teal 500
-
-// WITHDRAWALS - Deep orange (representing energy taken from grid)
-val powerWithdrawalsLight = Color(0xFFF4511E)           // Deep Orange 600
-val powerWithdrawalsGaugeStartLight = Color(0xFFFF7043) // Deep Orange 400
-val powerWithdrawalsGaugeEndLight = Color(0xFFE64A19)   // Deep Orange 700
-// Dark mode
-val powerWithdrawalsDark = Color(0xFFFF7043)           // Deep Orange 400
-val powerWithdrawalsGaugeStartDark = Color(0xFFFF8A65) // Deep Orange 300
-val powerWithdrawalsGaugeEndDark = Color(0xFFF4511E)   // Deep Orange 600
+val powerWithdrawalsDark = Color(0xFFFF9800)           // Orange 500
+val powerWithdrawalsGaugeStartDark = Color(0xFFFFB74D) // Orange 300
+val powerWithdrawalsGaugeEndDark = Color(0xFFF57C00)   // Orange 700
 
 
 
