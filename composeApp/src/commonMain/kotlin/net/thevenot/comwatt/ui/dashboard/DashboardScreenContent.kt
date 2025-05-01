@@ -77,7 +77,6 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
-import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
@@ -99,8 +98,7 @@ private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreenContent(
-    dataRepository: DataRepository,
-    viewModel: DashboardViewModel = viewModel {
+    dataRepository: DataRepository, viewModel: DashboardViewModel = viewModel {
         DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
     }
 ) {
@@ -120,11 +118,9 @@ fun DashboardScreenContent(
             viewModel.singleRefresh()
         }) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
-                    .padding(AppTheme.dimens.paddingNormal),
+                modifier = Modifier.fillMaxSize().padding(AppTheme.dimens.paddingNormal),
                 verticalArrangement = Arrangement.spacedBy(
-                    AppTheme.dimens.paddingNormal,
-                    Alignment.Top
+                    AppTheme.dimens.paddingNormal, Alignment.Top
                 )
             ) {
                 if (charts.isNotEmpty()) {
@@ -193,22 +189,19 @@ fun DashboardScreenContent(
     }
 }
 
-
 @Composable
 private fun LazyGraphCard(chart: ChartTimeSeries, uiState: DashboardScreenState) {
     OutlinedCard {
         Column {
             Card {
                 Chart(
-                    timeSeries = chart.timeSeries,
-                    uiState = uiState
+                    timeSeries = chart.timeSeries, uiState = uiState
                 )
             }
 
             Column(modifier = Modifier.padding(AppTheme.dimens.paddingNormal)) {
                 ChartTitle(
-                    chart.timeSeries.first().title.icon,
-                    chart.name?.trim() ?: "Unknown"
+                    chart.timeSeries.first().title.icon, chart.name?.trim() ?: "Unknown"
                 )
             }
         }
@@ -217,9 +210,7 @@ private fun LazyGraphCard(chart: ChartTimeSeries, uiState: DashboardScreenState)
 
 @Composable
 fun Chart(
-    timeSeries: List<TimeSeries>,
-    modifier: Modifier = Modifier,
-    uiState: DashboardScreenState
+    timeSeries: List<TimeSeries>, modifier: Modifier = Modifier, uiState: DashboardScreenState
 ) {
     val chartsData = timeSeries.filter { it.values.values.isNotEmpty() }.map { it.values }
     val maxValue = remember(chartsData) {
@@ -227,9 +218,7 @@ fun Chart(
     }
     val modelProducer = remember { CartesianChartModelProducer() }
     val markerValueFormatter = DefaultCartesianMarker.ValueFormatter.default(
-        thousandsSeparator = " ",
-        suffix = " W",
-        decimalCount = 0
+        thousandsSeparator = " ", suffix = " W", decimalCount = 0
     )
 
     LaunchedEffect(chartsData) {
@@ -249,118 +238,126 @@ fun Chart(
             }
         }
     }
-    val lineColors = timeSeries.map {
-            when (it.type) {
-                TimeSeriesType.PRODUCTION -> MaterialTheme.colorScheme.powerProduction
-                TimeSeriesType.CONSUMPTION -> MaterialTheme.colorScheme.powerConsumption
-                TimeSeriesType.INJECTION -> MaterialTheme.colorScheme.powerInjection
-                TimeSeriesType.WITHDRAWAL -> MaterialTheme.colorScheme.powerWithdrawals
-            }
+    val lineColors = getLineColors(timeSeries)
+    CartesianValueFormatter.decimal()
+    val yAxisValueFormatter = CartesianValueFormatter { _, value, _ ->
+        when {
+            value >= 1000 -> "${(value / 1000).toInt()}k"
+            value < 1 && value > 0 -> value.toString()
+            else -> value.toInt().toString()
         }
-    Column {
-        CartesianValueFormatter.decimal()
-        val yAxisValueFormatter = CartesianValueFormatter { _, value, _ ->
-            when {
-                value >= 1000 -> "${(value / 1000).toInt()}k"
-                value < 1 && value > 0 -> value.toString()
-                else -> value.toInt().toString()
-            }
-        }
-        val stepValue = if (maxValue <= 0) 1.0 else {
-            val magnitude = kotlin.math.floor(kotlin.math.log10(maxValue.toDouble()))
-            10.0.pow(magnitude)
-        }
-        val startAxisItemPlacer =
-            if (stepValue == 0.0) VerticalAxis.ItemPlacer.step() else VerticalAxis.ItemPlacer.step({
-                stepValue
-            })
-        val rangeProvider =
-            if (maxValue == 0f) CartesianLayerRangeProvider.auto() else CartesianLayerRangeProvider.fixed(
-                maxY = maxValue.toDouble()
-            )
-        val legendItemLabelComponent =
-            rememberTextComponent(MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onBackground))
+    }
+    val stepValue = if (maxValue <= 0) 1.0 else {
+        val magnitude = kotlin.math.floor(kotlin.math.log10(maxValue.toDouble()))
+        10.0.pow(magnitude)
+    }
+    val startAxisItemPlacer =
+        if (stepValue == 0.0) VerticalAxis.ItemPlacer.step() else VerticalAxis.ItemPlacer.step({
+            stepValue
+        })
+    val rangeProvider =
+        if (maxValue == 0f) CartesianLayerRangeProvider.auto() else CartesianLayerRangeProvider.fixed(
+            maxY = maxValue.toDouble()
+        )
+    val legendItemLabelComponent =
+        rememberTextComponent(MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onBackground))
 
-        val legend =
-            if (timeSeries.size > 1) rememberVerticalLegend<CartesianMeasuringContext, CartesianDrawingContext>(
-                items = { extraStore ->
-                    extraStore[LegendLabelKey].forEachIndexed { index, label ->
-                        add(
-                            LegendItem(
-                                ShapeComponent(fill(lineColors[index]), CorneredShape.Pill),
-                                legendItemLabelComponent,
-                                label,
-                            )
-                        )
-                    }
-                },
-                padding = Insets(
-                    start = AppTheme.dimens.paddingNormal,
-                    top = AppTheme.dimens.paddingSmall
-                ),
-            ) else null
-        CartesianChartHost(
-            chart = rememberCartesianChart(
-                rememberLineCartesianLayer(
-                    lineProvider = LineCartesianLayer.LineProvider.series(
-                        lineColors.map { color ->
-                            LineCartesianLayer.rememberLine(
-                                fill = LineCartesianLayer.LineFill.single(fill(color)),
-                                areaFill = LineCartesianLayer.AreaFill.single(
-                                    fill(
-                                        Brush.verticalGradient(
-                                            listOf(
-                                                color.copy(alpha = 0.4f), Color.Transparent
-                                            )
+    val legend = createChartLegend(timeSeries, lineColors, legendItemLabelComponent)
+    CartesianChartHost(
+        chart = rememberCartesianChart(
+            rememberLineCartesianLayer(
+                lineProvider = LineCartesianLayer.LineProvider.series(
+                    lineColors.map { color ->
+                        LineCartesianLayer.rememberLine(
+                            fill = LineCartesianLayer.LineFill.single(fill(color)),
+                            areaFill = LineCartesianLayer.AreaFill.single(
+                                fill(
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            color.copy(alpha = 0.4f), Color.Transparent
                                         )
                                     )
-                                ),
-                            )
-                        }
-                    ),
-                    rangeProvider = rangeProvider,
-                ),
-                startAxis = VerticalAxis.rememberStart(
-                    valueFormatter = yAxisValueFormatter,
-                    label = rememberAxisLabelComponent(
-                        minWidth = TextComponent.MinWidth.fixed(30.dp),
-                    ),
-                    itemPlacer = startAxisItemPlacer
-                ),
-                bottomAxis = HorizontalAxis.rememberBottom(
-                    valueFormatter = rememberTimeValueFormatter(),
-                    itemPlacer = remember { TimeAlignedItemPlacer() }
-                ),
-                marker = rememberMarker(markerValueFormatter),
-                legend = legend,
+                                )
+                            ),
+                        )
+                    }),
+                rangeProvider = rangeProvider,
             ),
-            modelProducer = modelProducer,
-            modifier = modifier.height(280.dp).padding(vertical = AppTheme.dimens.paddingSmall),
-            scrollState = rememberVicoScrollState(scrollEnabled = false),
-        )
+            startAxis = VerticalAxis.rememberStart(
+                valueFormatter = yAxisValueFormatter, label = rememberAxisLabelComponent(
+                    minWidth = TextComponent.MinWidth.fixed(30.dp),
+                ), itemPlacer = startAxisItemPlacer
+            ),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                valueFormatter = rememberTimeValueFormatter(uiState.timeUnitSelectedIndex),
+                itemPlacer = remember { TimeAlignedItemPlacer() }),
+            marker = rememberMarker(markerValueFormatter),
+            legend = legend,
+        ),
+        modelProducer = modelProducer,
+        modifier = modifier.height(280.dp).padding(vertical = AppTheme.dimens.paddingSmall),
+        scrollState = rememberVicoScrollState(scrollEnabled = false),
+    )
+}
+
+@Composable
+private fun createChartLegend(
+    timeSeries: List<TimeSeries>,
+    lineColors: List<Color>,
+    legendItemLabelComponent: TextComponent
+) =
+    if (timeSeries.size > 1) rememberVerticalLegend<CartesianMeasuringContext, CartesianDrawingContext>(
+        items = { extraStore ->
+            extraStore[LegendLabelKey].forEachIndexed { index, label ->
+                add(
+                    LegendItem(
+                        ShapeComponent(fill(lineColors[index]), CorneredShape.Pill),
+                        legendItemLabelComponent,
+                        label,
+                    )
+                )
+            }
+        },
+        padding = Insets(
+            start = AppTheme.dimens.paddingNormal, top = AppTheme.dimens.paddingSmall
+        ),
+    ) else null
+
+@Composable
+private fun getLineColors(timeSeries: List<TimeSeries>) = timeSeries.map {
+    when (it.type) {
+        TimeSeriesType.PRODUCTION -> MaterialTheme.colorScheme.powerProduction
+        TimeSeriesType.CONSUMPTION -> MaterialTheme.colorScheme.powerConsumption
+        TimeSeriesType.INJECTION -> MaterialTheme.colorScheme.powerInjection
+        TimeSeriesType.WITHDRAWAL -> MaterialTheme.colorScheme.powerWithdrawals
     }
 }
 
-/**
- * Creates a time formatter that formats Instants the same way as your existing code
- */
 @Composable
-fun rememberTimeValueFormatter(): CartesianValueFormatter {
-    return remember {
+fun rememberTimeValueFormatter(timeUnitSelectedIndex: Int): CartesianValueFormatter {
+    return remember(timeUnitSelectedIndex) {
         CartesianValueFormatter { _, value, _ ->
             val instant = Instant.fromEpochSeconds(value.toLong())
             val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
 
-            if (dateTime.hour == 0 && dateTime.minute == 0) {
-                dateTime.format(
-                    LocalDateTime.Format {
-                        dayOfMonth(padding = Padding.SPACE)
-                        monthName(MonthNames.ENGLISH_ABBREVIATED)
-                    }
-                )
-            } else {
-                dateTime.format(LocalDateTime.Format { hour(); char(':'); minute() })
+            val hourMinutesFormat = LocalDateTime.Format { hour(); char(':'); minute() }
+            val dayOfMonthFormat = LocalDateTime.Format {
+                dayOfMonth()
+                char(' ')
+                monthName(MonthNames.ENGLISH_ABBREVIATED)
             }
+            dateTime.format(
+                when (timeUnitSelectedIndex) {
+                    0, 1 -> if (dateTime.hour == 0 && dateTime.minute == 0) {
+                        dayOfMonthFormat
+                    } else {
+                        hourMinutesFormat
+                    }
+
+                    2 -> dayOfMonthFormat
+                    else -> hourMinutesFormat
+                }
+            )
         }
     }
 }

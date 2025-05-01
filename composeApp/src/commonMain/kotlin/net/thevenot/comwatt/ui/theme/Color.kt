@@ -244,14 +244,14 @@ val powerConsumptionDark = Color(0xFFFFB300)           // Amber 700
 val powerConsumptionGaugeStartDark = Color(0xFFFFCA28) // Amber 400
 val powerConsumptionGaugeEndDark = Color(0xFFFFA000)   // Amber 700
 
-// WITHDRAWALS - Lighter orange (similar to consumption, but lighter)
-val powerWithdrawalsLight = Color(0xFFEF6C00)           // Orange 800
-val powerWithdrawalsGaugeStartLight = Color(0xFFFF9800) // Orange 500
-val powerWithdrawalsGaugeEndLight = Color(0xFFE65100)   // Orange 900
+// WITHDRAWALS - Darker orange (similar to consumption)
+val powerWithdrawalsLight = Color(0xFFE65100)           // Orange 900
+val powerWithdrawalsGaugeStartLight = Color(0xFFF57C00) // Orange 700
+val powerWithdrawalsGaugeEndLight = Color(0xFFBF360C)   // Deep Orange 900
 // Dark mode
-val powerWithdrawalsDark = Color(0xFFFF9800)           // Orange 500
-val powerWithdrawalsGaugeStartDark = Color(0xFFFFB74D) // Orange 300
-val powerWithdrawalsGaugeEndDark = Color(0xFFF57C00)   // Orange 700
+val powerWithdrawalsDark = Color(0xFFF57C00)           // Orange 700
+val powerWithdrawalsGaugeStartDark = Color(0xFFFF9800) // Orange 500
+val powerWithdrawalsGaugeEndDark = Color(0xFFE65100)   // Orange 900
 
 
 
