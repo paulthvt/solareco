@@ -123,60 +123,60 @@ fun DashboardScreenContent(
                     AppTheme.dimens.paddingNormal, Alignment.Top
                 )
             ) {
-                if (charts.isNotEmpty()) {
-                    item {
-                        Row {
-                            val options = listOf(
-                                stringResource(Res.string.range_picker_button_hour),
-                                stringResource(Res.string.range_picker_button_day),
-                                stringResource(Res.string.range_picker_button_week),
-                                stringResource(Res.string.range_picker_button_custom)
+                item {
+                    Row {
+                        val options = listOf(
+                            stringResource(Res.string.range_picker_button_hour),
+                            stringResource(Res.string.range_picker_button_day),
+                            stringResource(Res.string.range_picker_button_week),
+                            stringResource(Res.string.range_picker_button_custom)
+                        )
+                        SingleChoiceSegmentedButtonRow {
+                            options.forEachIndexed { index, label ->
+                                SegmentedButton(
+                                    shape = SegmentedButtonDefaults.itemShape(
+                                        index = index, count = options.size
+                                    ), onClick = {
+                                        viewModel.onTimeUnitSelected(index)
+                                    }, selected = index == uiState.timeUnitSelectedIndex
+                                ) {
+                                    Text(label)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    var dragDirection: HorizontalDragDirection? = null
+                    Row(
+                        modifier = Modifier.fillMaxWidth().pointerInput(Unit) {
+                            detectHorizontalDragGestures(onDragEnd = {
+                                Napier.d(tag = TAG) { "Drag end $dragDirection" }
+                            }) { _, dragAmount ->
+                                when {
+                                    dragAmount < -20f -> {
+                                        dragDirection = HorizontalDragDirection.LEFT
+                                    }
+
+                                    dragAmount > 20f -> {
+                                        dragDirection = HorizontalDragDirection.RIGHT
+                                    }
+                                }
+                            }
+                        }, horizontalArrangement = Arrangement.Center
+                    ) {
+                        TextButton(onClick = { Napier.d(tag = TAG) { "Click" } }) {
+                            Text(
+                                "Today",
+                                modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
+                                    .fillMaxWidth(),
+                                textAlign = TextAlign.Center
                             )
-                            SingleChoiceSegmentedButtonRow {
-                                options.forEachIndexed { index, label ->
-                                    SegmentedButton(
-                                        shape = SegmentedButtonDefaults.itemShape(
-                                            index = index, count = options.size
-                                        ), onClick = {
-                                            viewModel.onTimeUnitSelected(index)
-                                        }, selected = index == uiState.timeUnitSelectedIndex
-                                    ) {
-                                        Text(label)
-                                    }
-                                }
-                            }
                         }
                     }
-
-                    item {
-                        var dragDirection: HorizontalDragDirection? = null
-                        Row(
-                            modifier = Modifier.fillMaxWidth().pointerInput(Unit) {
-                                detectHorizontalDragGestures(onDragEnd = {
-                                    Napier.d(tag = TAG) { "Drag end $dragDirection" }
-                                }) { _, dragAmount ->
-                                    when {
-                                        dragAmount < -20f -> {
-                                            dragDirection = HorizontalDragDirection.LEFT
-                                        }
-
-                                        dragAmount > 20f -> {
-                                            dragDirection = HorizontalDragDirection.RIGHT
-                                        }
-                                    }
-                                }
-                            }, horizontalArrangement = Arrangement.Center
-                        ) {
-                            TextButton(onClick = { Napier.d(tag = TAG) { "Click" } }) {
-                                Text(
-                                    "Today",
-                                    modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
-                                        .fillMaxWidth(),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
+                }
+                if (charts.isNotEmpty()) {
                     items(
                         items = charts.withIndex()
                             .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
