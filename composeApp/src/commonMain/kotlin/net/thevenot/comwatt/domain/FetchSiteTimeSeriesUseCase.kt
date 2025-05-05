@@ -1,7 +1,7 @@
 package net.thevenot.comwatt.domain
 
 import arrow.core.Either
-import io.github.aakira.napier.Napier
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -26,7 +26,7 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
             when (data) {
                 is Either.Left -> {
-                    Napier.e(tag = TAG) { "Error fetching site time services: ${data.value}" }
+                    Logger.e(TAG) { "Error fetching site time services: ${data.value}" }
                     val value = data.value
                     if (value is DomainError.Api && value.error is ApiError.HttpError && value.error.code == 401) {
                         dataRepository.tryAutoLogin({}, {})
@@ -35,7 +35,7 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
                 }
                 is Either.Right -> {
                     val delayMillis = computeDelay(data.value.lastUpdateTimestamp)
-                    Napier.d(tag = TAG) { "waiting for $delayMillis milliseconds" }
+                    Logger.d(TAG) { "waiting for $delayMillis milliseconds" }
                     delay(delayMillis)
                 }
             }
@@ -47,7 +47,7 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
     }
 
     private suspend fun refreshSiteData(): Either<DomainError, SiteTimeSeries> {
-        Napier.d(tag = TAG) { "calling site time series" }
+        Logger.d(TAG) { "calling site time series" }
         val siteId = dataRepository.getSettings().firstOrNull()?.siteId
         return siteId?.let { id ->
             dataRepository.api.fetchSiteTimeSeries(siteId = id, startTime = Clock.System.now().minus(5, DateTimeUnit.MINUTE))
@@ -77,7 +77,7 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
         val nextUpdateTimestamp = lastUpdateTimestamp.plus(2, DateTimeUnit.MINUTE).plus(5, DateTimeUnit.SECOND)
         val delayMillis = (nextUpdateTimestamp.toEpochMilliseconds() - Clock.System.now().toEpochMilliseconds()).coerceAtLeast(0)
         if (delayMillis == 0L) {
-            Napier.d(tag = TAG) { "no delay, using fallback delay $FALLBACK_DELAY" }
+            Logger.d(TAG) { "no delay, using fallback delay $FALLBACK_DELAY" }
             return FALLBACK_DELAY
         }
         return delayMillis

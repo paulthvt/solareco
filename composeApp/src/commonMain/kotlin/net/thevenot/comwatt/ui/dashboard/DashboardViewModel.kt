@@ -2,7 +2,7 @@ package net.thevenot.comwatt.ui.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.aakira.napier.Napier
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
@@ -32,15 +32,15 @@ class DashboardViewModel(
         convertSelectedIndexToTimeUnit(_uiState.value.timeUnitSelectedIndex)
 
     fun startAutoRefresh() {
-        Napier.d(tag = TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
+        Logger.d(TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
             val selectedTimeUnitIndex =  dataRepository.getSettings().firstOrNull()?.dashboardSelectedTimeUnitIndex
-            Napier.d(tag = TAG) { "startAutoRefresh selectedTimeUnitIndex $selectedTimeUnitIndex" }
+            Logger.d(TAG) { "startAutoRefresh selectedTimeUnitIndex $selectedTimeUnitIndex" }
             selectedTimeUnitIndex?.let {
                 _uiState.value = _uiState.value.copy(timeUnitSelectedIndex = it)
                 selectedTimeUnit = convertSelectedIndexToTimeUnit(it)
-                Napier.d(tag = TAG) { "startAutoRefresh selectedTimeUnit $selectedTimeUnit" }
+                Logger.d(TAG) { "startAutoRefresh selectedTimeUnit $selectedTimeUnit" }
             }
 
             fetchTimeSeriesUseCase.invoke(
@@ -54,7 +54,7 @@ class DashboardViewModel(
                 .flowOn(Dispatchers.IO)
                 .collect {
                     it.onLeft { error ->
-                        Napier.e(tag = TAG) { "Error in auto refresh: $error" }
+                        Logger.e(TAG) { "Error in auto refresh: $error" }
                         _uiState.value = _uiState.value.copy(
                             errorCount = _uiState.value.errorCount + 1
                         )
@@ -69,13 +69,13 @@ class DashboardViewModel(
     }
 
     fun stopAutoRefresh() {
-        Napier.d(tag = TAG) { "stopAutoRefresh" }
+        Logger.d(TAG) { "stopAutoRefresh" }
         autoRefreshJob?.cancel()
     }
 
     fun singleRefresh() {
         viewModelScope.launch {
-            Napier.d(tag = TAG) { "Single refresh $selectedTimeUnit" }
+            Logger.d(TAG) { "Single refresh $selectedTimeUnit" }
             _uiState.value = _uiState.value.copy(isRefreshing = true)
             fetchTimeSeriesUseCase.singleFetch(
                 when (selectedTimeUnit) {

@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import co.touchlab.kermit.Logger
 import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianDrawingContext
 import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianMeasuringContext
@@ -69,7 +70,6 @@ import comwatt.composeapp.generated.resources.range_picker_button_custom
 import comwatt.composeapp.generated.resources.range_picker_button_day
 import comwatt.composeapp.generated.resources.range_picker_button_hour
 import comwatt.composeapp.generated.resources.range_picker_button_week
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -152,7 +152,7 @@ fun DashboardScreenContent(
                     Row(
                         modifier = Modifier.fillMaxWidth().pointerInput(Unit) {
                             detectHorizontalDragGestures(onDragEnd = {
-                                Napier.d(tag = TAG) { "Drag end $dragDirection" }
+                                Logger.d(TAG) { "Drag end $dragDirection" }
                             }) { _, dragAmount ->
                                 when {
                                     dragAmount < -20f -> {
@@ -166,7 +166,7 @@ fun DashboardScreenContent(
                             }
                         }, horizontalArrangement = Arrangement.Center
                     ) {
-                        TextButton(onClick = { Napier.d(tag = TAG) { "Click" } }) {
+                        TextButton(onClick = { Logger.d(TAG) { "Click" } }) {
                             Text(
                                 "Today",
                                 modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
@@ -252,7 +252,7 @@ fun Chart(
         10.0.pow(magnitude)
     }
     val startAxisItemPlacer =
-        if (stepValue == 0.0) VerticalAxis.ItemPlacer.step() else VerticalAxis.ItemPlacer.step({
+        if (stepValue <= 0.0) VerticalAxis.ItemPlacer.step() else VerticalAxis.ItemPlacer.step({
             stepValue
         })
     val rangeProvider =

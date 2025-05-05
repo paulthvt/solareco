@@ -3,7 +3,7 @@ package net.thevenot.comwatt.ui.site
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import arrow.core.Either
-import io.github.aakira.napier.Napier
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -36,7 +36,7 @@ class SiteChooserViewModel(
         viewModelScope.launch {
             when (val siteResponse = dataRepository.api.sites()) {
                 is Either.Left -> {
-                    Napier.e(tag = TAG) { "Error loading sites: ${siteResponse.value}" }
+                    Logger.e(TAG) { "Error loading sites: ${siteResponse.value}" }
                 }
                 is Either.Right -> {
                     _sites.value = siteResponse.value
@@ -45,7 +45,7 @@ class SiteChooserViewModel(
 
             when (val userResponse = dataRepository.api.authenticated()) {
                 is Either.Left -> {
-                    Napier.e(tag = TAG) { "Error loading user: ${userResponse.value}" }
+                    Logger.e(TAG) { "Error loading user: ${userResponse.value}" }
                 }
                 is Either.Right -> {
                     _userDto.value = userResponse.value

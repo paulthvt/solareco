@@ -13,11 +13,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import arrow.core.Either
 import arrow.core.combine
 import arrow.core.flatMap
+import co.touchlab.kermit.Logger
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.consumption_production_chart_title
 import comwatt.composeapp.generated.resources.consumption_series_title
 import comwatt.composeapp.generated.resources.production_series_title
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.async
@@ -50,7 +50,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
                 when (data) {
                     is Either.Left -> {
-                        Napier.e(tag = TAG) { "Error fetching time series: ${data.value}" }
+                        Logger.e(TAG) { "Error fetching time series: ${data.value}" }
                         val value = data.value
                         if (value is DomainError.Api && value.error is ApiError.HttpError && value.error.code == 401) {
                             dataRepository.tryAutoLogin({}, {})
@@ -60,7 +60,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
                     is Either.Right -> {
                         val delayMillis = 30000L
-                        Napier.d(tag = TAG) { "waiting for $delayMillis milliseconds" }
+                        Logger.d(TAG) { "waiting for $delayMillis milliseconds" }
                         delay(delayMillis)
                     }
                 }
@@ -73,7 +73,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
     private suspend fun refreshTimeSeriesData(timeUnit: TimeUnit): Either<DomainError, List<ChartTimeSeries>> =
         withContext(Dispatchers.IO) {
-            Napier.d(tag = TAG) { "fetching charts data" }
+            Logger.d(TAG) { "fetching charts data" }
             val siteId = dataRepository.getSettings().firstOrNull()?.siteId
             return@withContext siteId?.let { id ->
                 val consumptionProdChartsData = getConsumptionProdChartTimeSeries(id, timeUnit)
@@ -105,12 +105,12 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                 ?.map { it.device }
                                 ?.mapNotNull { device ->
                                     device?.id?.let { deviceId ->
-                                        Napier.d(tag = TAG) { "Fetching time series for device id: $deviceId" }
+                                        Logger.d(TAG) { "Fetching time series for device id: $deviceId" }
                                         val seriesResult = dataRepository.api.fetchTimeSeries(
                                             deviceId = deviceId,
                                             timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit)
                                         )
-                                        Napier.d(tag = TAG) { "Fetched series for device id $deviceId: $seriesResult" }
+                                        Logger.d(TAG) { "Fetched series for device id $deviceId: $seriesResult" }
                                         val kind = device.deviceKind
                                         seriesResult.map { series ->
                                             TimeSeries(
