@@ -33,55 +33,61 @@ import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
+import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.domain.model.TimeUnit
+import net.thevenot.comwatt.domain.utils.TimeSeriesDownsampler.downsample
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.TileType
 import net.thevenot.comwatt.model.type.TimeAgoUnit
 import org.jetbrains.compose.resources.getString
 
 class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
-    operator fun invoke(timeUnit: TimeUnit = TimeUnit.DAY): Flow<Either<DomainError, List<ChartTimeSeries>>> = flow {
-        while (true) {
-            val data = refreshTimeSeriesData(timeUnit)
-            emit(data)
+    operator fun invoke(timeUnit: TimeUnit = TimeUnit.DAY): Flow<Either<DomainError, List<ChartTimeSeries>>> =
+        flow {
+            while (true) {
+                val data = refreshTimeSeriesData(timeUnit)
+                emit(data)
 
-            when (data) {
-                is Either.Left -> {
-                    Napier.e(tag = TAG) { "Error fetching time series: ${data.value}" }
-                    val value = data.value
-                    if (value is DomainError.Api && value.error is ApiError.HttpError && value.error.code == 401) {
-                        dataRepository.tryAutoLogin({}, {})
+                when (data) {
+                    is Either.Left -> {
+                        Napier.e(tag = TAG) { "Error fetching time series: ${data.value}" }
+                        val value = data.value
+                        if (value is DomainError.Api && value.error is ApiError.HttpError && value.error.code == 401) {
+                            dataRepository.tryAutoLogin({}, {})
+                        }
+                        delay(10_000L)
                     }
-                    delay(10_000L)
-                }
-                is Either.Right -> {
-                    val delayMillis = 30000L
-                    Napier.d(tag = TAG) { "waiting for $delayMillis milliseconds" }
-                    delay(delayMillis)
+
+                    is Either.Right -> {
+                        val delayMillis = 30000L
+                        Napier.d(tag = TAG) { "waiting for $delayMillis milliseconds" }
+                        delay(delayMillis)
+                    }
                 }
             }
         }
-    }
 
     suspend fun singleFetch(timeUnit: TimeUnit = TimeUnit.DAY): Either<DomainError, List<ChartTimeSeries>> {
         return refreshTimeSeriesData(timeUnit)
     }
 
-    private suspend fun refreshTimeSeriesData(timeUnit: TimeUnit): Either<DomainError, List<ChartTimeSeries>> = withContext(Dispatchers.IO) {
-        Napier.d(tag = TAG) { "fetching charts data" }
-        val siteId = dataRepository.getSettings().firstOrNull()?.siteId
-        return@withContext siteId?.let { id ->
-            val consumptionProdChartsData = getConsumptionProdChartTimeSeries(id, timeUnit)
-            val tilesChartsData = getTilesChartsData(id, timeUnit)
+    private suspend fun refreshTimeSeriesData(timeUnit: TimeUnit): Either<DomainError, List<ChartTimeSeries>> =
+        withContext(Dispatchers.IO) {
+            Napier.d(tag = TAG) { "fetching charts data" }
+            val siteId = dataRepository.getSettings().firstOrNull()?.siteId
+            return@withContext siteId?.let { id ->
+                val consumptionProdChartsData = getConsumptionProdChartTimeSeries(id, timeUnit)
+                val tilesChartsData = getTilesChartsData(id, timeUnit)
 
-            consumptionProdChartsData.combine(tilesChartsData,
-                combineLeft = { a, _ -> a },
-                combineRight = { consumptionProdChart, chartTimeSeriesList ->
-                    consumptionProdChart + chartTimeSeriesList
-                }
-            )
-        } ?: Either.Left(DomainError.Generic("Site id not found"))
-    }
+                consumptionProdChartsData.combine(
+                    tilesChartsData,
+                    combineLeft = { a, _ -> a },
+                    combineRight = { consumptionProdChart, chartTimeSeriesList ->
+                        consumptionProdChart + chartTimeSeriesList
+                    }
+                )
+            } ?: Either.Left(DomainError.Generic("Site id not found"))
+        }
 
     private suspend fun getTilesChartsData(
         id: Int,
@@ -105,14 +111,24 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                             timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit)
                                         )
                                         Napier.d(tag = TAG) { "Fetched series for device id $deviceId: $seriesResult" }
+                                        val kind = device.deviceKind
                                         seriesResult.map { series ->
                                             TimeSeries(
                                                 title = TimeSeriesTitle(
                                                     name = device.name ?: "",
                                                     icon = mapIcon(device.deviceKind?.icon)
                                                 ),
-                                                values = series.timestamps.zip(series.values)
-                                                    .associate { Instant.parse(it.first) to it.second.toFloat() }
+                                                values = downsample(
+                                                    data = series.timestamps.zip(series.values)
+                                                        .associate { Instant.parse(it.first) to it.second.toFloat() },
+                                                    timeUnit = timeUnit
+                                                ),
+                                                type = when {
+                                                    kind?.production == true -> TimeSeriesType.PRODUCTION
+                                                    kind?.injection == true -> TimeSeriesType.INJECTION
+                                                    kind?.withdrawal == true -> TimeSeriesType.WITHDRAWAL
+                                                    else -> TimeSeriesType.CONSUMPTION
+                                                }
                                             )
                                         }.getOrNull()
                                     }
@@ -137,7 +153,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
     private suspend fun getConsumptionProdChartTimeSeries(
         id: Int,
         timeUnit: TimeUnit
-    ) : Either<DomainError, List<ChartTimeSeries>> {
+    ): Either<DomainError, List<ChartTimeSeries>> {
         return dataRepository.api.fetchSiteTimeSeries(
             siteId = id,
             timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
@@ -154,22 +170,31 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     name = getString(Res.string.production_series_title),
                                     icon = Icons.Default.ElectricalServices
                                 ),
-                                values = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
-                                    .associate { Instant.parse(it.first) to it.second.toFloat() }
+                                values = downsample(
+                                    data = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
+                                        .associate { Instant.parse(it.first) to it.second.toFloat() },
+                                    timeUnit = timeUnit
+                                ),
+                                type = TimeSeriesType.PRODUCTION
                             ),
                             TimeSeries(
                                 title = TimeSeriesTitle(
                                     name = getString(Res.string.consumption_series_title),
                                     icon = Icons.Default.ElectricalServices
                                 ),
-                                values = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
-                                    .associate { Instant.parse(it.first) to it.second.toFloat() }
+                                values = downsample(
+                                    data = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
+                                        .associate { Instant.parse(it.first) to it.second.toFloat() },
+                                    timeUnit = timeUnit
+                                ),
+                                type = TimeSeriesType.CONSUMPTION,
                             )
                         )
                     )
                 )
             }
     }
+
 
     private fun mapIcon(icon: String?): ImageVector {
         return when (icon) {

@@ -48,10 +48,10 @@ import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.theme.ComwattTheme
-import net.thevenot.comwatt.ui.theme.powerConsumptionGauge
-import net.thevenot.comwatt.ui.theme.powerInjectionGauge
-import net.thevenot.comwatt.ui.theme.powerProductionGauge
-import net.thevenot.comwatt.ui.theme.powerWithdrawalsGauge
+import net.thevenot.comwatt.ui.theme.powerConsumption
+import net.thevenot.comwatt.ui.theme.powerInjection
+import net.thevenot.comwatt.ui.theme.powerProduction
+import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -176,25 +176,25 @@ fun GaugeSettingsDialog(
         Column {
             DialogSettingsRow(
                 title = Res.string.gauge_subtitle_production,
-                color = powerProductionGauge,
+                color = MaterialTheme.colorScheme.powerProduction,
                 checked = uiState.productionGaugeEnabled,
                 onCheckedChange = onProductionChecked
             )
             DialogSettingsRow(
                 title = Res.string.gauge_subtitle_consumption,
-                color = powerConsumptionGauge,
+                color = MaterialTheme.colorScheme.powerConsumption,
                 checked = uiState.consumptionGaugeEnabled,
                 onCheckedChange = onConsumptionChecked
             )
             DialogSettingsRow(
                 title = Res.string.gauge_subtitle_injection,
-                color = powerInjectionGauge,
+                color = MaterialTheme.colorScheme.powerInjection,
                 checked = uiState.injectionGaugeEnabled,
                 onCheckedChange = onInjectionChecked
             )
             DialogSettingsRow(
                 title = Res.string.gauge_subtitle_withdrawals,
-                color = powerWithdrawalsGauge,
+                color = MaterialTheme.colorScheme.powerWithdrawals,
                 checked = uiState.withdrawalsGaugeEnabled,
                 onCheckedChange = onWithdrawalsChecked
             )

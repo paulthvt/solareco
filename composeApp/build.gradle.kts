@@ -67,7 +67,9 @@ kotlin {
             implementation(libs.arrow.core)
             implementation(libs.arrow.fx.coroutines)
             implementation(libs.napier)
-            implementation(libs.koalaplot.core)
+
+            implementation(libs.vico)
+            implementation(libs.vico.multiplatform.m3)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

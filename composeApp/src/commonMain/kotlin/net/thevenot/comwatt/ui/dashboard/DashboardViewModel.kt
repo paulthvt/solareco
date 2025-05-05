@@ -95,6 +95,7 @@ class DashboardViewModel(
 
     fun onTimeUnitSelected(timeUnitSelectedIndex: Int) {
         _uiState.value = _uiState.value.copy(timeUnitSelectedIndex = timeUnitSelectedIndex)
+        _charts.value = listOf()
         selectedTimeUnit = convertSelectedIndexToTimeUnit(timeUnitSelectedIndex)
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isRefreshing = true)

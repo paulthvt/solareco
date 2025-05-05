@@ -59,16 +59,16 @@ import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.home.HomeViewModel.Companion.MAX_POWER
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
-import net.thevenot.comwatt.ui.theme.powerConsumptionGauge
+import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerConsumptionGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerConsumptionGaugeStart
-import net.thevenot.comwatt.ui.theme.powerInjectionGauge
+import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerInjectionGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerInjectionGaugeStart
-import net.thevenot.comwatt.ui.theme.powerProductionGauge
+import net.thevenot.comwatt.ui.theme.powerProduction
 import net.thevenot.comwatt.ui.theme.powerProductionGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerProductionGaugeStart
-import net.thevenot.comwatt.ui.theme.powerWithdrawalsGauge
+import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeStart
 import org.jetbrains.compose.resources.StringResource
@@ -218,17 +218,17 @@ fun OtherValues(consumption: String, injection: String, withdrawals: String) {
     Row(modifier = Modifier.fillMaxSize().padding(40.dp), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Bottom) {
         SingleValueTitle(
             title = Res.string.gauge_subtitle_consumption,
-            color = powerConsumptionGauge,
+            color = MaterialTheme.colorScheme.powerConsumption,
             value = consumption
         )
         SingleValueTitle(
             title = Res.string.gauge_subtitle_withdrawals,
-            color = powerWithdrawalsGauge,
+            color = MaterialTheme.colorScheme.powerWithdrawals,
             value = withdrawals
         )
         SingleValueTitle(
             title = Res.string.gauge_subtitle_injection,
-            color = powerInjectionGauge,
+            color = MaterialTheme.colorScheme.powerInjection,
             value = injection
         )
     }
@@ -264,7 +264,7 @@ fun ProductionValue(production: String) {
     ) {
         SourceTitle(
             title = Res.string.gauge_subtitle_production,
-            color = powerProductionGauge
+            color = MaterialTheme.colorScheme.powerProduction
         )
         Text(
             text = "$production W",
@@ -302,10 +302,10 @@ fun CircularPowerIndicator(
     val blurColor = MaterialTheme.colorScheme.primary
     val linesColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    val consumptionGradientColor = createGradient(powerConsumptionGaugeStart, powerConsumptionGaugeEnd)
-    val productionGradientColor = createGradient(powerProductionGaugeStart, powerProductionGaugeEnd)
-    val injectionGradientColor = createGradient(powerInjectionGaugeStart, powerInjectionGaugeEnd)
-    val withdrawalsGradientColor = createGradient(powerWithdrawalsGaugeStart, powerWithdrawalsGaugeEnd)
+    val consumptionGradientColor = createGradient(MaterialTheme.colorScheme.powerConsumptionGaugeStart, MaterialTheme.colorScheme.powerConsumptionGaugeEnd)
+    val productionGradientColor = createGradient(MaterialTheme.colorScheme.powerProductionGaugeStart, MaterialTheme.colorScheme.powerProductionGaugeEnd)
+    val injectionGradientColor = createGradient(MaterialTheme.colorScheme.powerInjectionGaugeStart, MaterialTheme.colorScheme.powerInjectionGaugeEnd)
+    val withdrawalsGradientColor = createGradient(MaterialTheme.colorScheme.powerWithdrawalsGaugeStart, MaterialTheme.colorScheme.powerWithdrawalsGaugeEnd)
 
     val maxEnabledValue = listOf(
         production to productionChecked,
@@ -314,6 +314,10 @@ fun CircularPowerIndicator(
         withdrawals to withdrawalsChecked
     ).filter { it.second }
         .maxOfOrNull { it.first } ?: 0f
+    val powerConsumptionGaugeEnd = MaterialTheme.colorScheme.powerConsumptionGaugeEnd
+    val powerProductionGaugeEnd = MaterialTheme.colorScheme.powerProductionGaugeEnd
+    val powerWithdrawalsGaugeEnd = MaterialTheme.colorScheme.powerWithdrawalsGaugeEnd
+    val powerInjectionGaugeEnd = MaterialTheme.colorScheme.powerInjectionGaugeEnd
 
     Canvas(
         modifier = Modifier

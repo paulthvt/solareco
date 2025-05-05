@@ -9,5 +9,10 @@ data class ChartTimeSeries(
 
 data class TimeSeries(
     val title: TimeSeriesTitle,
+    val type: TimeSeriesType,
     val values: Map<Instant, Float>,
 )
+
+enum class TimeSeriesType {
+    CONSUMPTION, PRODUCTION, INJECTION, WITHDRAWAL
+}
