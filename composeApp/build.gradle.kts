@@ -66,7 +66,7 @@ kotlin {
             implementation(libs.androidx.datastore.preferences.core)
             implementation(libs.arrow.core)
             implementation(libs.arrow.fx.coroutines)
-            implementation(libs.napier)
+            implementation(libs.touchlab.kermit)
 
             implementation(libs.vico)
             implementation(libs.vico.multiplatform.m3)

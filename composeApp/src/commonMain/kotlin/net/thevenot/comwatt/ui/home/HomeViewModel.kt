@@ -2,7 +2,7 @@ package net.thevenot.comwatt.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.aakira.napier.Napier
+import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
@@ -40,13 +40,13 @@ class HomeViewModel(
     }
 
     fun startAutoRefresh() {
-        Napier.d(tag = TAG) { "startAutoRefresh ${this@HomeViewModel}" }
+        Logger.d(TAG) { "startAutoRefresh ${this@HomeViewModel}" }
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
             fetchSiteTimeSeriesUseCase.invoke()
                 .flowOn(Dispatchers.IO)
                 .catch {
-                    Napier.e(tag = TAG) { "Error in auto refresh: $it" }
+                    Logger.e(TAG) { "Error in auto refresh: $it" }
                     _uiState.value = _uiState.value.copy(
                         errorCount = _uiState.value.errorCount + 1,
                         lastErrorMessage = it.message ?: "Unknown error"
@@ -54,7 +54,7 @@ class HomeViewModel(
                 }
                 .collect {
                     it.onLeft { error ->
-                        Napier.e(tag = TAG) { "Error in auto refresh: $error" }
+                        Logger.e(TAG) { "Error in auto refresh: $error" }
                         _uiState.value = _uiState.value.copy(
                             errorCount = _uiState.value.errorCount + 1
                         )
@@ -74,7 +74,7 @@ class HomeViewModel(
 
     fun singleRefresh() {
         viewModelScope.launch {
-            Napier.d(tag = TAG) { "Single refresh ${this@HomeViewModel}" }
+            Logger.d(TAG) { "Single refresh ${this@HomeViewModel}" }
             _uiState.value = _uiState.value.copy(isRefreshing = true)
             fetchSiteTimeSeriesUseCase.singleFetch().onRight {
                 _uiState.value = _uiState.value.copy(
@@ -96,7 +96,7 @@ class HomeViewModel(
     }
 
     fun stopAutoRefresh() {
-        Napier.d(tag = TAG) { "stopAutoRefresh" }
+        Logger.d(TAG) { "stopAutoRefresh" }
         autoRefreshJob?.cancel()
     }
 

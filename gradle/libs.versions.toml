@@ -24,7 +24,7 @@ sqlite = "2.5.0-rc01"
 androidx-room = "2.7.0-rc01"
 dataStoreVersion = "1.1.3"
 arrow = "2.0.1"
-napier = "2.7.1"
+kermit = "2.0.5"
 testResources = "0.10.0"
 vico = "2.1.2"
 
@@ -64,7 +64,7 @@ uri-kmp = { module = "com.eygraber:uri-kmp", version.ref = "uriKmp" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 arrow-core = { module = "io.arrow-kt:arrow-core", version.ref = "arrow" }
 arrow-fx-coroutines = { module = "io.arrow-kt:arrow-fx-coroutines", version.ref = "arrow" }
-napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+touchlab-kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermit" }
 vico = { group = "com.patrykandpatrick.vico", name = "multiplatform", version.ref = "vico" }
 vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
 test-resources = { module = "com.goncalossilva:resources", version.ref = "testResources" }
