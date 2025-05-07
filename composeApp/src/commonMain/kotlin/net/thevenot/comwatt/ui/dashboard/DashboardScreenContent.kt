@@ -3,6 +3,7 @@ package net.thevenot.comwatt.ui.dashboard
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -118,10 +119,11 @@ fun DashboardScreenContent(
             viewModel.singleRefresh()
         }) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(AppTheme.dimens.paddingNormal),
+                modifier = Modifier.fillMaxSize().padding(horizontal = AppTheme.dimens.paddingNormal),
                 verticalArrangement = Arrangement.spacedBy(
                     AppTheme.dimens.paddingNormal, Alignment.Top
-                )
+                ),
+                contentPadding = PaddingValues(bottom = AppTheme.dimens.paddingNormal)
             ) {
                 item {
                     Row {
