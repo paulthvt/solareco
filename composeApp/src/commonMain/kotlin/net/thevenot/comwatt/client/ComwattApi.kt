@@ -95,12 +95,12 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
     private suspend fun doFetchSiteTimeSeries(
         siteId: Int,
         startTime: Instant? = null,
+        endTime: Instant = Clock.System.now(),
         timeAgoUnit: TimeAgoUnit? = null,
         timeAgoValue: Int? = null,
         measureKind: MeasureKind = MeasureKind.FLOW,
         aggregationLevel: AggregationLevel = AggregationLevel.NONE
     ): Either<ApiError, SiteTimeSeriesDto> {
-        val endTime = Clock.System.now()
         val timeZone = TimeZone.of("Europe/Paris")
 
         return withContext(Dispatchers.IO) {
@@ -123,12 +123,14 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
     suspend fun fetchSiteTimeSeries(
         siteId: Int,
         startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
+        endTime: Instant = Clock.System.now(),
         measureKind: MeasureKind = MeasureKind.FLOW,
         aggregationLevel: AggregationLevel = AggregationLevel.NONE
     ): Either<ApiError, SiteTimeSeriesDto> {
         return doFetchSiteTimeSeries(
             siteId = siteId,
             startTime = startTime,
+            endTime = endTime,
             measureKind = measureKind,
             aggregationLevel = aggregationLevel
         )
@@ -138,6 +140,7 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         siteId: Int,
         timeAgoUnit: TimeAgoUnit,
         timeAgoValue: Int = 1,
+        endTime: Instant = Clock.System.now(),
         measureKind: MeasureKind = MeasureKind.FLOW,
         aggregationLevel: AggregationLevel = AggregationLevel.NONE
     ): Either<ApiError, SiteTimeSeriesDto> {
@@ -145,6 +148,7 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
             siteId = siteId,
             timeAgoUnit = timeAgoUnit,
             timeAgoValue = timeAgoValue,
+            endTime = endTime,
             measureKind = measureKind,
             aggregationLevel = aggregationLevel
         )

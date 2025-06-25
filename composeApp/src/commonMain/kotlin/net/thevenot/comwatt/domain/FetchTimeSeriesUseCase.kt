@@ -27,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
@@ -42,10 +43,11 @@ import net.thevenot.comwatt.model.type.TimeAgoUnit
 import org.jetbrains.compose.resources.getString
 
 class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
-    operator fun invoke(timeUnit: TimeUnit = TimeUnit.DAY): Flow<Either<DomainError, List<ChartTimeSeries>>> =
+    operator fun invoke(parametersProvider: () -> Pair<TimeUnit, Instant>): Flow<Either<DomainError, List<ChartTimeSeries>>> =
         flow {
             while (true) {
-                val data = refreshTimeSeriesData(timeUnit)
+                val (timeUnit, endTime) = parametersProvider()
+                val data = refreshTimeSeriesData(timeUnit, endTime)
                 emit(data)
 
                 when (data) {
@@ -67,17 +69,24 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
             }
         }
 
-    suspend fun singleFetch(timeUnit: TimeUnit = TimeUnit.DAY): Either<DomainError, List<ChartTimeSeries>> {
-        return refreshTimeSeriesData(timeUnit)
+    suspend fun singleFetch(
+        timeUnit: TimeUnit = TimeUnit.DAY,
+        endTime: Instant = Clock.System.now()
+    ): Either<DomainError, List<ChartTimeSeries>> {
+        return refreshTimeSeriesData(timeUnit, endTime)
     }
 
-    private suspend fun refreshTimeSeriesData(timeUnit: TimeUnit): Either<DomainError, List<ChartTimeSeries>> =
+    private suspend fun refreshTimeSeriesData(
+        timeUnit: TimeUnit,
+        endTime: Instant
+    ): Either<DomainError, List<ChartTimeSeries>> =
         withContext(Dispatchers.IO) {
-            Logger.d(TAG) { "fetching charts data" }
+            Logger.d(TAG) { "fetching charts data: time unit $timeUnit, end time $endTime" }
             val siteId = dataRepository.getSettings().firstOrNull()?.siteId
             return@withContext siteId?.let { id ->
-                val consumptionProdChartsData = getConsumptionProdChartTimeSeries(id, timeUnit)
-                val tilesChartsData = getTilesChartsData(id, timeUnit)
+                val consumptionProdChartsData =
+                    getConsumptionProdChartTimeSeries(id, timeUnit, endTime)
+                val tilesChartsData = getTilesChartsData(id, timeUnit, endTime)
 
                 consumptionProdChartsData.combine(
                     tilesChartsData,
@@ -91,7 +100,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
     private suspend fun getTilesChartsData(
         id: Int,
-        timeUnit: TimeUnit
+        timeUnit: TimeUnit,
+        endTime: Instant
     ) = withContext(Dispatchers.IO) {
         dataRepository.api.fetchTiles(id)
             .mapLeft { DomainError.Api(it) }
@@ -108,7 +118,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                         Logger.d(TAG) { "Fetching time series for device id: $deviceId" }
                                         val seriesResult = dataRepository.api.fetchTimeSeries(
                                             deviceId = deviceId,
-                                            timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit)
+                                            timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
+                                            endTime = endTime
                                         )
                                         Logger.d(TAG) { "Fetched series for device id $deviceId: $seriesResult" }
                                         val kind = device.deviceKind
@@ -152,12 +163,14 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
     private suspend fun getConsumptionProdChartTimeSeries(
         id: Int,
-        timeUnit: TimeUnit
+        timeUnit: TimeUnit,
+        endTime: Instant
     ): Either<DomainError, List<ChartTimeSeries>> {
         return dataRepository.api.fetchSiteTimeSeries(
             siteId = id,
             timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
-            timeAgoValue = 1
+            timeAgoValue = 1,
+            endTime = endTime
         )
             .mapLeft { DomainError.Api(it) }
             .map { siteTimeSeries ->

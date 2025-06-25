@@ -1,6 +1,5 @@
 package net.thevenot.comwatt.ui.dashboard
 
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -13,11 +12,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -29,14 +33,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -67,6 +70,10 @@ import com.patrykandpatrick.vico.multiplatform.common.fill
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
 import com.patrykandpatrick.vico.multiplatform.common.shape.CorneredShape
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.day_range_selected_time_n_days_gao
+import comwatt.composeapp.generated.resources.day_range_selected_time_today
+import comwatt.composeapp.generated.resources.day_range_selected_time_yesterday
+import comwatt.composeapp.generated.resources.hour_range_selected_time
 import comwatt.composeapp.generated.resources.range_picker_button_custom
 import comwatt.composeapp.generated.resources.range_picker_button_day
 import comwatt.composeapp.generated.resources.range_picker_button_hour
@@ -79,19 +86,25 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeries
+import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.theme.AppTheme
+import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
 import net.thevenot.comwatt.ui.theme.powerWithdrawals
+import net.thevenot.comwatt.utils.formatTime
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.pow
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
@@ -109,10 +122,22 @@ fun DashboardScreenContent(
             viewModel.stopAutoRefresh()
         }
     }
-
+    val showDatePickerDialog = remember { mutableStateOf(false) }
     val charts by viewModel.charts.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val state = rememberPullToRefreshState()
+
+    if (showDatePickerDialog.value) {
+        TimePickerDialog(
+            selectedTimeUnitIndex = uiState.timeUnitSelectedIndex,
+            onDismiss = { showDatePickerDialog.value = false },
+            defaultSelectedTimeRange = uiState.selectedTimeRange,
+            onRangeSelected = { range ->
+                viewModel.onTimeSelected(range)
+                showDatePickerDialog.value = false
+            }
+        )
+    }
 
     LoadingView(uiState.isDataLoaded.not()) {
         PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
@@ -126,56 +151,21 @@ fun DashboardScreenContent(
                 contentPadding = PaddingValues(bottom = AppTheme.dimens.paddingNormal)
             ) {
                 item {
-                    Row {
-                        val options = listOf(
-                            stringResource(Res.string.range_picker_button_hour),
-                            stringResource(Res.string.range_picker_button_day),
-                            stringResource(Res.string.range_picker_button_week),
-                            stringResource(Res.string.range_picker_button_custom)
-                        )
-                        SingleChoiceSegmentedButtonRow {
-                            options.forEachIndexed { index, label ->
-                                SegmentedButton(
-                                    shape = SegmentedButtonDefaults.itemShape(
-                                        index = index, count = options.size
-                                    ), onClick = {
-                                        viewModel.onTimeUnitSelected(index)
-                                    }, selected = index == uiState.timeUnitSelectedIndex
-                                ) {
-                                    Text(label)
-                                }
-                            }
-                        }
-                    }
+                    TimeUnitBar(uiState) { viewModel.onTimeUnitSelected(it) }
                 }
 
                 item {
-                    var dragDirection: HorizontalDragDirection? = null
-                    Row(
-                        modifier = Modifier.fillMaxWidth().pointerInput(Unit) {
-                            detectHorizontalDragGestures(onDragEnd = {
-                                Logger.d(TAG) { "Drag end $dragDirection" }
-                            }) { _, dragAmount ->
-                                when {
-                                    dragAmount < -20f -> {
-                                        dragDirection = HorizontalDragDirection.LEFT
-                                    }
-
-                                    dragAmount > 20f -> {
-                                        dragDirection = HorizontalDragDirection.RIGHT
-                                    }
-                                }
-                            }
-                        }, horizontalArrangement = Arrangement.Center
-                    ) {
-                        TextButton(onClick = { Logger.d(TAG) { "Click" } }) {
-                            Text(
-                                "Today",
-                                modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
-                                    .fillMaxWidth(),
-                                textAlign = TextAlign.Center
-                            )
-                        }
+                    RangeButton(
+                        uiState = uiState,
+                        onPreviousButtonClick = {
+                            viewModel.dragRange(RangeSelectionButton.PREV)
+                            viewModel.singleRefresh()
+                        },
+                        onNextButtonClick = {
+                            viewModel.dragRange(RangeSelectionButton.NEXT)
+                            viewModel.singleRefresh()
+                        }) {
+                        showDatePickerDialog.value = true
                     }
                 }
                 if (charts.isNotEmpty()) {
@@ -183,7 +173,7 @@ fun DashboardScreenContent(
                         items = charts.withIndex()
                             .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
                         key = { it.index to it.value.name }) { (_, chart) ->
-                        LazyGraphCard(chart, uiState)
+                        LazyGraphCard(uiState, chart)
                     }
                 }
             }
@@ -192,7 +182,118 @@ fun DashboardScreenContent(
 }
 
 @Composable
-private fun LazyGraphCard(chart: ChartTimeSeries, uiState: DashboardScreenState) {
+private fun RangeButton(
+    uiState: DashboardScreenState,
+    onPreviousButtonClick: () -> Unit = {},
+    onNextButtonClick: () -> Unit = {},
+    showDatePickerDialog: () -> Unit
+) {
+    val selectedIndex = when (uiState.timeUnitSelectedIndex) {
+        0 -> uiState.selectedTimeRange.hour.selectedValue
+        1 -> uiState.selectedTimeRange.day.selectedValue
+        2 -> 0
+        else -> 0
+    }
+    val minBound = when (uiState.timeUnitSelectedIndex) {
+        0 -> 23
+        1 -> 364
+        2 -> 0
+        else -> 0
+    }
+    Logger.d(TAG) { "selectedIndex $selectedIndex" }
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = AppTheme.dimens.paddingNormal),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedIconButton(onClick = {
+            onPreviousButtonClick()
+        }, enabled = selectedIndex < minBound) {
+            Icon(Icons.Default.ChevronLeft, contentDescription = "Previous")
+        }
+
+        TextButton(
+            onClick = { showDatePickerDialog() },
+            modifier = Modifier.weight(1f)
+        ) {
+            Column(
+                modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Logger.d(TAG) { "selected value ${uiState.selectedTimeRange.day.selectedValue}" }
+                Text(
+                    when (uiState.timeUnitSelectedIndex) {
+                        0 -> pluralStringResource(
+                            Res.plurals.hour_range_selected_time,
+                            uiState.selectedTimeRange.hour.selectedValue + 1,
+                            uiState.selectedTimeRange.hour.selectedValue + 1
+                        )
+
+                        1 -> when (uiState.selectedTimeRange.day.selectedValue) {
+                            0 -> stringResource(Res.string.day_range_selected_time_today)
+                            1 -> stringResource(Res.string.day_range_selected_time_yesterday)
+                            else -> stringResource(
+                                Res.string.day_range_selected_time_n_days_gao,
+                                uiState.selectedTimeRange.day.selectedValue
+                            )
+                        }
+
+                        else -> ""
+                    }
+                )
+
+                if (uiState.timeUnitSelectedIndex == 0) {
+                    Text(
+                        text = "${formatTime(uiState.selectedTimeRange.hour.start)} - ${
+                            formatTime(
+                                uiState.selectedTimeRange.hour.end
+                            )
+                        }",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+
+        OutlinedIconButton(onClick = {
+            onNextButtonClick()
+        }, enabled = selectedIndex > 0) {
+            Icon(Icons.Default.ChevronRight, contentDescription = "Next")
+        }
+    }
+}
+
+@Composable
+private fun TimeUnitBar(
+    uiState: DashboardScreenState,
+    onTimeUnitSelected: (Int) -> Unit = {}
+) {
+    Row {
+        val options = listOf(
+            stringResource(Res.string.range_picker_button_hour),
+            stringResource(Res.string.range_picker_button_day),
+            stringResource(Res.string.range_picker_button_week),
+            stringResource(Res.string.range_picker_button_custom)
+        )
+        SingleChoiceSegmentedButtonRow {
+            options.forEachIndexed { index, label ->
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        index = index, count = options.size
+                    ), onClick = {
+                        onTimeUnitSelected(index)
+                    }, selected = index == uiState.timeUnitSelectedIndex
+                ) {
+                    Text(label)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun LazyGraphCard(uiState: DashboardScreenState, chart: ChartTimeSeries) {
     OutlinedCard {
         Column {
             Card {
@@ -374,6 +475,79 @@ fun ChartTitle(icon: ImageVector, title: String) {
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleSmall,
         )
+    }
+}
+
+@Preview
+@Composable
+fun TimeUnitBarPreview() {
+    val sampleState = DashboardScreenState(
+        isDataLoaded = true,
+        isRefreshing = false,
+        selectedTimeRange = SelectedTimeRange(),
+        timeUnitSelectedIndex = 1
+    )
+
+    ComwattTheme {
+        TimeUnitBar(uiState = sampleState)
+    }
+}
+
+@Preview
+@Composable
+fun RangeButtonPreview() {
+    val sampleState = DashboardScreenState(
+        isDataLoaded = true,
+        isRefreshing = false,
+        selectedTimeRange = SelectedTimeRange(
+            hour = HourRange(
+                selectedValue = 2,
+                start = Instant.fromEpochSeconds(1_700_000_000L),
+                end = Instant.fromEpochSeconds(1_700_003_600L)
+            )
+        ),
+        timeUnitSelectedIndex = 0
+    )
+
+    ComwattTheme {
+        RangeButton(
+            uiState = sampleState,
+            onPreviousButtonClick = {},
+            onNextButtonClick = {},
+            showDatePickerDialog = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun LazyGraphCardPreview() {
+    val sampleState = DashboardScreenState(
+        isDataLoaded = true,
+        isRefreshing = false,
+        selectedTimeRange = SelectedTimeRange(),
+        timeUnitSelectedIndex = 1
+    )
+
+    // Generate a list of sample data points (e.g., 6 hours)
+    val now = Instant.fromEpochSeconds(1_700_000_000L)
+    val sampleValues = (0..5).associate { i ->
+        now.plus(i * 3600, kotlinx.datetime.DateTimeUnit.SECOND) to (100f + i * 50)
+    }
+
+    val sampleTimeSeries = TimeSeries(
+        title = TimeSeriesTitle("Sample", Icons.Default.Info),
+        type = TimeSeriesType.PRODUCTION,
+        values = sampleValues
+    )
+
+    val sampleChart = ChartTimeSeries(
+        name = "Sample Chart",
+        timeSeries = listOf(sampleTimeSeries)
+    )
+
+    ComwattTheme {
+        LazyGraphCard(uiState = sampleState, chart = sampleChart)
     }
 }
 
