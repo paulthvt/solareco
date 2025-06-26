@@ -30,4 +30,15 @@
     <string name="consumption_production_chart_title">Consumption vs Production</string>
     <string name="production_series_title">Production</string>
     <string name="consumption_series_title">Consumption</string>
+    <string name="hour_range_dialog_picker_yesterday_label">Yesterday</string>
+    <plurals name="hour_range_selected_time">
+        <item quantity="one">1 hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <string name="day_range_selected_time_today">Today</string>
+    <string name="day_range_selected_time_yesterday">Yesterday</string>
+    <string name="day_range_selected_time_n_days_gao">%1$d days ago</string>
+    <string name="day_range_dialog_picker_dismiss_button">Cancel</string>
+    <string name="day_range_dialog_picker_confirm_button">Confirm</string>
+    <string name="day_range_dialog_picker_title">Select the Range</string>
 </resources>

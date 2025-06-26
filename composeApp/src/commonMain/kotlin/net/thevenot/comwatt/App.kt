@@ -31,12 +31,10 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App(
-    darkTheme: Boolean,
     dynamicColor: Boolean,
     appContainer: AppContainer
 ) {
     ComwattTheme(
-        darkTheme = darkTheme,
         dynamicColor = dynamicColor
     ) {
         Surface(
