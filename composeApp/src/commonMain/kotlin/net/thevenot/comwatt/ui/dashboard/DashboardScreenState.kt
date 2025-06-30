@@ -2,9 +2,13 @@ package net.thevenot.comwatt.ui.dashboard
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 data class DashboardScreenState(
     val isRefreshing: Boolean = false,
@@ -18,15 +22,17 @@ data class DashboardScreenState(
 data class SelectedTimeRange(
     val hour: HourRange = HourRange.fromSelectedValue(0),
     val day: DayRange = DayRange.fromSelectedValue(0),
-    val week: Int = 0
+    val week: WeekRange = WeekRange.fromSelectedValue(0)
 ) {
     fun withUpdatedRange(
         hourSelectedValue: Int = hour.selectedValue,
-        daySelectedValue: Int = day.selectedValue
+        daySelectedValue: Int = day.selectedValue,
+        weekSelectedValue: Int = week.selectedValue
     ): SelectedTimeRange {
         return this
             .withUpdatedHourRange(hourSelectedValue)
             .withUpdatedDayRange(daySelectedValue)
+            .withUpdatedWeekRange(weekSelectedValue)
     }
 
     fun withUpdatedHourRange(selectedValue: Int = hour.selectedValue): SelectedTimeRange {
@@ -38,6 +44,12 @@ data class SelectedTimeRange(
     fun withUpdatedDayRange(selectedValue: Int = day.selectedValue): SelectedTimeRange {
         return this.copy(
             day = DayRange.fromSelectedValue(selectedValue)
+        )
+    }
+
+    fun withUpdatedWeekRange(selectedValue: Int = week.selectedValue): SelectedTimeRange {
+        return this.copy(
+            week = WeekRange.fromSelectedValue(selectedValue)
         )
     }
 }
@@ -66,6 +78,48 @@ data class DayRange(
             val now = Clock.System.now()
             val value = now.minus(selectedValue, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
             return DayRange(selectedValue, value)
+        }
+    }
+}
+
+data class WeekRange(
+    val selectedValue: Int,
+    val start: Instant,
+    val end: Instant
+) {
+    companion object {
+        fun fromSelectedValue(selectedValue: Int): WeekRange {
+            val now = Clock.System.now()
+            val currentTimeZone = TimeZone.currentSystemDefault()
+
+            if (selectedValue == 0) {
+                // Last 7 days (today - 6 days to today)
+                val end = now
+                val start = now.minus(6, DateTimeUnit.DAY, currentTimeZone)
+                return WeekRange(selectedValue, start, end)
+            } else {
+                // Sunday-to-Sunday pattern for previous weeks
+                val localDate = now.toLocalDateTime(currentTimeZone).date
+
+                // Find previous Sunday
+                var mostRecentSunday = localDate
+                while (mostRecentSunday.dayOfWeek != DayOfWeek.SUNDAY) {
+                    mostRecentSunday = mostRecentSunday.minus(1, DateTimeUnit.DAY)
+                }
+
+                // Calculate end date (Sunday)
+                val endLocalDate = mostRecentSunday.minus((selectedValue - 1) * 7, DateTimeUnit.DAY)
+                // Calculate start date (Monday, 6 days before)
+                val startLocalDate = endLocalDate.minus(6, DateTimeUnit.DAY)
+
+                // Convert LocalDate to Instant (end of day for end date)
+                val start = startLocalDate.atStartOfDayIn(currentTimeZone)
+                val end = endLocalDate.atStartOfDayIn(currentTimeZone)
+                    .plus(1, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
+                    .minus(1, DateTimeUnit.NANOSECOND)
+
+                return WeekRange(selectedValue, start, end)
+            }
         }
     }
 }

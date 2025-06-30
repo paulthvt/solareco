@@ -61,8 +61,8 @@ class DashboardViewModel(
                     },
                     when (selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
-                        DashboardTimeUnit.DAY -> Clock.System.now()
-                        DashboardTimeUnit.WEEK -> Clock.System.now()
+                        DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
+                        DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
                         DashboardTimeUnit.CUSTOM -> Clock.System.now()
                     }
                 )
@@ -111,7 +111,7 @@ class DashboardViewModel(
                 endTime = when (selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
                     DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
-                    DashboardTimeUnit.WEEK -> Clock.System.now()
+                    DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
                     DashboardTimeUnit.CUSTOM -> Clock.System.now()
                 }
             ).onRight {
@@ -173,7 +173,14 @@ class DashboardViewModel(
                         )
                     }
 
-                    DashboardTimeUnit.WEEK -> {}
+                    DashboardTimeUnit.WEEK -> _uiState.update {
+                        it.copy(
+                            selectedTimeRange = it.selectedTimeRange.withUpdatedWeekRange(
+                                it.selectedTimeRange.week.selectedValue - 1
+                            )
+                        )
+                    }
+
                     DashboardTimeUnit.CUSTOM -> {}
                 }
             }
@@ -196,7 +203,14 @@ class DashboardViewModel(
                         )
                     }
 
-                    DashboardTimeUnit.WEEK -> {}
+                    DashboardTimeUnit.WEEK -> _uiState.update {
+                        it.copy(
+                            selectedTimeRange = it.selectedTimeRange.withUpdatedWeekRange(
+                                it.selectedTimeRange.week.selectedValue + 1
+                            )
+                        )
+                    }
+
                     DashboardTimeUnit.CUSTOM -> {}
                 }
             }

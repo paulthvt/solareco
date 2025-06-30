@@ -6,7 +6,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
+import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.byUnicodePattern
+import kotlinx.datetime.format.char
 import kotlinx.datetime.offsetAt
 import kotlinx.datetime.toLocalDateTime
 
@@ -24,4 +26,14 @@ fun formatTime(dateTime: LocalDateTime): String {
 
 fun formatTime(instant: Instant, timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
     return formatTime(instant.toLocalDateTime(timeZone))
+}
+
+@OptIn(FormatStringsInDatetimeFormats::class)
+fun Instant.formatDayMonth(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
+    val offset = timeZone.offsetAt(this)
+    return this.format(DateTimeComponents.Format {
+        dayOfMonth()
+        char(' ')
+        monthName(MonthNames.ENGLISH_ABBREVIATED)
+    }, offset)
 }

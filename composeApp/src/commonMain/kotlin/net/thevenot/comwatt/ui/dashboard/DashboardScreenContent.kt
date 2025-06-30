@@ -78,6 +78,9 @@ import comwatt.composeapp.generated.resources.range_picker_button_custom
 import comwatt.composeapp.generated.resources.range_picker_button_day
 import comwatt.composeapp.generated.resources.range_picker_button_hour
 import comwatt.composeapp.generated.resources.range_picker_button_week
+import comwatt.composeapp.generated.resources.week_range_selected_time_n_weeks_ago
+import comwatt.composeapp.generated.resources.week_range_selected_time_one_week_ago
+import comwatt.composeapp.generated.resources.week_range_selected_time_past_seven_days
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
@@ -101,6 +104,7 @@ import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
 import net.thevenot.comwatt.ui.theme.powerWithdrawals
+import net.thevenot.comwatt.utils.formatDayMonth
 import net.thevenot.comwatt.utils.formatTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -191,13 +195,13 @@ private fun RangeButton(
     val selectedIndex = when (uiState.timeUnitSelectedIndex) {
         0 -> uiState.selectedTimeRange.hour.selectedValue
         1 -> uiState.selectedTimeRange.day.selectedValue
-        2 -> 0
+        2 -> uiState.selectedTimeRange.week.selectedValue
         else -> 0
     }
     val minBound = when (uiState.timeUnitSelectedIndex) {
         0 -> 23
         1 -> 364
-        2 -> 0
+        2 -> 52
         else -> 0
     }
     Logger.d(TAG) { "selectedIndex $selectedIndex" }
@@ -239,19 +243,41 @@ private fun RangeButton(
                             )
                         }
 
+                        2 -> when (uiState.selectedTimeRange.week.selectedValue) {
+                            0 -> stringResource(Res.string.week_range_selected_time_past_seven_days)
+                            1 -> stringResource(Res.string.week_range_selected_time_one_week_ago)
+                            else -> stringResource(
+                                Res.string.week_range_selected_time_n_weeks_ago,
+                                uiState.selectedTimeRange.week.selectedValue
+                            )
+                        }
+
                         else -> ""
                     }
                 )
 
-                if (uiState.timeUnitSelectedIndex == 0) {
-                    Text(
-                        text = "${formatTime(uiState.selectedTimeRange.hour.start)} - ${
-                            formatTime(
-                                uiState.selectedTimeRange.hour.end
-                            )
-                        }",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                when (uiState.timeUnitSelectedIndex) {
+                    0 -> {
+                        Text(
+                            text = "${formatTime(uiState.selectedTimeRange.hour.start)} - ${
+                                formatTime(
+                                    uiState.selectedTimeRange.hour.end
+                                )
+                            }",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    2 -> {
+                        Text(
+                            text = "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${
+
+                                uiState.selectedTimeRange.week.end.formatDayMonth()
+
+                            }",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }
