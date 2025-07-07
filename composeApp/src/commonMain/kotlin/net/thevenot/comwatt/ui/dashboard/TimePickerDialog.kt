@@ -5,8 +5,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.day_range_dialog_picker_confirm_button
 import comwatt.composeapp.generated.resources.day_range_dialog_picker_dismiss_button
@@ -14,6 +16,7 @@ import comwatt.composeapp.generated.resources.day_range_dialog_picker_title
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import net.thevenot.comwatt.ui.dashboard.pickers.CustomPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.DayPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.HourPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.WeekPicker
@@ -29,9 +32,14 @@ fun TimePickerDialog(
     val currentDateTime =
         remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
 
-    val selectedHourRange = remember { mutableStateOf(defaultSelectedTimeRange.hour.selectedValue) }
-    val selectedDay = remember { mutableStateOf(defaultSelectedTimeRange.day.selectedValue) }
-    val selectedWeek = remember { mutableStateOf(defaultSelectedTimeRange.week.selectedValue) }
+    var selectedHour by remember { mutableStateOf(defaultSelectedTimeRange.hour.selectedValue) }
+    var selectedDay by remember { mutableStateOf(defaultSelectedTimeRange.day.selectedValue) }
+    var selectedWeek by remember { mutableStateOf(defaultSelectedTimeRange.week.selectedValue) }
+    var selectedCustomStart by
+    remember { mutableStateOf(defaultSelectedTimeRange.custom.selectedStartValue) }
+    var selectedCustomEnd by
+    remember { mutableStateOf(defaultSelectedTimeRange.custom.selectedStartValue) }
+    var isRangeValid by remember { mutableStateOf(true) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -43,7 +51,7 @@ fun TimePickerDialog(
                             onRangeSelected(
                                 SelectedTimeRange(
                                     hour = HourRange.fromSelectedValue(
-                                        selectedHourRange.value
+                                        selectedHour
                                     )
                                 )
                             )
@@ -53,29 +61,40 @@ fun TimePickerDialog(
                             onRangeSelected(
                                 SelectedTimeRange(
                                     day = DayRange.fromSelectedValue(
-                                        selectedDay.value
+                                        selectedDay
                                     )
                                 )
                             )
                         }
+
                         2 -> {
                             onRangeSelected(
                                 SelectedTimeRange(
                                     week = WeekRange.fromSelectedValue(
-                                        selectedWeek.value
+                                        selectedWeek
+                                    )
+                                )
+                            )
+                        }
+
+                        3 -> {
+                            onRangeSelected(
+                                SelectedTimeRange(
+                                    custom = CustomRange.fromSelectedValues(
+                                        selectedCustomStart,
+                                        selectedCustomEnd
                                     )
                                 )
                             )
                         }
 
                         else -> {
-                            // Custom date selection not implemented
-                            onRangeSelected(defaultSelectedTimeRange)
                         }
                     }
 
                     onDismiss()
-                }
+                },
+                enabled = isRangeValid
             ) {
                 Text(stringResource(Res.string.day_range_dialog_picker_confirm_button))
             }
@@ -96,7 +115,7 @@ fun TimePickerDialog(
                     currentDateTime = currentDateTime,
                     defaultSelectedTimeRange = defaultSelectedTimeRange.hour.selectedValue,
                     onIntervalSelected = { range ->
-                        selectedHourRange.value = range
+                        selectedHour = range
                     }
                 )
 
@@ -104,7 +123,7 @@ fun TimePickerDialog(
                     currentDateTime = currentDateTime,
                     defaultSelectedDay = defaultSelectedTimeRange.day.selectedValue,
                     onDateSelected = { day ->
-                        selectedDay.value = day
+                        selectedDay = day
                     }
                 )
 
@@ -112,7 +131,20 @@ fun TimePickerDialog(
                     currentDateTime = currentDateTime,
                     defaultSelectedWeek = defaultSelectedTimeRange.week.selectedValue,
                     onIntervalSelected = { week ->
-                        selectedWeek.value = week
+                        selectedWeek = week
+                    }
+                )
+
+                3 -> CustomPicker(
+                    currentDateTime = currentDateTime,
+                    defaultStartDateTime = defaultSelectedTimeRange.custom.selectedStartValue,
+                    defaultEndDateTime = defaultSelectedTimeRange.custom.selectedEndValue,
+                    onRangeSelected = { range ->
+                        isRangeValid = range.isRangeValid
+                        if (range.isRangeValid) {
+                            selectedCustomStart = range.start
+                            selectedCustomEnd = range.end
+                        }
                     }
                 )
                 else -> Text("Custom date selection not implemented")

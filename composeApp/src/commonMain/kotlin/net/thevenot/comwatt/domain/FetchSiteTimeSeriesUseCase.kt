@@ -54,7 +54,7 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
                 .mapLeft { DomainError.Api(it) }
                 .map { timeSeries ->
                     val lastUpdateTimestamp =
-                        Instant.parse(timeSeries.timestamps.last().toString())
+                        Instant.parse(timeSeries.timestamps.last())
                     SiteTimeSeries(
                         production = timeSeries.productions.last(),
                         consumption = timeSeries.consumptions.last(),

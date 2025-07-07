@@ -108,11 +108,17 @@ class DashboardViewModel(
                     DashboardTimeUnit.WEEK -> TimeUnit.WEEK
                     DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK // todo handle custom
                 },
+                startTime = when (selectedTimeUnit) {
+                    DashboardTimeUnit.HOUR -> null
+                    DashboardTimeUnit.DAY -> null
+                    DashboardTimeUnit.WEEK -> null
+                    DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.start
+                },
                 endTime = when (selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
                     DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
                     DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
-                    DashboardTimeUnit.CUSTOM -> Clock.System.now()
+                    DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.end
                 }
             ).onRight {
                 _charts.value = it

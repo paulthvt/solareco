@@ -44,4 +44,13 @@
     <string name="day_range_dialog_picker_dismiss_button">Cancel</string>
     <string name="day_range_dialog_picker_confirm_button">Confirm</string>
     <string name="day_range_dialog_picker_title">Select the Range</string>
+    <string name="custom_range_dialog_picker_start_title">Start</string>
+    <string name="custom_range_dialog_picker_end_title">End</string>
+    <string name="custom_range_dialog_picker_start_must_be_before_end_error">Start date must be before end date</string>
+    <string name="custom_range_dialog_picker_start_cannot_be_in_future_error">Start date/time cannot be in the future</string>
+    <string name="custom_range_dialog_picker_end_cannot_be_in_future_error">End date/time cannot be in the future</string>
+    <string name="custom_range_dialog_picker_date_time_picker_select_time_icon">Select time</string>
+    <string name="custom_range_dialog_picker_date_time_picker_select_date_icon">"Select date</string>
+    <string name="custom_range_dialog_picker_date_time_picker_confirm_button">Confirm</string>
+    <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Cancel</string>
 </resources>

@@ -22,17 +22,24 @@ data class DashboardScreenState(
 data class SelectedTimeRange(
     val hour: HourRange = HourRange.fromSelectedValue(0),
     val day: DayRange = DayRange.fromSelectedValue(0),
-    val week: WeekRange = WeekRange.fromSelectedValue(0)
+    val week: WeekRange = WeekRange.fromSelectedValue(0),
+    val custom: CustomRange = CustomRange.fromSelectedValues(
+        Clock.System.now().minus(7, DateTimeUnit.DAY, TimeZone.currentSystemDefault()),
+        Clock.System.now()
+    )
 ) {
     fun withUpdatedRange(
         hourSelectedValue: Int = hour.selectedValue,
         daySelectedValue: Int = day.selectedValue,
-        weekSelectedValue: Int = week.selectedValue
+        weekSelectedValue: Int = week.selectedValue,
+        customSelectedStartValue: Instant = custom.selectedStartValue,
+        customSelectedEndValue: Instant = custom.selectedEndValue
     ): SelectedTimeRange {
         return this
             .withUpdatedHourRange(hourSelectedValue)
             .withUpdatedDayRange(daySelectedValue)
             .withUpdatedWeekRange(weekSelectedValue)
+            .withUpdatedCustomRange(customSelectedStartValue, customSelectedEndValue)
     }
 
     fun withUpdatedHourRange(selectedValue: Int = hour.selectedValue): SelectedTimeRange {
@@ -50,6 +57,15 @@ data class SelectedTimeRange(
     fun withUpdatedWeekRange(selectedValue: Int = week.selectedValue): SelectedTimeRange {
         return this.copy(
             week = WeekRange.fromSelectedValue(selectedValue)
+        )
+    }
+
+    fun withUpdatedCustomRange(
+        selectedStartValue: Instant = custom.selectedStartValue,
+        selectedEndValue: Instant = custom.selectedEndValue
+    ): SelectedTimeRange {
+        return this.copy(
+            custom = CustomRange.fromSelectedValues(selectedStartValue, selectedEndValue)
         )
     }
 }
@@ -120,6 +136,27 @@ data class WeekRange(
 
                 return WeekRange(selectedValue, start, end)
             }
+        }
+    }
+}
+
+data class CustomRange(
+    val selectedStartValue: Instant,
+    val selectedEndValue: Instant,
+    val start: Instant,
+    val end: Instant
+) {
+    companion object {
+        fun fromSelectedValues(
+            selectedStartValue: Instant,
+            selectedEndValue: Instant
+        ): CustomRange {
+            return CustomRange(
+                selectedStartValue = selectedStartValue,
+                selectedEndValue = selectedEndValue,
+                start = selectedStartValue,
+                end = selectedEndValue
+            )
         }
     }
 }

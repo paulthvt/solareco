@@ -31,7 +31,7 @@ class TimeAlignedItemPlacer(
         val intervalSeconds = when (timeUnitIndex) {
             0 -> 15.minutes.inWholeSeconds
             1 -> 4.hours.inWholeSeconds
-            2 -> 1.days.inWholeSeconds
+            2, 3 -> 1.days.inWholeSeconds
             else -> 1.hours.inWholeSeconds
         }
 

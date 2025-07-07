@@ -1,7 +1,9 @@
 package net.thevenot.comwatt.utils
 
 import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
@@ -26,6 +28,23 @@ fun formatTime(dateTime: LocalDateTime): String {
 
 fun formatTime(instant: Instant, timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
     return formatTime(instant.toLocalDateTime(timeZone))
+}
+
+//@OptIn(FormatStringsInDatetimeFormats::class)
+//fun Instant.formatTime(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
+//    val offset = timeZone.offsetAt(this)
+//    return this.format(DateTimeComponents.Format { byUnicodePattern("HH:mm") }, offset)
+//}
+
+fun LocalTime.formatHourMinutes(): String {
+    val customFormat = LocalTime.Format {
+        hour(); char(':'); minute()
+    }
+    return this.format(customFormat)
+}
+
+fun LocalDate.formatYearMonthDay(): String {
+    return this.format(LocalDate.Formats.ISO)
 }
 
 @OptIn(FormatStringsInDatetimeFormats::class)

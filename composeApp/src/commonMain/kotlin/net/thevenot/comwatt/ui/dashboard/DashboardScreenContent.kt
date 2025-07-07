@@ -192,7 +192,7 @@ private fun RangeButton(
     onNextButtonClick: () -> Unit = {},
     showDatePickerDialog: () -> Unit
 ) {
-    val selectedIndex = when (uiState.timeUnitSelectedIndex) {
+    val selectedValue = when (uiState.timeUnitSelectedIndex) {
         0 -> uiState.selectedTimeRange.hour.selectedValue
         1 -> uiState.selectedTimeRange.day.selectedValue
         2 -> uiState.selectedTimeRange.week.selectedValue
@@ -204,16 +204,18 @@ private fun RangeButton(
         2 -> 52
         else -> 0
     }
-    Logger.d(TAG) { "selectedIndex $selectedIndex" }
+    Logger.d(TAG) { "selectedIndex $selectedValue" }
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = AppTheme.dimens.paddingNormal),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedIconButton(onClick = {
-            onPreviousButtonClick()
-        }, enabled = selectedIndex < minBound) {
-            Icon(Icons.Default.ChevronLeft, contentDescription = "Previous")
+        if (uiState.timeUnitSelectedIndex != 3) {
+            OutlinedIconButton(onClick = {
+                onPreviousButtonClick()
+            }, enabled = selectedValue < minBound) {
+                Icon(Icons.Default.ChevronLeft, contentDescription = "Previous")
+            }
         }
 
         TextButton(
@@ -252,6 +254,10 @@ private fun RangeButton(
                             )
                         }
 
+                        3 -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${
+                            uiState.selectedTimeRange.custom.end.formatDayMonth()
+                        }"
+
                         else -> ""
                     }
                 )
@@ -278,14 +284,27 @@ private fun RangeButton(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+
+                    3 -> {
+                        Text(
+                            text = "${formatTime(uiState.selectedTimeRange.custom.start)} - ${
+                                formatTime(
+                                    uiState.selectedTimeRange.custom.end
+                                )
+                            }",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }
 
-        OutlinedIconButton(onClick = {
-            onNextButtonClick()
-        }, enabled = selectedIndex > 0) {
-            Icon(Icons.Default.ChevronRight, contentDescription = "Next")
+        if (uiState.timeUnitSelectedIndex != 3) {
+            OutlinedIconButton(onClick = {
+                onNextButtonClick()
+            }, enabled = selectedValue > 0) {
+                Icon(Icons.Default.ChevronRight, contentDescription = "Next")
+            }
         }
     }
 }
@@ -483,7 +502,7 @@ fun rememberTimeValueFormatter(timeUnitSelectedIndex: Int): CartesianValueFormat
                         hourMinutesFormat
                     }
 
-                    2 -> dayOfMonthFormat
+                    2, 3 -> dayOfMonthFormat
                     else -> hourMinutesFormat
                 }
             )

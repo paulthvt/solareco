@@ -35,6 +35,7 @@ import net.thevenot.comwatt.model.TimeSeriesDto
 import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.model.safeRequest
 import net.thevenot.comwatt.model.type.AggregationLevel
+import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.model.type.TimeAgoUnit
 import net.thevenot.comwatt.utils.toZoneString
@@ -99,7 +100,8 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         timeAgoUnit: TimeAgoUnit? = null,
         timeAgoValue: Int? = null,
         measureKind: MeasureKind = MeasureKind.FLOW,
-        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE,
+        aggregationType: AggregationType? = null
     ): Either<ApiError, SiteTimeSeriesDto> {
         val timeZone = TimeZone.of("Europe/Paris")
 
@@ -114,6 +116,7 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     startTime?.let { parameter("start", it.toZoneString(timeZone)) }
                     timeAgoUnit?.let { parameter("timeAgoUnit", it) }
                     timeAgoValue?.let { parameter("timeAgoValue", it) }
+                    aggregationType?.let { parameter("aggregationType", it) }
                     parameter("end", endTime.toZoneString(timeZone))
                 }
             }
@@ -142,7 +145,8 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         timeAgoValue: Int = 1,
         endTime: Instant = Clock.System.now(),
         measureKind: MeasureKind = MeasureKind.FLOW,
-        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE,
+        aggregationType: AggregationType? = null
     ): Either<ApiError, SiteTimeSeriesDto> {
         return doFetchSiteTimeSeries(
             siteId = siteId,
@@ -150,7 +154,8 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
             timeAgoValue = timeAgoValue,
             endTime = endTime,
             measureKind = measureKind,
-            aggregationLevel = aggregationLevel
+            aggregationLevel = aggregationLevel,
+            aggregationType = aggregationType
         )
     }
 
@@ -186,15 +191,18 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         }
     }
 
-    suspend fun fetchTimeSeries(
+    private suspend fun doFetchTimeSeries(
         deviceId: Int,
+        startTime: Instant? = null,
         endTime: Instant = Clock.System.now(),
-        timeAgoUnit: TimeAgoUnit = TimeAgoUnit.DAY,
-        timeAgoValue: Int = 1,
+        timeAgoUnit: TimeAgoUnit? = null,
+        timeAgoValue: Int? = null,
         measureKind: MeasureKind = MeasureKind.FLOW,
-        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE,
+        aggregationType: AggregationType? = null
     ): Either<ApiError, TimeSeriesDto> {
         val timeZone = TimeZone.of("Europe/Paris")
+
         return withContext(Dispatchers.IO) {
             client.safeRequest {
                 url {
@@ -203,12 +211,48 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     parameter("id", deviceId)
                     parameter("measureKind", measureKind)
                     parameter("aggregationLevel", aggregationLevel)
-                    parameter("timeAgoUnit", timeAgoUnit)
-                    parameter("timeAgoValue", timeAgoValue)
+                    startTime?.let { parameter("start", it.toZoneString(timeZone)) }
+                    timeAgoUnit?.let { parameter("timeAgoUnit", it) }
+                    timeAgoValue?.let { parameter("timeAgoValue", it) }
+                    aggregationType?.let { parameter("aggregationType", it) }
                     parameter("end", endTime.toZoneString(timeZone))
                 }
             }
         }
+    }
+
+    suspend fun fetchTimeSeries(
+        deviceId: Int,
+        startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
+        endTime: Instant = Clock.System.now(),
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+    ): Either<ApiError, TimeSeriesDto> {
+        return doFetchTimeSeries(
+            deviceId = deviceId,
+            startTime = startTime,
+            endTime = endTime,
+            measureKind = measureKind,
+            aggregationLevel = aggregationLevel
+        )
+    }
+
+    suspend fun fetchTimeSeries(
+        deviceId: Int,
+        endTime: Instant = Clock.System.now(),
+        timeAgoUnit: TimeAgoUnit = TimeAgoUnit.DAY,
+        timeAgoValue: Int = 1,
+        measureKind: MeasureKind = MeasureKind.FLOW,
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+    ): Either<ApiError, TimeSeriesDto> {
+        return doFetchTimeSeries(
+            deviceId = deviceId,
+            endTime = endTime,
+            timeAgoUnit = timeAgoUnit,
+            timeAgoValue = timeAgoValue,
+            measureKind = measureKind,
+            aggregationLevel = aggregationLevel
+        )
     }
 
     suspend fun authenticated(): Either<ApiError, UserDto?> {

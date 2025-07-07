@@ -36,9 +36,10 @@ import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.domain.model.TimeUnit
-import net.thevenot.comwatt.domain.utils.TimeSeriesDownsampler.downsample
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.TileType
+import net.thevenot.comwatt.model.type.AggregationLevel
+import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.model.type.TimeAgoUnit
 import org.jetbrains.compose.resources.getString
 
@@ -71,22 +72,24 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
     suspend fun singleFetch(
         timeUnit: TimeUnit = TimeUnit.DAY,
-        endTime: Instant = Clock.System.now()
+        endTime: Instant = Clock.System.now(),
+        startTime: Instant? = null
     ): Either<DomainError, List<ChartTimeSeries>> {
-        return refreshTimeSeriesData(timeUnit, endTime)
+        return refreshTimeSeriesData(timeUnit, endTime, startTime)
     }
 
     private suspend fun refreshTimeSeriesData(
         timeUnit: TimeUnit,
-        endTime: Instant
+        endTime: Instant,
+        startTime: Instant? = null,
     ): Either<DomainError, List<ChartTimeSeries>> =
         withContext(Dispatchers.IO) {
             Logger.d(TAG) { "fetching charts data: time unit $timeUnit, end time $endTime" }
             val siteId = dataRepository.getSettings().firstOrNull()?.siteId
             return@withContext siteId?.let { id ->
                 val consumptionProdChartsData =
-                    getConsumptionProdChartTimeSeries(id, timeUnit, endTime)
-                val tilesChartsData = getTilesChartsData(id, timeUnit, endTime)
+                    getConsumptionProdChartTimeSeries(id, timeUnit, endTime, startTime)
+                val tilesChartsData = getTilesChartsData(id, timeUnit, endTime, startTime)
 
                 consumptionProdChartsData.combine(
                     tilesChartsData,
@@ -101,7 +104,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
     private suspend fun getTilesChartsData(
         id: Int,
         timeUnit: TimeUnit,
-        endTime: Instant
+        endTime: Instant,
+        startTime: Instant? = null,
     ) = withContext(Dispatchers.IO) {
         dataRepository.api.fetchTiles(id)
             .mapLeft { DomainError.Api(it) }
@@ -116,11 +120,35 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                 ?.mapNotNull { device ->
                                     device?.id?.let { deviceId ->
                                         Logger.d(TAG) { "Fetching time series for device id: $deviceId" }
-                                        val seriesResult = dataRepository.api.fetchTimeSeries(
-                                            deviceId = deviceId,
-                                            timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
-                                            endTime = endTime
-                                        )
+                                        val aggregationLevel = when (timeUnit) {
+                                            TimeUnit.HOUR -> AggregationLevel.NONE
+                                            TimeUnit.DAY -> AggregationLevel.NONE
+                                            TimeUnit.WEEK -> AggregationLevel.HOUR
+                                            else -> AggregationLevel.NONE
+                                        }
+                                        val measureKind = when (timeUnit) {
+                                            TimeUnit.HOUR -> MeasureKind.FLOW
+                                            TimeUnit.DAY -> MeasureKind.FLOW
+                                            TimeUnit.WEEK -> MeasureKind.QUANTITY
+                                            else -> MeasureKind.FLOW
+                                        }
+                                        val seriesResult = if (startTime != null) {
+                                            dataRepository.api.fetchTimeSeries(
+                                                deviceId = deviceId,
+                                                startTime = startTime,
+                                                endTime = endTime,
+                                                aggregationLevel = aggregationLevel,
+                                                measureKind = measureKind
+                                            )
+                                        } else {
+                                            dataRepository.api.fetchTimeSeries(
+                                                deviceId = deviceId,
+                                                timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
+                                                endTime = endTime,
+                                                aggregationLevel = aggregationLevel,
+                                                measureKind = measureKind
+                                            )
+                                        }
                                         Logger.d(TAG) { "Fetched series for device id $deviceId: $seriesResult" }
                                         val kind = device.deviceKind
                                         seriesResult.map { series ->
@@ -129,11 +157,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                                     name = device.name ?: "",
                                                     icon = mapIcon(device.deviceKind?.icon)
                                                 ),
-                                                values = downsample(
-                                                    data = series.timestamps.zip(series.values)
-                                                        .associate { Instant.parse(it.first) to it.second.toFloat() },
-                                                    timeUnit = timeUnit
-                                                ),
+                                                values = series.timestamps.zip(series.values)
+                                                    .associate { Instant.parse(it.first) to it.second.toFloat() },
                                                 type = when {
                                                     kind?.production == true -> TimeSeriesType.PRODUCTION
                                                     kind?.injection == true -> TimeSeriesType.INJECTION
@@ -164,15 +189,41 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
     private suspend fun getConsumptionProdChartTimeSeries(
         id: Int,
         timeUnit: TimeUnit,
-        endTime: Instant
+        endTime: Instant,
+        startTime: Instant? = null
     ): Either<DomainError, List<ChartTimeSeries>> {
-        return dataRepository.api.fetchSiteTimeSeries(
-            siteId = id,
-            timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
-            timeAgoValue = 1,
-            endTime = endTime
-        )
-            .mapLeft { DomainError.Api(it) }
+        val aggregationLevel = when (timeUnit) {
+            TimeUnit.HOUR -> AggregationLevel.NONE
+            TimeUnit.DAY -> AggregationLevel.NONE
+            TimeUnit.WEEK -> AggregationLevel.HOUR
+            else -> AggregationLevel.NONE
+        }
+        val measureKind = when (timeUnit) {
+            TimeUnit.HOUR -> MeasureKind.FLOW
+            TimeUnit.DAY -> MeasureKind.FLOW
+            TimeUnit.WEEK -> MeasureKind.QUANTITY
+            else -> MeasureKind.FLOW
+        }
+        val siteTimeSeries = if (startTime != null) {
+            dataRepository.api.fetchSiteTimeSeries(
+                siteId = id,
+                startTime = startTime,
+                endTime = endTime,
+                aggregationLevel = aggregationLevel,
+                measureKind = measureKind
+            )
+        } else {
+            dataRepository.api.fetchSiteTimeSeries(
+                siteId = id,
+                timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
+                timeAgoValue = 1,
+                endTime = endTime,
+                aggregationLevel = aggregationLevel,
+                measureKind = measureKind
+            )
+        }
+
+        return siteTimeSeries.mapLeft { DomainError.Api(it) }
             .map { siteTimeSeries ->
                 listOf(
                     ChartTimeSeries(
@@ -183,11 +234,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     name = getString(Res.string.production_series_title),
                                     icon = Icons.Default.ElectricalServices
                                 ),
-                                values = downsample(
-                                    data = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
-                                        .associate { Instant.parse(it.first) to it.second.toFloat() },
-                                    timeUnit = timeUnit
-                                ),
+                                values = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
+                                    .associate { Instant.parse(it.first) to it.second.toFloat() },
                                 type = TimeSeriesType.PRODUCTION
                             ),
                             TimeSeries(
@@ -195,11 +243,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                     name = getString(Res.string.consumption_series_title),
                                     icon = Icons.Default.ElectricalServices
                                 ),
-                                values = downsample(
-                                    data = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
-                                        .associate { Instant.parse(it.first) to it.second.toFloat() },
-                                    timeUnit = timeUnit
-                                ),
+                                values = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
+                                    .associate { Instant.parse(it.first) to it.second.toFloat() },
                                 type = TimeSeriesType.CONSUMPTION,
                             )
                         )
