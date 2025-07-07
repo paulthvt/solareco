@@ -110,6 +110,10 @@ import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.pow
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.seconds
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 
@@ -368,6 +372,7 @@ fun Chart(
     val markerValueFormatter = DefaultCartesianMarker.ValueFormatter.default(
         thousandsSeparator = " ", suffix = " W", decimalCount = 0
     )
+    val rangeDuration = calculateRangeDuration(chartsData)
 
     LaunchedEffect(chartsData) {
         withContext(Dispatchers.Default) {
@@ -381,6 +386,7 @@ fun Chart(
                 }
                 extras { store ->
                     store[TimeAlignedItemPlacer.TimeUnitIndexKey] = uiState.timeUnitSelectedIndex
+                    store[TimeAlignedItemPlacer.RangeDurationKey] = rangeDuration
                     store[LegendLabelKey] = timeSeries.map { it.title.name }.toSet()
                 }
             }
@@ -437,7 +443,7 @@ fun Chart(
                 ), itemPlacer = startAxisItemPlacer
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
-                valueFormatter = rememberTimeValueFormatter(uiState.timeUnitSelectedIndex),
+                valueFormatter = rememberTimeValueFormatter(rangeDuration),
                 itemPlacer = remember { TimeAlignedItemPlacer() }),
             marker = rememberMarker(markerValueFormatter),
             legend = legend,
@@ -482,8 +488,8 @@ private fun getLineColors(timeSeries: List<TimeSeries>) = timeSeries.map {
 }
 
 @Composable
-fun rememberTimeValueFormatter(timeUnitSelectedIndex: Int): CartesianValueFormatter {
-    return remember(timeUnitSelectedIndex) {
+fun rememberTimeValueFormatter(rangeDuration: Duration): CartesianValueFormatter {
+    return remember(rangeDuration) {
         CartesianValueFormatter { _, value, _ ->
             val instant = Instant.fromEpochSeconds(value.toLong())
             val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
@@ -494,16 +500,21 @@ fun rememberTimeValueFormatter(timeUnitSelectedIndex: Int): CartesianValueFormat
                 char(' ')
                 monthName(MonthNames.ENGLISH_ABBREVIATED)
             }
-            dateTime.format(
-                when (timeUnitSelectedIndex) {
-                    0, 1 -> if (dateTime.hour == 0 && dateTime.minute == 0) {
-                        dayOfMonthFormat
-                    } else {
-                        hourMinutesFormat
-                    }
+            val monthYearFormat = LocalDateTime.Format {
+                dayOfMonth()
+                char(' ')
+                monthName(MonthNames.ENGLISH_ABBREVIATED)
+                char(' ')
+                year()
+            }
 
-                    2, 3 -> dayOfMonthFormat
-                    else -> hourMinutesFormat
+            dateTime.format(
+                when {
+                    rangeDuration < 4.hours -> hourMinutesFormat
+                    rangeDuration < 1.days -> hourMinutesFormat
+                    rangeDuration < 7.days -> dayOfMonthFormat
+                    rangeDuration < 60.days -> dayOfMonthFormat
+                    else -> monthYearFormat
                 }
             )
         }
@@ -597,3 +608,20 @@ fun LazyGraphCardPreview() {
 }
 
 private const val TAG = "DashboardScreenContent"
+
+/**
+ * Calculate the duration between the earliest and latest data points in the chart.
+ * This will be used to determine the appropriate interval for chart axis ticks.
+ */
+private fun calculateRangeDuration(chartsData: List<Map<Instant, Float>>): Duration {
+    if (chartsData.isEmpty() || chartsData.all { it.isEmpty() }) {
+        return 1.days
+    }
+
+    val allTimestamps = chartsData.flatMap { it.keys }
+    val earliestTimestamp = allTimestamps.minOrNull() ?: return 1.days
+    val latestTimestamp = allTimestamps.maxOrNull() ?: return 1.days
+
+    val durationSeconds = latestTimestamp.epochSeconds - earliestTimestamp.epochSeconds
+    return durationSeconds.seconds
+}
