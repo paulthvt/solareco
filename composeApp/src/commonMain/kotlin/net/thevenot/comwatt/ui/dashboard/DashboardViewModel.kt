@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.domain.FetchParameters
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.TimeUnit
@@ -52,18 +52,24 @@ class DashboardViewModel(
                 }
                 Logger.d(TAG) { "startAutoRefresh selectedTimeRange ${_uiState.value.selectedTimeRange}" }
 
-                Pair(
-                    when (selectedTimeUnit) {
+                FetchParameters(
+                    timeUnit = when (selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> TimeUnit.HOUR
                         DashboardTimeUnit.DAY -> TimeUnit.DAY
                         DashboardTimeUnit.WEEK -> TimeUnit.WEEK
-                        DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK // todo handle custom
+                        DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK
                     },
-                    when (selectedTimeUnit) {
+                    startTime = when (selectedTimeUnit) {
+                        DashboardTimeUnit.HOUR -> null
+                        DashboardTimeUnit.DAY -> null
+                        DashboardTimeUnit.WEEK -> null
+                        DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.start
+                    },
+                    endTime = when (selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
                         DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
                         DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
-                        DashboardTimeUnit.CUSTOM -> Clock.System.now()
+                        DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.end
                     }
                 )
             }
@@ -102,24 +108,26 @@ class DashboardViewModel(
                 )
             }
             fetchTimeSeriesUseCase.singleFetch(
-                timeUnit = when (selectedTimeUnit) {
-                    DashboardTimeUnit.HOUR -> TimeUnit.HOUR
-                    DashboardTimeUnit.DAY -> TimeUnit.DAY
-                    DashboardTimeUnit.WEEK -> TimeUnit.WEEK
-                    DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK // todo handle custom
-                },
-                startTime = when (selectedTimeUnit) {
-                    DashboardTimeUnit.HOUR -> null
-                    DashboardTimeUnit.DAY -> null
-                    DashboardTimeUnit.WEEK -> null
-                    DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.start
-                },
-                endTime = when (selectedTimeUnit) {
-                    DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
-                    DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
-                    DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
-                    DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.end
-                }
+                FetchParameters(
+                    timeUnit = when (selectedTimeUnit) {
+                        DashboardTimeUnit.HOUR -> TimeUnit.HOUR
+                        DashboardTimeUnit.DAY -> TimeUnit.DAY
+                        DashboardTimeUnit.WEEK -> TimeUnit.WEEK
+                        DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK
+                    },
+                    startTime = when (selectedTimeUnit) {
+                        DashboardTimeUnit.HOUR -> null
+                        DashboardTimeUnit.DAY -> null
+                        DashboardTimeUnit.WEEK -> null
+                        DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.start
+                    },
+                    endTime = when (selectedTimeUnit) {
+                        DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
+                        DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
+                        DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
+                        DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.end
+                    }
+                )
             ).onRight {
                 _charts.value = it
                 _uiState.update { state ->
