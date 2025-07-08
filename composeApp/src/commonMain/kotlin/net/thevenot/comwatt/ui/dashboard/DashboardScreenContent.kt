@@ -98,6 +98,7 @@ import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.LoadingView
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -120,7 +121,8 @@ private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreenContent(
-    dataRepository: DataRepository, viewModel: DashboardViewModel = viewModel {
+    dataRepository: DataRepository,
+    viewModel: DashboardViewModel = viewModel {
         DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
     }
 ) {
@@ -137,7 +139,7 @@ fun DashboardScreenContent(
 
     if (showDatePickerDialog.value) {
         TimePickerDialog(
-            selectedTimeUnitIndex = uiState.timeUnitSelectedIndex,
+            selectedTimeUnit = uiState.selectedTimeUnit,
             onDismiss = { showDatePickerDialog.value = false },
             defaultSelectedTimeRange = uiState.selectedTimeRange,
             onRangeSelected = { range ->
@@ -196,17 +198,17 @@ private fun RangeButton(
     onNextButtonClick: () -> Unit = {},
     showDatePickerDialog: () -> Unit
 ) {
-    val selectedValue = when (uiState.timeUnitSelectedIndex) {
-        0 -> uiState.selectedTimeRange.hour.selectedValue
-        1 -> uiState.selectedTimeRange.day.selectedValue
-        2 -> uiState.selectedTimeRange.week.selectedValue
-        else -> 0
+    val selectedValue = when (uiState.selectedTimeUnit) {
+        DashboardTimeUnit.HOUR -> uiState.selectedTimeRange.hour.selectedValue
+        DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.selectedValue
+        DashboardTimeUnit.WEEK -> uiState.selectedTimeRange.week.selectedValue
+        DashboardTimeUnit.CUSTOM -> 0
     }
-    val minBound = when (uiState.timeUnitSelectedIndex) {
-        0 -> 23
-        1 -> 364
-        2 -> 52
-        else -> 0
+    val minBound = when (uiState.selectedTimeUnit) {
+        DashboardTimeUnit.HOUR -> 23
+        DashboardTimeUnit.DAY -> 364
+        DashboardTimeUnit.WEEK -> 52
+        DashboardTimeUnit.CUSTOM -> 0
     }
     Logger.d(TAG) { "selectedIndex $selectedValue" }
     Row(
@@ -214,7 +216,7 @@ private fun RangeButton(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        if (uiState.timeUnitSelectedIndex != 3) {
+        if (uiState.selectedTimeUnit != DashboardTimeUnit.CUSTOM) {
             OutlinedIconButton(onClick = {
                 onPreviousButtonClick()
             }, enabled = selectedValue < minBound) {
@@ -233,14 +235,14 @@ private fun RangeButton(
             ) {
                 Logger.d(TAG) { "selected value ${uiState.selectedTimeRange.day.selectedValue}" }
                 Text(
-                    when (uiState.timeUnitSelectedIndex) {
-                        0 -> pluralStringResource(
+                    when (uiState.selectedTimeUnit) {
+                        DashboardTimeUnit.HOUR -> pluralStringResource(
                             Res.plurals.hour_range_selected_time,
                             uiState.selectedTimeRange.hour.selectedValue + 1,
                             uiState.selectedTimeRange.hour.selectedValue + 1
                         )
 
-                        1 -> when (uiState.selectedTimeRange.day.selectedValue) {
+                        DashboardTimeUnit.DAY -> when (uiState.selectedTimeRange.day.selectedValue) {
                             0 -> stringResource(Res.string.day_range_selected_time_today)
                             1 -> stringResource(Res.string.day_range_selected_time_yesterday)
                             else -> stringResource(
@@ -249,7 +251,7 @@ private fun RangeButton(
                             )
                         }
 
-                        2 -> when (uiState.selectedTimeRange.week.selectedValue) {
+                        DashboardTimeUnit.WEEK -> when (uiState.selectedTimeRange.week.selectedValue) {
                             0 -> stringResource(Res.string.week_range_selected_time_past_seven_days)
                             1 -> stringResource(Res.string.week_range_selected_time_one_week_ago)
                             else -> stringResource(
@@ -258,16 +260,14 @@ private fun RangeButton(
                             )
                         }
 
-                        3 -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${
+                        DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${
                             uiState.selectedTimeRange.custom.end.formatDayMonth()
                         }"
-
-                        else -> ""
                     }
                 )
 
-                when (uiState.timeUnitSelectedIndex) {
-                    0 -> {
+                when (uiState.selectedTimeUnit) {
+                    DashboardTimeUnit.HOUR -> {
                         Text(
                             text = "${formatTime(uiState.selectedTimeRange.hour.start)} - ${
                                 formatTime(
@@ -278,18 +278,16 @@ private fun RangeButton(
                         )
                     }
 
-                    2 -> {
+                    DashboardTimeUnit.WEEK -> {
                         Text(
                             text = "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${
-
                                 uiState.selectedTimeRange.week.end.formatDayMonth()
-
                             }",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
 
-                    3 -> {
+                    DashboardTimeUnit.CUSTOM -> {
                         Text(
                             text = "${formatTime(uiState.selectedTimeRange.custom.start)} - ${
                                 formatTime(
@@ -299,11 +297,13 @@ private fun RangeButton(
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
+
+                    else -> {}
                 }
             }
         }
 
-        if (uiState.timeUnitSelectedIndex != 3) {
+        if (uiState.selectedTimeUnit != DashboardTimeUnit.CUSTOM) {
             OutlinedIconButton(onClick = {
                 onNextButtonClick()
             }, enabled = selectedValue > 0) {
@@ -316,23 +316,23 @@ private fun RangeButton(
 @Composable
 private fun TimeUnitBar(
     uiState: DashboardScreenState,
-    onTimeUnitSelected: (Int) -> Unit = {}
+    onTimeUnitSelected: (DashboardTimeUnit) -> Unit = {}
 ) {
     Row {
         val options = listOf(
-            stringResource(Res.string.range_picker_button_hour),
-            stringResource(Res.string.range_picker_button_day),
-            stringResource(Res.string.range_picker_button_week),
-            stringResource(Res.string.range_picker_button_custom)
+            stringResource(Res.string.range_picker_button_hour) to DashboardTimeUnit.HOUR,
+            stringResource(Res.string.range_picker_button_day) to DashboardTimeUnit.DAY,
+            stringResource(Res.string.range_picker_button_week) to DashboardTimeUnit.WEEK,
+            stringResource(Res.string.range_picker_button_custom) to DashboardTimeUnit.CUSTOM
         )
         SingleChoiceSegmentedButtonRow {
-            options.forEachIndexed { index, label ->
+            options.forEachIndexed { index, (label, timeUnit) ->
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(
                         index = index, count = options.size
                     ), onClick = {
-                        onTimeUnitSelected(index)
-                    }, selected = index == uiState.timeUnitSelectedIndex
+                        onTimeUnitSelected(timeUnit)
+                    }, selected = timeUnit == uiState.selectedTimeUnit
                 ) {
                     Text(label)
                 }
@@ -385,7 +385,7 @@ fun Chart(
                     }
                 }
                 extras { store ->
-                    store[TimeAlignedItemPlacer.TimeUnitIndexKey] = uiState.timeUnitSelectedIndex
+                    store[TimeAlignedItemPlacer.TimeUnitIndexKey] = uiState.selectedTimeUnit
                     store[TimeAlignedItemPlacer.RangeDurationKey] = rangeDuration
                     store[LegendLabelKey] = timeSeries.map { it.title.name }.toSet()
                 }
@@ -541,7 +541,7 @@ fun TimeUnitBarPreview() {
         isDataLoaded = true,
         isRefreshing = false,
         selectedTimeRange = SelectedTimeRange(),
-        timeUnitSelectedIndex = 1
+        selectedTimeUnit = DashboardTimeUnit.HOUR
     )
 
     ComwattTheme {
@@ -562,7 +562,7 @@ fun RangeButtonPreview() {
                 end = Instant.fromEpochSeconds(1_700_003_600L)
             )
         ),
-        timeUnitSelectedIndex = 0
+        selectedTimeUnit = DashboardTimeUnit.HOUR
     )
 
     ComwattTheme {
@@ -582,7 +582,7 @@ fun LazyGraphCardPreview() {
         isDataLoaded = true,
         isRefreshing = false,
         selectedTimeRange = SelectedTimeRange(),
-        timeUnitSelectedIndex = 1
+        selectedTimeUnit = DashboardTimeUnit.HOUR
     )
 
     // Generate a list of sample data points (e.g., 6 hours)

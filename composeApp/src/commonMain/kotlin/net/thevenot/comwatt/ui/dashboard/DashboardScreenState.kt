@@ -9,10 +9,11 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 
 data class DashboardScreenState(
     val isRefreshing: Boolean = false,
-    val timeUnitSelectedIndex: Int = 0,
+    val selectedTimeUnit: DashboardTimeUnit = DashboardTimeUnit.HOUR,
     val isDataLoaded: Boolean = false,
     val callCount: Int = 0,
     val errorCount: Int = 0,

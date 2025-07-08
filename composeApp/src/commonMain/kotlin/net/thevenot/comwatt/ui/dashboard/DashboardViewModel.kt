@@ -31,19 +31,17 @@ class DashboardViewModel(
     private val _uiState = MutableStateFlow(DashboardScreenState())
     val uiState: StateFlow<DashboardScreenState> get() = _uiState
 
-    private var selectedTimeUnit =
-        convertSelectedIndexToTimeUnit(_uiState.value.timeUnitSelectedIndex)
-
     fun startAutoRefresh() {
         Logger.d(TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
-            val selectedTimeUnitIndex =  dataRepository.getSettings().firstOrNull()?.dashboardSelectedTimeUnitIndex
+            val selectedTimeUnitIndex =
+                dataRepository.getSettings().firstOrNull()?.dashboardSelectedTimeUnitIndex
             Logger.d(TAG) { "startAutoRefresh selectedTimeUnitIndex $selectedTimeUnitIndex" }
             selectedTimeUnitIndex?.let { index ->
-                _uiState.update { it.copy(timeUnitSelectedIndex = index) }
-                selectedTimeUnit = convertSelectedIndexToTimeUnit(index)
-                Logger.d(TAG) { "startAutoRefresh selectedTimeUnit $selectedTimeUnit" }
+                val timeUnit = DashboardTimeUnit.entries.getOrNull(index) ?: DashboardTimeUnit.HOUR
+                _uiState.update { it.copy(selectedTimeUnit = timeUnit) }
+                Logger.d(TAG) { "startAutoRefresh selectedTimeUnit ${_uiState.value.selectedTimeUnit}" }
             }
 
             fetchTimeSeriesUseCase.invoke {
@@ -53,19 +51,19 @@ class DashboardViewModel(
                 Logger.d(TAG) { "startAutoRefresh selectedTimeRange ${_uiState.value.selectedTimeRange}" }
 
                 FetchParameters(
-                    timeUnit = when (selectedTimeUnit) {
+                    timeUnit = when (_uiState.value.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> TimeUnit.HOUR
                         DashboardTimeUnit.DAY -> TimeUnit.DAY
                         DashboardTimeUnit.WEEK -> TimeUnit.WEEK
                         DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK
                     },
-                    startTime = when (selectedTimeUnit) {
+                    startTime = when (_uiState.value.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> null
                         DashboardTimeUnit.DAY -> null
                         DashboardTimeUnit.WEEK -> null
                         DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.start
                     },
-                    endTime = when (selectedTimeUnit) {
+                    endTime = when (_uiState.value.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
                         DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
                         DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
@@ -100,7 +98,7 @@ class DashboardViewModel(
 
     fun singleRefresh() {
         viewModelScope.launch {
-            Logger.d(TAG) { "Single refresh $selectedTimeUnit" }
+            Logger.d(TAG) { "Single refresh ${_uiState.value.selectedTimeUnit}" }
             _uiState.update {
                 it.copy(
                     selectedTimeRange = it.selectedTimeRange.withUpdatedRange(),
@@ -109,19 +107,19 @@ class DashboardViewModel(
             }
             fetchTimeSeriesUseCase.singleFetch(
                 FetchParameters(
-                    timeUnit = when (selectedTimeUnit) {
+                    timeUnit = when (_uiState.value.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> TimeUnit.HOUR
                         DashboardTimeUnit.DAY -> TimeUnit.DAY
                         DashboardTimeUnit.WEEK -> TimeUnit.WEEK
                         DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK
                     },
-                    startTime = when (selectedTimeUnit) {
+                    startTime = when (_uiState.value.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> null
                         DashboardTimeUnit.DAY -> null
                         DashboardTimeUnit.WEEK -> null
                         DashboardTimeUnit.CUSTOM -> _uiState.value.selectedTimeRange.custom.start
                     },
-                    endTime = when (selectedTimeUnit) {
+                    endTime = when (_uiState.value.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> _uiState.value.selectedTimeRange.hour.end
                         DashboardTimeUnit.DAY -> _uiState.value.selectedTimeRange.day.value
                         DashboardTimeUnit.WEEK -> _uiState.value.selectedTimeRange.week.end
@@ -140,13 +138,13 @@ class DashboardViewModel(
         }
     }
 
-    fun onTimeUnitSelected(timeUnitSelectedIndex: Int) {
-        _uiState.value = _uiState.value.copy(timeUnitSelectedIndex = timeUnitSelectedIndex)
+    fun onTimeUnitSelected(timeUnit: DashboardTimeUnit) {
+        _uiState.value = _uiState.value.copy(selectedTimeUnit = timeUnit)
         _charts.value = listOf()
-        selectedTimeUnit = convertSelectedIndexToTimeUnit(timeUnitSelectedIndex)
+
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isRefreshing = true)
-            dataRepository.saveDashboardSelectedTimeUnitIndex(timeUnitSelectedIndex)
+            dataRepository.saveDashboardSelectedTimeUnitIndex(timeUnit.ordinal)
             stopAutoRefresh()
             startAutoRefresh()
         }
@@ -163,14 +161,10 @@ class DashboardViewModel(
         stopAutoRefresh()
     }
 
-    private fun convertSelectedIndexToTimeUnit(timeUnitSelectedIndex: Int): DashboardTimeUnit {
-        return DashboardTimeUnit.entries[timeUnitSelectedIndex]
-    }
-
     fun dragRange(dragDirection: RangeSelectionButton?) {
         when (dragDirection) {
             RangeSelectionButton.NEXT -> {
-                when (selectedTimeUnit) {
+                when (_uiState.value.selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> _uiState.update {
                         it.copy(
                             selectedTimeRange = it.selectedTimeRange.withUpdatedHourRange(
@@ -200,7 +194,7 @@ class DashboardViewModel(
             }
 
             RangeSelectionButton.PREV -> {
-                when (selectedTimeUnit) {
+                when (_uiState.value.selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> _uiState.update {
                         it.copy(
                             selectedTimeRange = it.selectedTimeRange.withUpdatedHourRange(

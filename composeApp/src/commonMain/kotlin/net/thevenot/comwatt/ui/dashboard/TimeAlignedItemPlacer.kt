@@ -5,6 +5,7 @@ import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianMeasuringConte
 import com.patrykandpatrick.vico.multiplatform.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.multiplatform.cartesian.layer.CartesianLayerDimensions
 import com.patrykandpatrick.vico.multiplatform.common.data.ExtraStore
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -16,7 +17,7 @@ class TimeAlignedItemPlacer(
 ) : HorizontalAxis.ItemPlacer {
 
     companion object {
-        val TimeUnitIndexKey = object : ExtraStore.Key<Int>() {}
+        val TimeUnitIndexKey = object : ExtraStore.Key<DashboardTimeUnit>() {}
         val RangeDurationKey = object : ExtraStore.Key<Duration>() {}
     }
 
@@ -32,12 +33,12 @@ class TimeAlignedItemPlacer(
 
         val intervalSeconds = when {
             rangeDuration == null -> {
-                val timeUnitIndex = context.model.extraStore.getOrNull(TimeUnitIndexKey) ?: 0
+                val timeUnitIndex =
+                    context.model.extraStore.getOrNull(TimeUnitIndexKey) ?: DashboardTimeUnit.HOUR
                 when (timeUnitIndex) {
-                    0 -> 15.minutes.inWholeSeconds
-                    1 -> 4.hours.inWholeSeconds
-                    2, 3 -> 1.days.inWholeSeconds
-                    else -> 1.hours.inWholeSeconds
+                    DashboardTimeUnit.HOUR -> 15.minutes.inWholeSeconds
+                    DashboardTimeUnit.DAY -> 4.hours.inWholeSeconds
+                    DashboardTimeUnit.WEEK, DashboardTimeUnit.CUSTOM -> 1.days.inWholeSeconds
                 }
             }
 

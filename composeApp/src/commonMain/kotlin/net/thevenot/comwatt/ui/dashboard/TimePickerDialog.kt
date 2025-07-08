@@ -20,11 +20,12 @@ import net.thevenot.comwatt.ui.dashboard.pickers.CustomPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.DayPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.HourPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.WeekPicker
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun TimePickerDialog(
-    selectedTimeUnitIndex: Int,
+    selectedTimeUnit: DashboardTimeUnit,
     onDismiss: () -> Unit,
     defaultSelectedTimeRange: SelectedTimeRange,
     onRangeSelected: (SelectedTimeRange) -> Unit
@@ -46,8 +47,8 @@ fun TimePickerDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    when (selectedTimeUnitIndex) {
-                        0 -> {
+                    when (selectedTimeUnit) {
+                        DashboardTimeUnit.HOUR -> {
                             onRangeSelected(
                                 SelectedTimeRange(
                                     hour = HourRange.fromSelectedValue(
@@ -57,7 +58,7 @@ fun TimePickerDialog(
                             )
                         }
 
-                        1 -> {
+                        DashboardTimeUnit.DAY -> {
                             onRangeSelected(
                                 SelectedTimeRange(
                                     day = DayRange.fromSelectedValue(
@@ -67,7 +68,7 @@ fun TimePickerDialog(
                             )
                         }
 
-                        2 -> {
+                        DashboardTimeUnit.WEEK -> {
                             onRangeSelected(
                                 SelectedTimeRange(
                                     week = WeekRange.fromSelectedValue(
@@ -77,7 +78,7 @@ fun TimePickerDialog(
                             )
                         }
 
-                        3 -> {
+                        DashboardTimeUnit.CUSTOM -> {
                             onRangeSelected(
                                 SelectedTimeRange(
                                     custom = CustomRange.fromSelectedValues(
@@ -86,9 +87,6 @@ fun TimePickerDialog(
                                     )
                                 )
                             )
-                        }
-
-                        else -> {
                         }
                     }
 
@@ -105,13 +103,13 @@ fun TimePickerDialog(
             }
         },
         title = {
-            if (selectedTimeUnitIndex != 1) {
+            if (selectedTimeUnit != DashboardTimeUnit.DAY) {
                 Text(stringResource(Res.string.day_range_dialog_picker_title))
             }
         },
         text = {
-            when (selectedTimeUnitIndex) {
-                0 -> HourPicker(
+            when (selectedTimeUnit) {
+                DashboardTimeUnit.HOUR -> HourPicker(
                     currentDateTime = currentDateTime,
                     defaultSelectedTimeRange = defaultSelectedTimeRange.hour.selectedValue,
                     onIntervalSelected = { range ->
@@ -119,7 +117,7 @@ fun TimePickerDialog(
                     }
                 )
 
-                1 -> DayPicker(
+                DashboardTimeUnit.DAY -> DayPicker(
                     currentDateTime = currentDateTime,
                     defaultSelectedDay = defaultSelectedTimeRange.day.selectedValue,
                     onDateSelected = { day ->
@@ -127,7 +125,7 @@ fun TimePickerDialog(
                     }
                 )
 
-                2 -> WeekPicker(
+                DashboardTimeUnit.WEEK -> WeekPicker(
                     currentDateTime = currentDateTime,
                     defaultSelectedWeek = defaultSelectedTimeRange.week.selectedValue,
                     onIntervalSelected = { week ->
@@ -135,7 +133,7 @@ fun TimePickerDialog(
                     }
                 )
 
-                3 -> CustomPicker(
+                DashboardTimeUnit.CUSTOM -> CustomPicker(
                     currentDateTime = currentDateTime,
                     defaultStartDateTime = defaultSelectedTimeRange.custom.selectedStartValue,
                     defaultEndDateTime = defaultSelectedTimeRange.custom.selectedEndValue,
@@ -147,7 +145,6 @@ fun TimePickerDialog(
                         }
                     }
                 )
-                else -> Text("Custom date selection not implemented")
             }
         }
     )
