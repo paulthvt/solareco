@@ -24,6 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.week_range_selected_time_n_weeks_ago
+import comwatt.composeapp.generated.resources.week_range_selected_time_one_week_ago
+import comwatt.composeapp.generated.resources.week_range_selected_time_past_seven_days
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -37,6 +41,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -136,9 +141,12 @@ private fun WeekRangeButton(
     }
 
     val weekTitle = when (item.index) {
-        0 -> "Past 7 days"
-        1 -> "1 Week Ago"
-        else -> "${item.index} Weeks Ago"
+        0 -> stringResource(Res.string.week_range_selected_time_past_seven_days)
+        1 -> stringResource(Res.string.week_range_selected_time_one_week_ago)
+        else -> stringResource(
+            Res.string.week_range_selected_time_n_weeks_ago,
+            item.index
+        )
     }
 
     OutlinedButton(
