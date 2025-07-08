@@ -42,7 +42,8 @@ class TimeAlignedItemPlacer(
             }
 
             rangeDuration < 15.minutes -> 1.minutes.inWholeSeconds
-            rangeDuration < 1.hours -> 5.minutes.inWholeSeconds
+            rangeDuration < 30.minutes -> 5.minutes.inWholeSeconds
+            rangeDuration < 1.hours -> 10.minutes.inWholeSeconds
             rangeDuration < 4.hours -> 15.minutes.inWholeSeconds
             rangeDuration < 1.days -> 4.hours.inWholeSeconds
             rangeDuration < 7.days -> 1.days.inWholeSeconds
