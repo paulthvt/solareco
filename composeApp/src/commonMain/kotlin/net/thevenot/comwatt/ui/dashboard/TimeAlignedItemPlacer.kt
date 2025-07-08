@@ -5,6 +5,8 @@ import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianMeasuringConte
 import com.patrykandpatrick.vico.multiplatform.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.multiplatform.cartesian.layer.CartesianLayerDimensions
 import com.patrykandpatrick.vico.multiplatform.common.data.ExtraStore
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
@@ -15,7 +17,8 @@ class TimeAlignedItemPlacer(
 ) : HorizontalAxis.ItemPlacer {
 
     companion object {
-        val TimeUnitIndexKey = object : ExtraStore.Key<Int>() {}
+        val TimeUnitIndexKey = object : ExtraStore.Key<DashboardTimeUnit>() {}
+        val RangeDurationKey = object : ExtraStore.Key<Duration>() {}
     }
 
     override fun getShiftExtremeLines(context: CartesianDrawingContext): Boolean = shiftExtremeLines
@@ -26,13 +29,26 @@ class TimeAlignedItemPlacer(
         fullXRange: ClosedFloatingPointRange<Double>,
         maxLabelWidth: Float
     ): List<Double> {
-        val timeUnitIndex = context.model.extraStore.getOrNull(TimeUnitIndexKey) ?: 0
+        val rangeDuration = context.model.extraStore.getOrNull(RangeDurationKey)
 
-        val intervalSeconds = when (timeUnitIndex) {
-            0 -> 15.minutes.inWholeSeconds
-            1 -> 4.hours.inWholeSeconds
-            2 -> 1.days.inWholeSeconds
-            else -> 1.hours.inWholeSeconds
+        val intervalSeconds = when {
+            rangeDuration == null -> {
+                val timeUnitIndex =
+                    context.model.extraStore.getOrNull(TimeUnitIndexKey) ?: DashboardTimeUnit.HOUR
+                when (timeUnitIndex) {
+                    DashboardTimeUnit.HOUR -> 15.minutes.inWholeSeconds
+                    DashboardTimeUnit.DAY -> 4.hours.inWholeSeconds
+                    DashboardTimeUnit.WEEK, DashboardTimeUnit.CUSTOM -> 1.days.inWholeSeconds
+                }
+            }
+
+            rangeDuration < 15.minutes -> 1.minutes.inWholeSeconds
+            rangeDuration < 30.minutes -> 5.minutes.inWholeSeconds
+            rangeDuration < 1.hours -> 10.minutes.inWholeSeconds
+            rangeDuration < 4.hours -> 15.minutes.inWholeSeconds
+            rangeDuration < 1.days -> 4.hours.inWholeSeconds
+            rangeDuration < 7.days -> 1.days.inWholeSeconds
+            else -> 7.days.inWholeSeconds
         }
 
         val startTimestamp = visibleXRange.start
