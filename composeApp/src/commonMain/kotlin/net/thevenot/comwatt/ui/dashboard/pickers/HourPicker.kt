@@ -33,7 +33,7 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
-import net.thevenot.comwatt.utils.formatTime
+import net.thevenot.comwatt.utils.formatHourMinutes
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -135,7 +135,7 @@ private fun HourRangeButton(
                 style = MaterialTheme.typography.titleMedium,
             )
             Text(
-                text = "${formatTime(item.startTime)} - ${formatTime(item.endTime)}",
+                text = "${item.startTime.formatHourMinutes()} - ${item.endTime.formatHourMinutes()}",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(top = 2.dp)
             )

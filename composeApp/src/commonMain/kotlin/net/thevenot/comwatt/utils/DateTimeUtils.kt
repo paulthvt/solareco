@@ -12,7 +12,6 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.format.char
 import kotlinx.datetime.offsetAt
-import kotlinx.datetime.toLocalDateTime
 
 @OptIn(FormatStringsInDatetimeFormats::class)
 fun Instant.toZoneString(timeZone: TimeZone = TimeZone.UTC): String {
@@ -20,25 +19,23 @@ fun Instant.toZoneString(timeZone: TimeZone = TimeZone.UTC): String {
     return this.format(DateTimeComponents.Format { byUnicodePattern("yyyy-MM-dd'T'HH:mm:ssxxx") }, offset)
 }
 
-fun formatTime(dateTime: LocalDateTime): String {
-    return "${dateTime.hour.toString().padStart(2, '0')}h${
-        dateTime.minute.toString().padStart(2, '0')
-    }"
+fun LocalDateTime.formatHourMinutes(): String {
+    val format = LocalDateTime.Format {
+        hour(); char('h'); minute()
+    }
+    return this.format(format)
 }
 
-fun formatTime(instant: Instant, timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
-    return formatTime(instant.toLocalDateTime(timeZone))
+fun Instant.formatHourMinutes(): String {
+    val format = DateTimeComponents.Format {
+        hour(); char('h'); minute()
+    }
+    return this.format(format)
 }
-
-//@OptIn(FormatStringsInDatetimeFormats::class)
-//fun Instant.formatTime(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
-//    val offset = timeZone.offsetAt(this)
-//    return this.format(DateTimeComponents.Format { byUnicodePattern("HH:mm") }, offset)
-//}
 
 fun LocalTime.formatHourMinutes(): String {
     val customFormat = LocalTime.Format {
-        hour(); char(':'); minute()
+        hour(); char('h'); minute()
     }
     return this.format(customFormat)
 }

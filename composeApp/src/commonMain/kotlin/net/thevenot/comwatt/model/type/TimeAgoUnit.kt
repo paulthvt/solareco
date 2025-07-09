@@ -13,6 +13,7 @@ enum class TimeAgoUnit {
                 TimeUnit.WEEK -> WEEK
                 TimeUnit.MONTH -> MONTH
                 TimeUnit.YEAR -> YEAR
+                TimeUnit.CUSTOM -> throw IllegalArgumentException("Custom time unit is not supported for TimeAgoUnit")
             }
         }
     }

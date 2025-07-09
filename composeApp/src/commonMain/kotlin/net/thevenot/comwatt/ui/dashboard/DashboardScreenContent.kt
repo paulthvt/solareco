@@ -106,7 +106,7 @@ import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
 import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import net.thevenot.comwatt.utils.formatDayMonth
-import net.thevenot.comwatt.utils.formatTime
+import net.thevenot.comwatt.utils.formatHourMinutes
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -269,15 +269,17 @@ private fun RangeButton(
                 when (uiState.selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> {
                         Text(
-                            text = "${formatTime(uiState.selectedTimeRange.hour.start)} - ${
-                                formatTime(
-                                    uiState.selectedTimeRange.hour.end
-                                )
-                            }",
+                            text = "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
 
+                    DashboardTimeUnit.DAY -> {
+                        Text(
+                            text = uiState.selectedTimeRange.day.value.formatDayMonth(TimeZone.currentSystemDefault()),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                     DashboardTimeUnit.WEEK -> {
                         Text(
                             text = "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${
@@ -289,16 +291,10 @@ private fun RangeButton(
 
                     DashboardTimeUnit.CUSTOM -> {
                         Text(
-                            text = "${formatTime(uiState.selectedTimeRange.custom.start)} - ${
-                                formatTime(
-                                    uiState.selectedTimeRange.custom.end
-                                )
-                            }",
+                            text = "${uiState.selectedTimeRange.custom.start.formatHourMinutes()} - ${uiState.selectedTimeRange.custom.end.formatHourMinutes()}",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
-
-                    else -> {}
                 }
             }
         }
