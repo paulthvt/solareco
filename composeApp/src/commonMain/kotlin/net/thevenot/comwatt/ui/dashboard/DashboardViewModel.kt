@@ -132,7 +132,7 @@ class DashboardViewModel(
             DashboardTimeUnit.HOUR -> TimeUnit.HOUR
             DashboardTimeUnit.DAY -> TimeUnit.DAY
             DashboardTimeUnit.WEEK -> TimeUnit.WEEK
-            DashboardTimeUnit.CUSTOM -> TimeUnit.WEEK
+            DashboardTimeUnit.CUSTOM -> TimeUnit.CUSTOM
         }
     }
 
@@ -141,7 +141,6 @@ class DashboardViewModel(
             DashboardTimeUnit.HOUR,
             DashboardTimeUnit.DAY,
             DashboardTimeUnit.WEEK -> null
-
             DashboardTimeUnit.CUSTOM -> timeRange.custom.start
         }
     }

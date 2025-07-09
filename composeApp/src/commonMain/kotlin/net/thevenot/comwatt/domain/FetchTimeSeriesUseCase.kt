@@ -46,6 +46,8 @@ import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.model.type.TimeAgoUnit
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.seconds
 
 class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
     operator fun invoke(parametersProvider: () -> FetchParameters): Flow<Either<DomainError, List<ChartTimeSeries>>> =
@@ -262,7 +264,11 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         endTime: Instant,
         startTime: Instant? = null
     ): Either<ApiError, SiteTimeSeriesDto> {
-        val (aggregationLevel, measureKind) = getAggregationAndMeasureKind(timeUnit)
+        val (aggregationLevel, measureKind) = getAggregationAndMeasureKind(
+            timeUnit,
+            startTime,
+            endTime
+        )
 
         return if (startTime != null) {
             dataRepository.api.fetchSiteTimeSeries(
@@ -290,7 +296,11 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         endTime: Instant,
         startTime: Instant? = null
     ): Either<ApiError, TimeSeriesDto> {
-        val (aggregationLevel, measureKind) = getAggregationAndMeasureKind(timeUnit)
+        val (aggregationLevel, measureKind) = getAggregationAndMeasureKind(
+            timeUnit,
+            startTime,
+            endTime
+        )
 
         return if (startTime != null) {
             dataRepository.api.fetchTimeSeries(
@@ -311,19 +321,46 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         }
     }
 
-    private fun getAggregationAndMeasureKind(timeUnit: TimeUnit): Pair<AggregationLevel, MeasureKind> {
+    private fun getAggregationAndMeasureKind(
+        timeUnit: TimeUnit,
+        startTime: Instant?,
+        endTime: Instant
+    ): Pair<AggregationLevel, MeasureKind> {
+        val durationSeconds = if (startTime != null) {
+            (endTime.epochSeconds - startTime.epochSeconds).seconds
+        } else {
+            0.seconds
+        }
+
         val aggregationLevel = when (timeUnit) {
             TimeUnit.HOUR -> AggregationLevel.NONE
             TimeUnit.DAY -> AggregationLevel.NONE
             TimeUnit.WEEK -> AggregationLevel.HOUR
+            TimeUnit.MONTH -> AggregationLevel.DAY
+            TimeUnit.CUSTOM -> {
+                when {
+                    durationSeconds <= 1.days -> AggregationLevel.NONE
+                    durationSeconds <= 7.days -> AggregationLevel.HOUR
+                    durationSeconds <= 182.days -> AggregationLevel.DAY
+                    else -> AggregationLevel.MONTH
+                }
+            }
             else -> AggregationLevel.NONE
         }
+
         val measureKind = when (timeUnit) {
             TimeUnit.HOUR -> MeasureKind.FLOW
             TimeUnit.DAY -> MeasureKind.FLOW
             TimeUnit.WEEK -> MeasureKind.QUANTITY
-            else -> MeasureKind.FLOW
+            TimeUnit.MONTH -> MeasureKind.FLOW
+            else -> {
+                when {
+                    durationSeconds < 1.days -> MeasureKind.FLOW
+                    else -> MeasureKind.QUANTITY
+                }
+            }
         }
+        Logger.d(TAG) { "aggregationLevel $aggregationLevel" }
         return aggregationLevel to measureKind
     }
 
