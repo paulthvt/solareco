@@ -31,4 +31,27 @@
     <string name="consumption_production_chart_title">Consommation vs production</string>
     <string name="production_series_title">Production</string>
     <string name="consumption_series_title">Consommation</string>
+    <string name="hour_range_dialog_picker_yesterday_label">Hier</string>
+    <plurals name="hour_range_selected_time">
+        <item quantity="one">Il y a 1 heure</item>
+        <item quantity="other">Il y a %1$d heures</item>
+    </plurals>
+    <string name="day_range_selected_time_today">Aujourd\'hui</string>
+    <string name="day_range_selected_time_yesterday">Hier</string>
+    <string name="day_range_selected_time_n_days_gao">Il y a %1$d jours</string>
+    <string name="week_range_selected_time_past_seven_days">7 derniers jours</string>
+    <string name="week_range_selected_time_one_week_ago">Il y a 1 semaine</string>
+    <string name="week_range_selected_time_n_weeks_ago">Il y a %1$d semaines</string>
+    <string name="day_range_dialog_picker_dismiss_button">Annuler</string>
+    <string name="day_range_dialog_picker_confirm_button">Confirmer</string>
+    <string name="day_range_dialog_picker_title">Sélectionnez la plage</string>
+    <string name="custom_range_dialog_picker_start_title">Début</string>
+    <string name="custom_range_dialog_picker_end_title">Fin</string>
+    <string name="custom_range_dialog_picker_start_must_be_before_end_error">La date de début doit être antérieure à la date de fin</string>
+    <string name="custom_range_dialog_picker_start_cannot_be_in_future_error">La date/heure de début ne peut pas être dans le futur</string>
+    <string name="custom_range_dialog_picker_end_cannot_be_in_future_error">La date/heure de fin ne peut pas être dans le futur</string>
+    <string name="custom_range_dialog_picker_date_time_picker_select_time_icon">Sélectionnez l\'heure</string>
+    <string name="custom_range_dialog_picker_date_time_picker_select_date_icon">Sélectionnez la date</string>
+    <string name="custom_range_dialog_picker_date_time_picker_confirm_button">Confirmer</string>
+    <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Annuler</string>
 </resources>
