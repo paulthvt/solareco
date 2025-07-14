@@ -117,12 +117,6 @@ private fun HomeScreenContent(
                     style = MaterialTheme.typography.headlineMedium,
                 )
             }
-            Text(
-                text = "Call number: ${uiState.callCount}",
-            )
-            Text(
-                text = "Error number: ${uiState.errorCount}",
-            )
             if (uiState.lastErrorMessage.isNotEmpty()) {
                 Text(
                     text = "Error message: ${uiState.lastErrorMessage}",

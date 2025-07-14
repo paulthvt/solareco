@@ -332,10 +332,24 @@ fun CircularPowerIndicator(
             textMeasurer
         )
         if(consumptionChecked){
-            drawArcs(consumption, angle, blurColor, powerConsumptionGaugeEnd, consumptionGradientColor)
+            drawArcs(
+                consumption,
+                angle,
+                blurColor,
+                powerConsumptionGaugeEnd,
+                consumptionGradientColor,
+                2
+            )
         }
         if(productionChecked){
-            drawArcs(production, angle, blurColor, powerProductionGaugeEnd, productionGradientColor)
+            drawArcs(
+                production,
+                angle,
+                blurColor,
+                powerProductionGaugeEnd,
+                productionGradientColor,
+                0
+            )
         }
         if(withdrawalsChecked) {
             drawArcs(
@@ -343,11 +357,11 @@ fun CircularPowerIndicator(
                 angle,
                 blurColor,
                 powerWithdrawalsGaugeEnd,
-                withdrawalsGradientColor
+                withdrawalsGradientColor, 3
             )
         }
         if(injectionChecked){
-            drawArcs(injection, angle, blurColor, powerInjectionGaugeEnd, injectionGradientColor)
+            drawArcs(injection, angle, blurColor, powerInjectionGaugeEnd, injectionGradientColor, 1)
         }
     }
 }
@@ -366,55 +380,38 @@ fun DrawScope.drawArcs(
     maxValue: Float,
     blurColor: Color,
     arcColor: Color,
-    gradientColor: Brush
+    gradientColor: Brush,
+    arcIndex: Int
 ) {
+    val arcWidth = 20f
+    val arcSpacing = 8f
+    val totalOffset = arcIndex * (arcWidth + arcSpacing)
+    val arcSize = Size(
+        width = size.width - 2 * totalOffset,
+        height = size.height - 2 * totalOffset
+    )
+    val topLeft = Offset(totalOffset, totalOffset)
     val startAngle = 270 - maxValue / 2
     val sweepAngle = maxValue * progress
 
-    val topLeft = Offset(50f, 50f)
-    val size = Size(size.width - 100f, size.height - 100f)
-
-    fun drawBlur() {
-        for (i in 0..20) {
-            drawArc(
-                color = blurColor.copy(alpha = i / 900f),
-                startAngle = startAngle,
-                sweepAngle = sweepAngle,
-                useCenter = false,
-                topLeft = topLeft,
-                size = size,
-                style = Stroke(width = 80f + (20 - i) * 20, cap = StrokeCap.Round)
-            )
-        }
-    }
-
-    fun drawStroke() {
-        drawArc(
-            color = arcColor,
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            useCenter = false,
-            topLeft = topLeft,
-            size = size,
-            style = Stroke(width = 86f, cap = StrokeCap.Round)
-        )
-    }
-
-    fun drawGradient() {
-        drawArc(
-            brush = gradientColor,
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            useCenter = false,
-            topLeft = topLeft,
-            size = size,
-            style = Stroke(width = 80f, cap = StrokeCap.Round)
-        )
-    }
-
-//    drawBlur()
-    drawStroke()
-    drawGradient()
+    drawArc(
+        color = arcColor,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
+        useCenter = false,
+        topLeft = topLeft,
+        size = arcSize,
+        style = Stroke(width = arcWidth + 1.5f, cap = StrokeCap.Round)
+    )
+    drawArc(
+        brush = gradientColor,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
+        useCenter = false,
+        topLeft = topLeft,
+        size = arcSize,
+        style = Stroke(width = arcWidth, cap = StrokeCap.Round)
+    )
 }
 
 fun DrawScope.drawLines(
@@ -470,6 +467,37 @@ fun DrawScope.drawLines(
 
 fun toRadians(deg: Double): Double = deg / 180.0 * PI
 
+@Preview
+@Composable
+fun PowerGaugeScreenPreview() {
+    ComwattTheme(darkTheme = true, dynamicColor = false) {
+        Surface {
+            PowerGaugeScreen(
+                production = GaugeState(
+                    arcValue = 0.8f,
+                    value = "4000",
+                    enabled = true
+                ),
+                consumption = GaugeState(
+                    arcValue = 0.5f,
+                    value = "2500",
+                    enabled = true
+                ),
+                injection = GaugeState(
+                    arcValue = 0.3f,
+                    value = "1500",
+                    enabled = true
+                ),
+                withdrawals = GaugeState(
+                    arcValue = 0.2f,
+                    value = "1000",
+                    enabled = true
+                ),
+                onSettingsButtonClick = {}
+            )
+        }
+    }
+}
 
 @Preview
 @Composable
@@ -480,9 +508,9 @@ fun DefaultPreview() {
                 HomeScreenState(
                     siteTimeSeries = SiteTimeSeries(
                         production = 256.0,
-                        consumption = 0.3,
-                        injection = 0.2,
-                        withdrawals = 0.1,
+                        consumption = 120.0,
+                        injection = 136.0,
+                        withdrawals = 0.0,
                     )
                 )
             )
