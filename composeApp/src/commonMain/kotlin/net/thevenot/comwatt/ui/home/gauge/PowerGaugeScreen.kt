@@ -428,7 +428,7 @@ fun DrawScope.drawLines(
 
     for (i in startValue..(numberOfLongTicks * 5)) {
         val isLongTick = i % 5 == 0
-        val lineLength = if (isLongTick) 100f else 30f
+        val lineLength = if (isLongTick) 100f else 40f
         val tickAngle = i * oneRotation + (180 - maxValue) / 2
 
         rotate(tickAngle) {
