@@ -25,6 +25,7 @@ fun BottomNavigationBar(navController: NavController) {
                         contentDescription = null,
                     )
                 },
+                enabled = item.screen == Screen.Home || item.screen == Screen.Dashboard,
                 label = { Text(stringResource(item.label)) },
                 selected = currentDestination?.hierarchy?.any {
                     it.hasRoute(item.screen::class)

@@ -76,7 +76,6 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.floor
 import kotlin.math.sin
 
 suspend fun startAnimation(animation: Animatable<Float, AnimationVector1D>, targetValue: Float) {
@@ -423,13 +422,13 @@ fun DrawScope.drawLines(
 ) {
     val numberOfLongTicks = realMaxValue / 1000
     val oneRotation = maxValue / (numberOfLongTicks * 5)
-    val startValue = if (progress == 0f) 0 else floor(progress * numberOfLongTicks * 5).toInt() + 1
+    val startValue = 0
     val increment = realMaxValue / numberOfLongTicks
     val padding = 50f
 
     for (i in startValue..(numberOfLongTicks * 5)) {
         val isLongTick = i % 5 == 0
-        val lineLength = if (isLongTick) 80f else 30f
+        val lineLength = if (isLongTick) 100f else 30f
         val tickAngle = i * oneRotation + (180 - maxValue) / 2
 
         rotate(tickAngle) {
