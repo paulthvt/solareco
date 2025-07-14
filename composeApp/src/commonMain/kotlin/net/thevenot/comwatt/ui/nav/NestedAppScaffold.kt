@@ -9,6 +9,8 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -21,6 +23,7 @@ import androidx.navigation.NavController
 @Composable
 fun NestedAppScaffold(
     navController: NavController,
+    snackbarHostState: SnackbarHostState,
     title: String? = null,
     actionsContent: @Composable () -> Unit = {},
     fab: @Composable () -> Unit = {},
@@ -57,6 +60,7 @@ fun NestedAppScaffold(
             )
         },
         floatingActionButton = fab,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = { BottomNavigationBar(navController) },
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {

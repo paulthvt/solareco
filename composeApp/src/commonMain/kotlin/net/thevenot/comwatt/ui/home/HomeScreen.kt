@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.error_fetching_data
 import comwatt.composeapp.generated.resources.gauge_dialog_close_button
 import comwatt.composeapp.generated.resources.gauge_dialog_title
 import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
@@ -60,6 +62,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 fun HomeScreen(
     dataRepository: DataRepository,
+    snackbarHostState: SnackbarHostState,
     viewModel: HomeViewModel = viewModel {
         HomeViewModel(fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository))
     }
@@ -78,6 +81,12 @@ fun HomeScreen(
     }
 
     val uiState by viewModel.uiState.collectAsState()
+    val fetchErrorMessage = stringResource(Res.string.error_fetching_data)
+    LaunchedEffect(uiState.lastErrorMessage) {
+        if (uiState.lastErrorMessage.isNotEmpty()) {
+            snackbarHostState.showSnackbar(fetchErrorMessage)
+        }
+    }
 
     LoadingView(uiState.isDataLoaded.not()) {
         HomeScreenContent(

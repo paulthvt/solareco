@@ -1,8 +1,10 @@
 package net.thevenot.comwatt
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -54,6 +56,7 @@ fun MainAppNavHost(
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
     }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     NavHost(navController, startDestination = Screen.Login) {
         composable<Screen.Login> {
@@ -70,7 +73,7 @@ fun MainAppNavHost(
                 }
             }
         }
-        mainGraph(navController, dataRepository, viewModelStoreOwner)
+        mainGraph(navController, dataRepository, viewModelStoreOwner, snackbarHostState)
         addUserSettingsDialog(navController)
     }
 }
@@ -78,15 +81,17 @@ fun MainAppNavHost(
 fun NavGraphBuilder.mainGraph(
     navController: NavHostController,
     dataRepository: DataRepository,
-    viewModelStoreOwner: ViewModelStoreOwner
+    viewModelStoreOwner: ViewModelStoreOwner,
+    snackbarHostState: SnackbarHostState
 ) {
     navigation<Screen.Main>(
         startDestination = Screen.Home
     ) {
         composable<Screen.Home> {
-            NestedAppScaffold(navController) {
+            NestedAppScaffold(navController, snackbarHostState) {
                 HomeScreen(
                     dataRepository = dataRepository,
+                    snackbarHostState = snackbarHostState,
                     viewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner) {
                         HomeViewModel(FetchSiteTimeSeriesUseCase(dataRepository))
                     })
@@ -94,15 +99,15 @@ fun NavGraphBuilder.mainGraph(
 
         }
         composable<Screen.Dashboard> {
-            DashboardScreen(navController, dataRepository)
+            DashboardScreen(navController, snackbarHostState, dataRepository)
         }
         composable<Screen.Devices> {
-            NestedAppScaffold(navController) {
+            NestedAppScaffold(navController, snackbarHostState) {
                 DashboardScreenContent(dataRepository)
             }
         }
         composable<Screen.More> {
-            NestedAppScaffold(navController) {
+            NestedAppScaffold(navController, snackbarHostState) {
                 DashboardScreenContent(dataRepository)
             }
         }

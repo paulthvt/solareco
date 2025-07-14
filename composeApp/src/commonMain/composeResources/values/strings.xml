@@ -53,4 +53,5 @@
     <string name="custom_range_dialog_picker_date_time_picker_select_date_icon">"Select date</string>
     <string name="custom_range_dialog_picker_date_time_picker_confirm_button">Confirm</string>
     <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Cancel</string>
+    <string name="error_fetching_data">"An error occurred while fetching data"</string>
 </resources>
