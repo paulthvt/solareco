@@ -5,7 +5,6 @@ import net.thevenot.comwatt.di.Factory
 
 fun MainViewController() = ComposeUIViewController {
     App(
-        dynamicColor = false,
         AppContainer(Factory())
     )
 }

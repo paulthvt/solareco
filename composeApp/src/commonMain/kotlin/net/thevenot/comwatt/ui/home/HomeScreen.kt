@@ -42,6 +42,9 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import comwatt.composeapp.generated.resources.last_data_refresh_time
 import comwatt.composeapp.generated.resources.last_data_refresh_time_zero
+import de.drick.compose.hotpreview.DisplayCutoutMode
+import de.drick.compose.hotpreview.HotPreview
+import de.drick.compose.hotpreview.NavigationBarMode
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
@@ -49,6 +52,9 @@ import net.thevenot.comwatt.domain.model.SiteTimeSeries
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
+import net.thevenot.comwatt.ui.home.house.HouseScreen
+import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
+import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
@@ -57,7 +63,6 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
@@ -118,8 +123,10 @@ private fun HomeScreenContent(
         launchSingleDataRefresh()
     }) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            HouseScreen()
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text(
                     text = "Real time auto consumption",
@@ -221,10 +228,19 @@ fun DialogSettingsRow(
     }
 }
 
-@Preview
+@HotPreview(
+    widthDp = 411,
+    heightDp = 891,
+    density = 2.625f,
+    statusBar = true,
+    navigationBar = NavigationBarMode.GestureBottom,
+    displayCutout = DisplayCutoutMode.CameraTop
+)
+@HotPreviewScreenSizes
+@HotPreviewLightDark
 @Composable
-private fun HomeScreenPreview() {
-    ComwattTheme(darkTheme = true, dynamicColor = false) {
+fun HomeScreenPreview() {
+    ComwattTheme {
         Surface {
             HomeScreenContent(
                 uiState = HomeScreenState(

@@ -14,7 +14,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             App(
-                dynamicColor = false,
                 appContainer = AppContainer(Factory(this))
             )
         }
@@ -25,7 +24,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppAndroidPreview() {
     App(
-        dynamicColor = false,
         AppContainer(Factory(LocalContext.current))
     )
 }

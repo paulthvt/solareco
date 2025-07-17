@@ -193,7 +193,7 @@ private fun SiteChooserPreview() {
         )
     )
 
-    ComwattTheme(darkTheme = true, dynamicColor = false) {
+    ComwattTheme {
         Surface {
             SiteChooserContent(sites = sampleSites, userDto = userDto)
         }
