@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.material.icons.filled.ElectricalServices
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -82,11 +83,13 @@ fun HouseScreen(
     val consumptionColor = MaterialTheme.colorScheme.powerConsumption
     val cardColor = MaterialTheme.colorScheme.surfaceContainer
     val textColor = MaterialTheme.colorScheme.onSurface
-    val primaryColor = MaterialTheme.colorScheme.onSurface
+    val boxColor = MaterialTheme.colorScheme.onSurface
+    val onBoxColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
 
     val solarPanelIconPainter = rememberVectorPainter(Icons.Default.WbSunny)
     val gridIconPainter = rememberVectorPainter(Icons.Default.ElectricBolt)
-    val homeIconPainter = rememberVectorPainter(Icons.Default.ElectricalServices)
+    val consumptionIconPainter = rememberVectorPainter(Icons.Default.ElectricalServices)
+    val boxIconPainter = rememberVectorPainter(Icons.Default.Home)
 
     Box(modifier = Modifier.size(300.dp)) {
         Image(
@@ -109,10 +112,12 @@ fun HouseScreen(
                 consumptionColor = consumptionColor,
                 cardColor = cardColor,
                 textColor = textColor,
-                primaryColor = primaryColor,
+                boxColor = boxColor,
+                onBoxColor = onBoxColor,
                 solarPanelIconPainter = solarPanelIconPainter,
                 gridIconPainter = gridIconPainter,
-                homeIconPainter = homeIconPainter
+                consumptionIconPainter = consumptionIconPainter,
+                boxIconPainter = boxIconPainter
             )
         }
     }
@@ -130,10 +135,12 @@ private fun DrawScope.drawEnergyFlow(
     consumptionColor: Color,
     cardColor: Color,
     textColor: Color,
-    primaryColor: Color,
+    boxColor: Color,
+    onBoxColor: Color,
     solarPanelIconPainter: VectorPainter,
     gridIconPainter: VectorPainter,
-    homeIconPainter: VectorPainter
+    consumptionIconPainter: VectorPainter,
+    boxIconPainter: VectorPainter
 ) {
     val centerBoxSize = 24.dp.toPx()
     val lineThickness = 6.dp.toPx()
@@ -184,30 +191,30 @@ private fun DrawScope.drawEnergyFlow(
         watts = abs(gridWatts)
     )
 
-    // Draw the central connection box with electric bolt icon
+    // Draw the central connection box with home icon
     drawRoundRect(
-        color = primaryColor,
+        color = boxColor,
         topLeft = Offset(centerBox.x - centerBoxSize / 2, centerBox.y - centerBoxSize / 2),
         size = Size(centerBoxSize, centerBoxSize),
         cornerRadius = CornerRadius(4.dp.toPx())
     )
 
-    val boltIconStyle = TextStyle(
-        fontSize = 16.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.White
-    )
-
-    val boltLayoutResult = textMeasurer.measure("⚡", boltIconStyle)
-    val boltOffset = Offset(
-        centerBox.x - boltLayoutResult.size.width / 2,
-        centerBox.y - boltLayoutResult.size.height / 2
-    )
-
-    drawText(
-        textLayoutResult = boltLayoutResult,
-        topLeft = boltOffset
-    )
+    // Draw home icon in center box using VectorPainter
+    val centerIconSize = 16.dp.toPx()
+    drawIntoCanvas { canvas ->
+        canvas.save()
+        canvas.translate(
+            centerBox.x - centerIconSize / 2,
+            centerBox.y - centerIconSize / 2
+        )
+        with(boxIconPainter) {
+            draw(
+                size = Size(centerIconSize, centerIconSize),
+                colorFilter = ColorFilter.tint(onBoxColor)
+            )
+        }
+        canvas.restore()
+    }
 
     drawMaterialCard(
         center = solarEnd,
@@ -244,7 +251,7 @@ private fun DrawScope.drawEnergyFlow(
         powerColor = consumptionColor,
         cardColor = cardColor,
         watts = consumptionWatts.toInt(),
-        iconPainter = homeIconPainter,
+        iconPainter = consumptionIconPainter,
         description = "Consuming",
         textMeasurer = textMeasurer,
         textColor = textColor,
@@ -445,7 +452,7 @@ private fun DrawScope.drawMaterialCard(
         fontSize = 12.sp,
         fontFamily = FontFamily.SansSerif,
         fontWeight = FontWeight.Medium,
-        color = textColor.copy(alpha = 0.7f)
+        color = textColor
     )
 
     val descriptionLayoutResult = textMeasurer.measure(description, descriptionStyle)
