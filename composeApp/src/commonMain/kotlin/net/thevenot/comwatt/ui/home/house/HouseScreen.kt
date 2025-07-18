@@ -11,8 +11,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ElectricBolt
 import androidx.compose.material.icons.filled.ElectricalServices
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,10 +27,13 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -81,6 +84,10 @@ fun HouseScreen(
     val textColor = MaterialTheme.colorScheme.onSurface
     val primaryColor = MaterialTheme.colorScheme.onSurface
 
+    val solarPanelIconPainter = rememberVectorPainter(Icons.Default.WbSunny)
+    val gridIconPainter = rememberVectorPainter(Icons.Default.ElectricBolt)
+    val homeIconPainter = rememberVectorPainter(Icons.Default.ElectricalServices)
+
     Box(modifier = Modifier.size(300.dp)) {
         Image(
             painter = painterResource(resource = Res.drawable.home_day_light),
@@ -102,7 +109,10 @@ fun HouseScreen(
                 consumptionColor = consumptionColor,
                 cardColor = cardColor,
                 textColor = textColor,
-                primaryColor = primaryColor
+                primaryColor = primaryColor,
+                solarPanelIconPainter = solarPanelIconPainter,
+                gridIconPainter = gridIconPainter,
+                homeIconPainter = homeIconPainter
             )
         }
     }
@@ -120,7 +130,10 @@ private fun DrawScope.drawEnergyFlow(
     consumptionColor: Color,
     cardColor: Color,
     textColor: Color,
-    primaryColor: Color
+    primaryColor: Color,
+    solarPanelIconPainter: VectorPainter,
+    gridIconPainter: VectorPainter,
+    homeIconPainter: VectorPainter
 ) {
     val centerBoxSize = 24.dp.toPx()
     val lineThickness = 6.dp.toPx()
@@ -138,8 +151,7 @@ private fun DrawScope.drawEnergyFlow(
     val gridEnd = Offset(centerBox.x - 120.dp.toPx(), centerBox.y) // Left (grid)
     val consumptionEnd = Offset(centerBox.x + 120.dp.toPx(), centerBox.y) // Right (consumption)
 
-    // Draw lines and animations - order matters for overlapping
-    // Draw solar line first (vertical)
+    // Draw solar (vertical)
     drawAnimatedLine(
         start = solarEnd,
         end = centerBox,
@@ -204,7 +216,7 @@ private fun DrawScope.drawEnergyFlow(
         powerColor = solarColor,
         cardColor = cardColor,
         watts = solarWatts.toInt(),
-        icon = Icons.Default.WbSunny,
+        iconPainter = solarPanelIconPainter,
         description = "Producing",
         textMeasurer = textMeasurer,
         textColor = textColor,
@@ -218,7 +230,7 @@ private fun DrawScope.drawEnergyFlow(
         powerColor = if (gridWatts < 0) gridExportColor else gridImportColor,
         cardColor = cardColor,
         watts = abs(gridWatts).toInt(),
-        icon = Icons.Default.ElectricalServices,
+        iconPainter = gridIconPainter,
         description = if (gridWatts < 0) "Selling" else "Buying",
         textMeasurer = textMeasurer,
         textColor = textColor,
@@ -232,7 +244,7 @@ private fun DrawScope.drawEnergyFlow(
         powerColor = consumptionColor,
         cardColor = cardColor,
         watts = consumptionWatts.toInt(),
-        icon = Icons.Default.Home,
+        iconPainter = homeIconPainter,
         description = "Consuming",
         textMeasurer = textMeasurer,
         textColor = textColor,
@@ -332,7 +344,7 @@ private fun DrawScope.drawMaterialCard(
     powerColor: Color,
     cardColor: Color,
     watts: Int,
-    icon: ImageVector,
+    iconPainter: VectorPainter,
     description: String,
     textMeasurer: TextMeasurer,
     textColor: Color,
@@ -401,39 +413,32 @@ private fun DrawScope.drawMaterialCard(
         topLeft = wattsOffset
     )
 
-    // Draw a simple icon representation (circle with letter)
-    val iconRadius = 10.dp.toPx()
+    // Draw the Material icon using VectorPainter
+    val iconSize = 20.dp.toPx()
     val iconCenter = Offset(center.x, center.y)
 
+    // Draw icon background circle
     drawCircle(
         color = powerColor,
-        radius = iconRadius,
+        radius = 12.dp.toPx(),
         center = iconCenter
     )
 
-    val iconLetter = when (icon) {
-        Icons.Default.WbSunny -> "☀"
-        Icons.Default.Home -> "🏠"
-        Icons.Default.ElectricalServices -> "⚡"
-        else -> "⚡"
+    // Draw the icon
+    drawIntoCanvas { canvas ->
+        canvas.save()
+        canvas.translate(
+            iconCenter.x - iconSize / 2,
+            iconCenter.y - iconSize / 2
+        )
+        with(iconPainter) {
+            draw(
+                size = Size(iconSize, iconSize),
+                colorFilter = ColorFilter.tint(Color.White)
+            )
+        }
+        canvas.restore()
     }
-
-    val iconStyle = TextStyle(
-        fontSize = 10.sp,
-        fontWeight = FontWeight.Bold,
-        color = Color.White
-    )
-
-    val iconLayoutResult = textMeasurer.measure(iconLetter, iconStyle)
-    val iconOffset = Offset(
-        iconCenter.x - iconLayoutResult.size.width / 2,
-        iconCenter.y - iconLayoutResult.size.height / 2
-    )
-
-    drawText(
-        textLayoutResult = iconLayoutResult,
-        topLeft = iconOffset
-    )
 
     // Draw the description text
     val descriptionStyle = TextStyle(
@@ -446,7 +451,7 @@ private fun DrawScope.drawMaterialCard(
     val descriptionLayoutResult = textMeasurer.measure(description, descriptionStyle)
     val descriptionOffset = Offset(
         center.x - descriptionLayoutResult.size.width / 2,
-        iconCenter.y + iconRadius + 4.dp.toPx()
+        iconCenter.y + 12.dp.toPx() + 4.dp.toPx()
     )
 
     drawText(
