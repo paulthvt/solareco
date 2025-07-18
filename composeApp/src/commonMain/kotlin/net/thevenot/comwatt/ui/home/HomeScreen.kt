@@ -126,7 +126,7 @@ private fun HomeScreenContent(
             modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            HouseScreen()
+            HouseScreen(uiState)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text(
                     text = "Real time auto consumption",

@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.home_day_light
+import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -61,9 +63,7 @@ import kotlin.math.sqrt
 
 @Composable
 fun HouseScreen(
-    solarWatts: Float = 2500f,
-    gridWatts: Float = 800f,
-    consumptionWatts: Float = 1700f
+    homeScreenState: HomeScreenState,
 ) {
     val infiniteTransition = rememberInfiniteTransition()
     val animationProgress by infiniteTransition.animateFloat(
@@ -91,6 +91,12 @@ fun HouseScreen(
     val consumptionIconPainter = rememberVectorPainter(Icons.Default.ElectricalServices)
     val boxIconPainter = rememberVectorPainter(Icons.Default.Home)
 
+    val gridWatts = if (homeScreenState.siteTimeSeries.injection.toInt() > 0) {
+        -homeScreenState.siteTimeSeries.injection.toInt()
+    } else {
+        homeScreenState.siteTimeSeries.withdrawals.toInt()
+    }
+
     Box(modifier = Modifier.size(300.dp)) {
         Image(
             painter = painterResource(resource = Res.drawable.home_day_light),
@@ -102,9 +108,9 @@ fun HouseScreen(
         Canvas(modifier = Modifier.matchParentSize()) {
             drawEnergyFlow(
                 animationProgress = animationProgress,
-                solarWatts = solarWatts,
+                productionWatts = homeScreenState.siteTimeSeries.production.toInt(),
                 gridWatts = gridWatts,
-                consumptionWatts = consumptionWatts,
+                consumptionWatts = homeScreenState.siteTimeSeries.consumption.toInt(),
                 textMeasurer = textMeasurer,
                 solarColor = solarColor,
                 gridExportColor = gridExportColor,
@@ -125,9 +131,9 @@ fun HouseScreen(
 
 private fun DrawScope.drawEnergyFlow(
     animationProgress: Float,
-    solarWatts: Float,
-    gridWatts: Float,
-    consumptionWatts: Float,
+    productionWatts: Int,
+    gridWatts: Int,
+    consumptionWatts: Int,
     textMeasurer: TextMeasurer,
     solarColor: Color,
     gridExportColor: Color,
@@ -166,7 +172,7 @@ private fun DrawScope.drawEnergyFlow(
         color = solarColor,
         thickness = lineThickness,
         flowDirection = 1f, // Always flows down from solar
-        watts = solarWatts
+        watts = productionWatts
     )
 
     // Draw consumption line (right horizontal)
@@ -222,7 +228,7 @@ private fun DrawScope.drawEnergyFlow(
         cardHeight = cardHeight,
         powerColor = solarColor,
         cardColor = cardColor,
-        watts = solarWatts.toInt(),
+        watts = productionWatts,
         iconPainter = solarPanelIconPainter,
         description = "Producing",
         textMeasurer = textMeasurer,
@@ -236,7 +242,7 @@ private fun DrawScope.drawEnergyFlow(
         cardHeight = cardHeight,
         powerColor = if (gridWatts < 0) gridExportColor else gridImportColor,
         cardColor = cardColor,
-        watts = abs(gridWatts).toInt(),
+        watts = abs(gridWatts),
         iconPainter = gridIconPainter,
         description = if (gridWatts < 0) "Selling" else "Buying",
         textMeasurer = textMeasurer,
@@ -250,7 +256,7 @@ private fun DrawScope.drawEnergyFlow(
         cardHeight = cardHeight,
         powerColor = consumptionColor,
         cardColor = cardColor,
-        watts = consumptionWatts.toInt(),
+        watts = consumptionWatts,
         iconPainter = consumptionIconPainter,
         description = "Consuming",
         textMeasurer = textMeasurer,
@@ -266,7 +272,7 @@ private fun DrawScope.drawAnimatedLine(
     color: Color,
     thickness: Float,
     flowDirection: Float,
-    watts: Float
+    watts: Int
 ) {
     // Draw the base line
     drawLine(
@@ -469,10 +475,38 @@ private fun DrawScope.drawMaterialCard(
 
 @HotPreviewLightDark
 @Composable
-fun HouseScreenPreview() {
+fun HouseScreenSellingPreview() {
     ComwattTheme {
         Surface {
-            HouseScreen()
+            HouseScreen(
+                HomeScreenState(
+                    siteTimeSeries = SiteTimeSeries(
+                        production = 3000.0,
+                        withdrawals = 1500.0,
+                        injection = 0.0,
+                        consumption = 2000.0
+                    )
+                )
+            )
+        }
+    }
+}
+
+@HotPreviewLightDark
+@Composable
+fun HouseScreenInjectingPreview() {
+    ComwattTheme {
+        Surface {
+            HouseScreen(
+                HomeScreenState(
+                    siteTimeSeries = SiteTimeSeries(
+                        production = 3000.0,
+                        withdrawals = 0.0,
+                        injection = 500.0,
+                        consumption = 2000.0
+                    )
+                )
+            )
         }
     }
 }
