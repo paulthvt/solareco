@@ -41,10 +41,20 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.home_day_light
+import comwatt.composeapp.generated.resources.home_day_no_light
+import comwatt.composeapp.generated.resources.house_animation_buying
+import comwatt.composeapp.generated.resources.house_animation_consuming
+import comwatt.composeapp.generated.resources.house_animation_not_consuming
+import comwatt.composeapp.generated.resources.house_animation_not_producing
+import comwatt.composeapp.generated.resources.house_animation_producing
+import comwatt.composeapp.generated.resources.house_animation_selling
+import comwatt.composeapp.generated.resources.house_solar_panel_description
 import net.thevenot.comwatt.domain.model.SiteTimeSeries
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
@@ -54,12 +64,16 @@ import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
 import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
+
+private const val MIN_PRODUCTION_WATTS = 5
+private const val MIN_CONSUMPTION_WATTS = 500
 
 @Composable
 fun HouseScreen(
@@ -91,16 +105,28 @@ fun HouseScreen(
     val consumptionIconPainter = rememberVectorPainter(Icons.Default.ElectricalServices)
     val boxIconPainter = rememberVectorPainter(Icons.Default.Home)
 
+    val producingString = stringResource(Res.string.house_animation_producing)
+    val notProducingString = stringResource(Res.string.house_animation_not_producing)
+    val consumingString = stringResource(Res.string.house_animation_consuming)
+    val notConsumingString = stringResource(Res.string.house_animation_not_consuming)
+    val sellingString = stringResource(Res.string.house_animation_selling)
+    val buyingString = stringResource(Res.string.house_animation_buying)
+
     val gridWatts = if (homeScreenState.siteTimeSeries.injection.toInt() > 0) {
         -homeScreenState.siteTimeSeries.injection.toInt()
     } else {
         homeScreenState.siteTimeSeries.withdrawals.toInt()
     }
 
+    val homeImage = when {
+        homeScreenState.siteTimeSeries.consumption > MIN_CONSUMPTION_WATTS -> Res.drawable.home_day_light
+        else -> Res.drawable.home_day_no_light
+    }
+
     Box(modifier = Modifier.size(300.dp)) {
         Image(
-            painter = painterResource(resource = Res.drawable.home_day_light),
-            contentDescription = "House with solar panels",
+            painter = painterResource(resource = homeImage),
+            contentDescription = stringResource(Res.string.house_solar_panel_description),
             modifier = Modifier.matchParentSize()
                 .alpha(0.3f)
                 .align(Alignment.Center)
@@ -123,7 +149,13 @@ fun HouseScreen(
                 solarPanelIconPainter = solarPanelIconPainter,
                 gridIconPainter = gridIconPainter,
                 consumptionIconPainter = consumptionIconPainter,
-                boxIconPainter = boxIconPainter
+                boxIconPainter = boxIconPainter,
+                producingString = producingString,
+                notProducingString = notProducingString,
+                consumingString = consumingString,
+                notConsumingString = notConsumingString,
+                sellingString = sellingString,
+                buyingString = buyingString
             )
         }
     }
@@ -146,11 +178,17 @@ private fun DrawScope.drawEnergyFlow(
     solarPanelIconPainter: VectorPainter,
     gridIconPainter: VectorPainter,
     consumptionIconPainter: VectorPainter,
-    boxIconPainter: VectorPainter
+    boxIconPainter: VectorPainter,
+    producingString: String,
+    notProducingString: String,
+    consumingString: String,
+    notConsumingString: String,
+    sellingString: String,
+    buyingString: String
 ) {
     val centerBoxSize = 24.dp.toPx()
     val lineThickness = 6.dp.toPx()
-    val cardWidth = 90.dp.toPx()
+    val cardWidth = 100.dp.toPx()
     val cardHeight = 80.dp.toPx()
 
     // Central connection box position
@@ -165,26 +203,30 @@ private fun DrawScope.drawEnergyFlow(
     val consumptionEnd = Offset(centerBox.x + 120.dp.toPx(), centerBox.y) // Right (consumption)
 
     // Draw solar (vertical)
-    drawAnimatedLine(
-        start = solarEnd,
-        end = centerBox,
-        progress = animationProgress,
-        color = solarColor,
-        thickness = lineThickness,
-        flowDirection = 1f, // Always flows down from solar
-        watts = productionWatts
-    )
+    if (productionWatts > MIN_PRODUCTION_WATTS) {
+        drawAnimatedLine(
+            start = solarEnd,
+            end = centerBox,
+            progress = animationProgress,
+            color = solarColor,
+            thickness = lineThickness,
+            flowDirection = 1f, // Always flows down from solar
+            watts = productionWatts
+        )
+    }
 
     // Draw consumption line (right horizontal)
-    drawAnimatedLine(
-        start = centerBox,
-        end = consumptionEnd,
-        progress = animationProgress,
-        color = consumptionColor,
-        thickness = lineThickness,
-        flowDirection = 1f, // Always flows to consumption
-        watts = consumptionWatts
-    )
+    if (consumptionWatts > MIN_CONSUMPTION_WATTS) {
+        drawAnimatedLine(
+            start = centerBox,
+            end = consumptionEnd,
+            progress = animationProgress,
+            color = consumptionColor,
+            thickness = lineThickness,
+            flowDirection = 1f, // Always flows to consumption
+            watts = consumptionWatts
+        )
+    }
 
     // Draw grid line (left horizontal)
     drawAnimatedLine(
@@ -230,7 +272,7 @@ private fun DrawScope.drawEnergyFlow(
         cardColor = cardColor,
         watts = productionWatts,
         iconPainter = solarPanelIconPainter,
-        description = "Producing",
+        description = if (productionWatts > MIN_PRODUCTION_WATTS) producingString else notProducingString,
         textMeasurer = textMeasurer,
         textColor = textColor,
         lineDirection = LineDirection.BOTTOM
@@ -244,7 +286,7 @@ private fun DrawScope.drawEnergyFlow(
         cardColor = cardColor,
         watts = abs(gridWatts),
         iconPainter = gridIconPainter,
-        description = if (gridWatts < 0) "Selling" else "Buying",
+        description = if (gridWatts < 0) sellingString else buyingString,
         textMeasurer = textMeasurer,
         textColor = textColor,
         lineDirection = LineDirection.RIGHT
@@ -258,7 +300,7 @@ private fun DrawScope.drawEnergyFlow(
         cardColor = cardColor,
         watts = consumptionWatts,
         iconPainter = consumptionIconPainter,
-        description = "Consuming",
+        description = if (consumptionWatts > MIN_CONSUMPTION_WATTS) consumingString else notConsumingString,
         textMeasurer = textMeasurer,
         textColor = textColor,
         lineDirection = LineDirection.LEFT
@@ -418,7 +460,7 @@ private fun DrawScope.drawMaterialCard(
     val wattsLayoutResult = textMeasurer.measure(wattsText, wattsStyle)
     val wattsOffset = Offset(
         center.x - wattsLayoutResult.size.width / 2,
-        center.y - wattsLayoutResult.size.height / 2 - 24.dp.toPx()
+        center.y - wattsLayoutResult.size.height / 2 - 26.dp.toPx()
     )
 
     drawText(
@@ -461,7 +503,13 @@ private fun DrawScope.drawMaterialCard(
         color = textColor
     )
 
-    val descriptionLayoutResult = textMeasurer.measure(description, descriptionStyle)
+    val descriptionLayoutResult = textMeasurer.measure(
+        text = description,
+        style = descriptionStyle,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        constraints = Constraints(maxWidth = cardWidth.toInt())
+    )
     val descriptionOffset = Offset(
         center.x - descriptionLayoutResult.size.width / 2,
         iconCenter.y + 12.dp.toPx() + 4.dp.toPx()
@@ -481,7 +529,7 @@ fun HouseScreenSellingPreview() {
             HouseScreen(
                 HomeScreenState(
                     siteTimeSeries = SiteTimeSeries(
-                        production = 3000.0,
+                        production = 2.0,
                         withdrawals = 1500.0,
                         injection = 0.0,
                         consumption = 2000.0
