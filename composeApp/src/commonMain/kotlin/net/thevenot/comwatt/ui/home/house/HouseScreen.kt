@@ -78,6 +78,7 @@ private const val MIN_CONSUMPTION_WATTS = 500
 @Composable
 fun HouseScreen(
     homeScreenState: HomeScreenState,
+    modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition()
     val animationProgress by infiniteTransition.animateFloat(
@@ -123,7 +124,7 @@ fun HouseScreen(
         else -> Res.drawable.home_day_no_light
     }
 
-    Box(modifier = Modifier.size(300.dp)) {
+    Box(modifier = modifier) {
         Image(
             painter = painterResource(resource = homeImage),
             contentDescription = stringResource(Res.string.house_solar_panel_description),
@@ -534,7 +535,8 @@ fun HouseScreenSellingPreview() {
                         injection = 0.0,
                         consumption = 2000.0
                     )
-                )
+                ),
+                Modifier.size(400.dp)
             )
         }
     }
@@ -553,7 +555,8 @@ fun HouseScreenInjectingPreview() {
                         injection = 500.0,
                         consumption = 2000.0
                     )
-                )
+                ),
+                Modifier.size(400.dp)
             )
         }
     }

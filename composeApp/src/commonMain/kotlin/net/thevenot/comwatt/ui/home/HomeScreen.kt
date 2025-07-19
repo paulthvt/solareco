@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -50,11 +51,12 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
 import net.thevenot.comwatt.domain.model.SiteTimeSeries
 import net.thevenot.comwatt.ui.common.LoadingView
-import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
+import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
+import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
@@ -123,10 +125,10 @@ private fun HomeScreenContent(
         launchSingleDataRefresh()
     }) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
+            modifier = Modifier.fillMaxSize().padding(bottom = AppTheme.dimens.paddingNormal)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            HouseScreen(uiState)
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Text(
                     text = "Real time auto consumption",
@@ -140,7 +142,11 @@ private fun HomeScreenContent(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            PowerGaugeScreen(uiState, onSettingsButtonClick = { showDialog = true })
+            HouseScreen(uiState, Modifier.fillMaxWidth().height(400.dp))
+            ResponsiveGauge(
+                uiState,
+                onSettingsButtonClick = { showDialog = true }
+            )
             Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 uiState.timeDifference?.let {
                     Text(

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -40,6 +41,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
@@ -95,8 +98,30 @@ fun Animatable<Float, AnimationVector1D>.toUiState(wattValue: Int, enabled: Bool
 )
 
 @Composable
+fun ResponsiveGauge(
+    homeScreenState: HomeScreenState,
+    modifier: Modifier = Modifier,
+    onSettingsButtonClick: () -> Unit = {}
+) {
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val widthPx = windowInfo.containerSize.width
+    val gaugeWidthDp = with(density) { widthPx.toDp() }
+    val maxGaugeWidth = minOf(gaugeWidthDp, 500.dp)
+
+    PowerGaugeScreen(
+        homeScreenState = homeScreenState,
+        modifier = modifier
+            .widthIn(max = maxGaugeWidth)
+            .fillMaxWidth(),
+        onSettingsButtonClick = onSettingsButtonClick
+    )
+}
+
+@Composable
 fun PowerGaugeScreen(
     homeScreenState: HomeScreenState,
+    modifier: Modifier = Modifier,
     onSettingsButtonClick: () -> Unit = {}
 ) {
     val productionAnimation = remember { Animatable(0f) }
@@ -154,6 +179,7 @@ fun PowerGaugeScreen(
             homeScreenState.siteTimeSeries.withdrawals.toInt(),
             homeScreenState.withdrawalsGaugeEnabled
         ),
+        modifier = modifier,
         onSettingsButtonClick = onSettingsButtonClick
     )
 }
@@ -164,11 +190,12 @@ private fun PowerGaugeScreen(
     consumption: GaugeState,
     injection: GaugeState,
     withdrawals: GaugeState,
+    modifier: Modifier = Modifier,
     onSettingsButtonClick: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         PowerIndicator(production, consumption, injection, withdrawals, onSettingsButtonClick)
@@ -511,7 +538,8 @@ fun DefaultPreview() {
                         injection = 136.0,
                         withdrawals = 0.0,
                     )
-                )
+                ),
+                Modifier.fillMaxSize()
             )
         }
     }
