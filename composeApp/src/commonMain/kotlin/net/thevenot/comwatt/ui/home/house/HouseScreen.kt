@@ -56,6 +56,7 @@ import comwatt.composeapp.generated.resources.house_animation_producing
 import comwatt.composeapp.generated.resources.house_animation_selling
 import comwatt.composeapp.generated.resources.house_solar_panel_description
 import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.model.Trend
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -77,7 +78,7 @@ private const val MIN_CONSUMPTION_WATTS = 500
 
 @Composable
 fun HouseScreen(
-    homeScreenState: HomeScreenState,
+    state: HomeScreenState,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition()
@@ -100,6 +101,10 @@ fun HouseScreen(
     val textColor = MaterialTheme.colorScheme.onSurface
     val boxColor = MaterialTheme.colorScheme.onSurface
     val onBoxColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+    val productionTrend = state.siteTimeSeries.productionTrend
+    val consumptionTrend = state.siteTimeSeries.consumptionTrend
+    val injectionTrend = state.siteTimeSeries.injectionTrend
+    val withdrawalsTrend = state.siteTimeSeries.withdrawalsTrend
 
     val solarPanelIconPainter = rememberVectorPainter(Icons.Default.WbSunny)
     val gridIconPainter = rememberVectorPainter(Icons.Default.ElectricBolt)
@@ -113,14 +118,14 @@ fun HouseScreen(
     val sellingString = stringResource(Res.string.house_animation_selling)
     val buyingString = stringResource(Res.string.house_animation_buying)
 
-    val gridWatts = if (homeScreenState.siteTimeSeries.injection.toInt() > 0) {
-        -homeScreenState.siteTimeSeries.injection.toInt()
+    val gridWatts = if (state.siteTimeSeries.injection.toInt() > 0) {
+        -state.siteTimeSeries.injection.toInt()
     } else {
-        homeScreenState.siteTimeSeries.withdrawals.toInt()
+        state.siteTimeSeries.withdrawals.toInt()
     }
 
     val homeImage = when {
-        homeScreenState.siteTimeSeries.consumption > MIN_CONSUMPTION_WATTS -> Res.drawable.home_day_light
+        state.siteTimeSeries.consumption > MIN_CONSUMPTION_WATTS -> Res.drawable.home_day_light
         else -> Res.drawable.home_day_no_light
     }
 
@@ -135,9 +140,13 @@ fun HouseScreen(
         Canvas(modifier = Modifier.matchParentSize()) {
             drawEnergyFlow(
                 animationProgress = animationProgress,
-                productionWatts = homeScreenState.siteTimeSeries.production.toInt(),
+                productionWatts = state.siteTimeSeries.production.toInt(),
                 gridWatts = gridWatts,
-                consumptionWatts = homeScreenState.siteTimeSeries.consumption.toInt(),
+                consumptionWatts = state.siteTimeSeries.consumption.toInt(),
+                productionTrend = productionTrend,
+                consumptionTrend = consumptionTrend,
+                injectionTrend = injectionTrend,
+                withdrawalsTrend = withdrawalsTrend,
                 textMeasurer = textMeasurer,
                 solarColor = solarColor,
                 gridExportColor = gridExportColor,
@@ -167,6 +176,10 @@ private fun DrawScope.drawEnergyFlow(
     productionWatts: Int,
     gridWatts: Int,
     consumptionWatts: Int,
+    productionTrend: Trend?,
+    consumptionTrend: Trend?,
+    injectionTrend: Trend?,
+    withdrawalsTrend: Trend?,
     textMeasurer: TextMeasurer,
     solarColor: Color,
     gridExportColor: Color,
@@ -185,7 +198,7 @@ private fun DrawScope.drawEnergyFlow(
     consumingString: String,
     notConsumingString: String,
     sellingString: String,
-    buyingString: String
+    buyingString: String,
 ) {
     val centerBoxSize = 24.dp.toPx()
     val lineThickness = 6.dp.toPx()
@@ -272,6 +285,7 @@ private fun DrawScope.drawEnergyFlow(
         powerColor = solarColor,
         cardColor = cardColor,
         watts = productionWatts,
+        trend = productionTrend,
         iconPainter = solarPanelIconPainter,
         description = if (productionWatts > MIN_PRODUCTION_WATTS) producingString else notProducingString,
         textMeasurer = textMeasurer,
@@ -286,11 +300,12 @@ private fun DrawScope.drawEnergyFlow(
         powerColor = if (gridWatts < 0) gridExportColor else gridImportColor,
         cardColor = cardColor,
         watts = abs(gridWatts),
+        trend = if (gridWatts < 0) injectionTrend else withdrawalsTrend,
         iconPainter = gridIconPainter,
         description = if (gridWatts < 0) sellingString else buyingString,
         textMeasurer = textMeasurer,
         textColor = textColor,
-        lineDirection = LineDirection.RIGHT
+        lineDirection = LineDirection.RIGHT,
     )
 
     drawMaterialCard(
@@ -300,11 +315,12 @@ private fun DrawScope.drawEnergyFlow(
         powerColor = consumptionColor,
         cardColor = cardColor,
         watts = consumptionWatts,
+        trend = consumptionTrend,
         iconPainter = consumptionIconPainter,
         description = if (consumptionWatts > MIN_CONSUMPTION_WATTS) consumingString else notConsumingString,
         textMeasurer = textMeasurer,
         textColor = textColor,
-        lineDirection = LineDirection.LEFT
+        lineDirection = LineDirection.LEFT,
     )
 }
 
@@ -400,6 +416,7 @@ private fun DrawScope.drawMaterialCard(
     powerColor: Color,
     cardColor: Color,
     watts: Int,
+    trend: Trend?,
     iconPainter: VectorPainter,
     description: String,
     textMeasurer: TextMeasurer,
@@ -457,7 +474,13 @@ private fun DrawScope.drawMaterialCard(
         color = textColor
     )
 
-    val wattsText = "${watts}W"
+    val trend = when (trend) {
+        Trend.INCREASING -> "↑"
+        Trend.DECREASING -> "↓"
+        Trend.STABLE -> ""
+        null -> ""
+    }
+    val wattsText = "$watts W $trend"
     val wattsLayoutResult = textMeasurer.measure(wattsText, wattsStyle)
     val wattsOffset = Offset(
         center.x - wattsLayoutResult.size.width / 2,
@@ -553,7 +576,11 @@ fun HouseScreenInjectingPreview() {
                         production = 3000.0,
                         withdrawals = 0.0,
                         injection = 500.0,
-                        consumption = 2000.0
+                        consumption = 2000.0,
+                        productionTrend = Trend.INCREASING,
+                        consumptionTrend = Trend.STABLE,
+                        injectionTrend = Trend.DECREASING,
+                        withdrawalsTrend = Trend.STABLE
                     )
                 ),
                 Modifier.size(400.dp)

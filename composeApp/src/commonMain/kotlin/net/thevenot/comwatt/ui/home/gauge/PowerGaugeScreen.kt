@@ -519,6 +519,7 @@ fun PowerGaugeScreenPreview() {
                     value = "1000",
                     enabled = true
                 ),
+                modifier = Modifier.fillMaxWidth(),
                 onSettingsButtonClick = {}
             )
         }
@@ -539,7 +540,7 @@ fun DefaultPreview() {
                         withdrawals = 0.0,
                     )
                 ),
-                Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
