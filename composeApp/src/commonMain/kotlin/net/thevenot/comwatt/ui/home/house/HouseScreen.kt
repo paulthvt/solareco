@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -77,58 +76,70 @@ import kotlin.math.sqrt
 private const val MIN_PRODUCTION_WATTS = 5
 private const val MIN_CONSUMPTION_WATTS = 500
 
+// Data classes to reduce parameter lists
+private data class EnergyFlowConfig(
+    val centerBoxSize: Float,
+    val lineThickness: Float,
+    val cardWidth: Float,
+    val cardHeight: Float
+)
+
+private data class EnergyFlowColors(
+    val solar: Color,
+    val gridExport: Color,
+    val gridImport: Color,
+    val consumption: Color,
+    val card: Color,
+    val text: Color,
+    val box: Color,
+    val onBox: Color
+)
+
+private data class EnergyFlowIcons(
+    val solar: VectorPainter,
+    val grid: VectorPainter,
+    val consumption: VectorPainter,
+    val centerBox: VectorPainter
+)
+
+private data class EnergyFlowStrings(
+    val producing: String,
+    val notProducing: String,
+    val consuming: String,
+    val notConsuming: String,
+    val selling: String,
+    val buying: String
+)
+
+private data class EnergyFlowData(
+    val productionWatts: Int,
+    val gridWatts: Int,
+    val consumptionWatts: Int,
+    val productionTrend: Trend?,
+    val consumptionTrend: Trend?,
+    val injectionTrend: Trend?,
+    val withdrawalsTrend: Trend?
+)
+
+private data class EnergyFlowPositions(
+    val centerBox: Offset,
+    val solarEnd: Offset,
+    val gridEnd: Offset,
+    val consumptionEnd: Offset
+)
+
 @Composable
 fun HouseScreen(
     state: HomeScreenState,
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition()
-    val animationProgress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
+    val animationProgress = rememberEnergyFlowAnimation()
     val textMeasurer = rememberTextMeasurer()
-
-    val solarColor = MaterialTheme.colorScheme.powerProduction
-    val gridExportColor = MaterialTheme.colorScheme.powerInjection
-    val gridImportColor = MaterialTheme.colorScheme.powerWithdrawals
-    val consumptionColor = MaterialTheme.colorScheme.powerConsumption
-    val cardColor = MaterialTheme.colorScheme.surfaceContainer
-    val textColor = MaterialTheme.colorScheme.onSurface
-    val boxColor = MaterialTheme.colorScheme.onSurface
-    val onBoxColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
-    val productionTrend = state.siteTimeSeries.productionTrend
-    val consumptionTrend = state.siteTimeSeries.consumptionTrend
-    val injectionTrend = state.siteTimeSeries.injectionTrend
-    val withdrawalsTrend = state.siteTimeSeries.withdrawalsTrend
-
-    val solarPanelIconPainter = rememberVectorPainter(Icons.Default.WbSunny)
-    val gridIconPainter = rememberVectorPainter(Icons.Default.ElectricBolt)
-    val consumptionIconPainter = rememberVectorPainter(Icons.Default.ElectricalServices)
-    val boxIconPainter = rememberVectorPainter(Icons.Default.Home)
-
-    val producingString = stringResource(Res.string.house_animation_producing)
-    val notProducingString = stringResource(Res.string.house_animation_not_producing)
-    val consumingString = stringResource(Res.string.house_animation_consuming)
-    val notConsumingString = stringResource(Res.string.house_animation_not_consuming)
-    val sellingString = stringResource(Res.string.house_animation_selling)
-    val buyingString = stringResource(Res.string.house_animation_buying)
-
-    val gridWatts = if (state.siteTimeSeries.injection.toInt() > 0) {
-        -state.siteTimeSeries.injection.toInt()
-    } else {
-        state.siteTimeSeries.withdrawals.toInt()
-    }
-
-    val homeImage = when {
-        state.siteTimeSeries.consumption > MIN_CONSUMPTION_WATTS -> Res.drawable.home_day_light
-        else -> Res.drawable.home_day_no_light
-    }
+    val colors = rememberEnergyFlowColors()
+    val icons = rememberEnergyFlowIcons()
+    val strings = rememberEnergyFlowStrings()
+    val energyData = createEnergyFlowData(state.siteTimeSeries)
+    val homeImage = getHomeImage(state.siteTimeSeries.consumption)
 
     Box(modifier = modifier) {
         Image(
@@ -141,185 +152,250 @@ fun HouseScreen(
         Canvas(modifier = Modifier.matchParentSize()) {
             drawEnergyFlow(
                 animationProgress = animationProgress,
-                productionWatts = state.siteTimeSeries.production.toInt(),
-                gridWatts = gridWatts,
-                consumptionWatts = state.siteTimeSeries.consumption.toInt(),
-                productionTrend = productionTrend,
-                consumptionTrend = consumptionTrend,
-                injectionTrend = injectionTrend,
-                withdrawalsTrend = withdrawalsTrend,
-                textMeasurer = textMeasurer,
-                solarColor = solarColor,
-                gridExportColor = gridExportColor,
-                gridImportColor = gridImportColor,
-                consumptionColor = consumptionColor,
-                cardColor = cardColor,
-                textColor = textColor,
-                boxColor = boxColor,
-                onBoxColor = onBoxColor,
-                solarPanelIconPainter = solarPanelIconPainter,
-                gridIconPainter = gridIconPainter,
-                consumptionIconPainter = consumptionIconPainter,
-                boxIconPainter = boxIconPainter,
-                producingString = producingString,
-                notProducingString = notProducingString,
-                consumingString = consumingString,
-                notConsumingString = notConsumingString,
-                sellingString = sellingString,
-                buyingString = buyingString
+                energyData = energyData,
+                colors = colors,
+                icons = icons,
+                strings = strings,
+                textMeasurer = textMeasurer
             )
         }
     }
 }
 
+@Composable
+private fun rememberEnergyFlowAnimation(): Float {
+    val infiniteTransition = rememberInfiniteTransition()
+    return infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    ).value
+}
+
+@Composable
+private fun rememberEnergyFlowColors() = EnergyFlowColors(
+    solar = MaterialTheme.colorScheme.powerProduction,
+    gridExport = MaterialTheme.colorScheme.powerInjection,
+    gridImport = MaterialTheme.colorScheme.powerWithdrawals,
+    consumption = MaterialTheme.colorScheme.powerConsumption,
+    card = MaterialTheme.colorScheme.surfaceContainer,
+    text = MaterialTheme.colorScheme.onSurface,
+    box = MaterialTheme.colorScheme.onSurface,
+    onBox = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f)
+)
+
+@Composable
+private fun rememberEnergyFlowIcons() = EnergyFlowIcons(
+    solar = rememberVectorPainter(Icons.Default.WbSunny),
+    grid = rememberVectorPainter(Icons.Default.ElectricBolt),
+    consumption = rememberVectorPainter(Icons.Default.ElectricalServices),
+    centerBox = rememberVectorPainter(Icons.Default.Home)
+)
+
+@Composable
+private fun rememberEnergyFlowStrings() = EnergyFlowStrings(
+    producing = stringResource(Res.string.house_animation_producing),
+    notProducing = stringResource(Res.string.house_animation_not_producing),
+    consuming = stringResource(Res.string.house_animation_consuming),
+    notConsuming = stringResource(Res.string.house_animation_not_consuming),
+    selling = stringResource(Res.string.house_animation_selling),
+    buying = stringResource(Res.string.house_animation_buying)
+)
+
+private fun createEnergyFlowData(siteTimeSeries: SiteTimeSeries): EnergyFlowData {
+    val gridWatts = if (siteTimeSeries.injection.toInt() > 0) {
+        -siteTimeSeries.injection.toInt()
+    } else {
+        siteTimeSeries.withdrawals.toInt()
+    }
+
+    return EnergyFlowData(
+        productionWatts = siteTimeSeries.production.toInt(),
+        gridWatts = gridWatts,
+        consumptionWatts = siteTimeSeries.consumption.toInt(),
+        productionTrend = siteTimeSeries.productionTrend,
+        consumptionTrend = siteTimeSeries.consumptionTrend,
+        injectionTrend = siteTimeSeries.injectionTrend,
+        withdrawalsTrend = siteTimeSeries.withdrawalsTrend
+    )
+}
+
+private fun getHomeImage(consumption: Double) = when {
+    consumption > MIN_CONSUMPTION_WATTS -> Res.drawable.home_day_light
+    else -> Res.drawable.home_day_no_light
+}
+
 private fun DrawScope.drawEnergyFlow(
     animationProgress: Float,
-    productionWatts: Int,
-    gridWatts: Int,
-    consumptionWatts: Int,
-    productionTrend: Trend?,
-    consumptionTrend: Trend?,
-    injectionTrend: Trend?,
-    withdrawalsTrend: Trend?,
-    textMeasurer: TextMeasurer,
-    solarColor: Color,
-    gridExportColor: Color,
-    gridImportColor: Color,
-    consumptionColor: Color,
-    cardColor: Color,
-    textColor: Color,
-    boxColor: Color,
-    onBoxColor: Color,
-    solarPanelIconPainter: VectorPainter,
-    gridIconPainter: VectorPainter,
-    consumptionIconPainter: VectorPainter,
-    boxIconPainter: VectorPainter,
-    producingString: String,
-    notProducingString: String,
-    consumingString: String,
-    notConsumingString: String,
-    sellingString: String,
-    buyingString: String,
+    energyData: EnergyFlowData,
+    colors: EnergyFlowColors,
+    icons: EnergyFlowIcons,
+    strings: EnergyFlowStrings,
+    textMeasurer: TextMeasurer
 ) {
-    val centerBoxSize = 24.dp.toPx()
-    val lineThickness = 6.dp.toPx()
-    val cardWidth = 100.dp.toPx()
-    val cardHeight = 80.dp.toPx()
-
-    // Central connection box position
-    val centerBox = Offset(
-        x = size.center.x,
-        y = size.height * 2f / 3f
+    val config = EnergyFlowConfig(
+        centerBoxSize = 24.dp.toPx(),
+        lineThickness = 6.dp.toPx(),
+        cardWidth = 100.dp.toPx(),
+        cardHeight = 80.dp.toPx()
     )
 
-    // Line endpoints - adjusted for new center position
-    val solarEnd = Offset(centerBox.x, centerBox.y - 120.dp.toPx()) // Top (solar panels)
-    val gridEnd = Offset(centerBox.x - 120.dp.toPx(), centerBox.y) // Left (grid)
-    val consumptionEnd = Offset(centerBox.x + 120.dp.toPx(), centerBox.y) // Right (consumption)
+    val distance = 120.dp.toPx()
+    val positions = calculatePositions(size.center, size.height, distance)
 
-    // Draw solar (vertical)
-    if (productionWatts > MIN_PRODUCTION_WATTS) {
+    drawEnergyLines(animationProgress, energyData, colors, config, positions)
+    drawCenterBox(positions.centerBox, config, colors, icons.centerBox)
+    drawEnergyCards(energyData, colors, icons, strings, config, positions, textMeasurer)
+}
+
+private fun calculatePositions(
+    center: Offset,
+    canvasHeight: Float,
+    distance: Float
+): EnergyFlowPositions {
+    val centerBox = Offset(
+        x = center.x,
+        y = canvasHeight * 2f / 3f
+    )
+
+    return EnergyFlowPositions(
+        centerBox = centerBox,
+        solarEnd = Offset(centerBox.x, centerBox.y - distance),
+        gridEnd = Offset(centerBox.x - distance, centerBox.y),
+        consumptionEnd = Offset(centerBox.x + distance, centerBox.y)
+    )
+}
+
+private fun DrawScope.drawEnergyLines(
+    animationProgress: Float,
+    energyData: EnergyFlowData,
+    colors: EnergyFlowColors,
+    config: EnergyFlowConfig,
+    positions: EnergyFlowPositions
+) {
+    // Draw solar line (vertical)
+    if (energyData.productionWatts > MIN_PRODUCTION_WATTS) {
         drawAnimatedLine(
-            start = solarEnd,
-            end = centerBox,
+            start = positions.solarEnd,
+            end = positions.centerBox,
             progress = animationProgress,
-            color = solarColor,
-            thickness = lineThickness,
-            flowDirection = 1f, // Always flows down from solar
-            watts = productionWatts
+            color = colors.solar,
+            thickness = config.lineThickness,
+            flowDirection = 1f,
+            watts = energyData.productionWatts
         )
     }
 
     // Draw consumption line (right horizontal)
     drawAnimatedLine(
-        start = centerBox,
-        end = consumptionEnd,
+        start = positions.centerBox,
+        end = positions.consumptionEnd,
         progress = animationProgress,
-        color = consumptionColor,
-        thickness = lineThickness,
-        flowDirection = 1f, // Always flows to consumption
-        watts = consumptionWatts
+        color = colors.consumption,
+        thickness = config.lineThickness,
+        flowDirection = 1f,
+        watts = energyData.consumptionWatts
     )
 
     // Draw grid line (left horizontal)
     drawAnimatedLine(
-        start = gridEnd,
-        end = centerBox,
+        start = positions.gridEnd,
+        end = positions.centerBox,
         progress = animationProgress,
-        color = if (gridWatts < 0) gridExportColor else gridImportColor,
-        thickness = lineThickness,
-        flowDirection = if (gridWatts < 0) -1f else 1f, // Export to grid or import from grid
-        watts = abs(gridWatts)
+        color = if (energyData.gridWatts < 0) colors.gridExport else colors.gridImport,
+        thickness = config.lineThickness,
+        flowDirection = if (energyData.gridWatts < 0) -1f else 1f,
+        watts = abs(energyData.gridWatts)
     )
+}
 
-    // Draw the central connection box with home icon
+private fun DrawScope.drawCenterBox(
+    center: Offset,
+    config: EnergyFlowConfig,
+    colors: EnergyFlowColors,
+    iconPainter: VectorPainter
+) {
+    // Draw the box
     drawRoundRect(
-        color = boxColor,
-        topLeft = Offset(centerBox.x - centerBoxSize / 2, centerBox.y - centerBoxSize / 2),
-        size = Size(centerBoxSize, centerBoxSize),
+        color = colors.box,
+        topLeft = Offset(center.x - config.centerBoxSize / 2, center.y - config.centerBoxSize / 2),
+        size = Size(config.centerBoxSize, config.centerBoxSize),
         cornerRadius = CornerRadius(4.dp.toPx())
     )
 
-    // Draw home icon in center box using VectorPainter
-    val centerIconSize = 16.dp.toPx()
+    // Draw the icon
+    val iconSize = 16.dp.toPx()
     drawIntoCanvas { canvas ->
         canvas.save()
-        canvas.translate(
-            centerBox.x - centerIconSize / 2,
-            centerBox.y - centerIconSize / 2
-        )
-        with(boxIconPainter) {
+        canvas.translate(center.x - iconSize / 2, center.y - iconSize / 2)
+        with(iconPainter) {
             draw(
-                size = Size(centerIconSize, centerIconSize),
-                colorFilter = ColorFilter.tint(onBoxColor)
+                size = Size(iconSize, iconSize),
+                colorFilter = ColorFilter.tint(colors.onBox)
             )
         }
         canvas.restore()
     }
+}
 
+private fun DrawScope.drawEnergyCards(
+    energyData: EnergyFlowData,
+    colors: EnergyFlowColors,
+    icons: EnergyFlowIcons,
+    strings: EnergyFlowStrings,
+    config: EnergyFlowConfig,
+    positions: EnergyFlowPositions,
+    textMeasurer: TextMeasurer
+) {
+    // Solar card
     drawMaterialCard(
-        center = solarEnd,
-        cardWidth = cardWidth,
-        cardHeight = cardHeight,
-        powerColor = solarColor,
-        cardColor = cardColor,
-        watts = productionWatts,
-        trend = productionTrend,
-        iconPainter = solarPanelIconPainter,
-        description = if (productionWatts > MIN_PRODUCTION_WATTS) producingString else notProducingString,
+        center = positions.solarEnd,
+        cardWidth = config.cardWidth,
+        cardHeight = config.cardHeight,
+        powerColor = colors.solar,
+        cardColor = colors.card,
+        watts = energyData.productionWatts,
+        trend = energyData.productionTrend,
+        iconPainter = icons.solar,
+        description = if (energyData.productionWatts > MIN_PRODUCTION_WATTS) strings.producing else strings.notProducing,
         textMeasurer = textMeasurer,
-        textColor = textColor,
+        textColor = colors.text,
         lineDirection = LineDirection.BOTTOM
     )
 
+    // Grid card
     drawMaterialCard(
-        center = gridEnd,
-        cardWidth = cardWidth,
-        cardHeight = cardHeight,
-        powerColor = if (gridWatts < 0) gridExportColor else gridImportColor,
-        cardColor = cardColor,
-        watts = abs(gridWatts),
-        trend = if (gridWatts < 0) injectionTrend else withdrawalsTrend,
-        iconPainter = gridIconPainter,
-        description = if (gridWatts < 0) sellingString else buyingString,
+        center = positions.gridEnd,
+        cardWidth = config.cardWidth,
+        cardHeight = config.cardHeight,
+        powerColor = if (energyData.gridWatts < 0) colors.gridExport else colors.gridImport,
+        cardColor = colors.card,
+        watts = abs(energyData.gridWatts),
+        trend = if (energyData.gridWatts < 0) energyData.injectionTrend else energyData.withdrawalsTrend,
+        iconPainter = icons.grid,
+        description = if (energyData.gridWatts < 0) strings.selling else strings.buying,
         textMeasurer = textMeasurer,
-        textColor = textColor,
-        lineDirection = LineDirection.RIGHT,
+        textColor = colors.text,
+        lineDirection = LineDirection.RIGHT
     )
 
+    // Consumption card
     drawMaterialCard(
-        center = consumptionEnd,
-        cardWidth = cardWidth,
-        cardHeight = cardHeight,
-        powerColor = consumptionColor,
-        cardColor = cardColor,
-        watts = consumptionWatts,
-        trend = consumptionTrend,
-        iconPainter = consumptionIconPainter,
-        description = if (consumptionWatts > 0) consumingString else notConsumingString,
+        center = positions.consumptionEnd,
+        cardWidth = config.cardWidth,
+        cardHeight = config.cardHeight,
+        powerColor = colors.consumption,
+        cardColor = colors.card,
+        watts = energyData.consumptionWatts,
+        trend = energyData.consumptionTrend,
+        iconPainter = icons.consumption,
+        description = if (energyData.consumptionWatts > 0) strings.consuming else strings.notConsuming,
         textMeasurer = textMeasurer,
-        textColor = textColor,
-        lineDirection = LineDirection.LEFT,
+        textColor = colors.text,
+        lineDirection = LineDirection.LEFT
     )
 }
 
@@ -498,11 +574,11 @@ private fun DrawScope.drawMaterialCard(
     )
 
     val trendSymbol = when (trend) {
-        Trend.INCREASING -> "↗"
-        Trend.DECREASING -> "↘"
+        Trend.INCREASING -> " ↗"
+        Trend.DECREASING -> " ↘"
         Trend.STABLE, null -> ""
     }
-    val wattsText = "$watts W $trendSymbol"
+    val wattsText = "$watts W$trendSymbol"
     val wattsLayoutResult = textMeasurer.measure(wattsText, wattsStyle)
     val wattsOffset = Offset(
         center.x - wattsLayoutResult.size.width / 2,
