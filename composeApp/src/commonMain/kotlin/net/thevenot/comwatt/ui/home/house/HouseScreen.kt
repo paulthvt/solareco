@@ -41,6 +41,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
@@ -421,18 +422,42 @@ private fun DrawScope.drawMaterialCard(
     textColor: Color,
     lineDirection: LineDirection
 ) {
+    // Pre-measure the description text to determine if we need 2 lines
+    val descriptionStyle = TextStyle(
+        fontSize = 12.sp,
+        fontFamily = FontFamily.SansSerif,
+        fontWeight = FontWeight.Medium,
+        color = textColor.copy(alpha = 0.7f),
+        textAlign = TextAlign.Center
+    )
+
+    val descriptionLayoutResult = textMeasurer.measure(
+        text = description,
+        style = descriptionStyle,
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+        constraints = Constraints(maxWidth = (cardWidth - 16.dp.toPx()).toInt()) // Leave some padding
+    )
+
+    // Adjust card height based on number of lines
+    val adjustedCardHeight = if (descriptionLayoutResult.lineCount > 1) {
+        cardHeight + 16.dp.toPx()
+    } else {
+        cardHeight
+    }
+
     // Create gradient based on line direction
     val gradientBrush = when (lineDirection) {
         LineDirection.BOTTOM -> Brush.verticalGradient(
             colors = listOf(cardColor, powerColor.copy(alpha = 0.3f)),
-            startY = center.y - cardHeight / 2,
-            endY = center.y + cardHeight / 2
+            startY = center.y - adjustedCardHeight / 2,
+            endY = center.y + adjustedCardHeight / 2
         )
 
         LineDirection.TOP -> Brush.verticalGradient(
             colors = listOf(powerColor.copy(alpha = 0.3f), cardColor),
-            startY = center.y - cardHeight / 2,
-            endY = center.y + cardHeight / 2
+            startY = center.y - adjustedCardHeight / 2,
+            endY = center.y + adjustedCardHeight / 2
         )
 
         LineDirection.LEFT -> Brush.horizontalGradient(
@@ -451,16 +476,16 @@ private fun DrawScope.drawMaterialCard(
     // Draw the card background with gradient
     drawRoundRect(
         brush = gradientBrush,
-        topLeft = Offset(center.x - cardWidth / 2, center.y - cardHeight / 2),
-        size = Size(cardWidth, cardHeight),
+        topLeft = Offset(center.x - cardWidth / 2, center.y - adjustedCardHeight / 2),
+        size = Size(cardWidth, adjustedCardHeight),
         cornerRadius = CornerRadius(8.dp.toPx())
     )
 
     // Draw the card border
     drawRoundRect(
         color = powerColor,
-        topLeft = Offset(center.x - cardWidth / 2, center.y - cardHeight / 2),
-        size = Size(cardWidth, cardHeight),
+        topLeft = Offset(center.x - cardWidth / 2, center.y - adjustedCardHeight / 2),
+        size = Size(cardWidth, adjustedCardHeight),
         cornerRadius = CornerRadius(8.dp.toPx()),
         style = Stroke(width = 2.dp.toPx())
     )
@@ -516,21 +541,7 @@ private fun DrawScope.drawMaterialCard(
         canvas.restore()
     }
 
-    // Draw the description text
-    val descriptionStyle = TextStyle(
-        fontSize = 12.sp,
-        fontFamily = FontFamily.SansSerif,
-        fontWeight = FontWeight.Medium,
-        color = textColor
-    )
-
-    val descriptionLayoutResult = textMeasurer.measure(
-        text = description,
-        style = descriptionStyle,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        constraints = Constraints(maxWidth = cardWidth.toInt())
-    )
+    // Draw the pre-measured description text
     val descriptionOffset = Offset(
         center.x - descriptionLayoutResult.size.width / 2,
         iconCenter.y + 12.dp.toPx() + 4.dp.toPx()
