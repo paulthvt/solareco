@@ -474,13 +474,12 @@ private fun DrawScope.drawMaterialCard(
         color = textColor
     )
 
-    val trend = when (trend) {
-        Trend.INCREASING -> "↑"
-        Trend.DECREASING -> "↓"
-        Trend.STABLE -> ""
-        null -> ""
+    val trendSymbol = when (trend) {
+        Trend.INCREASING -> "↗"
+        Trend.DECREASING -> "↘"
+        Trend.STABLE, null -> ""
     }
-    val wattsText = "$watts W $trend"
+    val wattsText = "$watts W $trendSymbol"
     val wattsLayoutResult = textMeasurer.measure(wattsText, wattsStyle)
     val wattsOffset = Offset(
         center.x - wattsLayoutResult.size.width / 2,
