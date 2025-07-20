@@ -315,7 +315,7 @@ private fun DrawScope.drawEnergyFlow(
         watts = consumptionWatts,
         trend = consumptionTrend,
         iconPainter = consumptionIconPainter,
-        description = if (consumptionWatts > MIN_CONSUMPTION_WATTS) consumingString else notConsumingString,
+        description = if (consumptionWatts > 0) consumingString else notConsumingString,
         textMeasurer = textMeasurer,
         textColor = textColor,
         lineDirection = LineDirection.LEFT,
