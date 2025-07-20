@@ -33,9 +33,12 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App(
-    appContainer: AppContainer
+    appContainer: AppContainer,
+    dynamicColor: Boolean = false
 ) {
-    ComwattTheme {
+    ComwattTheme(
+        dynamicColor = dynamicColor
+    ) {
         Surface(
             modifier = Modifier.fillMaxSize()
         ) {

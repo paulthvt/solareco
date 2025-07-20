@@ -230,17 +230,15 @@ private fun DrawScope.drawEnergyFlow(
     }
 
     // Draw consumption line (right horizontal)
-    if (consumptionWatts > MIN_CONSUMPTION_WATTS) {
-        drawAnimatedLine(
-            start = centerBox,
-            end = consumptionEnd,
-            progress = animationProgress,
-            color = consumptionColor,
-            thickness = lineThickness,
-            flowDirection = 1f, // Always flows to consumption
-            watts = consumptionWatts
-        )
-    }
+    drawAnimatedLine(
+        start = centerBox,
+        end = consumptionEnd,
+        progress = animationProgress,
+        color = consumptionColor,
+        thickness = lineThickness,
+        flowDirection = 1f, // Always flows to consumption
+        watts = consumptionWatts
+    )
 
     // Draw grid line (left horizontal)
     drawAnimatedLine(
