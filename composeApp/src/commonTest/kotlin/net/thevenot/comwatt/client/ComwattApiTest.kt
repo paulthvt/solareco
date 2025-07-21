@@ -35,6 +35,7 @@ class ComwattApiTest {
     fun `fetch time series`() = runTest {
         val serverBaseUrl = "http://localhost"
         val deviceId = 132
+        val endTime = Instant.parse("2021-09-01T00:00:00Z")
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/api/aggregations/time-series?id=$deviceId&measureKind=FLOW&aggregationLevel=NONE&timeAgoUnit=DAY&timeAgoValue=1&end=2021-09-01T02%3A00%3A00%2B02%3A00"),
@@ -43,7 +44,12 @@ class ComwattApiTest {
             )
         )
 
-        val timeSeries = ComwattApi(client, serverBaseUrl).fetchTimeSeries(deviceId, Instant.parse("2021-09-01T00:00:00Z"))
+        val timeSeries = ComwattApi(client, serverBaseUrl).fetchTimeSeries(
+            deviceId = deviceId,
+            endTime = endTime,
+            timeAgoUnit = net.thevenot.comwatt.model.type.TimeAgoUnit.DAY,
+            timeAgoValue = 1
+        )
         assertTrue { timeSeries.isRight() }
         timeSeries.onRight {
             assertTrue { it.values.isNotEmpty() }
@@ -105,6 +111,46 @@ class ComwattApiTest {
         assertTrue { user.isRight() }
         user.onRight {
             assertEquals(23481, it?.id)
+        }
+    }
+
+    @Test
+    fun `fetch daily weather forecast`() = runTest {
+        val serverBaseUrl = "http://localhost"
+        val zip = "83560"
+        val countryCode = "FR"
+        val client = mockHttpClient(
+            configureMockEngine(
+                url = Url("$serverBaseUrl/weather/data/2.5/forecast/daily?zip=83560%2CFR&units=metric&lang=en"),
+                expectedResponseBody = Resource("src/commonTest/resources/api/responses/daily-response.json").readText(),
+                httpMethod = HttpMethod.Get
+            )
+        )
+
+        val weatherForecast =
+            ComwattApi(client, serverBaseUrl).fetchDailyWeatherForecast(zip, countryCode)
+        assertTrue { weatherForecast.isRight() }
+        weatherForecast.onRight { response ->
+            assertEquals("200", response.cod)
+            assertEquals(7, response.cnt)
+            assertEquals("Aix-en-Provence", response.city.name)
+            assertEquals("FR", response.city.country)
+            assertEquals(5.4467, response.city.coord.lon)
+            assertEquals(43.5283, response.city.coord.lat)
+            assertEquals(7, response.list.size)
+
+            // Verify first weather entry
+            val firstWeather = response.list.first()
+            assertEquals(1753009200L, firstWeather.dt)
+            assertEquals(25.33, firstWeather.temp.day)
+            assertEquals(19.74, firstWeather.temp.min)
+            assertEquals(27.56, firstWeather.temp.max)
+            assertEquals(1008, firstWeather.pressure)
+            assertEquals(63, firstWeather.humidity)
+            assertEquals(1, firstWeather.weather.size)
+            assertEquals("Rain", firstWeather.weather.first().main)
+            assertEquals("light rain", firstWeather.weather.first().description)
+            assertEquals(1.64, firstWeather.rain)
         }
     }
 }
