@@ -72,6 +72,7 @@ vico = { group = "com.patrykandpatrick.vico", name = "multiplatform", version.re
 vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
 test-resources = { module = "com.goncalossilva:resources", version.ref = "testResources" }
 hot-preview = { module = "de.drick.compose:hotpreview", version.ref = "hotPreview" }
+kastro = { module = "dev.jamesyox:kastro", version = "0.4.0" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

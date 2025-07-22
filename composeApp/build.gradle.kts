@@ -60,6 +60,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.hot.preview)
+            implementation(libs.kastro)
 
             // Ktor
             implementation(libs.ktor.client.core)

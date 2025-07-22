@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.sp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.home_day_light
 import comwatt.composeapp.generated.resources.home_day_no_light
+import comwatt.composeapp.generated.resources.home_night_light
+import comwatt.composeapp.generated.resources.home_night_no_light
 import comwatt.composeapp.generated.resources.house_animation_buying
 import comwatt.composeapp.generated.resources.house_animation_consuming
 import comwatt.composeapp.generated.resources.house_animation_not_consuming
@@ -139,7 +141,7 @@ fun HouseScreen(
     val icons = rememberEnergyFlowIcons()
     val strings = rememberEnergyFlowStrings()
     val energyData = createEnergyFlowData(state.siteTimeSeries)
-    val homeImage = getHomeImage(state.siteTimeSeries.consumption)
+    val homeImage = getHomeImage(state.siteTimeSeries.consumption, state.isDay)
 
     Box(modifier = modifier) {
         Image(
@@ -223,9 +225,9 @@ private fun createEnergyFlowData(siteTimeSeries: SiteTimeSeries): EnergyFlowData
     )
 }
 
-private fun getHomeImage(consumption: Double) = when {
-    consumption > MIN_CONSUMPTION_WATTS -> Res.drawable.home_day_light
-    else -> Res.drawable.home_day_no_light
+private fun getHomeImage(consumption: Double, isDay: Boolean) = when {
+    consumption > MIN_CONSUMPTION_WATTS -> if (isDay) Res.drawable.home_day_light else Res.drawable.home_night_light
+    else -> if (isDay) Res.drawable.home_day_no_light else Res.drawable.home_night_no_light
 }
 
 private fun DrawScope.drawEnergyFlow(

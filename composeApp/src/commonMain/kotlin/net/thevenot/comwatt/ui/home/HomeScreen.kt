@@ -48,6 +48,7 @@ import de.drick.compose.hotpreview.NavigationBarMode
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.domain.model.SiteTimeSeries
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
@@ -69,7 +70,10 @@ fun HomeScreen(
     dataRepository: DataRepository,
     snackbarHostState: SnackbarHostState,
     viewModel: HomeViewModel = viewModel {
-        HomeViewModel(fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository))
+        HomeViewModel(
+            fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository),
+            fetchWeatherUseCase = FetchWeatherUseCase(dataRepository)
+        )
     }
 ) {
     LifecycleResumeEffect(Unit) {
