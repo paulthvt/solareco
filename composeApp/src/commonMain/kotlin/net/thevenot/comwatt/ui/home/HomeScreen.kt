@@ -7,10 +7,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ElectricalServices
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -40,6 +48,7 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
+import comwatt.composeapp.generated.resources.home_screen_real_time_consumption_title
 import comwatt.composeapp.generated.resources.last_data_refresh_time
 import comwatt.composeapp.generated.resources.last_data_refresh_time_zero
 import de.drick.compose.hotpreview.DisplayCutoutMode
@@ -56,6 +65,7 @@ import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
+import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
@@ -127,39 +137,26 @@ private fun HomeScreenContent(
         launchSingleDataRefresh()
     }) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = AppTheme.dimens.paddingNormal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                Text(
-                    text = "Real time auto consumption",
-                    style = MaterialTheme.typography.headlineSmall,
-                )
-            }
-            if (uiState.lastErrorMessage.isNotEmpty()) {
-                Text(
-                    text = "Error message: ${uiState.lastErrorMessage}",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            HouseScreen(uiState, Modifier.fillMaxWidth().height(400.dp))
-            ResponsiveGauge(
-                uiState,
+            Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
+
+            RealTimeConsumptionSection(
+                uiState = uiState,
                 onSettingsButtonClick = { showDialog = true }
             )
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                uiState.timeDifference?.let {
-                    Text(
-                        text = when {
-                            it < 1 -> stringResource(Res.string.last_data_refresh_time_zero)
-                            else -> pluralStringResource(Res.plurals.last_data_refresh_time, it, it)
-                        },
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
+
+            // Placeholder for future sections
+            // TODO: Add weather forecast section
+            // TODO: Add statistics section
+
+            LastRefreshSection(uiState = uiState)
+
+            Spacer(modifier = Modifier.height(AppTheme.dimens.paddingNormal))
 
             if (showDialog) {
                 GaugeSettingsDialog(
@@ -171,6 +168,90 @@ private fun HomeScreenContent(
                     onWithdrawalsChecked = onWithdrawalsChecked
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun RealTimeConsumptionSection(
+    uiState: HomeScreenState,
+    onSettingsButtonClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ElectricalServices,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(Res.string.home_screen_real_time_consumption_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                HouseScreen(
+                    uiState = uiState,
+                    modifier = Modifier.fillMaxWidth().height(300.dp)
+                )
+
+                ResponsiveGauge(
+                    uiState = uiState,
+                    onSettingsButtonClick = onSettingsButtonClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LastRefreshSection(uiState: HomeScreenState) {
+    uiState.timeDifference?.let { timeDiff ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = AppTheme.dimens.paddingExtraSmall,
+                    vertical = AppTheme.dimens.paddingSmall
+                ),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = null,
+                modifier = Modifier.size(AppTheme.dimens.paddingNormal),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Text(
+                text = when {
+                    timeDiff < 1 -> stringResource(Res.string.last_data_refresh_time_zero)
+                    else -> pluralStringResource(
+                        Res.plurals.last_data_refresh_time,
+                        timeDiff,
+                        timeDiff
+                    )
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

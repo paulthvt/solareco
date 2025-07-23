@@ -132,7 +132,7 @@ private data class EnergyFlowPositions(
 
 @Composable
 fun HouseScreen(
-    state: HomeScreenState,
+    uiState: HomeScreenState,
     modifier: Modifier = Modifier
 ) {
     val animationProgress = rememberEnergyFlowAnimation()
@@ -140,8 +140,8 @@ fun HouseScreen(
     val colors = rememberEnergyFlowColors()
     val icons = rememberEnergyFlowIcons()
     val strings = rememberEnergyFlowStrings()
-    val energyData = createEnergyFlowData(state.siteTimeSeries)
-    val homeImage = getHomeImage(state.siteTimeSeries.consumption, state.isDay)
+    val energyData = createEnergyFlowData(uiState.siteTimeSeries)
+    val homeImage = getHomeImage(uiState.siteTimeSeries.consumption, uiState.isDay)
 
     Box(modifier = modifier) {
         Image(

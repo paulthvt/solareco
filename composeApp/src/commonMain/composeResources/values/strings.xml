@@ -61,4 +61,5 @@
     <string name="house_animation_not_consuming">Not consuming</string>
     <string name="house_animation_selling">Selling</string>
     <string name="house_animation_buying">Buying</string>
+    <string name="home_screen_real_time_consumption_title">Real Time Auto Consumption</string>
 </resources>

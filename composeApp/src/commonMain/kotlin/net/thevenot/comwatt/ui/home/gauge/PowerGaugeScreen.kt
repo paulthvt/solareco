@@ -99,7 +99,7 @@ fun Animatable<Float, AnimationVector1D>.toUiState(wattValue: Int, enabled: Bool
 
 @Composable
 fun ResponsiveGauge(
-    homeScreenState: HomeScreenState,
+    uiState: HomeScreenState,
     modifier: Modifier = Modifier,
     onSettingsButtonClick: () -> Unit = {}
 ) {
@@ -110,7 +110,7 @@ fun ResponsiveGauge(
     val maxGaugeWidth = minOf(gaugeWidthDp, 500.dp)
 
     PowerGaugeScreen(
-        homeScreenState = homeScreenState,
+        homeScreenState = uiState,
         modifier = modifier
             .widthIn(max = maxGaugeWidth)
             .fillMaxWidth(),
