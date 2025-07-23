@@ -292,26 +292,30 @@ private fun DrawScope.drawEnergyLines(
     }
 
     // Draw consumption line (right horizontal)
-    drawAnimatedLine(
-        start = positions.centerBox,
-        end = positions.consumptionEnd,
-        progress = animationProgress,
-        color = colors.consumption,
-        thickness = config.lineThickness,
-        flowDirection = 1f,
-        watts = energyData.consumptionWatts
-    )
+    if (energyData.consumptionWatts > 0) {
+        drawAnimatedLine(
+            start = positions.centerBox,
+            end = positions.consumptionEnd,
+            progress = animationProgress,
+            color = colors.consumption,
+            thickness = config.lineThickness,
+            flowDirection = 1f,
+            watts = energyData.consumptionWatts
+        )
+    }
 
     // Draw grid line (left horizontal)
-    drawAnimatedLine(
-        start = positions.gridEnd,
-        end = positions.centerBox,
-        progress = animationProgress,
-        color = if (energyData.gridWatts < 0) colors.gridExport else colors.gridImport,
-        thickness = config.lineThickness,
-        flowDirection = if (energyData.gridWatts < 0) -1f else 1f,
-        watts = abs(energyData.gridWatts)
-    )
+    if (energyData.gridWatts > 0) {
+        drawAnimatedLine(
+            start = positions.gridEnd,
+            end = positions.centerBox,
+            progress = animationProgress,
+            color = if (energyData.gridWatts < 0) colors.gridExport else colors.gridImport,
+            thickness = config.lineThickness,
+            flowDirection = if (energyData.gridWatts < 0) -1f else 1f,
+            watts = abs(energyData.gridWatts)
+        )
+    }
 }
 
 private fun DrawScope.drawCenterBox(
