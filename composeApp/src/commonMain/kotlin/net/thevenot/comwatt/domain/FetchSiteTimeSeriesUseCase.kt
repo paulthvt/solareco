@@ -16,6 +16,7 @@ import kotlinx.datetime.plus
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.model.TrendCalculator
 import net.thevenot.comwatt.model.ApiError
 
 class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
@@ -64,6 +65,10 @@ class FetchSiteTimeSeriesUseCase(private val dataRepository: DataRepository) {
                         productionRate = timeSeries.productions.last() / MAX_POWER,
                         injectionRate = timeSeries.injections.last() / MAX_POWER,
                         withdrawalsRate = timeSeries.withdrawals.last() / MAX_POWER,
+                        productionTrend = TrendCalculator.calculateTrend(timeSeries.productions),
+                        consumptionTrend = TrendCalculator.calculateTrend(timeSeries.consumptions),
+                        injectionTrend = TrendCalculator.calculateTrend(timeSeries.injections),
+                        withdrawalsTrend = TrendCalculator.calculateTrend(timeSeries.withdrawals),
                         lastUpdateTimestamp = lastUpdateTimestamp,
                         updateDate = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123),
                         lastRefreshDate = Clock.System.now()

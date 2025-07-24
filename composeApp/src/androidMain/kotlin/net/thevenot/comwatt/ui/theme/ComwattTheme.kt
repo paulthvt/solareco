@@ -20,8 +20,9 @@ actual fun ComwattTheme(
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
-            if(darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> darkScheme
         else -> lightScheme
     }
@@ -29,10 +30,16 @@ actual fun ComwattTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val activity  = view.context as Activity
+            val activity = view.context as Activity
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                WindowCompat.getInsetsController(activity.window, view).isAppearanceLightStatusBars = !darkTheme
-                WindowCompat.getInsetsController(activity.window, view).isAppearanceLightNavigationBars = !darkTheme
+                WindowCompat.getInsetsController(
+                    activity.window,
+                    view
+                ).isAppearanceLightStatusBars = !darkTheme
+                WindowCompat.getInsetsController(
+                    activity.window,
+                    view
+                ).isAppearanceLightNavigationBars = !darkTheme
             }
         }
     }

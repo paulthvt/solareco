@@ -15,5 +15,6 @@ data class HomeScreenState(
     val withdrawalsGaugeEnabled: Boolean = true,
     val lastRefreshInstant: Instant? = null,
     val timeDifference: Int? = null,
-    val siteTimeSeries: SiteTimeSeries = SiteTimeSeries()
+    val siteTimeSeries: SiteTimeSeries = SiteTimeSeries(),
+    val isDay: Boolean = true,
 )
