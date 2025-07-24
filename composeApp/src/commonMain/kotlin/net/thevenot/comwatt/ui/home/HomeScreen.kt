@@ -12,11 +12,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ElectricalServices
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -177,9 +176,8 @@ private fun RealTimeConsumptionSection(
     uiState: HomeScreenState,
     onSettingsButtonClick: () -> Unit
 ) {
-    Card(
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
             modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
@@ -190,7 +188,7 @@ private fun RealTimeConsumptionSection(
                 horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
             ) {
                 Icon(
-                    imageVector = Icons.Default.ElectricalServices,
+                    imageVector = Icons.Default.Speed,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary

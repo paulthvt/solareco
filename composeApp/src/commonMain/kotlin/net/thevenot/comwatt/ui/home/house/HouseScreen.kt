@@ -292,7 +292,7 @@ private fun DrawScope.drawEnergyLines(
     }
 
     // Draw consumption line (right horizontal)
-    if (energyData.consumptionWatts > 0) {
+    if (energyData.consumptionWatts != 0) {
         drawAnimatedLine(
             start = positions.centerBox,
             end = positions.consumptionEnd,
@@ -305,7 +305,7 @@ private fun DrawScope.drawEnergyLines(
     }
 
     // Draw grid line (left horizontal)
-    if (energyData.gridWatts > 0) {
+    if (energyData.gridWatts != 0) {
         drawAnimatedLine(
             start = positions.gridEnd,
             end = positions.centerBox,
