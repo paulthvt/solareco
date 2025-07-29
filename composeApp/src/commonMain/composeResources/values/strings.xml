@@ -54,10 +54,10 @@
     <string name="custom_range_dialog_picker_date_time_picker_confirm_button">Confirm</string>
     <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Cancel</string>
     <string name="statistics_card_title">Daily Statistics</string>
-    <string name="statistics_self_consumption_rate">Self-Consumption</string>
-    <string name="statistics_autonomy_rate">Autonomy</string>
-    <string name="statistics_self_consumption_tooltip">How much of your produced energy you use yourself</string>
-    <string name="statistics_autonomy_tooltip">How much of your total consumption is covered by your own production</string>
+    <string name="statistics_self_consumption_rate">Energy Self-Use</string>
+    <string name="statistics_autonomy_rate">Solar Coverage</string>
+    <string name="statistics_self_consumption_tooltip">Percentage of your solar production that powers your home directly</string>
+    <string name="statistics_autonomy_tooltip">Percentage of your home's energy needs met by your solar panels</string>
     <string name="home_screen_real_time_consumption_title">Real-Time Power</string>
     <string name="error_fetching_data">Error fetching data</string>
     <string name="house_solar_panel_description">House with solar panels</string>
