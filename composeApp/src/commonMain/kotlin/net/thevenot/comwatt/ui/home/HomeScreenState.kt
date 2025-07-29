@@ -1,7 +1,8 @@
 package net.thevenot.comwatt.ui.home
 
 import kotlinx.datetime.Instant
-import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.model.SiteDailyData
+import net.thevenot.comwatt.domain.model.SiteRealtimeData
 
 data class HomeScreenState(
     val isRefreshing: Boolean = false,
@@ -15,6 +16,7 @@ data class HomeScreenState(
     val withdrawalsGaugeEnabled: Boolean = true,
     val lastRefreshInstant: Instant? = null,
     val timeDifference: Int? = null,
-    val siteTimeSeries: SiteTimeSeries = SiteTimeSeries(),
+    val siteRealtimeData: SiteRealtimeData = SiteRealtimeData(),
+    val siteDailyData: SiteDailyData = SiteDailyData(),
     val isDay: Boolean = true,
 )

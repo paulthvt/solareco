@@ -57,7 +57,7 @@ import comwatt.composeapp.generated.resources.house_animation_not_producing
 import comwatt.composeapp.generated.resources.house_animation_producing
 import comwatt.composeapp.generated.resources.house_animation_selling
 import comwatt.composeapp.generated.resources.house_solar_panel_description
-import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.domain.model.Trend
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
@@ -140,8 +140,8 @@ fun HouseScreen(
     val colors = rememberEnergyFlowColors()
     val icons = rememberEnergyFlowIcons()
     val strings = rememberEnergyFlowStrings()
-    val energyData = createEnergyFlowData(uiState.siteTimeSeries)
-    val homeImage = getHomeImage(uiState.siteTimeSeries.consumption, uiState.isDay)
+    val energyData = createEnergyFlowData(uiState.siteRealtimeData)
+    val homeImage = getHomeImage(uiState.siteRealtimeData.consumption, uiState.isDay)
 
     Box(modifier = modifier) {
         Image(
@@ -207,7 +207,7 @@ private fun rememberEnergyFlowStrings() = EnergyFlowStrings(
     buying = stringResource(Res.string.house_animation_buying)
 )
 
-private fun createEnergyFlowData(siteTimeSeries: SiteTimeSeries): EnergyFlowData {
+private fun createEnergyFlowData(siteTimeSeries: SiteRealtimeData): EnergyFlowData {
     val gridWatts = if (siteTimeSeries.injection.toInt() > 0) {
         -siteTimeSeries.injection.toInt()
     } else {
@@ -642,7 +642,7 @@ fun HouseScreenSellingPreview() {
         Surface {
             HouseScreen(
                 HomeScreenState(
-                    siteTimeSeries = SiteTimeSeries(
+                    siteRealtimeData = SiteRealtimeData(
                         production = 2.0,
                         withdrawals = 1500.0,
                         injection = 0.0,
@@ -662,7 +662,7 @@ fun HouseScreenInjectingPreview() {
         Surface {
             HouseScreen(
                 HomeScreenState(
-                    siteTimeSeries = SiteTimeSeries(
+                    siteRealtimeData = SiteRealtimeData(
                         production = 3000.0,
                         withdrawals = 0.0,
                         injection = 500.0,

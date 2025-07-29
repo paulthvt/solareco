@@ -17,7 +17,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
+import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.dashboard.DashboardScreenContent
@@ -95,7 +96,10 @@ fun NavGraphBuilder.mainGraph(
                     snackbarHostState = snackbarHostState,
                     viewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner) {
                         HomeViewModel(
-                            fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository),
+                            fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(
+                                dataRepository
+                            ),
+                            fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
                             fetchWeatherUseCase = FetchWeatherUseCase(dataRepository)
                         )
                     })

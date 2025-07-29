@@ -55,13 +55,16 @@ import de.drick.compose.hotpreview.HotPreview
 import de.drick.compose.hotpreview.NavigationBarMode
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
+import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
-import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.model.SiteDailyData
+import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.home.house.HouseScreen
+import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
 import net.thevenot.comwatt.ui.theme.AppTheme
@@ -80,7 +83,8 @@ fun HomeScreen(
     snackbarHostState: SnackbarHostState,
     viewModel: HomeViewModel = viewModel {
         HomeViewModel(
-            fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository),
+            fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(dataRepository),
+            fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
             fetchWeatherUseCase = FetchWeatherUseCase(dataRepository)
         )
     }
@@ -148,9 +152,9 @@ private fun HomeScreenContent(
                 uiState = uiState,
                 onSettingsButtonClick = { showDialog = true }
             )
+            StatisticsCard(uiState = uiState)
 
             // Placeholder for future sections
-            // TODO: Add weather forecast section
             // TODO: Add statistics section
 
             LastRefreshSection(uiState = uiState)
@@ -334,13 +338,21 @@ fun HomeScreenPreview() {
                     callCount = 123,
                     errorCount = 0,
                     isRefreshing = false,
-                    siteTimeSeries = SiteTimeSeries(
+                    siteRealtimeData = SiteRealtimeData(
                         production = 123.0,
                         consumption = 456.0,
                         injection = 789.0,
                         withdrawals = 951.0,
                         updateDate = "2021-09-01T12:00:00Z",
                         lastRefreshDate = "2021-09-01T12:00:00Z",
+                    ),
+                    siteDailyData = SiteDailyData(
+                        selfConsumptionRate = 0.75,
+                        autonomyRate = 0.68,
+                        totalProduction = 45.2,
+                        totalConsumption = 38.7,
+                        totalInjection = 11.3,
+                        totalWithdrawals = 12.4
                     )
                 )
             )

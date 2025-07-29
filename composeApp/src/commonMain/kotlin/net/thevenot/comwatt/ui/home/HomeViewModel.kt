@@ -16,12 +16,14 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
+import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
 
 
 class HomeViewModel(
-    private val fetchSiteTimeSeriesUseCase: FetchSiteTimeSeriesUseCase,
+    private val fetchSiteRealtimeDataUseCase: FetchSiteRealtimeDataUseCase,
+    private val fetchSiteDailyDataUseCase: FetchSiteDailyDataUseCase,
     private val fetchWeatherUseCase: FetchWeatherUseCase
 ) : ViewModel() {
     private var autoRefreshJob: Job? = null
@@ -50,7 +52,7 @@ class HomeViewModel(
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
             launch {
-                fetchSiteTimeSeriesUseCase.invoke().flowOn(Dispatchers.IO).catch {
+                fetchSiteRealtimeDataUseCase.invoke().flowOn(Dispatchers.IO).catch {
                     Logger.e(TAG) { "Error in auto refresh: $it" }
                     _uiState.update { state ->
                         state.copy(
@@ -58,17 +60,17 @@ class HomeViewModel(
                             lastErrorMessage = it.message ?: "Unknown error"
                         )
                     }
-                }.collect {
-                    it.onLeft { error ->
+                }.collect { result ->
+                    result.onLeft { error ->
                         Logger.e(TAG) { "Error in auto refresh: $error" }
                         _uiState.update { state ->
                             state.copy(errorCount = _uiState.value.errorCount + 1)
                         }
                     }
-                    it.onRight { value ->
+                    result.onRight { value ->
                         _uiState.update { state ->
                             state.copy(
-                                siteTimeSeries = value,
+                                siteRealtimeData = value,
                                 callCount = _uiState.value.callCount + 1,
                                 lastRefreshInstant = value.lastUpdateTimestamp
                             )
@@ -76,6 +78,14 @@ class HomeViewModel(
                         updateTimeDifference()
                     }
                     _uiState.update { state -> state.copy(isDataLoaded = true) }
+                }
+            }
+            launch {
+                fetchSiteDailyDataUseCase.invoke().onRight { dailyData ->
+                    Logger.d(TAG) { "Daily data: $dailyData" }
+                    _uiState.update { state ->
+                        state.copy(siteDailyData = dailyData)
+                    }
                 }
             }
             launch {
@@ -108,11 +118,12 @@ class HomeViewModel(
         viewModelScope.launch {
             Logger.d(TAG) { "Single refresh ${this@HomeViewModel}" }
             _uiState.update { it.copy(isRefreshing = true) }
-            val siteDeferred = async { fetchSiteTimeSeriesUseCase.singleFetch() }
+            val siteRealtimeDeferred = async { fetchSiteRealtimeDataUseCase.singleFetch() }
+            val siteDailyDeferred = async { fetchSiteDailyDataUseCase.invoke() }
             val weatherDeferred = async { fetchWeatherUseCase.singleFetch() }
 
-            val siteResult = siteDeferred.await()
-            siteResult.onRight {
+            val siteRealtimeResult = siteRealtimeDeferred.await()
+            siteRealtimeResult.onRight {
                 _uiState.update { state ->
                     state.copy(
                         callCount = _uiState.value.callCount + 1,
@@ -120,6 +131,13 @@ class HomeViewModel(
                     )
                 }
                 updateTimeDifference()
+            }
+
+            val siteDailyResult = siteDailyDeferred.await()
+            siteDailyResult.onRight { dailyData ->
+                _uiState.update { state ->
+                    state.copy(siteDailyData = dailyData)
+                }
             }
 
             val weatherResult = weatherDeferred.await()
@@ -162,4 +180,3 @@ class HomeViewModel(
         private const val TAG = "HomeViewModel"
     }
 }
-

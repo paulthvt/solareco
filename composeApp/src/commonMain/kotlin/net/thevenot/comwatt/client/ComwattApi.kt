@@ -129,14 +129,16 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
         endTime: Instant = Clock.System.now(),
         measureKind: MeasureKind = MeasureKind.FLOW,
-        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE,
+        aggregationType: AggregationType? = null
     ): Either<ApiError, SiteTimeSeriesDto> {
         return doFetchSiteTimeSeries(
             siteId = siteId,
             startTime = startTime,
             endTime = endTime,
             measureKind = measureKind,
-            aggregationLevel = aggregationLevel
+            aggregationLevel = aggregationLevel,
+            aggregationType = aggregationType
         )
     }
 

@@ -2,7 +2,7 @@ package net.thevenot.comwatt.domain.model
 
 import kotlinx.datetime.Instant
 
-data class SiteTimeSeries(
+data class SiteRealtimeData(
     val production: Double = Double.NaN,
     val consumption: Double = Double.NaN,
     val injection: Double = Double.NaN,

@@ -81,6 +81,7 @@ kotlin {
 
             implementation(libs.vico)
             implementation(libs.vico.multiplatform.m3)
+            implementation(libs.koalaplot.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

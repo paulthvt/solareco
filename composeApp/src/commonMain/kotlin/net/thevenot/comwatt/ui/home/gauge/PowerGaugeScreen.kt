@@ -57,7 +57,7 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
-import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.home.HomeViewModel.Companion.MAX_POWER
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
@@ -129,54 +129,54 @@ fun PowerGaugeScreen(
     val injectionAnimation = remember { Animatable(0f) }
     val withdrawalsAnimation = remember { Animatable(0f) }
 
-    if (homeScreenState.siteTimeSeries.productionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.productionRate) {
+    if (homeScreenState.siteRealtimeData.productionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.productionRate) {
             startAnimation(
                 productionAnimation,
-                homeScreenState.siteTimeSeries.productionRate.toFloat()
+                homeScreenState.siteRealtimeData.productionRate.toFloat()
             )
         }
     }
-    if (homeScreenState.siteTimeSeries.consumptionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.consumptionRate) {
+    if (homeScreenState.siteRealtimeData.consumptionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.consumptionRate) {
             startAnimation(
                 consumptionAnimation,
-                homeScreenState.siteTimeSeries.consumptionRate.toFloat()
+                homeScreenState.siteRealtimeData.consumptionRate.toFloat()
             )
         }
     }
-    if (homeScreenState.siteTimeSeries.injectionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.injectionRate) {
+    if (homeScreenState.siteRealtimeData.injectionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.injectionRate) {
             startAnimation(
                 injectionAnimation,
-                homeScreenState.siteTimeSeries.injectionRate.toFloat()
+                homeScreenState.siteRealtimeData.injectionRate.toFloat()
             )
         }
     }
-    if (homeScreenState.siteTimeSeries.withdrawalsRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.withdrawalsRate) {
+    if (homeScreenState.siteRealtimeData.withdrawalsRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.withdrawalsRate) {
             startAnimation(
                 withdrawalsAnimation,
-                homeScreenState.siteTimeSeries.withdrawalsRate.toFloat()
+                homeScreenState.siteRealtimeData.withdrawalsRate.toFloat()
             )
         }
     }
 
     PowerGaugeScreen(
         production = productionAnimation.toUiState(
-            homeScreenState.siteTimeSeries.production.toInt(),
+            homeScreenState.siteRealtimeData.production.toInt(),
             homeScreenState.productionGaugeEnabled
         ),
         consumption = consumptionAnimation.toUiState(
-            homeScreenState.siteTimeSeries.consumption.toInt(),
+            homeScreenState.siteRealtimeData.consumption.toInt(),
             homeScreenState.consumptionGaugeEnabled
         ),
         injection = injectionAnimation.toUiState(
-            homeScreenState.siteTimeSeries.injection.toInt(),
+            homeScreenState.siteRealtimeData.injection.toInt(),
             homeScreenState.injectionGaugeEnabled
         ),
         withdrawals = withdrawalsAnimation.toUiState(
-            homeScreenState.siteTimeSeries.withdrawals.toInt(),
+            homeScreenState.siteRealtimeData.withdrawals.toInt(),
             homeScreenState.withdrawalsGaugeEnabled
         ),
         modifier = modifier,
@@ -533,7 +533,7 @@ fun DefaultPreview() {
         Surface {
             PowerGaugeScreen(
                 HomeScreenState(
-                    siteTimeSeries = SiteTimeSeries(
+                    siteRealtimeData = SiteRealtimeData(
                         production = 256.0,
                         consumption = 120.0,
                         injection = 136.0,
