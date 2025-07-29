@@ -1,15 +1,20 @@
 package net.thevenot.comwatt.ui.home.statistics
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -25,11 +30,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
+import comwatt.composeapp.generated.resources.gauge_subtitle_injection
+import comwatt.composeapp.generated.resources.gauge_subtitle_production
+import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import comwatt.composeapp.generated.resources.statistics_autonomy_rate
 import comwatt.composeapp.generated.resources.statistics_autonomy_tooltip
 import comwatt.composeapp.generated.resources.statistics_card_title
@@ -102,6 +113,8 @@ fun StatisticsCard(
                     modifier = Modifier.weight(1f)
                 )
             }
+
+            DailyTotalsSection(uiState.siteDailyData)
         }
     }
 }
@@ -198,6 +211,153 @@ private fun DonutChartWithPercentage(
     }
 }
 
+@Composable
+private fun DailyTotalsSection(dailyData: SiteDailyData) {
+    // Find the maximum value for relative scaling of gradients
+    val maxValue = maxOf(
+        dailyData.totalProduction,
+        dailyData.totalConsumption,
+        dailyData.totalInjection,
+        dailyData.totalWithdrawals
+    )
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+    ) {
+        Text(
+            text = "Today's Totals",
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = AppTheme.dimens.paddingExtraSmall)
+        )
+
+        // First row: Production and Consumption
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+        ) {
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_production),
+                value = dailyData.totalProduction,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerProduction,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_consumption),
+                value = dailyData.totalConsumption,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerConsumption,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Second row: Injection and Withdrawals
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+        ) {
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_injection),
+                value = dailyData.totalInjection,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerInjection,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_withdrawals),
+                value = dailyData.totalWithdrawals,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerWithdrawals,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DailyTotalCard(
+    title: String,
+    value: Double,
+    unit: String,
+    color: Color,
+    maxValue: Double,
+    modifier: Modifier = Modifier
+) {
+    val normalizedValue = if (maxValue > 0) (value / maxValue).coerceIn(0.0, 1.0) else 0.0
+    // Convert from W to kWh and format with 1 decimal place
+    val valueInKwh = value / 1000.0
+    val formattedValue = "${(valueInKwh * 10).toInt() / 10.0}"
+
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(AppTheme.dimens.paddingSmall),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = formattedValue,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = unit,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(2.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(normalizedValue.toFloat())
+                        .height(4.dp)
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    color.copy(alpha = 0.9f),
+                                    color.copy(alpha = 0.6f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(2.dp)
+                        )
+                )
+            }
+        }
+    }
+}
+
 @HotPreviewLightDark
 @Composable
 fun StatisticsCardPreview() {
@@ -207,7 +367,11 @@ fun StatisticsCardPreview() {
                 uiState = HomeScreenState(
                     siteDailyData = SiteDailyData(
                         selfConsumptionRate = 0.75,
-                        autonomyRate = 0.60
+                        autonomyRate = 0.68,
+                        totalProduction = 45123.2,
+                        totalConsumption = 38542.7,
+                        totalInjection = 11542.3,
+                        totalWithdrawals = 12325.4
                     )
                 ),
                 modifier = Modifier.padding(16.dp)
