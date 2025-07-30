@@ -1,3 +1,4 @@
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -12,9 +13,11 @@ plugins {
 }
 
 kotlin {
+    jvm("desktop")
+
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     
@@ -30,6 +33,12 @@ kotlin {
     }
     
     sourceSets {
+        val desktopMain by getting
+        desktopMain.dependencies {
+            implementation(libs.ktor.client.jwm)
+            implementation(compose.desktop.currentOs)
+            implementation(libs.kotlinx.coroutines.swing)
+        }
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.ktor.client.android)
@@ -50,6 +59,8 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.hot.preview)
+            implementation(libs.kastro)
 
             // Ktor
             implementation(libs.ktor.client.core)
@@ -70,6 +81,7 @@ kotlin {
 
             implementation(libs.vico)
             implementation(libs.vico.multiplatform.m3)
+            implementation(libs.koalaplot.core)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -103,8 +115,20 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+}
+
+compose.desktop {
+    application {
+        mainClass = "net.thevenot.comwatt.MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "net.thevenot.comwatt"
+            packageVersion = "1.0.0"
+        }
     }
 }
 
@@ -114,6 +138,7 @@ room {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+    add("kspDesktop", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosX64", libs.androidx.room.compiler)

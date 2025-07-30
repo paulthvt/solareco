@@ -7,11 +7,19 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -32,21 +40,34 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.error_fetching_data
 import comwatt.composeapp.generated.resources.gauge_dialog_close_button
 import comwatt.composeapp.generated.resources.gauge_dialog_title
 import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
+import comwatt.composeapp.generated.resources.home_screen_real_time_consumption_title
 import comwatt.composeapp.generated.resources.last_data_refresh_time
 import comwatt.composeapp.generated.resources.last_data_refresh_time_zero
+import de.drick.compose.hotpreview.DisplayCutoutMode
+import de.drick.compose.hotpreview.HotPreview
+import de.drick.compose.hotpreview.NavigationBarMode
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
-import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
+import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
+import net.thevenot.comwatt.domain.FetchWeatherUseCase
+import net.thevenot.comwatt.domain.model.SiteDailyData
+import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.common.LoadingView
-import net.thevenot.comwatt.ui.home.gauge.PowerGaugeScreen
+import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
+import net.thevenot.comwatt.ui.home.house.HouseScreen
+import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
+import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
+import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
+import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
@@ -55,13 +76,17 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
     dataRepository: DataRepository,
+    snackbarHostState: SnackbarHostState,
     viewModel: HomeViewModel = viewModel {
-        HomeViewModel(fetchSiteTimeSeriesUseCase = FetchSiteTimeSeriesUseCase(dataRepository))
+        HomeViewModel(
+            fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(dataRepository),
+            fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
+            fetchWeatherUseCase = FetchWeatherUseCase(dataRepository)
+        )
     }
 ) {
     LifecycleResumeEffect(Unit) {
@@ -78,6 +103,12 @@ fun HomeScreen(
     }
 
     val uiState by viewModel.uiState.collectAsState()
+    val fetchErrorMessage = stringResource(Res.string.error_fetching_data)
+    LaunchedEffect(uiState.lastErrorMessage) {
+        if (uiState.lastErrorMessage.isNotEmpty()) {
+            snackbarHostState.showSnackbar(fetchErrorMessage)
+        }
+    }
 
     LoadingView(uiState.isDataLoaded.not()) {
         HomeScreenContent(
@@ -109,39 +140,26 @@ private fun HomeScreenContent(
         launchSingleDataRefresh()
     }) {
         Column(
-            modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(horizontal = AppTheme.dimens.paddingNormal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
         ) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                Text(
-                    text = "Real time auto consumption",
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-            }
-            Text(
-                text = "Call number: ${uiState.callCount}",
+            Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
+
+            RealTimeConsumptionSection(
+                uiState = uiState,
+                onSettingsButtonClick = { showDialog = true }
             )
-            Text(
-                text = "Error number: ${uiState.errorCount}",
-            )
-            if (uiState.lastErrorMessage.isNotEmpty()) {
-                Text(
-                    text = "Error message: ${uiState.lastErrorMessage}",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            PowerGaugeScreen(uiState, onSettingsButtonClick = { showDialog = true })
-            Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                uiState.timeDifference?.let {
-                    Text(
-                        text = when {
-                            it < 1 -> stringResource(Res.string.last_data_refresh_time_zero)
-                            else -> pluralStringResource(Res.plurals.last_data_refresh_time, it, it)
-                        },
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                }
-            }
+            StatisticsCard(uiState = uiState)
+
+            // Placeholder for future sections
+            // TODO: Add statistics section
+
+            LastRefreshSection(uiState = uiState)
+
+            Spacer(modifier = Modifier.height(AppTheme.dimens.paddingNormal))
 
             if (showDialog) {
                 GaugeSettingsDialog(
@@ -153,6 +171,89 @@ private fun HomeScreenContent(
                     onWithdrawalsChecked = onWithdrawalsChecked
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun RealTimeConsumptionSection(
+    uiState: HomeScreenState,
+    onSettingsButtonClick: () -> Unit
+) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(
+            modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Speed,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(Res.string.home_screen_real_time_consumption_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                HouseScreen(
+                    uiState = uiState,
+                    modifier = Modifier.fillMaxWidth().height(300.dp)
+                )
+
+                ResponsiveGauge(
+                    uiState = uiState,
+                    onSettingsButtonClick = onSettingsButtonClick
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LastRefreshSection(uiState: HomeScreenState) {
+    uiState.timeDifference?.let { timeDiff ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = AppTheme.dimens.paddingExtraSmall,
+                    vertical = AppTheme.dimens.paddingSmall
+                ),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Refresh,
+                contentDescription = null,
+                modifier = Modifier.size(AppTheme.dimens.paddingNormal),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.size(6.dp))
+            Text(
+                text = when {
+                    timeDiff < 1 -> stringResource(Res.string.last_data_refresh_time_zero)
+                    else -> pluralStringResource(
+                        Res.plurals.last_data_refresh_time,
+                        timeDiff,
+                        timeDiff
+                    )
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -218,23 +319,40 @@ fun DialogSettingsRow(
     }
 }
 
-@Preview
+@HotPreview(
+    widthDp = 411,
+    heightDp = 891,
+    density = 2.625f,
+    statusBar = true,
+    navigationBar = NavigationBarMode.GestureBottom,
+    displayCutout = DisplayCutoutMode.CameraTop
+)
+@HotPreviewScreenSizes
+@HotPreviewLightDark
 @Composable
-private fun HomeScreenPreview() {
-    ComwattTheme(darkTheme = true, dynamicColor = false) {
+fun HomeScreenPreview() {
+    ComwattTheme {
         Surface {
             HomeScreenContent(
                 uiState = HomeScreenState(
                     callCount = 123,
                     errorCount = 0,
                     isRefreshing = false,
-                    siteTimeSeries = SiteTimeSeries(
+                    siteRealtimeData = SiteRealtimeData(
                         production = 123.0,
                         consumption = 456.0,
                         injection = 789.0,
                         withdrawals = 951.0,
                         updateDate = "2021-09-01T12:00:00Z",
                         lastRefreshDate = "2021-09-01T12:00:00Z",
+                    ),
+                    siteDailyData = SiteDailyData(
+                        selfConsumptionRate = 0.75,
+                        autonomyRate = 0.68,
+                        totalProduction = 45.2,
+                        totalConsumption = 38.7,
+                        totalInjection = 11.3,
+                        totalWithdrawals = 12.4
                     )
                 )
             )

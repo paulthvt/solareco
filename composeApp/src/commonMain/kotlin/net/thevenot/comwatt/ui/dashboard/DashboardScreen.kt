@@ -3,14 +3,11 @@ package net.thevenot.comwatt.ui.dashboard
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -32,6 +29,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun DashboardScreen(
     navController: NavController,
+    snackbarHostState: SnackbarHostState,
     dataRepository: DataRepository,
     viewModel: DashboardViewModel = viewModel {
         DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
@@ -41,14 +39,7 @@ fun DashboardScreen(
 
     NestedAppScaffold(
         navController = navController,
-        actionsContent = {
-            IconButton(onClick = { showTimeSelectionDialog = true }) {
-                Icon(
-                    Icons.Default.Event,
-                    contentDescription = "calendar",
-                )
-            }
-        }
+        snackbarHostState = snackbarHostState,
     ) {
         DashboardScreenContent(dataRepository, viewModel)
 

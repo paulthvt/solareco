@@ -26,6 +26,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
 import net.thevenot.comwatt.model.ApiError
+import net.thevenot.comwatt.model.DailyWeatherResponseDto
 import net.thevenot.comwatt.model.DeviceDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
@@ -128,14 +129,16 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         startTime: Instant = Clock.System.now().minus(5, DateTimeUnit.MINUTE),
         endTime: Instant = Clock.System.now(),
         measureKind: MeasureKind = MeasureKind.FLOW,
-        aggregationLevel: AggregationLevel = AggregationLevel.NONE
+        aggregationLevel: AggregationLevel = AggregationLevel.NONE,
+        aggregationType: AggregationType? = null
     ): Either<ApiError, SiteTimeSeriesDto> {
         return doFetchSiteTimeSeries(
             siteId = siteId,
             startTime = startTime,
             endTime = endTime,
             measureKind = measureKind,
-            aggregationLevel = aggregationLevel
+            aggregationLevel = aggregationLevel,
+            aggregationType = aggregationType
         )
     }
 
@@ -261,6 +264,25 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                 url {
                     method = HttpMethod.Get
                     path("api/users/authenticated")
+                }
+            }
+        }
+    }
+
+    suspend fun fetchDailyWeatherForecast(
+        zip: String,
+        countryCode: String = "FR",
+        units: String = "metric",
+        lang: String = "en"
+    ): Either<ApiError, DailyWeatherResponseDto> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("weather/data/2.5/forecast/daily")
+                    parameter("zip", "$zip,$countryCode")
+                    parameter("units", units)
+                    parameter("lang", lang)
                 }
             }
         }
