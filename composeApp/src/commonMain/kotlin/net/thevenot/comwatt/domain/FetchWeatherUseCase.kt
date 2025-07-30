@@ -41,7 +41,7 @@ class FetchWeatherUseCase(private val dataRepository: DataRepository) {
                     if (value is DomainError.Api && value.error is ApiError.HttpError && value.error.code == 401) {
                         dataRepository.tryAutoLogin({}, {})
                     }
-                    delay(300_000L) // 5 minutes delay on error
+                    delay(10_000L)
                 }
 
                 is Either.Right -> {

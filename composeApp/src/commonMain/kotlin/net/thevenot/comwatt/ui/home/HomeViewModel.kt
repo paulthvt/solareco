@@ -81,10 +81,26 @@ class HomeViewModel(
                 }
             }
             launch {
-                fetchSiteDailyDataUseCase.invoke().onRight { dailyData ->
-                    Logger.d(TAG) { "Daily data: $dailyData" }
+                fetchSiteDailyDataUseCase.invoke().flowOn(Dispatchers.IO).catch {
+                    Logger.e(TAG) { "Error in daily data auto refresh: $it" }
                     _uiState.update { state ->
-                        state.copy(siteDailyData = dailyData)
+                        state.copy(
+                            errorCount = _uiState.value.errorCount + 1,
+                            lastErrorMessage = it.message ?: "Unknown error"
+                        )
+                    }
+                }.collect { result ->
+                    result.onLeft { error ->
+                        Logger.e(TAG) { "Error fetching daily data: $error" }
+                        _uiState.update { state ->
+                            state.copy(errorCount = _uiState.value.errorCount + 1)
+                        }
+                    }
+                    result.onRight { dailyData ->
+                        Logger.d(TAG) { "Daily data: $dailyData" }
+                        _uiState.update { state ->
+                            state.copy(siteDailyData = dailyData)
+                        }
                     }
                 }
             }
@@ -119,7 +135,7 @@ class HomeViewModel(
             Logger.d(TAG) { "Single refresh ${this@HomeViewModel}" }
             _uiState.update { it.copy(isRefreshing = true) }
             val siteRealtimeDeferred = async { fetchSiteRealtimeDataUseCase.singleFetch() }
-            val siteDailyDeferred = async { fetchSiteDailyDataUseCase.invoke() }
+            val siteDailyDeferred = async { fetchSiteDailyDataUseCase.singleFetch() }
             val weatherDeferred = async { fetchWeatherUseCase.singleFetch() }
 
             val siteRealtimeResult = siteRealtimeDeferred.await()

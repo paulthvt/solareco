@@ -2,7 +2,10 @@ package net.thevenot.comwatt.domain
 
 import arrow.core.Either
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
@@ -13,13 +16,42 @@ import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.SiteDailyData
+import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 
 class FetchSiteDailyDataUseCase(private val dataRepository: DataRepository) {
 
-    suspend operator fun invoke(): Either<DomainError, SiteDailyData> {
+    operator fun invoke(): Flow<Either<DomainError, SiteDailyData>> = flow {
+        while (true) {
+            val data = fetchDailyData()
+            emit(data)
+
+            when (data) {
+                is Either.Left -> {
+                    Logger.e(TAG) { "Error fetching site daily data: ${data.value}" }
+                    val value = data.value
+                    if (value is DomainError.Api && value.error is ApiError.HttpError && value.error.code == 401) {
+                        dataRepository.tryAutoLogin({}, {})
+                    }
+                    delay(10_000L)
+                }
+
+                is Either.Right -> {
+                    val delayMillis = 60_000L // 1 minutes for daily data updates
+                    Logger.d(TAG) { "Daily data fetched successfully, waiting for $delayMillis milliseconds" }
+                    delay(delayMillis)
+                }
+            }
+        }
+    }
+
+    suspend fun singleFetch(): Either<DomainError, SiteDailyData> {
+        return fetchDailyData()
+    }
+
+    private suspend fun fetchDailyData(): Either<DomainError, SiteDailyData> {
         Logger.d(TAG) { "calling site daily data" }
         val siteId = dataRepository.getSettings().firstOrNull()?.siteId
         return siteId?.let { id ->
