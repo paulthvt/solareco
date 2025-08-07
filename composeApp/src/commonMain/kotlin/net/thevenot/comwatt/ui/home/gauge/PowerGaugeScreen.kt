@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -40,6 +41,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
@@ -54,9 +57,10 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_consumption
 import comwatt.composeapp.generated.resources.gauge_subtitle_injection
 import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
-import net.thevenot.comwatt.domain.model.SiteTimeSeries
+import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.home.HomeViewModel.Companion.MAX_POWER
+import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -73,10 +77,8 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeStart
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.cos
-import kotlin.math.floor
 import kotlin.math.sin
 
 suspend fun startAnimation(animation: Animatable<Float, AnimationVector1D>, targetValue: Float) {
@@ -96,8 +98,30 @@ fun Animatable<Float, AnimationVector1D>.toUiState(wattValue: Int, enabled: Bool
 )
 
 @Composable
+fun ResponsiveGauge(
+    uiState: HomeScreenState,
+    modifier: Modifier = Modifier,
+    onSettingsButtonClick: () -> Unit = {}
+) {
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
+    val widthPx = windowInfo.containerSize.width
+    val gaugeWidthDp = with(density) { widthPx.toDp() }
+    val maxGaugeWidth = minOf(gaugeWidthDp, 500.dp)
+
+    PowerGaugeScreen(
+        homeScreenState = uiState,
+        modifier = modifier
+            .widthIn(max = maxGaugeWidth)
+            .fillMaxWidth(),
+        onSettingsButtonClick = onSettingsButtonClick
+    )
+}
+
+@Composable
 fun PowerGaugeScreen(
     homeScreenState: HomeScreenState,
+    modifier: Modifier = Modifier,
     onSettingsButtonClick: () -> Unit = {}
 ) {
     val productionAnimation = remember { Animatable(0f) }
@@ -105,56 +129,57 @@ fun PowerGaugeScreen(
     val injectionAnimation = remember { Animatable(0f) }
     val withdrawalsAnimation = remember { Animatable(0f) }
 
-    if (homeScreenState.siteTimeSeries.productionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.productionRate) {
+    if (homeScreenState.siteRealtimeData.productionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.productionRate) {
             startAnimation(
                 productionAnimation,
-                homeScreenState.siteTimeSeries.productionRate.toFloat()
+                homeScreenState.siteRealtimeData.productionRate.toFloat()
             )
         }
     }
-    if (homeScreenState.siteTimeSeries.consumptionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.consumptionRate) {
+    if (homeScreenState.siteRealtimeData.consumptionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.consumptionRate) {
             startAnimation(
                 consumptionAnimation,
-                homeScreenState.siteTimeSeries.consumptionRate.toFloat()
+                homeScreenState.siteRealtimeData.consumptionRate.toFloat()
             )
         }
     }
-    if (homeScreenState.siteTimeSeries.injectionRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.injectionRate) {
+    if (homeScreenState.siteRealtimeData.injectionRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.injectionRate) {
             startAnimation(
                 injectionAnimation,
-                homeScreenState.siteTimeSeries.injectionRate.toFloat()
+                homeScreenState.siteRealtimeData.injectionRate.toFloat()
             )
         }
     }
-    if (homeScreenState.siteTimeSeries.withdrawalsRate.isNaN().not()) {
-        LaunchedEffect(homeScreenState.siteTimeSeries.withdrawalsRate) {
+    if (homeScreenState.siteRealtimeData.withdrawalsRate.isNaN().not()) {
+        LaunchedEffect(homeScreenState.siteRealtimeData.withdrawalsRate) {
             startAnimation(
                 withdrawalsAnimation,
-                homeScreenState.siteTimeSeries.withdrawalsRate.toFloat()
+                homeScreenState.siteRealtimeData.withdrawalsRate.toFloat()
             )
         }
     }
 
     PowerGaugeScreen(
         production = productionAnimation.toUiState(
-            homeScreenState.siteTimeSeries.production.toInt(),
+            homeScreenState.siteRealtimeData.production.toInt(),
             homeScreenState.productionGaugeEnabled
         ),
         consumption = consumptionAnimation.toUiState(
-            homeScreenState.siteTimeSeries.consumption.toInt(),
+            homeScreenState.siteRealtimeData.consumption.toInt(),
             homeScreenState.consumptionGaugeEnabled
         ),
         injection = injectionAnimation.toUiState(
-            homeScreenState.siteTimeSeries.injection.toInt(),
+            homeScreenState.siteRealtimeData.injection.toInt(),
             homeScreenState.injectionGaugeEnabled
         ),
         withdrawals = withdrawalsAnimation.toUiState(
-            homeScreenState.siteTimeSeries.withdrawals.toInt(),
+            homeScreenState.siteRealtimeData.withdrawals.toInt(),
             homeScreenState.withdrawalsGaugeEnabled
         ),
+        modifier = modifier,
         onSettingsButtonClick = onSettingsButtonClick
     )
 }
@@ -165,11 +190,12 @@ private fun PowerGaugeScreen(
     consumption: GaugeState,
     injection: GaugeState,
     withdrawals: GaugeState,
+    modifier: Modifier = Modifier,
     onSettingsButtonClick: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         PowerIndicator(production, consumption, injection, withdrawals, onSettingsButtonClick)
@@ -332,10 +358,24 @@ fun CircularPowerIndicator(
             textMeasurer
         )
         if(consumptionChecked){
-            drawArcs(consumption, angle, blurColor, powerConsumptionGaugeEnd, consumptionGradientColor)
+            drawArcs(
+                consumption,
+                angle,
+                blurColor,
+                powerConsumptionGaugeEnd,
+                consumptionGradientColor,
+                2
+            )
         }
         if(productionChecked){
-            drawArcs(production, angle, blurColor, powerProductionGaugeEnd, productionGradientColor)
+            drawArcs(
+                production,
+                angle,
+                blurColor,
+                powerProductionGaugeEnd,
+                productionGradientColor,
+                0
+            )
         }
         if(withdrawalsChecked) {
             drawArcs(
@@ -343,11 +383,11 @@ fun CircularPowerIndicator(
                 angle,
                 blurColor,
                 powerWithdrawalsGaugeEnd,
-                withdrawalsGradientColor
+                withdrawalsGradientColor, 3
             )
         }
         if(injectionChecked){
-            drawArcs(injection, angle, blurColor, powerInjectionGaugeEnd, injectionGradientColor)
+            drawArcs(injection, angle, blurColor, powerInjectionGaugeEnd, injectionGradientColor, 1)
         }
     }
 }
@@ -366,55 +406,38 @@ fun DrawScope.drawArcs(
     maxValue: Float,
     blurColor: Color,
     arcColor: Color,
-    gradientColor: Brush
+    gradientColor: Brush,
+    arcIndex: Int
 ) {
+    val arcWidth = 20f
+    val arcSpacing = 8f
+    val totalOffset = arcIndex * (arcWidth + arcSpacing)
+    val arcSize = Size(
+        width = size.width - 2 * totalOffset,
+        height = size.height - 2 * totalOffset
+    )
+    val topLeft = Offset(totalOffset, totalOffset)
     val startAngle = 270 - maxValue / 2
     val sweepAngle = maxValue * progress
 
-    val topLeft = Offset(50f, 50f)
-    val size = Size(size.width - 100f, size.height - 100f)
-
-    fun drawBlur() {
-        for (i in 0..20) {
-            drawArc(
-                color = blurColor.copy(alpha = i / 900f),
-                startAngle = startAngle,
-                sweepAngle = sweepAngle,
-                useCenter = false,
-                topLeft = topLeft,
-                size = size,
-                style = Stroke(width = 80f + (20 - i) * 20, cap = StrokeCap.Round)
-            )
-        }
-    }
-
-    fun drawStroke() {
-        drawArc(
-            color = arcColor,
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            useCenter = false,
-            topLeft = topLeft,
-            size = size,
-            style = Stroke(width = 86f, cap = StrokeCap.Round)
-        )
-    }
-
-    fun drawGradient() {
-        drawArc(
-            brush = gradientColor,
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            useCenter = false,
-            topLeft = topLeft,
-            size = size,
-            style = Stroke(width = 80f, cap = StrokeCap.Round)
-        )
-    }
-
-//    drawBlur()
-    drawStroke()
-    drawGradient()
+    drawArc(
+        color = arcColor,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
+        useCenter = false,
+        topLeft = topLeft,
+        size = arcSize,
+        style = Stroke(width = arcWidth + 1.5f, cap = StrokeCap.Round)
+    )
+    drawArc(
+        brush = gradientColor,
+        startAngle = startAngle,
+        sweepAngle = sweepAngle,
+        useCenter = false,
+        topLeft = topLeft,
+        size = arcSize,
+        style = Stroke(width = arcWidth, cap = StrokeCap.Round)
+    )
 }
 
 fun DrawScope.drawLines(
@@ -426,13 +449,13 @@ fun DrawScope.drawLines(
 ) {
     val numberOfLongTicks = realMaxValue / 1000
     val oneRotation = maxValue / (numberOfLongTicks * 5)
-    val startValue = if (progress == 0f) 0 else floor(progress * numberOfLongTicks * 5).toInt() + 1
+    val startValue = 0
     val increment = realMaxValue / numberOfLongTicks
     val padding = 50f
 
     for (i in startValue..(numberOfLongTicks * 5)) {
         val isLongTick = i % 5 == 0
-        val lineLength = if (isLongTick) 80f else 30f
+        val lineLength = if (isLongTick) 100f else 40f
         val tickAngle = i * oneRotation + (180 - maxValue) / 2
 
         rotate(tickAngle) {
@@ -470,21 +493,54 @@ fun DrawScope.drawLines(
 
 fun toRadians(deg: Double): Double = deg / 180.0 * PI
 
+@HotPreviewLightDark
+@Composable
+fun PowerGaugeScreenPreview() {
+    ComwattTheme {
+        Surface {
+            PowerGaugeScreen(
+                production = GaugeState(
+                    arcValue = 0.8f,
+                    value = "4000",
+                    enabled = true
+                ),
+                consumption = GaugeState(
+                    arcValue = 0.5f,
+                    value = "2500",
+                    enabled = true
+                ),
+                injection = GaugeState(
+                    arcValue = 0.3f,
+                    value = "1500",
+                    enabled = true
+                ),
+                withdrawals = GaugeState(
+                    arcValue = 0.2f,
+                    value = "1000",
+                    enabled = true
+                ),
+                modifier = Modifier.fillMaxWidth(),
+                onSettingsButtonClick = {}
+            )
+        }
+    }
+}
 
-@Preview
+@HotPreviewLightDark
 @Composable
 fun DefaultPreview() {
-    ComwattTheme(darkTheme = true, dynamicColor = false) {
+    ComwattTheme {
         Surface {
             PowerGaugeScreen(
                 HomeScreenState(
-                    siteTimeSeries = SiteTimeSeries(
+                    siteRealtimeData = SiteRealtimeData(
                         production = 256.0,
-                        consumption = 0.3,
-                        injection = 0.2,
-                        withdrawals = 0.1,
+                        consumption = 120.0,
+                        injection = 136.0,
+                        withdrawals = 0.0,
                     )
-                )
+                ),
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

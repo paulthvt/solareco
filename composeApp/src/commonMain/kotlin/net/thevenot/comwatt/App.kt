@@ -1,8 +1,10 @@
 package net.thevenot.comwatt
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
@@ -15,7 +17,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import net.thevenot.comwatt.domain.FetchSiteTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
+import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
+import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.dashboard.DashboardScreenContent
 import net.thevenot.comwatt.ui.home.HomeScreen
@@ -31,8 +35,8 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App(
-    dynamicColor: Boolean,
-    appContainer: AppContainer
+    appContainer: AppContainer,
+    dynamicColor: Boolean = false
 ) {
     ComwattTheme(
         dynamicColor = dynamicColor
@@ -54,6 +58,7 @@ fun MainAppNavHost(
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current) {
         "No ViewModelStoreOwner was provided via LocalViewModelStoreOwner"
     }
+    val snackbarHostState = remember { SnackbarHostState() }
 
     NavHost(navController, startDestination = Screen.Login) {
         composable<Screen.Login> {
@@ -70,7 +75,7 @@ fun MainAppNavHost(
                 }
             }
         }
-        mainGraph(navController, dataRepository, viewModelStoreOwner)
+        mainGraph(navController, dataRepository, viewModelStoreOwner, snackbarHostState)
         addUserSettingsDialog(navController)
     }
 }
@@ -78,31 +83,39 @@ fun MainAppNavHost(
 fun NavGraphBuilder.mainGraph(
     navController: NavHostController,
     dataRepository: DataRepository,
-    viewModelStoreOwner: ViewModelStoreOwner
+    viewModelStoreOwner: ViewModelStoreOwner,
+    snackbarHostState: SnackbarHostState
 ) {
     navigation<Screen.Main>(
         startDestination = Screen.Home
     ) {
         composable<Screen.Home> {
-            NestedAppScaffold(navController) {
+            NestedAppScaffold(navController, snackbarHostState) {
                 HomeScreen(
                     dataRepository = dataRepository,
+                    snackbarHostState = snackbarHostState,
                     viewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner) {
-                        HomeViewModel(FetchSiteTimeSeriesUseCase(dataRepository))
+                        HomeViewModel(
+                            fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(
+                                dataRepository
+                            ),
+                            fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
+                            fetchWeatherUseCase = FetchWeatherUseCase(dataRepository)
+                        )
                     })
             }
 
         }
         composable<Screen.Dashboard> {
-            DashboardScreen(navController, dataRepository)
+            DashboardScreen(navController, snackbarHostState, dataRepository)
         }
         composable<Screen.Devices> {
-            NestedAppScaffold(navController) {
+            NestedAppScaffold(navController, snackbarHostState) {
                 DashboardScreenContent(dataRepository)
             }
         }
         composable<Screen.More> {
-            NestedAppScaffold(navController) {
+            NestedAppScaffold(navController, snackbarHostState) {
                 DashboardScreenContent(dataRepository)
             }
         }

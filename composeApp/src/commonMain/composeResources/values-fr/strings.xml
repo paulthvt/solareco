@@ -54,4 +54,11 @@
     <string name="custom_range_dialog_picker_date_time_picker_select_date_icon">Sélectionnez la date</string>
     <string name="custom_range_dialog_picker_date_time_picker_confirm_button">Confirmer</string>
     <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Annuler</string>
+    <string name="statistics_card_title">Statistiques du jour</string>
+    <string name="statistics_self_consumption_rate">Auto-utilisation</string>
+    <string name="statistics_autonomy_rate">Couverture solaire</string>
+    <string name="statistics_self_consumption_tooltip">Pourcentage de votre production solaire qui alimente directement votre maison</string>
+    <string name="statistics_autonomy_tooltip">Pourcentage des besoins énergétiques de votre maison couverts par vos panneaux solaires</string>
+    <string name="home_screen_real_time_consumption_title">Puissance en temps réel</string>
+    <string name="error_fetching_data">Erreur lors de la récupération des données</string>
 </resources>
