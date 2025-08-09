@@ -54,11 +54,18 @@
     <string name="custom_range_dialog_picker_date_time_picker_select_date_icon">Sélectionnez la date</string>
     <string name="custom_range_dialog_picker_date_time_picker_confirm_button">Confirmer</string>
     <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Annuler</string>
-    <string name="statistics_card_title">Statistiques du jour</string>
-    <string name="statistics_self_consumption_rate">Auto-utilisation</string>
+    <string name="statistics_card_title">Statistiques Quotidiennes</string>
+    <string name="statistics_self_consumption_rate">Autoconsommation d\'énergie</string>
     <string name="statistics_autonomy_rate">Couverture solaire</string>
-    <string name="statistics_self_consumption_tooltip">Pourcentage de votre production solaire qui alimente directement votre maison</string>
-    <string name="statistics_autonomy_tooltip">Pourcentage des besoins énergétiques de votre maison couverts par vos panneaux solaires</string>
+    <string name="statistics_self_consumption_tooltip">Pourcentage de votre production solaire qui alimente votre maison directement</string>
+    <string name="statistics_autonomy_tooltip">Pourcentage des besoins énergétiques de votre maison satisfaits par vos panneaux solaires</string>
     <string name="home_screen_real_time_consumption_title">Puissance en temps réel</string>
     <string name="error_fetching_data">Erreur lors de la récupération des données</string>
+    <string name="house_solar_panel_description">Maison avec panneaux solaires</string>
+    <string name="house_animation_producing">Production en cours</string>
+    <string name="house_animation_not_producing">Pas de production</string>
+    <string name="house_animation_consuming">Consommation</string>
+    <string name="house_animation_not_consuming">Pas de consommation</string>
+    <string name="house_animation_selling">Vente en cours</string>
+    <string name="house_animation_buying">Achat en cours</string>
 </resources>
