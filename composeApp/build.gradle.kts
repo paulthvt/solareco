@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.testResources)
+    alias(libs.plugins.composeHotReload)
 }
 
 kotlin {
