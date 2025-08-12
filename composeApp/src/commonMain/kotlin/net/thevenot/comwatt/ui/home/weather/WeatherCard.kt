@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -79,42 +80,36 @@ fun WeatherCard(
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
                             modifier = Modifier.weight(1f)
                         ) {}
 
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(
-                                AppTheme.dimens.paddingSmall,
-                                Alignment.CenterHorizontally
-                            ),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowUp,
-                                contentDescription = "Max temperature",
-                                modifier = Modifier.padding(AppTheme.dimens.paddingExtraSmall)
-                                    .size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Icon(
-                                imageVector = Icons.Default.KeyboardArrowDown,
-                                contentDescription = "Min temperature",
-                                modifier = Modifier.padding(AppTheme.dimens.paddingExtraSmall)
-                                    .size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Icon(
-                                imageVector = Icons.Default.WaterDrop,
-                                contentDescription = "Precipitation probability",
-                                modifier = Modifier.padding(AppTheme.dimens.paddingExtraSmall)
-                                    .size(16.dp),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "Max temperature",
+                            modifier = Modifier
+                                .width(40.dp)
+                                .size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Min temperature",
+                            modifier = Modifier
+                                .width(40.dp)
+                                .size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Icon(
+                            imageVector = Icons.Default.WaterDrop,
+                            contentDescription = "Precipitation probability",
+                            modifier = Modifier
+                                .width(40.dp)
+                                .size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
 
                     forecastsToShow.forEachIndexed { index, forecast ->
@@ -143,7 +138,6 @@ private fun WeatherDayItem(
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(
@@ -173,28 +167,28 @@ private fun WeatherDayItem(
             }
         }
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${dailyWeather.temperatureMax.roundToInt()}°",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "${dailyWeather.temperatureMin.roundToInt()}°",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                text = "${(dailyWeather.precipitationProbability * 100).roundToInt()}%",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.End,
-            )
-        }
+        Text(
+            text = "${dailyWeather.temperatureMax.roundToInt()}°",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(40.dp)
+        )
+        Text(
+            text = "${dailyWeather.temperatureMin.roundToInt()}°",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(40.dp)
+        )
+        Text(
+            text = "${(dailyWeather.precipitationProbability * 100).roundToInt()}%",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(40.dp)
+        )
     }
 }
 
