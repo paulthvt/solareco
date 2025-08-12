@@ -123,6 +123,9 @@ class HomeViewModel(
                         }
                     }
                     it.onRight { weather ->
+                        _uiState.update { state ->
+                            state.copy(weatherForecast = weather)
+                        }
                         updateSunState(weather.latitude, weather.longitude)
                     }
                 }
@@ -158,6 +161,9 @@ class HomeViewModel(
 
             val weatherResult = weatherDeferred.await()
             weatherResult.onRight {
+                _uiState.update { state ->
+                    state.copy(weatherForecast = it)
+                }
                 updateSunState(it.latitude, it.longitude)
             }
 

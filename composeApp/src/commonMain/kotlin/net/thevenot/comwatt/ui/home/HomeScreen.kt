@@ -65,6 +65,7 @@ import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
+import net.thevenot.comwatt.ui.home.weather.WeatherCard
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
 import net.thevenot.comwatt.ui.theme.AppTheme
@@ -153,10 +154,7 @@ private fun HomeScreenContent(
                 onSettingsButtonClick = { showDialog = true }
             )
             StatisticsCard(uiState = uiState)
-
-            // Placeholder for future sections
-            // TODO: Add statistics section
-
+            WeatherCard(uiState = uiState)
             LastRefreshSection(uiState = uiState)
 
             Spacer(modifier = Modifier.height(AppTheme.dimens.paddingNormal))

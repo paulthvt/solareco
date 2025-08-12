@@ -1,6 +1,5 @@
 package net.thevenot.comwatt.domain.model
 
-import androidx.compose.ui.graphics.vector.ImageVector
 import kotlinx.datetime.Instant
 
 data class WeatherForecast(
@@ -35,5 +34,5 @@ data class DailyWeather(
     val rainAmount: Double?,
     val weatherMain: String,
     val weatherDescription: String,
-    val weatherIcon: ImageVector
+    val weatherCondition: WeatherCondition
 )
