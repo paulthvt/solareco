@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -74,6 +77,46 @@ fun WeatherCard(
                 Column(
                     verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
                 ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            modifier = Modifier.weight(1f)
+                        ) {}
+
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(
+                                AppTheme.dimens.paddingSmall,
+                                Alignment.CenterHorizontally
+                            ),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowUp,
+                                contentDescription = "Max temperature",
+                                modifier = Modifier.padding(AppTheme.dimens.paddingExtraSmall)
+                                    .size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Icon(
+                                imageVector = Icons.Default.KeyboardArrowDown,
+                                contentDescription = "Min temperature",
+                                modifier = Modifier.padding(AppTheme.dimens.paddingExtraSmall)
+                                    .size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Icon(
+                                imageVector = Icons.Default.WaterDrop,
+                                contentDescription = "Precipitation probability",
+                                modifier = Modifier.padding(AppTheme.dimens.paddingExtraSmall)
+                                    .size(16.dp),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
+
                     forecastsToShow.forEachIndexed { index, forecast ->
                         val dayLabel = when (index) {
                             0 -> "Today"
@@ -145,15 +188,13 @@ private fun WeatherDayItem(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Text(
+                text = "${(dailyWeather.precipitationProbability * 100).roundToInt()}%",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+            )
         }
-
-        Text(
-            text = "${(dailyWeather.precipitationProbability * 100).roundToInt()}%",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.End,
-            modifier = Modifier.padding(start = AppTheme.dimens.paddingSmall)
-        )
     }
 }
 
