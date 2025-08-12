@@ -1,11 +1,5 @@
 package net.thevenot.comwatt.domain
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.Thunderstorm
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.ui.graphics.vector.ImageVector
 import arrow.core.Either
 import arrow.core.flatMap
 import co.touchlab.kermit.Logger
@@ -20,6 +14,7 @@ import kotlinx.datetime.Instant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.DailyWeather
+import net.thevenot.comwatt.domain.model.WeatherCondition
 import net.thevenot.comwatt.domain.model.WeatherForecast
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.DailyWeatherDto
@@ -165,19 +160,76 @@ class FetchWeatherUseCase(private val dataRepository: DataRepository) {
             rainAmount = dto.rain,
             weatherMain = primaryWeather?.main ?: "Unknown",
             weatherDescription = primaryWeather?.description ?: "No description",
-            weatherIcon = mapWeatherIcon(primaryWeather)
+            weatherCondition = mapWeatherCondition(primaryWeather)
         )
     }
 
-    private fun mapWeatherIcon(weather: WeatherConditionDto?): ImageVector {
+    private fun mapWeatherCondition(weather: WeatherConditionDto?): WeatherCondition {
         return when (weather?.main?.lowercase()) {
-            "clear" -> Icons.Default.WbSunny
-            "clouds" -> Icons.Default.Cloud
-            "rain", "drizzle" -> Icons.Default.CloudOff // Use CloudOff as rain icon placeholder
-            "thunderstorm" -> Icons.Default.Thunderstorm
-            "snow" -> Icons.Default.Cloud // Use Cloud as snow icon placeholder
-            "mist", "fog", "haze", "dust", "sand", "ash", "squall", "tornado" -> Icons.Default.Cloud
-            else -> Icons.Default.WbSunny
+            "clear" -> WeatherCondition.CLEAR
+            "clouds" -> {
+                when {
+                    weather.description.contains(
+                        "few",
+                        ignoreCase = true
+                    ) || weather.description.contains(
+                        "scattered",
+                        ignoreCase = true
+                    ) -> WeatherCondition.PARTLY_CLOUDY
+
+                    else -> WeatherCondition.CLOUDY
+                }
+            }
+
+            "rain" -> {
+                when {
+                    weather.description.contains(
+                        "heavy",
+                        ignoreCase = true
+                    ) || weather.description.contains(
+                        "severe",
+                        ignoreCase = true
+                    ) -> WeatherCondition.HEAVY_RAIN
+
+                    weather.description.contains(
+                        "light",
+                        ignoreCase = true
+                    ) -> WeatherCondition.DRIZZLE
+
+                    else -> WeatherCondition.RAIN
+                }
+            }
+
+            "drizzle" -> WeatherCondition.DRIZZLE
+            "thunderstorm" -> {
+                when {
+                    weather.description.contains(
+                        "heavy",
+                        ignoreCase = true
+                    ) || weather.description.contains(
+                        "severe",
+                        ignoreCase = true
+                    ) -> WeatherCondition.STRONG_THUNDERSTORM
+
+                    else -> WeatherCondition.THUNDERSTORM
+                }
+            }
+
+            "snow" -> {
+                when {
+                    weather.description.contains(
+                        "heavy",
+                        ignoreCase = true
+                    ) -> WeatherCondition.HEAVY_SNOW
+
+                    else -> WeatherCondition.SNOW
+                }
+            }
+
+            "mist" -> WeatherCondition.MIST
+            "tornado" -> WeatherCondition.TORNADO
+            "fog", "haze", "dust", "sand", "ash", "squall" -> WeatherCondition.FOG
+            else -> WeatherCondition.UNKNOWN
         }
     }
 

@@ -67,4 +67,5 @@
     <string name="house_animation_not_consuming">Not consuming</string>
     <string name="house_animation_selling">Selling</string>
     <string name="house_animation_buying">Buying</string>
+    <string name="weather_day_today">Today</string>
 </resources>

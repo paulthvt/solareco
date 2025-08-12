@@ -3,6 +3,7 @@ package net.thevenot.comwatt.ui.home
 import kotlinx.datetime.Instant
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
+import net.thevenot.comwatt.domain.model.WeatherForecast
 
 data class HomeScreenState(
     val isRefreshing: Boolean = false,
@@ -19,4 +20,5 @@ data class HomeScreenState(
     val siteRealtimeData: SiteRealtimeData = SiteRealtimeData(),
     val siteDailyData: SiteDailyData = SiteDailyData(),
     val isDay: Boolean = true,
+    val weatherForecast: WeatherForecast? = null,
 )
