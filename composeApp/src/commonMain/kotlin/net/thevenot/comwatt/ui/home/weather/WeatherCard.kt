@@ -18,12 +18,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.weather_day_today
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.domain.model.DailyWeather
 import net.thevenot.comwatt.domain.model.WeatherCondition
 import net.thevenot.comwatt.domain.model.WeatherForecast
@@ -32,7 +37,10 @@ import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.getWeatherIcon
+import net.thevenot.comwatt.utils.DateFormatter
+import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.days
 
 @Composable
 fun WeatherCard(
@@ -114,9 +122,15 @@ fun WeatherCard(
 
                     forecastsToShow.forEachIndexed { index, forecast ->
                         val dayLabel = when (index) {
-                            0 -> "Today"
-                            1 -> "Tomorrow"
-                            else -> "Day ${index + 1}"
+                            0 -> stringResource(Res.string.weather_day_today)
+                            else -> {
+                                val forecastDate =
+                                    forecast.date.toLocalDateTime(TimeZone.currentSystemDefault()).date
+                                val dayOfWeek = forecastDate.dayOfWeek
+                                remember(dayOfWeek) {
+                                    DateFormatter.getDayName(dayOfWeek)
+                                }
+                            }
                         }
 
                         WeatherDayItem(
@@ -241,7 +255,7 @@ private fun sampleWeatherForecast(): WeatherForecast {
                 weatherCondition = WeatherCondition.CLEAR
             ),
             DailyWeather(
-                date = Clock.System.now(),
+                date = Clock.System.now().plus(1.days),
                 sunrise = Clock.System.now(),
                 sunset = Clock.System.now(),
                 temperatureDay = 19.0,
@@ -261,13 +275,13 @@ private fun sampleWeatherForecast(): WeatherForecast {
                 windGust = 6.2,
                 cloudiness = 75,
                 precipitationProbability = 0.6,
-                rainAmount = 2.5,
+                rainAmount = null,
                 weatherMain = "Rain",
                 weatherDescription = "light rain",
                 weatherCondition = WeatherCondition.RAIN
             ),
             DailyWeather(
-                date = Clock.System.now(),
+                date = Clock.System.now().plus(2.days),
                 sunrise = Clock.System.now(),
                 sunset = Clock.System.now(),
                 temperatureDay = 24.0,
