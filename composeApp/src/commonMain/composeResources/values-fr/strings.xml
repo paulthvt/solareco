@@ -68,4 +68,5 @@
     <string name="house_animation_not_consuming">Pas de consommation</string>
     <string name="house_animation_selling">Vente en cours</string>
     <string name="house_animation_buying">Achat en cours</string>
+    <string name="weather_day_today">Aujourd\'hui</string>
 </resources>
