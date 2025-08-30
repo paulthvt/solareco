@@ -17,10 +17,10 @@ jobs:
       RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
       RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
       RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-      # We'll write the keystore to this path and point Gradle to it
       RELEASE_STORE_FILE: ${{ github.workspace }}/release-keystore.jks
       VERSION_NAME: ${{ github.event.inputs.versionName }}
       VERSION_CODE: ${{ github.event.inputs.versionCode }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -35,13 +35,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Decode and write release keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 && secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 != '' }}
         shell: bash
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $RELEASE_STORE_FILE
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RELEASE_STORE_FILE"
 
       - name: Fail workflow if keystore secret is missing
-        if: ${{ !secrets.ANDROID_KEYSTORE_BASE64 || secrets.ANDROID_KEYSTORE_BASE64 == '' }}
+        if: ${{ env.ANDROID_KEYSTORE_BASE64 == '' }}
+        shell: bash
         run: |
           echo "Error: ANDROID_KEYSTORE_BASE64 secret is missing. Cannot proceed with an unsigned release."
           exit 1
