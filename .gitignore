@@ -17,3 +17,12 @@ captures
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
 .java-version
+
+# Android signing keys and secret files
+*.jks
+*.keystore
+keystore.properties
+**/release.keystore
+**/debug.keystore
+# Optional: any file containing release creds
+release-signing.properties

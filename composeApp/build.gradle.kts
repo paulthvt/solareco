@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -98,21 +99,83 @@ android {
     namespace = "net.thevenot.comwatt"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    // Load properties from local.properties
+    val localProperties = File(rootDir, "local.properties")
+    val localProps = Properties().apply {
+        if (localProperties.exists()) {
+            localProperties.inputStream().use { load(it) }
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            val storeFilePath =
+                System.getenv("RELEASE_STORE_FILE") ?: localProps.getProperty("RELEASE_STORE_FILE")
+            val storePwd = System.getenv("RELEASE_STORE_PASSWORD")
+                ?: localProps.getProperty("RELEASE_STORE_PASSWORD")
+            val keyAliasProp =
+                System.getenv("RELEASE_KEY_ALIAS") ?: localProps.getProperty("RELEASE_KEY_ALIAS")
+            val keyPwd = System.getenv("RELEASE_KEY_PASSWORD")
+                ?: localProps.getProperty("RELEASE_KEY_PASSWORD")
+
+            if (!storeFilePath.isNullOrBlank()) {
+                storeFile = file(storeFilePath)
+            }
+            if (!storePwd.isNullOrBlank()) {
+                storePassword = storePwd
+            }
+            if (!keyAliasProp.isNullOrBlank()) {
+                keyAlias = keyAliasProp
+            }
+            if (!keyPwd.isNullOrBlank()) {
+                keyPassword = keyPwd
+            }
+        }
+    }
+
     defaultConfig {
         applicationId = "net.thevenot.comwatt"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+
+        versionCode =
+            (project.findProperty("VERSION_CODE") ?: System.getenv("VERSION_CODE"))?.toString()
+                ?.toIntOrNull()
+        versionName =
+            (project.findProperty("VERSION_NAME") ?: System.getenv("VERSION_NAME"))?.toString()
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
     buildTypes {
+        getByName("debug") {
+            applicationIdSuffix = ".debug"
+            resValue("string", "app_name", "comwatt debug")
+        }
         getByName("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+
+            val hasSigning = listOf(
+                localProps.getProperty("RELEASE_STORE_FILE") ?: System.getenv("RELEASE_STORE_FILE"),
+                localProps.getProperty("RELEASE_STORE_PASSWORD")
+                    ?: System.getenv("RELEASE_STORE_PASSWORD"),
+                localProps.getProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS"),
+                localProps.getProperty("RELEASE_KEY_PASSWORD")
+                    ?: System.getenv("RELEASE_KEY_PASSWORD"),
+            ).all { it != null && it.isNotBlank() }
+            if (hasSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            } else {
+                println("[comwatt] Release signing configuration not provided. The release build will be UNSIGNED.")
+            }
         }
     }
     compileOptions {
@@ -145,4 +208,3 @@ dependencies {
     add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
 }
-
