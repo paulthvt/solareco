@@ -68,59 +68,12 @@ fun StatisticsCard(
     uiState: HomeScreenState,
     modifier: Modifier = Modifier
 ) {
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Analytics,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(Res.string.statistics_card_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                DonutChartWithPercentage(
-                    title = stringResource(Res.string.statistics_self_consumption_rate),
-                    tooltipText = stringResource(Res.string.statistics_self_consumption_tooltip),
-                    percentage = uiState.siteDailyData.selfConsumptionRate.toFloat(),
-                    primaryColor = MaterialTheme.colorScheme.powerProduction,
-                    secondaryColor = MaterialTheme.colorScheme.powerInjection,
-                    modifier = Modifier.weight(1f)
-                )
-
-                DonutChartWithPercentage(
-                    title = stringResource(Res.string.statistics_autonomy_rate),
-                    tooltipText = stringResource(Res.string.statistics_autonomy_tooltip),
-                    percentage = uiState.siteDailyData.autonomyRate.toFloat(),
-                    primaryColor = MaterialTheme.colorScheme.powerConsumption,
-                    secondaryColor = MaterialTheme.colorScheme.powerWithdrawals,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            DailyTotalsSection(
-                uiState.siteDailyData,
-                stringResource(Res.string.statistics_card_today_total)
-            )
-        }
-    }
+    StatisticsCardContent(
+        siteData = uiState.siteDailyData,
+        totalsLabel = stringResource(Res.string.statistics_card_today_total),
+        modifier = modifier,
+        title = stringResource(Res.string.statistics_card_title)
+    )
 }
 
 @Composable

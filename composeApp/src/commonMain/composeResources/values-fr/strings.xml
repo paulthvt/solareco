@@ -55,6 +55,7 @@
     <string name="custom_range_dialog_picker_date_time_picker_confirm_button">Confirmer</string>
     <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Annuler</string>
     <string name="statistics_card_title">Statistiques Quotidiennes</string>
+    <string name="statistics_card_today_total">Totaux du jour</string>
     <string name="statistics_card_title_hourly">Statistiques Horaires</string>
     <string name="statistics_card_title_weekly">Statistiques Hebdomadaires</string>
     <string name="statistics_card_title_custom">Statistiques Personnalisées</string>
