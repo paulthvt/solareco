@@ -44,6 +44,7 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import comwatt.composeapp.generated.resources.statistics_autonomy_rate
 import comwatt.composeapp.generated.resources.statistics_autonomy_tooltip
 import comwatt.composeapp.generated.resources.statistics_card_title
+import comwatt.composeapp.generated.resources.statistics_card_today_total
 import comwatt.composeapp.generated.resources.statistics_self_consumption_rate
 import comwatt.composeapp.generated.resources.statistics_self_consumption_tooltip
 import io.github.koalaplot.core.pie.DefaultSlice
@@ -114,7 +115,10 @@ fun StatisticsCard(
                 )
             }
 
-            DailyTotalsSection(uiState.siteDailyData, "Today's Totals")
+            DailyTotalsSection(
+                uiState.siteDailyData,
+                stringResource(Res.string.statistics_card_today_total)
+            )
         }
     }
 }
