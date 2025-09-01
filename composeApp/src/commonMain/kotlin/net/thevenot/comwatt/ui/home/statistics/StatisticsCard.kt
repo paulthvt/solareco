@@ -114,7 +114,66 @@ fun StatisticsCard(
                 )
             }
 
-            DailyTotalsSection(uiState.siteDailyData)
+            DailyTotalsSection(uiState.siteDailyData, "Today's Totals")
+        }
+    }
+}
+
+@Composable
+fun StatisticsCardContent(
+    siteData: SiteDailyData,
+    totalsLabel: String,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+) {
+    ElevatedCard(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Analytics,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = title ?: stringResource(Res.string.statistics_card_title),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                DonutChartWithPercentage(
+                    title = stringResource(Res.string.statistics_self_consumption_rate),
+                    tooltipText = stringResource(Res.string.statistics_self_consumption_tooltip),
+                    percentage = siteData.selfConsumptionRate.toFloat(),
+                    primaryColor = MaterialTheme.colorScheme.powerProduction,
+                    secondaryColor = MaterialTheme.colorScheme.powerInjection,
+                    modifier = Modifier.weight(1f)
+                )
+
+                DonutChartWithPercentage(
+                    title = stringResource(Res.string.statistics_autonomy_rate),
+                    tooltipText = stringResource(Res.string.statistics_autonomy_tooltip),
+                    percentage = siteData.autonomyRate.toFloat(),
+                    primaryColor = MaterialTheme.colorScheme.powerConsumption,
+                    secondaryColor = MaterialTheme.colorScheme.powerWithdrawals,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            DailyTotalsSection(siteData, totalsLabel)
         }
     }
 }
@@ -212,7 +271,7 @@ private fun DonutChartWithPercentage(
 }
 
 @Composable
-private fun DailyTotalsSection(dailyData: SiteDailyData) {
+private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
     // Find the maximum value for relative scaling of gradients
     val maxValue = maxOf(
         dailyData.totalProduction,
@@ -225,7 +284,7 @@ private fun DailyTotalsSection(dailyData: SiteDailyData) {
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
     ) {
         Text(
-            text = "Today's Totals",
+            text = label,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = AppTheme.dimens.paddingExtraSmall)
@@ -291,7 +350,7 @@ private fun DailyTotalCard(
     modifier: Modifier = Modifier
 ) {
     val normalizedValue = if (maxValue > 0) (value / maxValue).coerceIn(0.0, 1.0) else 0.0
-    // Convert from W to kWh and format with 1 decimal place
+    // Convert from Wh to kWh and format with 1 decimal place
     val valueInKwh = value / 1000.0
     val formattedValue = "${(valueInKwh * 10).toInt() / 10.0}"
 
@@ -363,17 +422,16 @@ private fun DailyTotalCard(
 fun StatisticsCardPreview() {
     ComwattTheme {
         Surface {
-            StatisticsCard(
-                uiState = HomeScreenState(
-                    siteDailyData = SiteDailyData(
-                        selfConsumptionRate = 0.75,
-                        autonomyRate = 0.68,
-                        totalProduction = 45123.2,
-                        totalConsumption = 38542.7,
-                        totalInjection = 11542.3,
-                        totalWithdrawals = 12325.4
-                    )
+            StatisticsCardContent(
+                siteData = SiteDailyData(
+                    selfConsumptionRate = 0.75,
+                    autonomyRate = 0.68,
+                    totalProduction = 45123.2,
+                    totalConsumption = 38542.7,
+                    totalInjection = 11542.3,
+                    totalWithdrawals = 12325.4
                 ),
+                totalsLabel = "Today's Totals",
                 modifier = Modifier.padding(16.dp)
             )
         }

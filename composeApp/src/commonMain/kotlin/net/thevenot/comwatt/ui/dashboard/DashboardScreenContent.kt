@@ -99,6 +99,7 @@ import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
+import net.thevenot.comwatt.ui.home.statistics.StatisticsCardContent
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -178,6 +179,18 @@ fun DashboardScreenContent(
                         showDatePickerDialog.value = true
                     }
                 }
+
+                uiState.rangeStats?.let { stats ->
+                    item(key = "range_stats_card") {
+                        StatisticsCardContent(
+                            siteData = stats,
+                            totalsLabel = buildRangeTotalsLabel(uiState),
+                            modifier = Modifier.fillMaxWidth(),
+                            title = null
+                        )
+                    }
+                }
+
                 if (charts.isNotEmpty()) {
                     items(
                         items = charts.withIndex()
@@ -188,6 +201,15 @@ fun DashboardScreenContent(
                 }
             }
         }
+    }
+}
+
+private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String {
+    return when (uiState.selectedTimeUnit) {
+        DashboardTimeUnit.HOUR -> "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}"
+        DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.value.formatDayMonth(TimeZone.currentSystemDefault())
+        DashboardTimeUnit.WEEK -> "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${uiState.selectedTimeRange.week.end.formatDayMonth()}"
+        DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${uiState.selectedTimeRange.custom.end.formatDayMonth()}"
     }
 }
 
@@ -600,6 +622,26 @@ fun LazyGraphCardPreview() {
 
     ComwattTheme {
         LazyGraphCard(uiState = sampleState, chart = sampleChart)
+    }
+}
+
+@Preview
+@Composable
+fun DashboardStatisticsCardPreview() {
+    val sampleStats = net.thevenot.comwatt.domain.model.SiteDailyData(
+        totalProduction = 45123.2,
+        totalConsumption = 38542.7,
+        totalInjection = 11542.3,
+        totalWithdrawals = 12325.4,
+        selfConsumptionRate = 0.75,
+        autonomyRate = 0.68
+    )
+    ComwattTheme {
+        StatisticsCardContent(
+            siteData = sampleStats,
+            totalsLabel = "Last 7 days",
+            modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
+        )
     }
 }
 
