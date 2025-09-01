@@ -78,6 +78,10 @@ import comwatt.composeapp.generated.resources.range_picker_button_custom
 import comwatt.composeapp.generated.resources.range_picker_button_day
 import comwatt.composeapp.generated.resources.range_picker_button_hour
 import comwatt.composeapp.generated.resources.range_picker_button_week
+import comwatt.composeapp.generated.resources.statistics_card_title
+import comwatt.composeapp.generated.resources.statistics_card_title_custom
+import comwatt.composeapp.generated.resources.statistics_card_title_hourly
+import comwatt.composeapp.generated.resources.statistics_card_title_weekly
 import comwatt.composeapp.generated.resources.week_range_selected_time_n_weeks_ago
 import comwatt.composeapp.generated.resources.week_range_selected_time_one_week_ago
 import comwatt.composeapp.generated.resources.week_range_selected_time_past_seven_days
@@ -182,11 +186,17 @@ fun DashboardScreenContent(
 
                 uiState.rangeStats?.let { stats ->
                     item(key = "range_stats_card") {
+                        val statsTitle = when (uiState.selectedTimeUnit) {
+                            DashboardTimeUnit.HOUR -> stringResource(Res.string.statistics_card_title_hourly)
+                            DashboardTimeUnit.DAY -> stringResource(Res.string.statistics_card_title)
+                            DashboardTimeUnit.WEEK -> stringResource(Res.string.statistics_card_title_weekly)
+                            DashboardTimeUnit.CUSTOM -> stringResource(Res.string.statistics_card_title_custom)
+                        }
                         StatisticsCardContent(
                             siteData = stats,
                             totalsLabel = buildRangeTotalsLabel(uiState),
                             modifier = Modifier.fillMaxWidth(),
-                            title = null
+                            title = statsTitle
                         )
                     }
                 }
