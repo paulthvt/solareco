@@ -9,6 +9,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 
 data class DashboardScreenState(
@@ -18,6 +19,7 @@ data class DashboardScreenState(
     val callCount: Int = 0,
     val errorCount: Int = 0,
     val selectedTimeRange: SelectedTimeRange = SelectedTimeRange(),
+    val rangeStats: SiteDailyData? = null,
 )
 
 data class SelectedTimeRange(

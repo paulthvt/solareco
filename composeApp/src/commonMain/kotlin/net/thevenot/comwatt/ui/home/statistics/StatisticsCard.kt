@@ -44,6 +44,7 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import comwatt.composeapp.generated.resources.statistics_autonomy_rate
 import comwatt.composeapp.generated.resources.statistics_autonomy_tooltip
 import comwatt.composeapp.generated.resources.statistics_card_title
+import comwatt.composeapp.generated.resources.statistics_card_today_total
 import comwatt.composeapp.generated.resources.statistics_self_consumption_rate
 import comwatt.composeapp.generated.resources.statistics_self_consumption_tooltip
 import io.github.koalaplot.core.pie.DefaultSlice
@@ -67,6 +68,21 @@ fun StatisticsCard(
     uiState: HomeScreenState,
     modifier: Modifier = Modifier
 ) {
+    StatisticsCardContent(
+        siteData = uiState.siteDailyData,
+        totalsLabel = stringResource(Res.string.statistics_card_today_total),
+        modifier = modifier,
+        title = stringResource(Res.string.statistics_card_title)
+    )
+}
+
+@Composable
+fun StatisticsCardContent(
+    siteData: SiteDailyData,
+    totalsLabel: String,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+) {
     ElevatedCard(
         modifier = modifier.fillMaxWidth()
     ) {
@@ -85,7 +101,7 @@ fun StatisticsCard(
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = stringResource(Res.string.statistics_card_title),
+                    text = title ?: stringResource(Res.string.statistics_card_title),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -98,7 +114,7 @@ fun StatisticsCard(
                 DonutChartWithPercentage(
                     title = stringResource(Res.string.statistics_self_consumption_rate),
                     tooltipText = stringResource(Res.string.statistics_self_consumption_tooltip),
-                    percentage = uiState.siteDailyData.selfConsumptionRate.toFloat(),
+                    percentage = siteData.selfConsumptionRate.toFloat(),
                     primaryColor = MaterialTheme.colorScheme.powerProduction,
                     secondaryColor = MaterialTheme.colorScheme.powerInjection,
                     modifier = Modifier.weight(1f)
@@ -107,14 +123,14 @@ fun StatisticsCard(
                 DonutChartWithPercentage(
                     title = stringResource(Res.string.statistics_autonomy_rate),
                     tooltipText = stringResource(Res.string.statistics_autonomy_tooltip),
-                    percentage = uiState.siteDailyData.autonomyRate.toFloat(),
+                    percentage = siteData.autonomyRate.toFloat(),
                     primaryColor = MaterialTheme.colorScheme.powerConsumption,
                     secondaryColor = MaterialTheme.colorScheme.powerWithdrawals,
                     modifier = Modifier.weight(1f)
                 )
             }
 
-            DailyTotalsSection(uiState.siteDailyData)
+            DailyTotalsSection(siteData, totalsLabel)
         }
     }
 }
@@ -212,7 +228,7 @@ private fun DonutChartWithPercentage(
 }
 
 @Composable
-private fun DailyTotalsSection(dailyData: SiteDailyData) {
+private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
     // Find the maximum value for relative scaling of gradients
     val maxValue = maxOf(
         dailyData.totalProduction,
@@ -225,7 +241,7 @@ private fun DailyTotalsSection(dailyData: SiteDailyData) {
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
     ) {
         Text(
-            text = "Today's Totals",
+            text = label,
             style = MaterialTheme.typography.titleSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = AppTheme.dimens.paddingExtraSmall)
@@ -291,7 +307,7 @@ private fun DailyTotalCard(
     modifier: Modifier = Modifier
 ) {
     val normalizedValue = if (maxValue > 0) (value / maxValue).coerceIn(0.0, 1.0) else 0.0
-    // Convert from W to kWh and format with 1 decimal place
+    // Convert from Wh to kWh and format with 1 decimal place
     val valueInKwh = value / 1000.0
     val formattedValue = "${(valueInKwh * 10).toInt() / 10.0}"
 
@@ -363,17 +379,16 @@ private fun DailyTotalCard(
 fun StatisticsCardPreview() {
     ComwattTheme {
         Surface {
-            StatisticsCard(
-                uiState = HomeScreenState(
-                    siteDailyData = SiteDailyData(
-                        selfConsumptionRate = 0.75,
-                        autonomyRate = 0.68,
-                        totalProduction = 45123.2,
-                        totalConsumption = 38542.7,
-                        totalInjection = 11542.3,
-                        totalWithdrawals = 12325.4
-                    )
+            StatisticsCardContent(
+                siteData = SiteDailyData(
+                    selfConsumptionRate = 0.75,
+                    autonomyRate = 0.68,
+                    totalProduction = 45123.2,
+                    totalConsumption = 38542.7,
+                    totalInjection = 11542.3,
+                    totalWithdrawals = 12325.4
                 ),
+                totalsLabel = "Today's Totals",
                 modifier = Modifier.padding(16.dp)
             )
         }
