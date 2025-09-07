@@ -44,7 +44,6 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import comwatt.composeapp.generated.resources.statistics_autonomy_rate
 import comwatt.composeapp.generated.resources.statistics_autonomy_tooltip
 import comwatt.composeapp.generated.resources.statistics_card_title
-import comwatt.composeapp.generated.resources.statistics_card_today_total
 import comwatt.composeapp.generated.resources.statistics_self_consumption_rate
 import comwatt.composeapp.generated.resources.statistics_self_consumption_tooltip
 import io.github.koalaplot.core.pie.DefaultSlice
@@ -52,7 +51,6 @@ import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.domain.model.SiteDailyData
-import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -65,19 +63,6 @@ import kotlin.math.roundToInt
 
 @Composable
 fun StatisticsCard(
-    uiState: HomeScreenState,
-    modifier: Modifier = Modifier
-) {
-    StatisticsCardContent(
-        siteData = uiState.siteDailyData,
-        totalsLabel = stringResource(Res.string.statistics_card_today_total),
-        modifier = modifier,
-        title = stringResource(Res.string.statistics_card_title)
-    )
-}
-
-@Composable
-fun StatisticsCardContent(
     siteData: SiteDailyData,
     totalsLabel: String,
     modifier: Modifier = Modifier,
@@ -379,7 +364,7 @@ private fun DailyTotalCard(
 fun StatisticsCardPreview() {
     ComwattTheme {
         Surface {
-            StatisticsCardContent(
+            StatisticsCard(
                 siteData = SiteDailyData(
                     selfConsumptionRate = 0.75,
                     autonomyRate = 0.68,

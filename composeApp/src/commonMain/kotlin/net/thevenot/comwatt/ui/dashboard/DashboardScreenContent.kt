@@ -103,7 +103,7 @@ import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
-import net.thevenot.comwatt.ui.home.statistics.StatisticsCardContent
+import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -192,7 +192,7 @@ fun DashboardScreenContent(
                             DashboardTimeUnit.WEEK -> stringResource(Res.string.statistics_card_title_weekly)
                             DashboardTimeUnit.CUSTOM -> stringResource(Res.string.statistics_card_title_custom)
                         }
-                        StatisticsCardContent(
+                        StatisticsCard(
                             siteData = stats,
                             totalsLabel = buildRangeTotalsLabel(uiState),
                             modifier = Modifier.fillMaxWidth(),
@@ -647,7 +647,7 @@ fun DashboardStatisticsCardPreview() {
         autonomyRate = 0.68
     )
     ComwattTheme {
-        StatisticsCardContent(
+        StatisticsCard(
             siteData = sampleStats,
             totalsLabel = "Last 7 days",
             modifier = Modifier.padding(AppTheme.dimens.paddingNormal)

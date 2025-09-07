@@ -50,6 +50,8 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import comwatt.composeapp.generated.resources.home_screen_real_time_consumption_title
 import comwatt.composeapp.generated.resources.last_data_refresh_time
 import comwatt.composeapp.generated.resources.last_data_refresh_time_zero
+import comwatt.composeapp.generated.resources.statistics_card_title
+import comwatt.composeapp.generated.resources.statistics_card_today_total
 import de.drick.compose.hotpreview.DisplayCutoutMode
 import de.drick.compose.hotpreview.HotPreview
 import de.drick.compose.hotpreview.NavigationBarMode
@@ -153,7 +155,12 @@ private fun HomeScreenContent(
                 uiState = uiState,
                 onSettingsButtonClick = { showDialog = true }
             )
-            StatisticsCard(uiState = uiState)
+            StatisticsCard(
+                siteData = uiState.siteDailyData,
+                totalsLabel = stringResource(Res.string.statistics_card_today_total),
+                modifier = Modifier,
+                title = stringResource(Res.string.statistics_card_title)
+            )
             WeatherCard(uiState = uiState)
             LastRefreshSection(uiState = uiState)
 
