@@ -193,7 +193,7 @@ fun DashboardScreenContent(
                             DashboardTimeUnit.CUSTOM -> stringResource(Res.string.statistics_card_title_custom)
                         }
                         StatisticsCard(
-                            siteData = stats,
+                            siteDailyData = stats,
                             totalsLabel = buildRangeTotalsLabel(uiState),
                             modifier = Modifier.fillMaxWidth(),
                             title = statsTitle
@@ -648,7 +648,7 @@ fun DashboardStatisticsCardPreview() {
     )
     ComwattTheme {
         StatisticsCard(
-            siteData = sampleStats,
+            siteDailyData = sampleStats,
             totalsLabel = "Last 7 days",
             modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
         )

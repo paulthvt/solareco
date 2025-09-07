@@ -63,59 +63,61 @@ import kotlin.math.roundToInt
 
 @Composable
 fun StatisticsCard(
-    siteData: SiteDailyData,
+    siteDailyData: SiteDailyData?,
     totalsLabel: String,
     modifier: Modifier = Modifier,
     title: String? = null,
 ) {
-    ElevatedCard(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
+    siteDailyData?.let { siteData ->
+        ElevatedCard(
+            modifier = modifier.fillMaxWidth()
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+            Column(
+                modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Analytics,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = title ?: stringResource(Res.string.statistics_card_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Analytics,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = title ?: stringResource(Res.string.statistics_card_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    DonutChartWithPercentage(
+                        title = stringResource(Res.string.statistics_self_consumption_rate),
+                        tooltipText = stringResource(Res.string.statistics_self_consumption_tooltip),
+                        percentage = siteData.selfConsumptionRate.toFloat(),
+                        primaryColor = MaterialTheme.colorScheme.powerProduction,
+                        secondaryColor = MaterialTheme.colorScheme.powerInjection,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    DonutChartWithPercentage(
+                        title = stringResource(Res.string.statistics_autonomy_rate),
+                        tooltipText = stringResource(Res.string.statistics_autonomy_tooltip),
+                        percentage = siteData.autonomyRate.toFloat(),
+                        primaryColor = MaterialTheme.colorScheme.powerConsumption,
+                        secondaryColor = MaterialTheme.colorScheme.powerWithdrawals,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                DailyTotalsSection(siteData, totalsLabel)
             }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                DonutChartWithPercentage(
-                    title = stringResource(Res.string.statistics_self_consumption_rate),
-                    tooltipText = stringResource(Res.string.statistics_self_consumption_tooltip),
-                    percentage = siteData.selfConsumptionRate.toFloat(),
-                    primaryColor = MaterialTheme.colorScheme.powerProduction,
-                    secondaryColor = MaterialTheme.colorScheme.powerInjection,
-                    modifier = Modifier.weight(1f)
-                )
-
-                DonutChartWithPercentage(
-                    title = stringResource(Res.string.statistics_autonomy_rate),
-                    tooltipText = stringResource(Res.string.statistics_autonomy_tooltip),
-                    percentage = siteData.autonomyRate.toFloat(),
-                    primaryColor = MaterialTheme.colorScheme.powerConsumption,
-                    secondaryColor = MaterialTheme.colorScheme.powerWithdrawals,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            DailyTotalsSection(siteData, totalsLabel)
         }
     }
 }
@@ -365,7 +367,7 @@ fun StatisticsCardPreview() {
     ComwattTheme {
         Surface {
             StatisticsCard(
-                siteData = SiteDailyData(
+                siteDailyData = SiteDailyData(
                     selfConsumptionRate = 0.75,
                     autonomyRate = 0.68,
                     totalProduction = 45123.2,

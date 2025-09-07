@@ -156,7 +156,7 @@ private fun HomeScreenContent(
                 onSettingsButtonClick = { showDialog = true }
             )
             StatisticsCard(
-                siteData = uiState.siteDailyData,
+                siteDailyData = uiState.siteDailyData,
                 totalsLabel = stringResource(Res.string.statistics_card_today_total),
                 modifier = Modifier,
                 title = stringResource(Res.string.statistics_card_title)
