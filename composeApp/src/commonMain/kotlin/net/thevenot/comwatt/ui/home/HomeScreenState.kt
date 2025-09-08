@@ -20,5 +20,6 @@ data class HomeScreenState(
     val siteRealtimeData: SiteRealtimeData = SiteRealtimeData(),
     val siteDailyData: SiteDailyData? = null,
     val isDay: Boolean = true,
+    val siteName: String? = null,
     val weatherForecast: WeatherForecast? = null,
 )
