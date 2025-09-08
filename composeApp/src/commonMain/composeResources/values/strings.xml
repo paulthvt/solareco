@@ -72,4 +72,5 @@
     <string name="house_animation_selling">Selling</string>
     <string name="house_animation_buying">Buying</string>
     <string name="weather_day_today">Today</string>
+    <string name="dashboard_screen_title">Statistics</string>
 </resources>

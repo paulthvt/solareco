@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
@@ -24,7 +25,8 @@ import net.thevenot.comwatt.domain.FetchWeatherUseCase
 class HomeViewModel(
     private val fetchSiteRealtimeDataUseCase: FetchSiteRealtimeDataUseCase,
     private val fetchSiteDailyDataUseCase: FetchSiteDailyDataUseCase,
-    private val fetchWeatherUseCase: FetchWeatherUseCase
+    private val fetchWeatherUseCase: FetchWeatherUseCase,
+    private val fetchCurrentSiteUseCase: FetchCurrentSiteUseCase
 ) : ViewModel() {
     private var autoRefreshJob: Job? = null
 
@@ -51,6 +53,15 @@ class HomeViewModel(
         Logger.d(TAG) { "startAutoRefresh ${this@HomeViewModel}" }
         if (autoRefreshJob?.isActive == true) return
         autoRefreshJob = viewModelScope.launch {
+            launch {
+                fetchCurrentSiteUseCase.invoke().onRight { site ->
+                    _uiState.update { state ->
+                        state.copy(siteName = site?.name)
+                    }
+                }.onLeft { error ->
+                    Logger.e(TAG) { "Error fetching current site: $error" }
+                }
+            }
             launch {
                 fetchSiteRealtimeDataUseCase.invoke().flowOn(Dispatchers.IO).catch {
                     Logger.e(TAG) { "Error in auto refresh: $it" }

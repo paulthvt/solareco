@@ -8,7 +8,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -17,13 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
-import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
-import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
-import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.dashboard.DashboardScreenContent
 import net.thevenot.comwatt.ui.home.HomeScreen
-import net.thevenot.comwatt.ui.home.HomeViewModel
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
@@ -90,21 +85,11 @@ fun NavGraphBuilder.mainGraph(
         startDestination = Screen.Home
     ) {
         composable<Screen.Home> {
-            NestedAppScaffold(navController, snackbarHostState) {
-                HomeScreen(
-                    dataRepository = dataRepository,
-                    snackbarHostState = snackbarHostState,
-                    viewModel = viewModel(viewModelStoreOwner = viewModelStoreOwner) {
-                        HomeViewModel(
-                            fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(
-                                dataRepository
-                            ),
-                            fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
-                            fetchWeatherUseCase = FetchWeatherUseCase(dataRepository)
-                        )
-                    })
-            }
-
+            HomeScreen(
+                navController = navController,
+                snackbarHostState = snackbarHostState,
+                dataRepository = dataRepository
+            )
         }
         composable<Screen.Dashboard> {
             DashboardScreen(navController, snackbarHostState, dataRepository)

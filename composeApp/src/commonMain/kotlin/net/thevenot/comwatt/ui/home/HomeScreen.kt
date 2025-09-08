@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.error_fetching_data
 import comwatt.composeapp.generated.resources.gauge_dialog_close_button
@@ -57,17 +59,20 @@ import de.drick.compose.hotpreview.HotPreview
 import de.drick.compose.hotpreview.NavigationBarMode
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
+import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.home.weather.WeatherCard
+import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
 import net.thevenot.comwatt.ui.theme.AppTheme
@@ -82,13 +87,15 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeScreen(
+    navController: NavController,
     dataRepository: DataRepository,
     snackbarHostState: SnackbarHostState,
     viewModel: HomeViewModel = viewModel {
         HomeViewModel(
             fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(dataRepository),
             fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
-            fetchWeatherUseCase = FetchWeatherUseCase(dataRepository)
+            fetchWeatherUseCase = FetchWeatherUseCase(dataRepository),
+            fetchCurrentSiteUseCase = FetchCurrentSiteUseCase(dataRepository)
         )
     }
 ) {
@@ -112,16 +119,29 @@ fun HomeScreen(
             snackbarHostState.showSnackbar(fetchErrorMessage)
         }
     }
-
-    LoadingView(uiState.isDataLoaded.not()) {
-        HomeScreenContent(
-            uiState,
-            viewModel::enableProductionGauge,
-            viewModel::enableConsumptionGauge,
-            viewModel::enableInjectionGauge,
-            viewModel::enableWithdrawalsGauge,
-            viewModel::singleRefresh
-        )
+    NestedAppScaffold(
+        navController = navController,
+        title = {
+            uiState.siteName?.let { site ->
+                CenteredTitleWithIcon(
+                    icon = Icons.Filled.Home,
+                    title = site,
+                    iconContentDescription = "Site Icon"
+                )
+            }
+        },
+        snackbarHostState = snackbarHostState,
+    ) {
+        LoadingView(uiState.isDataLoaded.not()) {
+            HomeScreenContent(
+                uiState,
+                viewModel::enableProductionGauge,
+                viewModel::enableConsumptionGauge,
+                viewModel::enableInjectionGauge,
+                viewModel::enableWithdrawalsGauge,
+                viewModel::singleRefresh
+            )
+        }
     }
 }
 
