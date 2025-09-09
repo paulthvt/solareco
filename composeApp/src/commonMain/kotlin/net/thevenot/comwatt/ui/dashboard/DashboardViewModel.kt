@@ -16,10 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
-import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchParameters
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
@@ -301,10 +298,8 @@ class DashboardViewModel(
             DashboardTimeUnit.HOUR -> range.hour.start to range.hour.end
             DashboardTimeUnit.DAY -> {
                 val tz = TimeZone.currentSystemDefault()
-                val date = range.day.value.toLocalDateTime(tz).date
-                val start = date.atStartOfDayIn(tz)
-                val end = start.plus(1, DateTimeUnit.DAY, tz)
-                    .minus(1, DateTimeUnit.NANOSECOND)
+                val end = range.day.value
+                val start = end.minus(1, DateTimeUnit.DAY, tz)
                 start to end
             }
 
