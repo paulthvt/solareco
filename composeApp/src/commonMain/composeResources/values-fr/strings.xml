@@ -56,11 +56,11 @@
     <string name="custom_range_dialog_picker_date_time_picker_cancel_button">Annuler</string>
     <string name="statistics_card_title">Statistiques Quotidiennes</string>
     <string name="statistics_card_today_total">Totaux du jour</string>
-    <string name="statistics_card_title_hourly">Statistiques horaires</string>
+    <string name="statistics_card_title_hourly">Statistiques Horaires</string>
     <string name="statistics_card_title_weekly">Statistiques Hebdomadaires</string>
-    <string name="statistics_card_title_custom">Statistiques personnalisées</string>
+    <string name="statistics_card_title_custom">Statistiques Personnalisées</string>
     <string name="statistics_self_consumption_rate">Autoconsommation d\'énergie</string>
-    <string name="statistics_autonomy_rate">Couverture solaire</string>
+    <string name="statistics_autonomy_rate">Couverture Solaire</string>
     <string name="statistics_self_consumption_tooltip">Pourcentage de votre production solaire qui alimente votre maison directement</string>
     <string name="statistics_autonomy_tooltip">Pourcentage des besoins énergétiques de votre maison satisfaits par vos panneaux solaires</string>
     <string name="home_screen_real_time_consumption_title">Puissance en temps réel</string>
@@ -73,4 +73,5 @@
     <string name="house_animation_selling">Vente en cours</string>
     <string name="house_animation_buying">Achat en cours</string>
     <string name="weather_day_today">Aujourd\'hui</string>
+    <string name="dashboard_screen_title">Statistiques</string>
 </resources>
