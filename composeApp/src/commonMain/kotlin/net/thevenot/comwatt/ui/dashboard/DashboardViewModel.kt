@@ -41,6 +41,10 @@ class DashboardViewModel(
     private val _uiState = MutableStateFlow(DashboardScreenState())
     val uiState: StateFlow<DashboardScreenState> get() = _uiState
 
+    // Track expanded cards and their statistics
+    private val _expandedCards = MutableStateFlow<Set<String>>(setOf())
+    val expandedCards: StateFlow<Set<String>> = _expandedCards
+
     fun startAutoRefresh() {
         Logger.d(TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
@@ -91,6 +95,7 @@ class DashboardViewModel(
         result.onRight { value ->
             _charts.value = value
             _uiState.update { state -> state.copy(callCount = _uiState.value.callCount + 1) }
+            // No need to update statistics separately - they're already in ChartTimeSeries
         }
 
         _uiState.update { state ->
@@ -305,6 +310,16 @@ class DashboardViewModel(
 
             DashboardTimeUnit.WEEK -> range.week.start to range.week.end
             DashboardTimeUnit.CUSTOM -> range.custom.start to range.custom.end
+        }
+    }
+
+    fun toggleCardExpansion(chartName: String) {
+        val isCurrentlyExpanded = _expandedCards.value.contains(chartName)
+
+        if (isCurrentlyExpanded) {
+            _expandedCards.update { it - chartName }
+        } else {
+            _expandedCards.update { it + chartName }
         }
     }
 

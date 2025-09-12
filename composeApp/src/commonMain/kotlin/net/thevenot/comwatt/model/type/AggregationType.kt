@@ -1,5 +1,8 @@
 package net.thevenot.comwatt.model.type
 
 enum class AggregationType {
-    SUM
+    SUM,
+    MIN,
+    MAX,
+    AVG
 }

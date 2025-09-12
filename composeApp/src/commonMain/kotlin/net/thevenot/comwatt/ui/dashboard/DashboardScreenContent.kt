@@ -9,16 +9,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
@@ -70,6 +74,7 @@ import com.patrykandpatrick.vico.multiplatform.common.fill
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
 import com.patrykandpatrick.vico.multiplatform.common.shape.CorneredShape
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.dashboard_chart_statistics_title
 import comwatt.composeapp.generated.resources.day_range_selected_time_n_days_gao
 import comwatt.composeapp.generated.resources.day_range_selected_time_today
 import comwatt.composeapp.generated.resources.day_range_selected_time_yesterday
@@ -206,7 +211,7 @@ fun DashboardScreenContent(
                         items = charts.withIndex()
                             .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
                         key = { it.index to it.value.name }) { (_, chart) ->
-                        LazyGraphCard(uiState, chart)
+                        LazyGraphCard(uiState, chart, viewModel)
                     }
                 }
             }
@@ -370,7 +375,14 @@ private fun TimeUnitBar(
 }
 
 @Composable
-private fun LazyGraphCard(uiState: DashboardScreenState, chart: ChartTimeSeries) {
+private fun LazyGraphCard(
+    uiState: DashboardScreenState,
+    chart: ChartTimeSeries,
+    viewModel: DashboardViewModel
+) {
+    val expandedCards by viewModel.expandedCards.collectAsState()
+    val isExpanded = expandedCards.contains(chart.name ?: "Unknown")
+
     OutlinedCard {
         Column {
             Card {
@@ -378,11 +390,58 @@ private fun LazyGraphCard(uiState: DashboardScreenState, chart: ChartTimeSeries)
                     timeSeries = chart.timeSeries, uiState = uiState
                 )
             }
-
-            Column(modifier = Modifier.padding(AppTheme.dimens.paddingNormal)) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = AppTheme.dimens.paddingNormal,
+                        vertical = AppTheme.dimens.paddingSmall
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 ChartTitle(
-                    chart.timeSeries.first().title.icon, chart.name?.trim() ?: "Unknown"
+                    chart.timeSeries.first().title.icon,
+                    chart.name?.trim() ?: "Unknown"
                 )
+
+                IconButton(
+                    onClick = { viewModel.toggleCardExpansion(chart.name ?: "Unknown") },
+                    modifier = Modifier.width(32.dp).height(32.dp)
+                ) {
+                    Icon(
+                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            if (isExpanded) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(AppTheme.dimens.paddingNormal)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.dashboard_chart_statistics_title),
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(bottom = AppTheme.dimens.paddingSmall)
+                    )
+
+                    chart.timeSeries.forEachIndexed { index, timeSeries ->
+                        val timeSeriesStatistics = chart.statistics[index]
+                        val lineColor = getLineColorForTimeSeries(timeSeries)
+
+                        TimeSeriesStatisticsRow(
+                            timeSeries = timeSeries,
+                            statistics = timeSeriesStatistics,
+                            color = lineColor,
+                            modifier = Modifier.padding(bottom = AppTheme.dimens.paddingSmall)
+                        )
+                    }
+                }
             }
         }
     }
@@ -630,8 +689,16 @@ fun LazyGraphCardPreview() {
         timeSeries = listOf(sampleTimeSeries)
     )
 
+    // Create a sample viewModel for preview
+    val sampleViewModel = viewModel {
+        DashboardViewModel(
+            FetchTimeSeriesUseCase(dataRepository = null as DataRepository),
+            dataRepository = null as DataRepository
+        )
+    }
+
     ComwattTheme {
-        LazyGraphCard(uiState = sampleState, chart = sampleChart)
+        LazyGraphCard(uiState = sampleState, chart = sampleChart, viewModel = sampleViewModel)
     }
 }
 
@@ -672,4 +739,128 @@ private fun calculateRangeDuration(chartsData: List<Map<Instant, Float>>): Durat
 
     val durationSeconds = latestTimestamp.epochSeconds - earliestTimestamp.epochSeconds
     return durationSeconds.seconds
+}
+
+@Composable
+private fun StatisticsRow(statistics: ChartStatistics) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        StatisticItem(
+            label = "MIN",
+            value = formatPowerValue(statistics.min),
+            modifier = Modifier.weight(1f)
+        )
+        StatisticItem(
+            label = "MAX",
+            value = formatPowerValue(statistics.max),
+            modifier = Modifier.weight(1f)
+        )
+        StatisticItem(
+            label = "AVG",
+            value = formatPowerValue(statistics.average),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun StatisticItem(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+        )
+        Text(
+            text = value,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+    }
+}
+
+private fun formatPowerValue(value: Double): String {
+    return when {
+        value >= 1000 -> "${(value / 1000).toInt()} kW"
+        value < 1 && value > 0 -> "${value.toInt()} W"
+        else -> "${value.toInt()} W"
+    }
+}
+
+@Composable
+private fun getLineColorForTimeSeries(timeSeries: TimeSeries): Color {
+    return when (timeSeries.type) {
+        TimeSeriesType.PRODUCTION -> MaterialTheme.colorScheme.powerProduction
+        TimeSeriesType.CONSUMPTION -> MaterialTheme.colorScheme.powerConsumption
+        TimeSeriesType.INJECTION -> MaterialTheme.colorScheme.powerInjection
+        TimeSeriesType.WITHDRAWAL -> MaterialTheme.colorScheme.powerWithdrawals
+    }
+}
+
+@Composable
+private fun TimeSeriesStatisticsRow(
+    timeSeries: TimeSeries,
+    statistics: ChartStatistics,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        // Time series name with colored dot
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.dimens.paddingSmall),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Colored dot indicator
+            androidx.compose.foundation.Canvas(
+                modifier = Modifier.size(12.dp)
+            ) {
+                drawCircle(color = color)
+            }
+
+            Spacer(modifier = Modifier.width(AppTheme.dimens.paddingSmall))
+
+            Text(
+                text = timeSeries.title.name,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Statistics for this time series
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            StatisticItem(
+                label = "MIN",
+                value = formatPowerValue(statistics.min),
+                modifier = Modifier.weight(1f)
+            )
+            StatisticItem(
+                label = "MAX",
+                value = formatPowerValue(statistics.max),
+                modifier = Modifier.weight(1f)
+            )
+            StatisticItem(
+                label = "AVG",
+                value = formatPowerValue(statistics.average),
+                modifier = Modifier.weight(1f)
+            )
+            StatisticItem(
+                label = "SUM",
+                value = formatPowerValue(statistics.sum),
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
 }
