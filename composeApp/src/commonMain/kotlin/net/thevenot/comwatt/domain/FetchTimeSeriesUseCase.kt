@@ -13,6 +13,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import arrow.core.Either
 import arrow.core.combine
 import arrow.core.flatMap
+import arrow.core.getOrElse
 import co.touchlab.kermit.Logger
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.consumption_production_chart_title
@@ -43,8 +44,10 @@ import net.thevenot.comwatt.model.TileResponseDto
 import net.thevenot.comwatt.model.TileType
 import net.thevenot.comwatt.model.TimeSeriesDto
 import net.thevenot.comwatt.model.type.AggregationLevel
+import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.model.type.TimeAgoUnit
+import net.thevenot.comwatt.ui.dashboard.ChartStatistics
 import org.jetbrains.compose.resources.getString
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
@@ -132,10 +135,33 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                                 startTime = startTime
                             )
 
-                            ChartTimeSeries(
+                            val chartTimeSeries = ChartTimeSeries(
                                 name = tile.name,
                                 timeSeries = deviceTimeSeries
                             )
+
+                            if (deviceTimeSeries.isNotEmpty()) {
+                                val statistics = computeStatisticsWithApiSum(chartTimeSeries) {
+                                    tile.tileChartDatas
+                                        ?.map { it.measureKey }
+                                        ?.mapNotNull { it.device?.id }
+                                        ?.map { deviceId ->
+                                            fetchDeviceTimeSeries(
+                                                deviceId = deviceId,
+                                                timeUnit = timeUnit,
+                                                endTime = endTime,
+                                                startTime = startTime,
+                                                measureKind = MeasureKind.QUANTITY,
+                                                aggregationType = AggregationType.SUM
+                                            ).map { timeSeriesDto ->
+                                                timeSeriesDto.values[0]
+                                            }.getOrElse { 0.0 }
+                                        } ?: emptyList()
+                                }
+                                chartTimeSeries.copy(statistics = statistics)
+                            } else {
+                                chartTimeSeries
+                            }
                         }
                     }
                     .filter { it.await().timeSeries.isNotEmpty() }
@@ -213,21 +239,49 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         return siteTimeSeries.mapLeft { DomainError.Api(it) }
             .map { siteTimeSeries ->
                 listOf(
-                    createConsumptionProductionChartTimeSeries(siteTimeSeries)
+                    createConsumptionProductionChartTimeSeries(
+                        siteTimeSeries = siteTimeSeries,
+                        siteId = id,
+                        timeUnit = timeUnit,
+                        startTime = startTime,
+                        endTime = endTime
+                    )
                 )
             }
     }
 
     private suspend fun createConsumptionProductionChartTimeSeries(
-        siteTimeSeries: SiteTimeSeriesDto
+        siteTimeSeries: SiteTimeSeriesDto,
+        siteId: Int,
+        timeUnit: TimeUnit,
+        startTime: Instant? = null,
+        endTime: Instant
     ): ChartTimeSeries {
-        return ChartTimeSeries(
+        val chartTimeSeries = ChartTimeSeries(
             name = getString(Res.string.consumption_production_chart_title),
             timeSeries = listOf(
                 createProductionTimeSeries(siteTimeSeries),
                 createConsumptionTimeSeries(siteTimeSeries)
             )
         )
+
+        val statistics = computeStatisticsWithApiSum(chartTimeSeries) {
+            fetchSiteTimeSeries(
+                siteId = siteId,
+                timeUnit = timeUnit,
+                endTime = endTime,
+                startTime = startTime,
+                measureKind = MeasureKind.QUANTITY,
+                aggregationType = AggregationType.SUM
+            ).map { timeSeriesDto ->
+                listOf(
+                    timeSeriesDto.productions[0],
+                    timeSeriesDto.consumptions[0]
+                )
+            }.getOrElse { listOf(0.0, 0.0) }
+        }
+
+        return chartTimeSeries.copy(statistics = statistics)
     }
 
     private suspend fun createProductionTimeSeries(
@@ -262,20 +316,18 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         siteId: Int,
         timeUnit: TimeUnit,
         endTime: Instant,
-        startTime: Instant? = null
+        startTime: Instant? = null,
+        measureKind: MeasureKind = getMeasureKind(timeUnit, startTime, endTime),
+        aggregationLevel: AggregationLevel = getAggregationLevel(timeUnit, startTime, endTime),
+        aggregationType: AggregationType? = null
     ): Either<ApiError, SiteTimeSeriesDto> {
-        val (aggregationLevel, measureKind) = getAggregationAndMeasureKind(
-            timeUnit,
-            startTime,
-            endTime
-        )
-
         return if (startTime != null) {
             dataRepository.api.fetchSiteTimeSeries(
                 siteId = siteId,
                 startTime = startTime,
                 endTime = endTime,
                 aggregationLevel = aggregationLevel,
+                aggregationType = aggregationType,
                 measureKind = measureKind
             )
         } else {
@@ -285,6 +337,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                 timeAgoValue = 1,
                 endTime = endTime,
                 aggregationLevel = aggregationLevel,
+                aggregationType = aggregationType,
                 measureKind = measureKind
             )
         }
@@ -294,20 +347,18 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         deviceId: Int,
         timeUnit: TimeUnit,
         endTime: Instant,
-        startTime: Instant? = null
+        startTime: Instant? = null,
+        aggregationLevel: AggregationLevel = getAggregationLevel(timeUnit, startTime, endTime),
+        measureKind: MeasureKind = getMeasureKind(timeUnit, startTime, endTime),
+        aggregationType: AggregationType? = null
     ): Either<ApiError, TimeSeriesDto> {
-        val (aggregationLevel, measureKind) = getAggregationAndMeasureKind(
-            timeUnit,
-            startTime,
-            endTime
-        )
-
         return if (startTime != null) {
             dataRepository.api.fetchTimeSeries(
                 deviceId = deviceId,
                 startTime = startTime,
                 endTime = endTime,
                 aggregationLevel = aggregationLevel,
+                aggregationType = aggregationType,
                 measureKind = measureKind
             )
         } else {
@@ -316,23 +367,24 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                 timeAgoUnit = TimeAgoUnit.fromTimeUnit(timeUnit),
                 endTime = endTime,
                 aggregationLevel = aggregationLevel,
+                aggregationType = aggregationType,
                 measureKind = measureKind
             )
         }
     }
 
-    private fun getAggregationAndMeasureKind(
+    private fun getAggregationLevel(
         timeUnit: TimeUnit,
         startTime: Instant?,
         endTime: Instant
-    ): Pair<AggregationLevel, MeasureKind> {
+    ): AggregationLevel {
         val durationSeconds = if (startTime != null) {
             (endTime.epochSeconds - startTime.epochSeconds).seconds
         } else {
             0.seconds
         }
 
-        val aggregationLevel = when (timeUnit) {
+        return when (timeUnit) {
             TimeUnit.HOUR -> AggregationLevel.NONE
             TimeUnit.DAY -> AggregationLevel.NONE
             TimeUnit.WEEK -> AggregationLevel.HOUR
@@ -347,8 +399,20 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
             }
             else -> AggregationLevel.NONE
         }
+    }
 
-        val measureKind = when (timeUnit) {
+    private fun getMeasureKind(
+        timeUnit: TimeUnit,
+        startTime: Instant?,
+        endTime: Instant
+    ): MeasureKind {
+        val durationSeconds = if (startTime != null) {
+            (endTime.epochSeconds - startTime.epochSeconds).seconds
+        } else {
+            0.seconds
+        }
+
+        return when (timeUnit) {
             TimeUnit.HOUR -> MeasureKind.FLOW
             TimeUnit.DAY -> MeasureKind.FLOW
             TimeUnit.WEEK -> MeasureKind.QUANTITY
@@ -360,8 +424,6 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                 }
             }
         }
-        Logger.d(TAG) { "aggregationLevel $aggregationLevel" }
-        return aggregationLevel to measureKind
     }
 
     private fun mapIcon(icon: String?): ImageVector {
@@ -376,6 +438,22 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
             "icon-ap-withdrawal" -> Icons.Default.ElectricalServices
             "icon-ap-plug" -> Icons.Default.ElectricalServices
             else -> Icons.Default.DeviceUnknown
+        }
+    }
+
+    /**
+     * Computes statistics for a ChartTimeSeries using API-based sum calculations
+     */
+    private suspend fun computeStatisticsWithApiSum(
+        chartTimeSeries: ChartTimeSeries,
+        sumProvider: suspend () -> List<Double>,
+    ): List<ChartStatistics> {
+        val sums = sumProvider()
+        return chartTimeSeries.timeSeries.zip(sums) { timeSeries, sum ->
+            ChartStatistics.computeWithApiSum(
+                timeSeries = timeSeries,
+                sum = sum,
+            )
         }
     }
 

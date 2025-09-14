@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.ui.dashboard
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -74,6 +75,12 @@ import com.patrykandpatrick.vico.multiplatform.common.fill
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
 import com.patrykandpatrick.vico.multiplatform.common.shape.CorneredShape
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.dashboard_chart_statistics_avg_title
+import comwatt.composeapp.generated.resources.dashboard_chart_statistics_expand_icon_description_collapsed
+import comwatt.composeapp.generated.resources.dashboard_chart_statistics_expand_icon_description_expanded
+import comwatt.composeapp.generated.resources.dashboard_chart_statistics_max_title
+import comwatt.composeapp.generated.resources.dashboard_chart_statistics_min_title
+import comwatt.composeapp.generated.resources.dashboard_chart_statistics_sum_title
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_title
 import comwatt.composeapp.generated.resources.day_range_selected_time_n_days_gao
 import comwatt.composeapp.generated.resources.day_range_selected_time_today
@@ -211,7 +218,7 @@ fun DashboardScreenContent(
                         items = charts.withIndex()
                             .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
                         key = { it.index to it.value.name }) { (_, chart) ->
-                        LazyGraphCard(uiState, chart, viewModel)
+                        LazyGraphCard(uiState, chart) { viewModel.toggleCardExpansion(it) }
                     }
                 }
             }
@@ -378,10 +385,9 @@ private fun TimeUnitBar(
 private fun LazyGraphCard(
     uiState: DashboardScreenState,
     chart: ChartTimeSeries,
-    viewModel: DashboardViewModel
+    toggleCardExpansion: (String) -> Unit = {}
 ) {
-    val expandedCards by viewModel.expandedCards.collectAsState()
-    val isExpanded = expandedCards.contains(chart.name ?: "Unknown")
+    val isExpanded = uiState.expandedCards.contains(chart.name ?: "Unknown")
 
     OutlinedCard {
         Column {
@@ -406,12 +412,14 @@ private fun LazyGraphCard(
                 )
 
                 IconButton(
-                    onClick = { viewModel.toggleCardExpansion(chart.name ?: "Unknown") },
+                    onClick = { toggleCardExpansion(chart.name ?: "Unknown") },
                     modifier = Modifier.width(32.dp).height(32.dp)
                 ) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
+                        contentDescription = if (isExpanded) stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded) else stringResource(
+                            Res.string.dashboard_chart_statistics_expand_icon_description_collapsed
+                        ),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -689,16 +697,8 @@ fun LazyGraphCardPreview() {
         timeSeries = listOf(sampleTimeSeries)
     )
 
-    // Create a sample viewModel for preview
-    val sampleViewModel = viewModel {
-        DashboardViewModel(
-            FetchTimeSeriesUseCase(dataRepository = null as DataRepository),
-            dataRepository = null as DataRepository
-        )
-    }
-
     ComwattTheme {
-        LazyGraphCard(uiState = sampleState, chart = sampleChart, viewModel = sampleViewModel)
+        LazyGraphCard(uiState = sampleState, chart = sampleChart)
     }
 }
 
@@ -742,30 +742,6 @@ private fun calculateRangeDuration(chartsData: List<Map<Instant, Float>>): Durat
 }
 
 @Composable
-private fun StatisticsRow(statistics: ChartStatistics) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        StatisticItem(
-            label = "MIN",
-            value = formatPowerValue(statistics.min),
-            modifier = Modifier.weight(1f)
-        )
-        StatisticItem(
-            label = "MAX",
-            value = formatPowerValue(statistics.max),
-            modifier = Modifier.weight(1f)
-        )
-        StatisticItem(
-            label = "AVG",
-            value = formatPowerValue(statistics.average),
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
 private fun StatisticItem(
     label: String,
     value: String,
@@ -796,6 +772,14 @@ private fun formatPowerValue(value: Double): String {
     }
 }
 
+private fun formatEnergyValue(value: Double): String {
+    return when {
+        value >= 1000 -> "${(value / 1000).toInt()} kWh"
+        value < 1 && value > 0 -> "${value.toInt()} Wh"
+        else -> "${value.toInt()} Wh"
+    }
+}
+
 @Composable
 private fun getLineColorForTimeSeries(timeSeries: TimeSeries): Color {
     return when (timeSeries.type) {
@@ -814,13 +798,11 @@ private fun TimeSeriesStatisticsRow(
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
-        // Time series name with colored dot
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.dimens.paddingSmall),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Colored dot indicator
-            androidx.compose.foundation.Canvas(
+            Canvas(
                 modifier = Modifier.size(12.dp)
             ) {
                 drawCircle(color = color)
@@ -836,29 +818,28 @@ private fun TimeSeriesStatisticsRow(
             )
         }
 
-        // Statistics for this time series
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
             StatisticItem(
-                label = "MIN",
+                label = stringResource(Res.string.dashboard_chart_statistics_min_title),
                 value = formatPowerValue(statistics.min),
                 modifier = Modifier.weight(1f)
             )
             StatisticItem(
-                label = "MAX",
+                label = stringResource(Res.string.dashboard_chart_statistics_max_title),
                 value = formatPowerValue(statistics.max),
                 modifier = Modifier.weight(1f)
             )
             StatisticItem(
-                label = "AVG",
+                label = stringResource(Res.string.dashboard_chart_statistics_avg_title),
                 value = formatPowerValue(statistics.average),
                 modifier = Modifier.weight(1f)
             )
             StatisticItem(
-                label = "SUM",
-                value = formatPowerValue(statistics.sum),
+                label = stringResource(Res.string.dashboard_chart_statistics_sum_title),
+                value = formatEnergyValue(statistics.sum),
                 modifier = Modifier.weight(1f)
             )
         }

@@ -41,10 +41,6 @@ class DashboardViewModel(
     private val _uiState = MutableStateFlow(DashboardScreenState())
     val uiState: StateFlow<DashboardScreenState> get() = _uiState
 
-    // Track expanded cards and their statistics
-    private val _expandedCards = MutableStateFlow<Set<String>>(setOf())
-    val expandedCards: StateFlow<Set<String>> = _expandedCards
-
     fun startAutoRefresh() {
         Logger.d(TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
@@ -314,12 +310,13 @@ class DashboardViewModel(
     }
 
     fun toggleCardExpansion(chartName: String) {
-        val isCurrentlyExpanded = _expandedCards.value.contains(chartName)
+
+        val isCurrentlyExpanded = _uiState.value.expandedCards.contains(chartName)
 
         if (isCurrentlyExpanded) {
-            _expandedCards.update { it - chartName }
+            _uiState.update { it.copy(expandedCards = it.expandedCards - chartName) }
         } else {
-            _expandedCards.update { it + chartName }
+            _uiState.update { it.copy(expandedCards = it.expandedCards + chartName) }
         }
     }
 

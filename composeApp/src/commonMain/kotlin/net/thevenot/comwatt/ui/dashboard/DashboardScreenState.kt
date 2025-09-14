@@ -20,6 +20,7 @@ data class DashboardScreenState(
     val errorCount: Int = 0,
     val selectedTimeRange: SelectedTimeRange = SelectedTimeRange(),
     val rangeStats: SiteDailyData? = null,
+    val expandedCards: Set<String> = emptySet()
 )
 
 data class SelectedTimeRange(

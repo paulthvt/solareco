@@ -10,22 +10,21 @@ data class ChartStatistics(
     val isLoading: Boolean = false
 ) {
     companion object {
-        /**
-         * Computes statistics for a single time series
-         */
-        fun computeFromTimeSeries(timeSeries: TimeSeries): ChartStatistics {
+        fun computeWithApiSum(
+            timeSeries: TimeSeries,
+            sum: Double,
+        ): ChartStatistics {
             val values = timeSeries.values.values
 
-            return if (values.isEmpty()) {
-                ChartStatistics(0.0, 0.0, 0.0, 0.0, false)
-            } else {
-                val min = values.minOrNull()?.toDouble() ?: 0.0
-                val max = values.maxOrNull()?.toDouble() ?: 0.0
-                val average = values.average()
-                val sum = values.sum().toDouble()
-
-                ChartStatistics(min, max, average, sum, false)
+            if (values.isEmpty()) {
+                return ChartStatistics(0.0, 0.0, 0.0, 0.0, false)
             }
+
+            val min = values.minOrNull()?.toDouble() ?: 0.0
+            val max = values.maxOrNull()?.toDouble() ?: 0.0
+            val average = values.average()
+
+            return ChartStatistics(min, max, average, sum, false)
         }
     }
 }

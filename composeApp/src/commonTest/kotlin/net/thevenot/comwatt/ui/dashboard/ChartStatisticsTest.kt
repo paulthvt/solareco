@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 class ChartStatisticsTest {
 
     @Test
-    fun `computeFromTimeSeries with empty values should return zeros`() {
+    fun `computeWithApiSum with empty values should return zeros`() {
         // Given
         val timeSeries = TimeSeries(
             title = TimeSeriesTitle("Empty Series", Icons.Default.Star),
@@ -21,14 +21,14 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 0.0)
 
         // Then
         assertEquals(ChartStatistics(0.0, 0.0, 0.0, 0.0, false), result)
     }
 
     @Test
-    fun `computeFromTimeSeries with multiple values should compute correct statistics`() {
+    fun `computeWithApiSum with multiple values should compute correct statistics`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -45,7 +45,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 60.0)
 
         // Then
         assertEquals(10.0, result.min, 0.001)
@@ -56,7 +56,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with single value should handle correctly`() {
+    fun `computeWithApiSum with single value should handle correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
 
@@ -67,7 +67,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 42.5)
 
         // Then
         assertEquals(42.5, result.min, 0.001)
@@ -77,7 +77,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with negative values should compute correctly`() {
+    fun `computeWithApiSum with negative values should compute correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -94,7 +94,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, -7.0)
 
         // Then
         assertEquals(-10.0, result.min, 0.001)
@@ -104,7 +104,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with all negative values should compute correctly`() {
+    fun `computeWithApiSum with all negative values should compute correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -121,7 +121,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, -30.0)
 
         // Then
         assertEquals(-15.0, result.min, 0.001)
@@ -131,7 +131,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with decimal values should compute correctly`() {
+    fun `computeWithApiSum with decimal values should compute correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -148,7 +148,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 7.26)
 
         // Then
         assertEquals(1.41, result.min, 0.001)
@@ -158,7 +158,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with zero values should handle correctly`() {
+    fun `computeWithApiSum with zero values should handle correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -175,7 +175,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 0.0)
 
         // Then
         assertEquals(0.0, result.min, 0.001)
@@ -185,7 +185,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with mixed zero and non-zero values should compute correctly`() {
+    fun `computeWithApiSum with mixed zero and non-zero values should compute correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -204,7 +204,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 30.0)
 
         // Then
         assertEquals(0.0, result.min, 0.001)
@@ -214,7 +214,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with very small values should handle correctly`() {
+    fun `computeWithApiSum with very small values should handle correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -229,7 +229,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 0.003)
 
         // Then
         assertEquals(0.001, result.min, 0.0001)
@@ -239,7 +239,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with very large values should handle correctly`() {
+    fun `computeWithApiSum with very large values should handle correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -256,7 +256,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 6000000.0)
 
         // Then
         assertEquals(1000000.0, result.min, 0.001)
@@ -266,7 +266,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with duplicate values should compute correctly`() {
+    fun `computeWithApiSum with duplicate values should compute correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -285,7 +285,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 60.0)
 
         // Then
         assertEquals(15.0, result.min, 0.001)
@@ -295,7 +295,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with extreme range values should compute correctly`() {
+    fun `computeWithApiSum with extreme range values should compute correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -312,7 +312,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 1000.5)
 
         // Then
         assertEquals(-1000.0, result.min, 0.001)
@@ -322,7 +322,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with single zero value should handle correctly`() {
+    fun `computeWithApiSum with single zero value should handle correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
 
@@ -333,7 +333,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 0.0)
 
         // Then
         assertEquals(0.0, result.min, 0.001)
@@ -343,7 +343,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries with single negative value should handle correctly`() {
+    fun `computeWithApiSum with single negative value should handle correctly`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
 
@@ -354,7 +354,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, -25.5)
 
         // Then
         assertEquals(-25.5, result.min, 0.001)
@@ -364,7 +364,7 @@ class ChartStatisticsTest {
     }
 
     @Test
-    fun `computeFromTimeSeries should always set isLoading to false`() {
+    fun `computeWithApiSum should always set isLoading to false`() {
         // Given
         val instant1 = Instant.fromEpochSeconds(1000)
         val instant2 = Instant.fromEpochSeconds(2000)
@@ -379,7 +379,7 @@ class ChartStatisticsTest {
         )
 
         // When
-        val result = ChartStatistics.computeFromTimeSeries(timeSeries)
+        val result = ChartStatistics.computeWithApiSum(timeSeries, 300.0)
 
         // Then
         assertEquals(false, result.isLoading)
