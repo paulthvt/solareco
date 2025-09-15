@@ -134,6 +134,7 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
+private const val TAG = "DashboardScreenContent"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -670,60 +671,6 @@ fun RangeButtonPreview() {
     }
 }
 
-@Preview
-@Composable
-fun LazyGraphCardPreview() {
-    val sampleState = DashboardScreenState(
-        isDataLoaded = true,
-        isRefreshing = false,
-        selectedTimeRange = SelectedTimeRange(),
-        selectedTimeUnit = DashboardTimeUnit.HOUR
-    )
-
-    // Generate a list of sample data points (e.g., 6 hours)
-    val now = Instant.fromEpochSeconds(1_700_000_000L)
-    val sampleValues = (0..5).associate { i ->
-        now.plus(i * 3600, kotlinx.datetime.DateTimeUnit.SECOND) to (100f + i * 50)
-    }
-
-    val sampleTimeSeries = TimeSeries(
-        title = TimeSeriesTitle("Sample", Icons.Default.Info),
-        type = TimeSeriesType.PRODUCTION,
-        values = sampleValues
-    )
-
-    val sampleChart = ChartTimeSeries(
-        name = "Sample Chart",
-        timeSeries = listOf(sampleTimeSeries)
-    )
-
-    ComwattTheme {
-        LazyGraphCard(uiState = sampleState, chart = sampleChart)
-    }
-}
-
-@Preview
-@Composable
-fun DashboardStatisticsCardPreview() {
-    val sampleStats = net.thevenot.comwatt.domain.model.SiteDailyData(
-        totalProduction = 45123.2,
-        totalConsumption = 38542.7,
-        totalInjection = 11542.3,
-        totalWithdrawals = 12325.4,
-        selfConsumptionRate = 0.75,
-        autonomyRate = 0.68
-    )
-    ComwattTheme {
-        StatisticsCard(
-            siteDailyData = sampleStats,
-            totalsLabel = "Last 7 days",
-            modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
-        )
-    }
-}
-
-private const val TAG = "DashboardScreenContent"
-
 /**
  * Calculate the duration between the earliest and latest data points in the chart.
  * This will be used to determine the appropriate interval for chart axis ticks.
@@ -843,5 +790,57 @@ private fun TimeSeriesStatisticsRow(
                 modifier = Modifier.weight(1f)
             )
         }
+    }
+}
+
+@Preview
+@Composable
+fun LazyGraphCardPreview() {
+    val sampleState = DashboardScreenState(
+        isDataLoaded = true,
+        isRefreshing = false,
+        selectedTimeRange = SelectedTimeRange(),
+        selectedTimeUnit = DashboardTimeUnit.HOUR
+    )
+
+    // Generate a list of sample data points (e.g., 6 hours)
+    val now = Instant.fromEpochSeconds(1_700_000_000L)
+    val sampleValues = (0..5).associate { i ->
+        now.plus(i * 3600, kotlinx.datetime.DateTimeUnit.SECOND) to (100f + i * 50)
+    }
+
+    val sampleTimeSeries = TimeSeries(
+        title = TimeSeriesTitle("Sample", Icons.Default.Info),
+        type = TimeSeriesType.PRODUCTION,
+        values = sampleValues
+    )
+
+    val sampleChart = ChartTimeSeries(
+        name = "Sample Chart",
+        timeSeries = listOf(sampleTimeSeries)
+    )
+
+    ComwattTheme {
+        LazyGraphCard(uiState = sampleState, chart = sampleChart)
+    }
+}
+
+@Preview
+@Composable
+fun DashboardStatisticsCardPreview() {
+    val sampleStats = net.thevenot.comwatt.domain.model.SiteDailyData(
+        totalProduction = 45123.2,
+        totalConsumption = 38542.7,
+        totalInjection = 11542.3,
+        totalWithdrawals = 12325.4,
+        selfConsumptionRate = 0.75,
+        autonomyRate = 0.68
+    )
+    ComwattTheme {
+        StatisticsCard(
+            siteDailyData = sampleStats,
+            totalsLabel = "Last 7 days",
+            modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
+        )
     }
 }

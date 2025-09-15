@@ -216,7 +216,6 @@ private fun DonutChartWithPercentage(
 
 @Composable
 private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
-    // Find the maximum value for relative scaling of gradients
     val maxValue = maxOf(
         dailyData.totalProduction,
         dailyData.totalConsumption,
