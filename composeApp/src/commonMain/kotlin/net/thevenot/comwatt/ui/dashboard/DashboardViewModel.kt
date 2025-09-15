@@ -91,7 +91,6 @@ class DashboardViewModel(
         result.onRight { value ->
             _charts.value = value
             _uiState.update { state -> state.copy(callCount = _uiState.value.callCount + 1) }
-            // No need to update statistics separately - they're already in ChartTimeSeries
         }
 
         _uiState.update { state ->
