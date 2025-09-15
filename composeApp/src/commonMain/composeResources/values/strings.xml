@@ -73,4 +73,11 @@
     <string name="house_animation_buying">Buying</string>
     <string name="weather_day_today">Today</string>
     <string name="dashboard_screen_title">Statistics</string>
+    <string name="dashboard_chart_statistics_title">Statistics</string>
+    <string name="dashboard_chart_statistics_min_title">MIN</string>
+    <string name="dashboard_chart_statistics_max_title">MAX</string>
+    <string name="dashboard_chart_statistics_avg_title">AVG</string>
+    <string name="dashboard_chart_statistics_sum_title">SUM</string>
+    <string name="dashboard_chart_statistics_expand_icon_description_expanded">Collapse</string>
+    <string name="dashboard_chart_statistics_expand_icon_description_collapsed">Expand</string>
 </resources>

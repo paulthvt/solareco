@@ -308,6 +308,17 @@ class DashboardViewModel(
         }
     }
 
+    fun toggleCardExpansion(chartName: String) {
+
+        val isCurrentlyExpanded = _uiState.value.expandedCards.contains(chartName)
+
+        if (isCurrentlyExpanded) {
+            _uiState.update { it.copy(expandedCards = it.expandedCards - chartName) }
+        } else {
+            _uiState.update { it.copy(expandedCards = it.expandedCards + chartName) }
+        }
+    }
+
     companion object {
         private const val TAG = "DashboardViewModel"
     }
