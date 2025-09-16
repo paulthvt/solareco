@@ -116,6 +116,7 @@ import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
+import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -126,7 +127,6 @@ import net.thevenot.comwatt.utils.formatDayMonth
 import net.thevenot.comwatt.utils.formatHourMinutes
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.pow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -439,17 +439,12 @@ private fun LazyGraphCard(
                         modifier = Modifier.padding(bottom = AppTheme.dimens.paddingSmall)
                     )
 
-                    chart.timeSeries.forEachIndexed { index, timeSeries ->
-                        val timeSeriesStatistics = chart.statistics[index]
-                        val lineColor = getLineColorForTimeSeries(timeSeries)
-
-                        TimeSeriesStatisticsRow(
-                            timeSeries = timeSeries,
-                            statistics = timeSeriesStatistics,
-                            color = lineColor,
-                            modifier = Modifier.padding(bottom = AppTheme.dimens.paddingSmall)
-                        )
-                    }
+                    TimeSeriesStatisticsTable(
+                        timeSeriesList = chart.timeSeries,
+                        statisticsList = chart.statistics,
+                        colors = chart.timeSeries.map { getLineColorForTimeSeries(it) },
+                        modifier = Modifier.padding(bottom = AppTheme.dimens.paddingSmall)
+                    )
                 }
             }
         }
@@ -630,47 +625,6 @@ fun ChartTitle(icon: ImageVector, title: String) {
     }
 }
 
-@Preview
-@Composable
-fun TimeUnitBarPreview() {
-    val sampleState = DashboardScreenState(
-        isDataLoaded = true,
-        isRefreshing = false,
-        selectedTimeRange = SelectedTimeRange(),
-        selectedTimeUnit = DashboardTimeUnit.HOUR
-    )
-
-    ComwattTheme {
-        TimeUnitBar(uiState = sampleState)
-    }
-}
-
-@Preview
-@Composable
-fun RangeButtonPreview() {
-    val sampleState = DashboardScreenState(
-        isDataLoaded = true,
-        isRefreshing = false,
-        selectedTimeRange = SelectedTimeRange(
-            hour = HourRange(
-                selectedValue = 2,
-                start = Instant.fromEpochSeconds(1_700_000_000L),
-                end = Instant.fromEpochSeconds(1_700_003_600L)
-            )
-        ),
-        selectedTimeUnit = DashboardTimeUnit.HOUR
-    )
-
-    ComwattTheme {
-        RangeButton(
-            uiState = sampleState,
-            onPreviousButtonClick = {},
-            onNextButtonClick = {},
-            showDatePickerDialog = {}
-        )
-    }
-}
-
 /**
  * Calculate the duration between the earliest and latest data points in the chart.
  * This will be used to determine the appropriate interval for chart axis ticks.
@@ -686,29 +640,6 @@ private fun calculateRangeDuration(chartsData: List<Map<Instant, Float>>): Durat
 
     val durationSeconds = latestTimestamp.epochSeconds - earliestTimestamp.epochSeconds
     return durationSeconds.seconds
-}
-
-@Composable
-private fun StatisticItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-    }
 }
 
 private fun formatPowerValue(value: Double): String {
@@ -738,62 +669,149 @@ private fun getLineColorForTimeSeries(timeSeries: TimeSeries): Color {
 }
 
 @Composable
-private fun TimeSeriesStatisticsRow(
-    timeSeries: TimeSeries,
-    statistics: ChartStatistics,
-    color: Color,
+private fun TimeSeriesStatisticsTable(
+    timeSeriesList: List<TimeSeries>,
+    statisticsList: List<ChartStatistics>,
+    colors: List<Color>,
     modifier: Modifier = Modifier
 ) {
     Column(modifier = modifier) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = AppTheme.dimens.paddingSmall),
-            verticalAlignment = Alignment.CenterVertically
+            horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            Canvas(
-                modifier = Modifier.size(12.dp)
-            ) {
-                drawCircle(color = color)
-            }
-
-            Spacer(modifier = Modifier.width(AppTheme.dimens.paddingSmall))
+            Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = timeSeries.title.name,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.weight(1f)
+                text = stringResource(Res.string.dashboard_chart_statistics_min_title),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(
+                text = stringResource(Res.string.dashboard_chart_statistics_max_title),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(
+                text = stringResource(Res.string.dashboard_chart_statistics_avg_title),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(
+                text = stringResource(Res.string.dashboard_chart_statistics_sum_title),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
             )
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            StatisticItem(
-                label = stringResource(Res.string.dashboard_chart_statistics_min_title),
-                value = formatPowerValue(statistics.min),
-                modifier = Modifier.weight(1f)
-            )
-            StatisticItem(
-                label = stringResource(Res.string.dashboard_chart_statistics_max_title),
-                value = formatPowerValue(statistics.max),
-                modifier = Modifier.weight(1f)
-            )
-            StatisticItem(
-                label = stringResource(Res.string.dashboard_chart_statistics_avg_title),
-                value = formatPowerValue(statistics.average),
-                modifier = Modifier.weight(1f)
-            )
-            StatisticItem(
-                label = stringResource(Res.string.dashboard_chart_statistics_sum_title),
-                value = formatEnergyValue(statistics.sum),
-                modifier = Modifier.weight(1f)
+        timeSeriesList.forEachIndexed { index, timeSeries ->
+            TimeSeriesStatisticsRow(
+                statistics = statisticsList[index],
+                color = colors[index],
+                modifier = Modifier.padding(bottom = AppTheme.dimens.paddingExtraSmall)
             )
         }
     }
 }
 
-@Preview
+@Composable
+private fun TimeSeriesStatisticsRow(
+    statistics: ChartStatistics,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        Canvas(
+            modifier = Modifier.size(12.dp)
+        ) {
+            drawCircle(color = color)
+        }
+
+        Text(
+            text = formatPowerValue(statistics.min),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Text(
+            text = formatPowerValue(statistics.max),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Text(
+            text = formatPowerValue(statistics.average),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Text(
+            text = formatEnergyValue(statistics.sum),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+    }
+}
+
+@HotPreviewLightDark
+@Composable
+fun TimeUnitBarPreview() {
+    val sampleState = DashboardScreenState(
+        isDataLoaded = true,
+        isRefreshing = false,
+        selectedTimeRange = SelectedTimeRange(),
+        selectedTimeUnit = DashboardTimeUnit.HOUR
+    )
+
+    ComwattTheme {
+        TimeUnitBar(uiState = sampleState)
+    }
+}
+
+@HotPreviewLightDark
+@Composable
+fun RangeButtonPreview() {
+    val sampleState = DashboardScreenState(
+        isDataLoaded = true,
+        isRefreshing = false,
+        selectedTimeRange = SelectedTimeRange(
+            hour = HourRange(
+                selectedValue = 2,
+                start = Instant.fromEpochSeconds(1_700_000_000L),
+                end = Instant.fromEpochSeconds(1_700_003_600L)
+            )
+        ),
+        selectedTimeUnit = DashboardTimeUnit.HOUR
+    )
+
+    ComwattTheme {
+        RangeButton(
+            uiState = sampleState,
+            onPreviousButtonClick = {},
+            onNextButtonClick = {},
+            showDatePickerDialog = {}
+        )
+    }
+}
+
+@HotPreviewLightDark
 @Composable
 fun LazyGraphCardPreview() {
     val sampleState = DashboardScreenState(
@@ -825,7 +843,48 @@ fun LazyGraphCardPreview() {
     }
 }
 
-@Preview
+@HotPreviewLightDark
+@Composable
+fun TimeSeriesStatisticsTablePreview() {
+    val sampleTimeSeries1 = TimeSeries(
+        title = TimeSeriesTitle("Production", Icons.Default.Info),
+        type = TimeSeriesType.PRODUCTION,
+        values = emptyMap()
+    )
+
+    val sampleTimeSeries2 = TimeSeries(
+        title = TimeSeriesTitle("Consumption", Icons.Default.Info),
+        type = TimeSeriesType.CONSUMPTION,
+        values = emptyMap()
+    )
+
+    val sampleStatistics1 = ChartStatistics(
+        min = 150.0,
+        max = 3500.0,
+        average = 1800.0,
+        sum = 21600.0,
+        isLoading = false
+    )
+
+    val sampleStatistics2 = ChartStatistics(
+        min = 200.0,
+        max = 2800.0,
+        average = 1400.0,
+        sum = 16800.0,
+        isLoading = false
+    )
+
+    ComwattTheme {
+        TimeSeriesStatisticsTable(
+            timeSeriesList = listOf(sampleTimeSeries1, sampleTimeSeries2),
+            statisticsList = listOf(sampleStatistics1, sampleStatistics2),
+            colors = listOf(Color.Green, Color.Red),
+            modifier = Modifier.padding(AppTheme.dimens.paddingNormal)
+        )
+    }
+}
+
+@HotPreviewLightDark
 @Composable
 fun DashboardStatisticsCardPreview() {
     val sampleStats = net.thevenot.comwatt.domain.model.SiteDailyData(
