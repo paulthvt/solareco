@@ -1,9 +1,9 @@
 package net.thevenot.comwatt.utils
 
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 class DateTimeUtilsTest {
     @Test

@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import net.thevenot.comwatt.DataRepository
@@ -28,6 +27,7 @@ import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
+import kotlin.time.Instant
 
 class DashboardViewModel(
     private val fetchTimeSeriesUseCase: FetchTimeSeriesUseCase,

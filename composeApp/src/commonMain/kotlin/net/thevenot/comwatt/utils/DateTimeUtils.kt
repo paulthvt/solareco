@@ -1,6 +1,5 @@
 package net.thevenot.comwatt.utils
 
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -12,6 +11,7 @@ import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.format.char
 import kotlinx.datetime.offsetAt
+import kotlin.time.Instant
 
 @OptIn(FormatStringsInDatetimeFormats::class)
 fun Instant.toZoneString(timeZone: TimeZone = TimeZone.UTC): String {

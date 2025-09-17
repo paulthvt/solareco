@@ -18,9 +18,7 @@ import io.ktor.util.date.GMTDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
@@ -40,7 +38,9 @@ import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.model.type.TimeAgoUnit
 import net.thevenot.comwatt.utils.toZoneString
+import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.Instant
 
 class ComwattApi(val client: HttpClient, val baseUrl: String) {
     suspend fun authenticate(

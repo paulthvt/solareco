@@ -1,9 +1,10 @@
 package net.thevenot.comwatt.domain.utils
-import kotlinx.datetime.Instant
+
 import net.thevenot.comwatt.domain.model.TimeUnit
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 class TimeSeriesDownsamplerTest {
     @Test

@@ -6,9 +6,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.minus
@@ -18,6 +16,8 @@ import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.domain.model.TrendCalculator
 import net.thevenot.comwatt.model.ApiError
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class FetchSiteRealtimeDataUseCase(private val dataRepository: DataRepository) {
     operator fun invoke(): Flow<Either<DomainError, SiteRealtimeData>> = flow {

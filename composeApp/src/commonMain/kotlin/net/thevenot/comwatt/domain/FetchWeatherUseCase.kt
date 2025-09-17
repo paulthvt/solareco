@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.DailyWeather
@@ -21,6 +20,7 @@ import net.thevenot.comwatt.model.DailyWeatherDto
 import net.thevenot.comwatt.model.DailyWeatherResponseDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.WeatherConditionDto
+import kotlin.time.Instant
 
 class FetchWeatherUseCase(private val dataRepository: DataRepository) {
 

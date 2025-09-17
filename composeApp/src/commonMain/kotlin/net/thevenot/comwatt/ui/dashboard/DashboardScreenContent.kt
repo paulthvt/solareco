@@ -99,7 +99,6 @@ import comwatt.composeapp.generated.resources.week_range_selected_time_one_week_
 import comwatt.composeapp.generated.resources.week_range_selected_time_past_seven_days
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -132,6 +131,7 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 private val LegendLabelKey = ExtraStore.Key<Set<String>>()
 private const val TAG = "DashboardScreenContent"

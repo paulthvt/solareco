@@ -1,8 +1,8 @@
 package net.thevenot.comwatt.domain.utils
 
-import kotlinx.datetime.Instant
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.time.Instant
 
 class SiteStatsCalculatorTest {
     @Test

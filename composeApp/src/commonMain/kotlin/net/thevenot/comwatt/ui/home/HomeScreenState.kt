@@ -1,9 +1,9 @@
 package net.thevenot.comwatt.ui.home
 
-import kotlinx.datetime.Instant
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.domain.model.WeatherForecast
+import kotlin.time.Instant
 
 data class HomeScreenState(
     val isRefreshing: Boolean = false,

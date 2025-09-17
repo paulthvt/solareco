@@ -28,8 +28,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
@@ -49,8 +47,10 @@ import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.model.type.TimeAgoUnit
 import net.thevenot.comwatt.ui.dashboard.ChartStatistics
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 
 class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
     operator fun invoke(parametersProvider: () -> FetchParameters): Flow<Either<DomainError, List<ChartTimeSeries>>> =
