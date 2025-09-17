@@ -26,7 +26,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.weather_day_today
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.domain.model.DailyWeather
@@ -40,6 +39,7 @@ import net.thevenot.comwatt.ui.theme.getWeatherIcon
 import net.thevenot.comwatt.utils.DateFormatter
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 
 @Composable

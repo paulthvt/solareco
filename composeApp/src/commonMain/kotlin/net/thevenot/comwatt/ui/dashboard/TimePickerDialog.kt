@@ -13,7 +13,6 @@ import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.day_range_dialog_picker_confirm_button
 import comwatt.composeapp.generated.resources.day_range_dialog_picker_dismiss_button
 import comwatt.composeapp.generated.resources.day_range_dialog_picker_title
-import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.ui.dashboard.pickers.CustomPicker
@@ -22,6 +21,7 @@ import net.thevenot.comwatt.ui.dashboard.pickers.HourPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.WeekPicker
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
 
 @Composable
 fun TimePickerDialog(

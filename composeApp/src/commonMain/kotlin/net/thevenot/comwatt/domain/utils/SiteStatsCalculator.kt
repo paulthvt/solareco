@@ -1,9 +1,9 @@
 package net.thevenot.comwatt.domain.utils
 
-import kotlinx.datetime.Instant
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import net.thevenot.comwatt.domain.model.SiteDailyData
+import kotlin.time.Instant
 
 /**
  * Compute totals and rates from site series values.

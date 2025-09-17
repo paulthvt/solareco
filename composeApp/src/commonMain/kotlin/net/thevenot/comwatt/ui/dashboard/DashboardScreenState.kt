@@ -1,9 +1,7 @@
 package net.thevenot.comwatt.ui.dashboard
 
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
@@ -11,6 +9,8 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 data class DashboardScreenState(
     val isRefreshing: Boolean = false,

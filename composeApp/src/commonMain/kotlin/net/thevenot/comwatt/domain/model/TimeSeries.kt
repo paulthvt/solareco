@@ -1,7 +1,7 @@
 package net.thevenot.comwatt.domain.model
 
-import kotlinx.datetime.Instant
 import net.thevenot.comwatt.ui.dashboard.ChartStatistics
+import kotlin.time.Instant
 
 data class ChartTimeSeries(
     val name: String?,

@@ -28,7 +28,6 @@ import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.week_range_selected_time_n_weeks_ago
 import comwatt.composeapp.generated.resources.week_range_selected_time_one_week_ago
 import comwatt.composeapp.generated.resources.week_range_selected_time_past_seven_days
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -43,6 +42,7 @@ import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.time.Clock
 
 @Composable
 fun WeekPicker(

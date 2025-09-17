@@ -4,12 +4,12 @@ import com.goncalossilva.resources.Resource
 import io.ktor.http.HttpMethod
 import io.ktor.http.Url
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.Instant
 import net.thevenot.comwatt.utils.configureMockEngine
 import net.thevenot.comwatt.utils.mockHttpClient
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 class ComwattApiTest {
     @Test

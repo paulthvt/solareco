@@ -1,8 +1,8 @@
 package net.thevenot.comwatt.domain.utils
 
-import kotlinx.datetime.Instant
 import net.thevenot.comwatt.domain.model.TimeUnit
 import kotlin.math.abs
+import kotlin.time.Instant
 
 object TimeSeriesDownsampler {
     fun downsample(
