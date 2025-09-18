@@ -155,6 +155,10 @@ fun DashboardScreenContent(
     val uiState by viewModel.uiState.collectAsState()
     val state = rememberPullToRefreshState()
 
+    val displayCharts = remember(charts) {
+        charts.filter { chart -> chart.timeSeries.any { it.values.isNotEmpty() } }
+    }
+
     if (showDatePickerDialog.value) {
         TimePickerDialog(
             selectedTimeUnit = uiState.selectedTimeUnit,
@@ -214,11 +218,10 @@ fun DashboardScreenContent(
                     }
                 }
 
-                if (charts.isNotEmpty()) {
+                if (displayCharts.isNotEmpty()) {
                     items(
-                        items = charts.withIndex()
-                            .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
-                        key = { it.index to it.value.name }) { (_, chart) ->
+                        items = displayCharts,
+                        key = { it.name ?: it.hashCode() }) { chart ->
                         LazyGraphCard(uiState, chart) { viewModel.toggleCardExpansion(it) }
                     }
                 }
@@ -465,7 +468,7 @@ fun Chart(
     )
     val rangeDuration = calculateRangeDuration(chartsData)
 
-    LaunchedEffect(chartsData) {
+    LaunchedEffect(timeSeries) {
         withContext(Dispatchers.Default) {
             modelProducer.runTransaction {
                 lineSeries {

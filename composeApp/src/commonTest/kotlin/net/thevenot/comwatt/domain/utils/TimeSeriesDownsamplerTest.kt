@@ -146,6 +146,31 @@ class TimeSeriesDownsamplerTest {
         assertEquals(0.0f, result[lastKey])
     }
 
+    @Test
+    fun testDownsamplePreservesChronologicalOrder() {
+        val size = 500
+        val data = (0 until size).associate { i ->
+            Instant.fromEpochSeconds(1_000_000 + i.toLong()) to (i % 50).toFloat()
+        }
+        val result = TimeSeriesDownsampler.downsample(data, TimeUnit.DAY)
+        val keys = result.keys.toList()
+        assertTrue(keys.zipWithNext().all { (a, b) -> a <= b }, "Timestamps not in ascending order")
+    }
+
+    @Test
+    fun testDownsampleRetainsDistinctPeak() {
+        // Create a dataset with a single sharp peak
+        val base = mutableMapOf<Instant, Float>()
+        for (i in 0 until 400) {
+            val value = if (i == 200) 10_000f else (i % 100).toFloat()
+            base[Instant.fromEpochSeconds(2_000_000 + i.toLong())] = value
+        }
+        val peakInstant = base.entries.first { it.value == 10_000f }.key
+        val result = TimeSeriesDownsampler.downsample(base, TimeUnit.DAY)
+        val retained = result[peakInstant]
+        assertTrue(retained == 10_000f, "Peak value was not retained in downsampled result")
+    }
+
     private fun createTestData(size: Int): Map<Instant, Float> {
         val data = mutableMapOf<Instant, Float>()
         for (i in 0 until size) {
