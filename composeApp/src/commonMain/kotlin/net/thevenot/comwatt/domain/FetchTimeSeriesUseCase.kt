@@ -35,6 +35,7 @@ import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.domain.model.TimeUnit
+import net.thevenot.comwatt.domain.utils.TimeSeriesDownsampler
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.DeviceKindDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
@@ -111,7 +112,9 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                     combineRight = { consumptionProdChart, chartTimeSeriesList ->
                         consumptionProdChart + chartTimeSeriesList
                     }
-                )
+                )/*.map { list ->
+                    applyDownsampling(list, fetchParameters.timeUnit)
+                }*/
             } ?: Either.Left(DomainError.Generic("Site id not found"))
         }
 
@@ -459,6 +462,20 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
 
     companion object {
         private const val TAG = "FetchTimeSeriesUseCase"
+    }
+
+    private fun applyDownsampling(
+        charts: List<ChartTimeSeries>,
+        timeUnit: TimeUnit
+    ): List<ChartTimeSeries> {
+        return charts.map { chart ->
+            chart.copy(
+                timeSeries = chart.timeSeries.map { ts ->
+                    val ds = TimeSeriesDownsampler.downsample(ts.values, timeUnit)
+                    if (ds === ts.values) ts else ts.copy(values = ds)
+                }
+            )
+        }
     }
 }
 
