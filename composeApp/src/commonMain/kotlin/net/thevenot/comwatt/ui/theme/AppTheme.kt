@@ -1,6 +1,10 @@
 package net.thevenot.comwatt.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf
 
@@ -10,6 +14,20 @@ expect fun ComwattTheme(
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 )
+
+@Composable
+fun AppComwattTheme(
+    colorScheme: ColorScheme,
+    typography: Typography,
+    content: @Composable () -> Unit
+) {
+    MaterialExpressiveTheme(
+        colorScheme = colorScheme,
+        motionScheme = MotionScheme.expressive(),
+        typography = typography,
+        content = content
+    )
+}
 
 private val LocalAppDimens = staticCompositionLocalOf {
     normalDimensions

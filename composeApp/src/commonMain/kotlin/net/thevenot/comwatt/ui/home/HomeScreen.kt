@@ -26,6 +26,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -159,7 +160,17 @@ private fun HomeScreenContent(
 
     val scrollState = rememberScrollState()
     val state = rememberPullToRefreshState()
-    PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
+    PullToRefreshBox(
+        state = state,
+        isRefreshing = uiState.isRefreshing,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                modifier = Modifier.align(Alignment.TopCenter),
+                isRefreshing = uiState.isRefreshing,
+                state = state,
+            )
+        },
+        onRefresh = {
         launchSingleDataRefresh()
     }) {
         Column(
@@ -170,7 +181,6 @@ private fun HomeScreenContent(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
         ) {
             Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
-
             RealTimeConsumptionSection(
                 uiState = uiState,
                 onSettingsButtonClick = { showDialog = true }

@@ -33,6 +33,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -168,9 +169,20 @@ fun DashboardScreenContent(
     }
 
     LoadingView(uiState.isDataLoaded.not()) {
-        PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
-            viewModel.singleRefresh()
-        }) {
+        PullToRefreshBox(
+            state = state,
+            isRefreshing = uiState.isRefreshing,
+            indicator = {
+                PullToRefreshDefaults.LoadingIndicator(
+                    modifier = Modifier.align(Alignment.TopCenter),
+                    isRefreshing = uiState.isRefreshing,
+                    state = state,
+                )
+            },
+            onRefresh = {
+                viewModel.singleRefresh()
+            }
+        ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(horizontal = AppTheme.dimens.paddingNormal),
                 verticalArrangement = Arrangement.spacedBy(

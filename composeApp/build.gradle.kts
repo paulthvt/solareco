@@ -19,6 +19,8 @@ kotlin {
 
     compilerOptions {
         optIn.add("kotlin.time.ExperimentalTime")
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3ExpressiveApi")
+        optIn.add("androidx.compose.material3.ExperimentalMaterial3ComponentOverrideApi")
     }
 
     androidTarget {
@@ -53,8 +55,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
-            implementation(compose.material3)
+            implementation(libs.compose.material3)
             implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
