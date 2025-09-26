@@ -65,13 +65,13 @@ import com.patrykandpatrick.vico.multiplatform.cartesian.layer.rememberLineCarte
 import com.patrykandpatrick.vico.multiplatform.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.multiplatform.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.multiplatform.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.multiplatform.common.Fill
 import com.patrykandpatrick.vico.multiplatform.common.Insets
 import com.patrykandpatrick.vico.multiplatform.common.LegendItem
 import com.patrykandpatrick.vico.multiplatform.common.component.ShapeComponent
 import com.patrykandpatrick.vico.multiplatform.common.component.TextComponent
 import com.patrykandpatrick.vico.multiplatform.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.multiplatform.common.data.ExtraStore
-import com.patrykandpatrick.vico.multiplatform.common.fill
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
 import com.patrykandpatrick.vico.multiplatform.common.shape.CorneredShape
 import comwatt.composeapp.generated.resources.Res
@@ -517,9 +517,9 @@ fun Chart(
                 lineProvider = LineCartesianLayer.LineProvider.series(
                     lineColors.map { color ->
                         LineCartesianLayer.rememberLine(
-                            fill = LineCartesianLayer.LineFill.single(fill(color)),
+                            fill = LineCartesianLayer.LineFill.single(Fill(color)),
                             areaFill = LineCartesianLayer.AreaFill.single(
-                                fill(
+                                Fill(
                                     Brush.verticalGradient(
                                         listOf(
                                             color.copy(alpha = 0.4f), Color.Transparent
@@ -559,7 +559,7 @@ private fun createChartLegend(
             extraStore[LegendLabelKey].forEachIndexed { index, label ->
                 add(
                     LegendItem(
-                        ShapeComponent(fill(lineColors[index]), CorneredShape.Pill),
+                        ShapeComponent(Fill(lineColors[index]), CorneredShape.Pill),
                         legendItemLabelComponent,
                         label,
                     )
