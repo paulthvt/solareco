@@ -58,6 +58,7 @@
     <string name="statistics_card_title_hourly">Hourly Statistics</string>
     <string name="statistics_card_title_weekly">Weekly Statistics</string>
     <string name="statistics_card_title_custom">Custom Statistics</string>
+    <string name="statistics_card_self_consumption_na">N/A</string>
     <string name="statistics_self_consumption_rate">Energy Self-Use</string>
     <string name="statistics_autonomy_rate">Solar Coverage</string>
     <string name="statistics_self_consumption_tooltip">Percentage of your solar production that powers your home directly</string>

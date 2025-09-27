@@ -7,7 +7,7 @@ data class SiteDailyData(
     val totalConsumption: Double = 0.0,
     val totalInjection: Double = 0.0,
     val totalWithdrawals: Double = 0.0,
-    val selfConsumptionRate: Double = 0.0,
+    val selfConsumptionRate: Double? = null,
     val autonomyRate: Double = 0.0,
     val lastUpdateTimestamp: Instant = Instant.DISTANT_PAST,
     val updateDate: String = "",

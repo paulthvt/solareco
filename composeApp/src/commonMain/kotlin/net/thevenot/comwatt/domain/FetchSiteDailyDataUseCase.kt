@@ -14,6 +14,7 @@ import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.SiteDailyData
+import net.thevenot.comwatt.domain.utils.computeSiteStats
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.AggregationType
@@ -75,39 +76,17 @@ class FetchSiteDailyDataUseCase(private val dataRepository: DataRepository) {
                         Instant.DISTANT_PAST
                     }
 
-                    val totalProduction = timeSeries.productions.sum()
-                    val totalConsumption = timeSeries.consumptions.sum()
-                    val totalInjection = timeSeries.injections.sum()
-                    val totalWithdrawals = timeSeries.withdrawals.sum()
+                    val siteStats = computeSiteStats(
+                        productions = timeSeries.productions,
+                        consumptions = timeSeries.consumptions,
+                        injections = timeSeries.injections,
+                        withdrawals = timeSeries.withdrawals,
+                        lastTimestamp = lastUpdateTimestamp
+                    )
 
-                    // Calculate self-consumption rate: (production - injection) / production
-                    val selfConsumptionRate = if (totalProduction > 0) {
-                        ((totalProduction - totalInjection) / totalProduction).coerceIn(0.0, 1.0)
-                    } else {
-                        0.0
-                    }
-
-                    // Calculate autonomy rate: (consumption - withdrawals) / consumption
-                    val autonomyRate = if (totalConsumption > 0) {
-                        ((totalConsumption - totalWithdrawals) / totalConsumption).coerceIn(
-                            0.0,
-                            1.0
-                        )
-                    } else {
-                        0.0
-                    }
-
-                    SiteDailyData(
-                        totalProduction = totalProduction,
-                        totalConsumption = totalConsumption,
-                        totalInjection = totalInjection,
-                        totalWithdrawals = totalWithdrawals,
-                        selfConsumptionRate = selfConsumptionRate,
-                        autonomyRate = autonomyRate,
-                        lastUpdateTimestamp = lastUpdateTimestamp,
-                        updateDate = lastUpdateTimestamp.format(DateTimeComponents.Formats.RFC_1123),
+                    siteStats.copy(
                         lastRefreshDate = Clock.System.now()
-                            .format(DateTimeComponents.Formats.RFC_1123),
+                            .format(DateTimeComponents.Formats.RFC_1123)
                     )
                 }
         } ?: Either.Left(DomainError.Generic("Site id not found"))

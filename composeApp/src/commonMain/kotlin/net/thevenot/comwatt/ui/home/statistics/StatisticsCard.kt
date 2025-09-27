@@ -43,6 +43,7 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import comwatt.composeapp.generated.resources.statistics_autonomy_rate
 import comwatt.composeapp.generated.resources.statistics_autonomy_tooltip
+import comwatt.composeapp.generated.resources.statistics_card_self_consumption_na
 import comwatt.composeapp.generated.resources.statistics_card_title
 import comwatt.composeapp.generated.resources.statistics_self_consumption_rate
 import comwatt.composeapp.generated.resources.statistics_self_consumption_tooltip
@@ -100,7 +101,7 @@ fun StatisticsCard(
                     DonutChartWithPercentage(
                         title = stringResource(Res.string.statistics_self_consumption_rate),
                         tooltipText = stringResource(Res.string.statistics_self_consumption_tooltip),
-                        percentage = siteData.selfConsumptionRate.toFloat(),
+                        percentage = siteData.selfConsumptionRate?.toFloat(),
                         primaryColor = MaterialTheme.colorScheme.powerProduction,
                         secondaryColor = MaterialTheme.colorScheme.powerInjection,
                         modifier = Modifier.weight(1f)
@@ -127,13 +128,14 @@ fun StatisticsCard(
 private fun DonutChartWithPercentage(
     title: String,
     tooltipText: String,
-    percentage: Float,
+    percentage: Float?,
     primaryColor: Color,
     secondaryColor: Color,
     modifier: Modifier = Modifier
 ) {
-    val remainingPercentage = 1.0f - percentage
-    val percentageInt = (percentage * 100).roundToInt()
+    val validPercentage = percentage?.coerceIn(0f, 1f)
+    val remainingPercentage = if (validPercentage != null) 1.0f - validPercentage else 1.0f
+    val percentageInt = validPercentage?.let { (it * 100).roundToInt() }
     val tooltipState = rememberTooltipState(isPersistent = true)
     val coroutineScope = rememberCoroutineScope()
 
@@ -188,10 +190,17 @@ private fun DonutChartWithPercentage(
             contentAlignment = Alignment.Center
         ) {
             PieChart(
-                values = listOf(percentage, remainingPercentage),
+                values = listOf(validPercentage ?: 0f, remainingPercentage),
                 slice = { index ->
                     DefaultSlice(
-                        color = if (index == 0) primaryColor else secondaryColor.copy(alpha = 0.2f),
+                        color = when {
+                            validPercentage == null -> MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                                alpha = 0.15f
+                            )
+
+                            index == 0 -> primaryColor
+                            else -> secondaryColor.copy(alpha = 0.2f)
+                        },
                         hoverExpandFactor = 1.0f
                     )
                 },
@@ -204,7 +213,8 @@ private fun DonutChartWithPercentage(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "$percentageInt%",
+                    text = percentageInt?.let { "$it%" }
+                        ?: stringResource(Res.string.statistics_card_self_consumption_na),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
