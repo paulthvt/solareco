@@ -2,6 +2,7 @@ package net.thevenot.comwatt.domain.utils
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.time.Instant
 
 class SiteStatsCalculatorTest {
@@ -27,13 +28,30 @@ class SiteStatsCalculatorTest {
         assertEquals(300.0, result.totalWithdrawals, 0.0001)
 
         // self-consumption = (production - injection) / production = (1000-200)/1000 = 0.8
-        assertEquals(0.8, result.selfConsumptionRate, 0.0001)
+        assertEquals(0.8, result.selfConsumptionRate!!, 0.0001)
         // autonomy = (consumption - withdrawals) / consumption = (1200-300)/1200 = 0.75
         assertEquals(0.75, result.autonomyRate, 0.0001)
     }
 
     @Test
-    fun computeSiteStats_handlesZeroSafely() {
+    fun computeSiteStats_handlesZeroProductionSelfConsumptionNull() {
+        val result = computeSiteStats(
+            productions = emptyList(),
+            consumptions = listOf(100.0),
+            injections = emptyList(),
+            withdrawals = listOf(10.0),
+            lastTimestamp = null
+        )
+        assertNull(
+            result.selfConsumptionRate,
+            "selfConsumptionRate should be null when production is zero"
+        )
+        // autonomy = (100-10)/100 = 0.9
+        assertEquals(0.9, result.autonomyRate, 0.0001)
+    }
+
+    @Test
+    fun computeSiteStats_handlesZeroSafelyAllEmpty() {
         val result = computeSiteStats(
             productions = emptyList(),
             consumptions = emptyList(),
@@ -41,8 +59,36 @@ class SiteStatsCalculatorTest {
             withdrawals = emptyList(),
             lastTimestamp = null
         )
-        assertEquals(0.0, result.selfConsumptionRate, 0.0)
+        assertNull(result.selfConsumptionRate)
         assertEquals(0.0, result.autonomyRate, 0.0)
     }
-}
 
+    @Test
+    fun computeSiteStats_productionBelowThresholdTreatedAsZero() {
+        // total raw production 4.5 -> should be adjusted to 0.0
+        val result = computeSiteStats(
+            productions = listOf(2.0, 2.5),
+            consumptions = listOf(50.0),
+            injections = listOf(1.0), // injection > 0 but production becomes 0, rate must be null
+            withdrawals = listOf(5.0),
+            lastTimestamp = null
+        )
+        assertEquals(0.0, result.totalProduction, 0.0)
+        assertEquals(1.0, result.totalInjection, 0.0)
+        assertNull(result.selfConsumptionRate, "Rate must be null when production adjusted to zero")
+    }
+
+    @Test
+    fun computeSiteStats_injectionZeroSelfConsumptionNull() {
+        val result = computeSiteStats(
+            productions = listOf(3.0, 4.0, 10.0), // total 17 > threshold
+            consumptions = listOf(30.0),
+            injections = listOf(), // zero injection => rate null
+            withdrawals = listOf(2.0),
+            lastTimestamp = null
+        )
+        assertEquals(17.0, result.totalProduction, 0.0)
+        assertEquals(0.0, result.totalInjection, 0.0)
+        assertNull(result.selfConsumptionRate, "Rate must be null when injection is zero")
+    }
+}
