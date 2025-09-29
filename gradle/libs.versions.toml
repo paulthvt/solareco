@@ -27,7 +27,7 @@ testResources = "0.10.1"
 vico = "2.2.0"
 koalaplot = "0.9.1"
 hotPreview = "0.2.0"
-compose-hot-reload = "1.0.0-beta08"
+compose-hot-reload = "1.0.0-beta09"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
