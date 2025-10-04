@@ -59,6 +59,7 @@
     <string name="statistics_card_title_hourly">Statistiques Horaires</string>
     <string name="statistics_card_title_weekly">Statistiques Hebdomadaires</string>
     <string name="statistics_card_title_custom">Statistiques Personnalisées</string>
+    <string name="statistics_card_self_consumption_na">N/A</string>
     <string name="statistics_self_consumption_rate">Autoconsommation d\'énergie</string>
     <string name="statistics_autonomy_rate">Couverture Solaire</string>
     <string name="statistics_self_consumption_tooltip">Pourcentage de votre production solaire qui alimente votre maison directement</string>
