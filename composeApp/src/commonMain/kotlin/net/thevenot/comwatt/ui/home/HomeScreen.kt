@@ -132,7 +132,11 @@ fun HomeScreen(
         },
         snackbarHostState = snackbarHostState,
     ) {
-        LoadingView(uiState.isDataLoaded.not()) {
+        LoadingView(
+            isLoading = uiState.isDataLoaded.not(),
+            hasError = uiState.lastErrorMessage.isNotEmpty(),
+            onRefresh = viewModel::singleRefresh
+        ) {
             HomeScreenContent(
                 uiState,
                 viewModel::enableProductionGauge,

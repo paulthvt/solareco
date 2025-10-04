@@ -88,8 +88,8 @@ class HomeViewModel(
                             )
                         }
                         updateTimeDifference()
+                        _uiState.update { state -> state.copy(isDataLoaded = true) }
                     }
-                    _uiState.update { state -> state.copy(isDataLoaded = true) }
                 }
             }
             launch {
@@ -148,7 +148,7 @@ class HomeViewModel(
     fun singleRefresh() {
         viewModelScope.launch {
             Logger.d(TAG) { "Single refresh ${this@HomeViewModel}" }
-            _uiState.update { it.copy(isRefreshing = true) }
+            _uiState.update { it.copy(isRefreshing = true, lastErrorMessage = "") }
             val siteRealtimeDeferred = async { fetchSiteRealtimeDataUseCase.singleFetch() }
             val siteDailyDeferred = async { fetchSiteDailyDataUseCase.singleFetch() }
             val weatherDeferred = async { fetchWeatherUseCase.singleFetch() }
