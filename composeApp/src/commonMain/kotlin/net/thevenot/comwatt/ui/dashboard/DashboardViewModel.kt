@@ -9,6 +9,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
@@ -44,7 +45,7 @@ class DashboardViewModel(
     fun startAutoRefresh() {
         Logger.d(TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
-
+        _uiState.update { it.copy(lastErrorMessage = "") }
         autoRefreshJob = viewModelScope.launch {
             loadSelectedTimeUnit()
             launch {
@@ -76,7 +77,9 @@ class DashboardViewModel(
             Logger.d(TAG) { "startAutoRefresh selectedTimeRange ${_uiState.value.selectedTimeRange}" }
             createFetchParameters()
         }
-            .flowOn(Dispatchers.IO)
+            .flowOn(Dispatchers.IO).catch {
+                handleException("Exception in auto refresh", it)
+            }
             .collect { result ->
                 handleFetchResult(result)
             }
@@ -84,11 +87,8 @@ class DashboardViewModel(
 
     private fun handleFetchResult(result: Either<DomainError, List<ChartTimeSeries>>) {
         result.onLeft { error ->
-            Logger.e(TAG) { "Error in auto refresh: $error" }
-            _uiState.update { state -> state.copy(errorCount = _uiState.value.errorCount + 1) }
-        }
-
-        result.onRight { value ->
+            handleError("Error in data auto refresh", error)
+        }.onRight { value ->
             _charts.value = value
             _uiState.update { state -> state.copy(callCount = _uiState.value.callCount + 1) }
         }
@@ -112,12 +112,14 @@ class DashboardViewModel(
             _uiState.update {
                 it.copy(
                     selectedTimeRange = it.selectedTimeRange.withUpdatedRange(),
-                    isRefreshing = true
+                    isRefreshing = true,
+                    lastErrorMessage = ""
                 )
             }
 
             launch {
                 fetchTimeSeriesUseCase.singleFetch(createFetchParameters())
+                    .onLeft { error -> handleError("Error in data single refresh", error) }
                     .onRight {
                         _charts.value = it
                         _uiState.update { state ->
@@ -316,6 +318,27 @@ class DashboardViewModel(
             _uiState.update { it.copy(expandedCards = it.expandedCards - chartName) }
         } else {
             _uiState.update { it.copy(expandedCards = it.expandedCards + chartName) }
+        }
+    }
+
+    private fun handleException(log: String, error: Throwable) {
+        Logger.e(TAG) { "$log: $error" }
+        _uiState.update { state ->
+            state.copy(
+                lastErrorMessage = error.message ?: "Unknown error"
+            )
+        }
+    }
+
+    private fun handleError(log: String, error: DomainError) {
+        Logger.e(TAG) { "$log: $error" }
+        _uiState.update { state ->
+            state.copy(
+                lastErrorMessage = when (error) {
+                    is DomainError.Api -> error.error.toString()
+                    is DomainError.Generic -> error.message
+                }
+            )
         }
     }
 

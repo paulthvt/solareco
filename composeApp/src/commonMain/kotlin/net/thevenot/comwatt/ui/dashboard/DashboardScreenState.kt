@@ -14,10 +14,10 @@ import kotlin.time.Instant
 
 data class DashboardScreenState(
     val isRefreshing: Boolean = false,
+    val lastErrorMessage: String = "",
     val selectedTimeUnit: DashboardTimeUnit = DashboardTimeUnit.HOUR,
     val isDataLoaded: Boolean = false,
     val callCount: Int = 0,
-    val errorCount: Int = 0,
     val selectedTimeRange: SelectedTimeRange = SelectedTimeRange(),
     val rangeStats: SiteDailyData? = null,
     val expandedCards: Set<String> = emptySet()

@@ -30,6 +30,7 @@ import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
@@ -84,6 +85,7 @@ import comwatt.composeapp.generated.resources.dashboard_chart_statistics_title
 import comwatt.composeapp.generated.resources.day_range_selected_time_n_days_gao
 import comwatt.composeapp.generated.resources.day_range_selected_time_today
 import comwatt.composeapp.generated.resources.day_range_selected_time_yesterday
+import comwatt.composeapp.generated.resources.error_fetching_data
 import comwatt.composeapp.generated.resources.hour_range_selected_time
 import comwatt.composeapp.generated.resources.range_picker_button_custom
 import comwatt.composeapp.generated.resources.range_picker_button_day
@@ -139,6 +141,7 @@ private const val TAG = "DashboardScreenContent"
 @Composable
 fun DashboardScreenContent(
     dataRepository: DataRepository,
+    snackbarHostState: SnackbarHostState,
     viewModel: DashboardViewModel = viewModel {
         DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
     }
@@ -153,6 +156,12 @@ fun DashboardScreenContent(
     val charts by viewModel.charts.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val state = rememberPullToRefreshState()
+    val fetchErrorMessage = stringResource(Res.string.error_fetching_data)
+    LaunchedEffect(uiState.lastErrorMessage) {
+        if (uiState.lastErrorMessage.isNotEmpty()) {
+            snackbarHostState.showSnackbar(fetchErrorMessage)
+        }
+    }
 
     val displayCharts = remember(charts) {
         charts.filter { chart -> chart.timeSeries.any { it.values.isNotEmpty() } }
@@ -170,7 +179,11 @@ fun DashboardScreenContent(
         )
     }
 
-    LoadingView(uiState.isDataLoaded.not()) {
+    LoadingView(
+        isLoading = uiState.isDataLoaded.not(),
+        hasError = uiState.lastErrorMessage.isNotEmpty(),
+        onRefresh = viewModel::singleRefresh
+    ) {
         PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
             viewModel.singleRefresh()
         }) {

@@ -52,7 +52,7 @@ fun DashboardScreen(
         },
         snackbarHostState = snackbarHostState,
     ) {
-        DashboardScreenContent(dataRepository, viewModel)
+        DashboardScreenContent(dataRepository, snackbarHostState, viewModel)
 
         if (showTimeSelectionDialog) {
             TimeSelectionDialog { showTimeSelectionDialog = false }

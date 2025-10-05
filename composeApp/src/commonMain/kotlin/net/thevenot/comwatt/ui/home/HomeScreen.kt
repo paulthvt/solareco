@@ -365,7 +365,6 @@ fun HomeScreenPreview() {
             HomeScreenContent(
                 uiState = HomeScreenState(
                     callCount = 123,
-                    errorCount = 0,
                     isRefreshing = false,
                     siteRealtimeData = SiteRealtimeData(
                         production = 123.0,
