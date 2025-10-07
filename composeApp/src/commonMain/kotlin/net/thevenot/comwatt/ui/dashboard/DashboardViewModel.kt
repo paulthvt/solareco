@@ -15,8 +15,11 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchParameters
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
@@ -72,7 +75,7 @@ class DashboardViewModel(
     private suspend fun updateTimeRangeAndFetchData() {
         fetchTimeSeriesUseCase.invoke {
             _uiState.update {
-                it.copy(selectedTimeRange = it.selectedTimeRange.withUpdatedHourRange())
+                it.copy(selectedTimeRange = it.selectedTimeRange.withUpdatedRange())
             }
             Logger.d(TAG) { "startAutoRefresh selectedTimeRange ${_uiState.value.selectedTimeRange}" }
             createFetchParameters()
@@ -138,11 +141,17 @@ class DashboardViewModel(
 
     private fun createFetchParameters(): FetchParameters {
         val currentState = _uiState.value
-
+        val tz = TimeZone.currentSystemDefault()
         return FetchParameters(
             timeUnit = mapDashboardTimeUnitToTimeUnit(currentState.selectedTimeUnit),
-            startTime = getStartTime(currentState.selectedTimeUnit, currentState.selectedTimeRange),
-            endTime = getEndTime(currentState.selectedTimeUnit, currentState.selectedTimeRange)
+            startTime = getStartTime(
+                currentState.selectedTimeUnit,
+                currentState.selectedTimeRange
+            )?.toInstant(tz),
+            endTime = getEndTime(
+                currentState.selectedTimeUnit,
+                currentState.selectedTimeRange
+            ).toInstant(tz)
         )
     }
 
@@ -155,7 +164,10 @@ class DashboardViewModel(
         }
     }
 
-    private fun getStartTime(timeUnit: DashboardTimeUnit, timeRange: SelectedTimeRange): Instant? {
+    private fun getStartTime(
+        timeUnit: DashboardTimeUnit,
+        timeRange: SelectedTimeRange
+    ): LocalDateTime? {
         return when (timeUnit) {
             DashboardTimeUnit.HOUR,
             DashboardTimeUnit.DAY,
@@ -164,7 +176,10 @@ class DashboardViewModel(
         }
     }
 
-    private fun getEndTime(timeUnit: DashboardTimeUnit, timeRange: SelectedTimeRange): Instant {
+    private fun getEndTime(
+        timeUnit: DashboardTimeUnit,
+        timeRange: SelectedTimeRange
+    ): LocalDateTime {
         return when (timeUnit) {
             DashboardTimeUnit.HOUR -> timeRange.hour.end
             DashboardTimeUnit.DAY -> timeRange.day.value
@@ -273,8 +288,8 @@ class DashboardViewModel(
 
         val result = dataRepository.api.fetchSiteTimeSeries(
             siteId = siteId,
-            startTime = start,
-            endTime = end,
+            startTime = start.toInstant(TimeZone.currentSystemDefault()),
+            endTime = end.toInstant(TimeZone.currentSystemDefault()),
             measureKind = MeasureKind.QUANTITY,
             aggregationLevel = AggregationLevel.NONE,
             aggregationType = AggregationType.SUM
@@ -295,14 +310,14 @@ class DashboardViewModel(
     private fun getRangeBounds(
         unit: DashboardTimeUnit,
         range: SelectedTimeRange
-    ): Pair<Instant, Instant> {
+    ): Pair<LocalDateTime, LocalDateTime> {
         return when (unit) {
             DashboardTimeUnit.HOUR -> range.hour.start to range.hour.end
             DashboardTimeUnit.DAY -> {
                 val tz = TimeZone.currentSystemDefault()
                 val end = range.day.value
-                val start = end.minus(1, DateTimeUnit.DAY, tz)
-                start to end
+                val start = end.toInstant(tz).minus(1, DateTimeUnit.DAY, tz)
+                start.toLocalDateTime(tz) to end
             }
 
             DashboardTimeUnit.WEEK -> range.week.start to range.week.end

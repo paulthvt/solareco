@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.utils
 
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -28,5 +29,21 @@ class DateTimeUtilsTest {
     fun testParseTimestamp() {
         val instant = Instant.parse("2025-01-20T19:49:23.009Z")
 
+    }
+
+    @Test
+    fun testLocalDateTimeFormatDayMonth() {
+        val testCases = listOf(
+            LocalDateTime(2024, 1, 5, 10, 30) to "5 Jan",
+            LocalDateTime(2024, 12, 25, 0, 0) to "25 Dec",
+            LocalDateTime(2025, 6, 15, 14, 45) to "15 Jun",
+            LocalDateTime(2025, 10, 7, 22, 30) to "7 Oct",
+            LocalDateTime(2024, 2, 1, 8, 15) to "1 Feb"
+        )
+
+        for ((localDateTime, expected) in testCases) {
+            val result = localDateTime.formatDayMonth()
+            assertEquals(expected, result, "Failed for input: $localDateTime")
+        }
     }
 }

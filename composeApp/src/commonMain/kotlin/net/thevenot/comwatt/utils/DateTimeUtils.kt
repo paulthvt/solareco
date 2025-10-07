@@ -8,6 +8,7 @@ import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.FormatStringsInDatetimeFormats
 import kotlinx.datetime.format.MonthNames
+import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.byUnicodePattern
 import kotlinx.datetime.format.char
 import kotlinx.datetime.offsetAt
@@ -24,6 +25,16 @@ fun LocalDateTime.formatHourMinutes(): String {
         hour(); char('h'); minute()
     }
     return this.format(format)
+}
+
+fun LocalDateTime.formatDayMonth(): String {
+    return this.format(
+        LocalDateTime.Format {
+            day(padding = Padding.NONE)
+            char(' ')
+            monthName(MonthNames.ENGLISH_ABBREVIATED)
+        }
+    )
 }
 
 fun Instant.formatHourMinutes(): String {
@@ -48,7 +59,7 @@ fun LocalDate.formatYearMonthDay(): String {
 fun Instant.formatDayMonth(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
     val offset = timeZone.offsetAt(this)
     return this.format(DateTimeComponents.Format {
-        dayOfMonth()
+        day(padding = Padding.NONE)
         char(' ')
         monthName(MonthNames.ENGLISH_ABBREVIATED)
     }, offset)

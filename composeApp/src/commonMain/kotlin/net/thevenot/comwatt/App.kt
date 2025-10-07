@@ -3,6 +3,7 @@ package net.thevenot.comwatt
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -17,10 +18,8 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
-import net.thevenot.comwatt.ui.dashboard.DashboardScreenContent
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
-import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -95,14 +94,10 @@ fun NavGraphBuilder.mainGraph(
             DashboardScreen(navController, snackbarHostState, dataRepository)
         }
         composable<Screen.Devices> {
-            NestedAppScaffold(navController, snackbarHostState) {
-                DashboardScreenContent(dataRepository, snackbarHostState)
-            }
+            Text("Not Implemented Yet")
         }
         composable<Screen.More> {
-            NestedAppScaffold(navController, snackbarHostState) {
-                DashboardScreenContent(dataRepository, snackbarHostState)
-            }
+            Text("Not Implemented Yet")
         }
     }
 }

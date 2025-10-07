@@ -241,7 +241,7 @@ fun DashboardScreenContent(
 private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String =
     when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}"
-        DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.value.formatDayMonth(TimeZone.currentSystemDefault())
+        DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.value.formatDayMonth()
         DashboardTimeUnit.WEEK -> "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${uiState.selectedTimeRange.week.end.formatDayMonth()}"
         DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${uiState.selectedTimeRange.custom.end.formatDayMonth()}"
 }
@@ -285,6 +285,7 @@ private fun RangeButton(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
+                Logger.d(TAG) { "selected value ${uiState.selectedTimeRange}" }
                 Text(
                     when (uiState.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> pluralStringResource(
@@ -319,7 +320,7 @@ private fun RangeButton(
                     )
 
                     DashboardTimeUnit.DAY -> Text(
-                        text = uiState.selectedTimeRange.day.value.formatDayMonth(TimeZone.currentSystemDefault()),
+                        text = uiState.selectedTimeRange.day.value.formatDayMonth(),
                         style = MaterialTheme.typography.bodySmall
                     )
 
@@ -746,8 +747,8 @@ fun RangeButtonPreview() {
         selectedTimeRange = SelectedTimeRange(
             hour = HourRange(
                 selectedValue = 2,
-                start = Instant.fromEpochSeconds(1_700_000_000L),
-                end = Instant.fromEpochSeconds(1_700_003_600L)
+                start = LocalDateTime(2025, 10, 7, 20, 41, 0, 0),
+                end = LocalDateTime(2025, 10, 7, 21, 41, 0, 0)
             )
         ),
         selectedTimeUnit = DashboardTimeUnit.HOUR

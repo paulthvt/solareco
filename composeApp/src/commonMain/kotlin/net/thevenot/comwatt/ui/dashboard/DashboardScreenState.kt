@@ -2,6 +2,7 @@ package net.thevenot.comwatt.ui.dashboard
 
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.minus
@@ -76,50 +77,61 @@ data class SelectedTimeRange(
 
 data class HourRange(
     val selectedValue: Int,
-    val start: Instant,
-    val end: Instant
+    val start: LocalDateTime,
+    val end: LocalDateTime
 ) {
     companion object {
         fun fromSelectedValue(selectedValue: Int): HourRange {
+            val currentTimeZone = TimeZone.currentSystemDefault()
             val now = Clock.System.now()
-            val start = now.minus(selectedValue + 1, DateTimeUnit.HOUR)
-            val end = now.minus(selectedValue, DateTimeUnit.HOUR)
-            return HourRange(selectedValue, start, end)
+            val targetHourStart = now.minus(selectedValue + 1, DateTimeUnit.HOUR)
+
+            return HourRange(
+                selectedValue,
+                targetHourStart.toLocalDateTime(currentTimeZone),
+                now.toLocalDateTime(currentTimeZone)
+            )
         }
     }
 }
 
 data class DayRange(
     val selectedValue: Int,
-    val value: Instant,
+    val value: LocalDateTime,
 ) {
     companion object {
         fun fromSelectedValue(selectedValue: Int): DayRange {
+            val currentTimeZone = TimeZone.currentSystemDefault()
             val now = Clock.System.now()
             val value = now.minus(selectedValue, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
-            return DayRange(selectedValue, value)
+            return DayRange(selectedValue, value.toLocalDateTime(currentTimeZone))
         }
     }
 }
 
 data class WeekRange(
     val selectedValue: Int,
-    val start: Instant,
-    val end: Instant
+    val start: LocalDateTime,
+    val end: LocalDateTime
 ) {
     companion object {
         fun fromSelectedValue(selectedValue: Int): WeekRange {
-            val now = Clock.System.now()
             val currentTimeZone = TimeZone.currentSystemDefault()
+            val now = Clock.System.now()
+            val localNow = now.toLocalDateTime(currentTimeZone)
 
             if (selectedValue == 0) {
                 // Last 7 days (today - 6 days to today)
                 val end = now
                 val start = now.minus(6, DateTimeUnit.DAY, currentTimeZone)
-                return WeekRange(selectedValue, start, end)
+                return WeekRange(
+                    selectedValue,
+                    start.toLocalDateTime(currentTimeZone),
+                    end.toLocalDateTime(currentTimeZone)
+                )
             } else {
                 // Sunday-to-Sunday pattern for previous weeks
-                val localDate = now.toLocalDateTime(currentTimeZone).date
+                val localDate = localNow.date
 
                 // Find previous Sunday
                 var mostRecentSunday = localDate
@@ -135,10 +147,14 @@ data class WeekRange(
                 // Convert LocalDate to Instant (end of day for end date)
                 val start = startLocalDate.atStartOfDayIn(currentTimeZone)
                 val end = endLocalDate.atStartOfDayIn(currentTimeZone)
-                    .plus(1, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
+                    .plus(1, DateTimeUnit.DAY, currentTimeZone)
                     .minus(1, DateTimeUnit.NANOSECOND)
 
-                return WeekRange(selectedValue, start, end)
+                return WeekRange(
+                    selectedValue,
+                    start.toLocalDateTime(currentTimeZone),
+                    end.toLocalDateTime(currentTimeZone)
+                )
             }
         }
     }
@@ -147,8 +163,8 @@ data class WeekRange(
 data class CustomRange(
     val selectedStartValue: Instant,
     val selectedEndValue: Instant,
-    val start: Instant,
-    val end: Instant
+    val start: LocalDateTime,
+    val end: LocalDateTime
 ) {
     companion object {
         fun fromSelectedValues(
@@ -158,8 +174,8 @@ data class CustomRange(
             return CustomRange(
                 selectedStartValue = selectedStartValue,
                 selectedEndValue = selectedEndValue,
-                start = selectedStartValue,
-                end = selectedEndValue
+                start = selectedStartValue.toLocalDateTime(TimeZone.currentSystemDefault()),
+                end = selectedEndValue.toLocalDateTime(TimeZone.currentSystemDefault())
             )
         }
     }

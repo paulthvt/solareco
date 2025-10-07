@@ -138,12 +138,12 @@ fun HomeScreen(
             onRefresh = viewModel::singleRefresh
         ) {
             HomeScreenContent(
-                uiState,
-                viewModel::enableProductionGauge,
-                viewModel::enableConsumptionGauge,
-                viewModel::enableInjectionGauge,
-                viewModel::enableWithdrawalsGauge,
-                viewModel::singleRefresh
+                uiState = uiState,
+                onProductionChecked = viewModel::enableProductionGauge,
+                onConsumptionChecked = viewModel::enableConsumptionGauge,
+                onInjectionChecked = viewModel::enableInjectionGauge,
+                onWithdrawalsChecked = viewModel::enableWithdrawalsGauge,
+                launchSingleDataRefresh = viewModel::singleRefresh
             )
         }
     }
