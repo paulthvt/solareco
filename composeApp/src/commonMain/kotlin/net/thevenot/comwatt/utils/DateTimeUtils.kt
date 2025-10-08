@@ -17,7 +17,10 @@ import kotlin.time.Instant
 @OptIn(FormatStringsInDatetimeFormats::class)
 fun Instant.toZoneString(timeZone: TimeZone = TimeZone.UTC): String {
     val offset = timeZone.offsetAt(this)
-    return this.format(DateTimeComponents.Format { byUnicodePattern("yyyy-MM-dd'T'HH:mm:ssxxx") }, offset)
+    return this.format(
+        DateTimeComponents.Format { byUnicodePattern("yyyy-MM-dd'T'HH:mm:ssxxx") },
+        offset
+    )
 }
 
 fun LocalDateTime.formatHourMinutes(): String {
@@ -27,15 +30,13 @@ fun LocalDateTime.formatHourMinutes(): String {
     return this.format(format)
 }
 
-fun LocalDateTime.formatDayMonth(): String {
-    return this.format(
-        LocalDateTime.Format {
-            day(padding = Padding.NONE)
-            char(' ')
-            monthName(MonthNames.ENGLISH_ABBREVIATED)
-        }
-    )
-}
+fun LocalDateTime.formatDayMonth(): String = this.format(
+    LocalDateTime.Format {
+        day(padding = Padding.NONE)
+        char(' ')
+        monthName(MonthNames.ENGLISH_ABBREVIATED)
+    }
+)
 
 fun Instant.formatHourMinutes(): String {
     val format = DateTimeComponents.Format {
@@ -51,9 +52,7 @@ fun LocalTime.formatHourMinutes(): String {
     return this.format(customFormat)
 }
 
-fun LocalDate.formatYearMonthDay(): String {
-    return this.format(LocalDate.Formats.ISO)
-}
+fun LocalDate.formatYearMonthDay(): String = this.format(LocalDate.Formats.ISO)
 
 @OptIn(FormatStringsInDatetimeFormats::class)
 fun Instant.formatDayMonth(timeZone: TimeZone = TimeZone.currentSystemDefault()): String {
