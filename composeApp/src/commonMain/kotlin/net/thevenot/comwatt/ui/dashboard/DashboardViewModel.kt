@@ -14,12 +14,9 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
 import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchParameters
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
@@ -182,7 +179,7 @@ class DashboardViewModel(
     ): LocalDateTime {
         return when (timeUnit) {
             DashboardTimeUnit.HOUR -> timeRange.hour.end
-            DashboardTimeUnit.DAY -> timeRange.day.value
+            DashboardTimeUnit.DAY -> timeRange.day.end
             DashboardTimeUnit.WEEK -> timeRange.week.end
             DashboardTimeUnit.CUSTOM -> timeRange.custom.end
         }
@@ -313,13 +310,7 @@ class DashboardViewModel(
     ): Pair<LocalDateTime, LocalDateTime> {
         return when (unit) {
             DashboardTimeUnit.HOUR -> range.hour.start to range.hour.end
-            DashboardTimeUnit.DAY -> {
-                val tz = TimeZone.currentSystemDefault()
-                val end = range.day.value
-                val start = end.toInstant(tz).minus(1, DateTimeUnit.DAY, tz)
-                start.toLocalDateTime(tz) to end
-            }
-
+            DashboardTimeUnit.DAY -> range.day.start to range.day.end
             DashboardTimeUnit.WEEK -> range.week.start to range.week.end
             DashboardTimeUnit.CUSTOM -> range.custom.start to range.custom.end
         }

@@ -275,7 +275,7 @@ fun DashboardScreenContent(
 private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String {
     return when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}"
-        DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.value.formatDayMonth()
+        DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.end.formatDayMonth()
         DashboardTimeUnit.WEEK -> "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${uiState.selectedTimeRange.week.end.formatDayMonth()}"
         DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${uiState.selectedTimeRange.custom.end.formatDayMonth()}"
     }
@@ -366,7 +366,7 @@ private fun RangeButton(
 
                     DashboardTimeUnit.DAY -> {
                         Text(
-                            text = uiState.selectedTimeRange.day.value.formatDayMonth(),
+                            text = uiState.selectedTimeRange.day.end.formatDayMonth(),
                             style = MaterialTheme.typography.bodySmall
                         )
                     }

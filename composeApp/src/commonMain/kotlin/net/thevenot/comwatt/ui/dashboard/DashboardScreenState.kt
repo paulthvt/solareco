@@ -97,14 +97,21 @@ data class HourRange(
 
 data class DayRange(
     val selectedValue: Int,
-    val value: LocalDateTime,
+    val start: LocalDateTime,
+    val end: LocalDateTime,
 ) {
     companion object {
         fun fromSelectedValue(selectedValue: Int): DayRange {
             val currentTimeZone = TimeZone.currentSystemDefault()
             val now = Clock.System.now()
-            val value = now.minus(selectedValue, DateTimeUnit.DAY, TimeZone.currentSystemDefault())
-            return DayRange(selectedValue, value.toLocalDateTime(currentTimeZone))
+            val end = now.minus(selectedValue, DateTimeUnit.DAY, currentTimeZone)
+            val start = end.minus(1, DateTimeUnit.DAY, currentTimeZone)
+
+            return DayRange(
+                selectedValue,
+                start.toLocalDateTime(currentTimeZone),
+                end.toLocalDateTime(currentTimeZone)
+            )
         }
     }
 }
