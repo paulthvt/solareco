@@ -20,6 +20,7 @@ import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
+import net.thevenot.comwatt.domain.exception.DomainError
 import kotlin.time.Clock
 
 
@@ -53,6 +54,7 @@ class HomeViewModel(
     fun startAutoRefresh() {
         Logger.d(TAG) { "startAutoRefresh ${this@HomeViewModel}" }
         if (autoRefreshJob?.isActive == true) return
+        _uiState.update { it.copy(lastErrorMessage = "") }
         autoRefreshJob = viewModelScope.launch {
             launch {
                 fetchCurrentSiteUseCase.invoke().onRight { site ->
@@ -65,47 +67,35 @@ class HomeViewModel(
             }
             launch {
                 fetchSiteRealtimeDataUseCase.invoke().flowOn(Dispatchers.IO).catch {
-                    Logger.e(TAG) { "Error in auto refresh: $it" }
-                    _uiState.update { state ->
-                        state.copy(
-                            errorCount = _uiState.value.errorCount + 1,
-                            lastErrorMessage = it.message ?: "Unknown error"
-                        )
-                    }
+                    handleException("Exception in auto refresh", it)
                 }.collect { result ->
-                    result.onLeft { error ->
-                        Logger.e(TAG) { "Error in auto refresh: $error" }
-                        _uiState.update { state ->
-                            state.copy(errorCount = _uiState.value.errorCount + 1)
+                    result.onLeft { handleError("Error in real time data auto refresh", it) }
+                        .onRight { value ->
+                            _uiState.update { state ->
+                                state.copy(
+                                    siteRealtimeData = value,
+                                    callCount = _uiState.value.callCount + 1,
+                                    lastRefreshInstant = value.lastUpdateTimestamp
+                                )
+                            }
+                            updateTimeDifference()
+                            _uiState.update { state -> state.copy(isDataLoaded = true) }
                         }
-                    }
-                    result.onRight { value ->
-                        _uiState.update { state ->
-                            state.copy(
-                                siteRealtimeData = value,
-                                callCount = _uiState.value.callCount + 1,
-                                lastRefreshInstant = value.lastUpdateTimestamp
-                            )
-                        }
-                        updateTimeDifference()
-                    }
-                    _uiState.update { state -> state.copy(isDataLoaded = true) }
                 }
             }
             launch {
                 fetchSiteDailyDataUseCase.invoke().flowOn(Dispatchers.IO).catch {
-                    Logger.e(TAG) { "Error in daily data auto refresh: $it" }
-                    _uiState.update { state ->
-                        state.copy(
-                            errorCount = _uiState.value.errorCount + 1,
-                            lastErrorMessage = it.message ?: "Unknown error"
-                        )
-                    }
+                    handleException("Error in daily data auto refresh", it)
                 }.collect { result ->
                     result.onLeft { error ->
                         Logger.e(TAG) { "Error fetching daily data: $error" }
                         _uiState.update { state ->
-                            state.copy(errorCount = _uiState.value.errorCount + 1)
+                            state.copy(
+                                lastErrorMessage = when (error) {
+                                    is DomainError.Api -> error.error.toString()
+                                    is DomainError.Generic -> error.message
+                                }
+                            )
                         }
                     }
                     result.onRight { dailyData ->
@@ -118,19 +108,16 @@ class HomeViewModel(
             }
             launch {
                 fetchWeatherUseCase.invoke().flowOn(Dispatchers.IO).catch {
-                    Logger.e(TAG) { "Error in auto refresh: $it" }
-                    _uiState.update { state ->
-                        state.copy(
-                            errorCount = _uiState.value.errorCount + 1,
-                            lastErrorMessage = it.message ?: "Unknown error"
-                        )
-                    }
+                    handleException("Error in auto refresh", it)
                 }.collect {
                     it.onLeft { error ->
                         Logger.e(TAG) { "Error fetching weather: $error" }
                         _uiState.update { state ->
                             state.copy(
-                                errorCount = _uiState.value.errorCount + 1
+                                lastErrorMessage = when (error) {
+                                    is DomainError.Api -> error.error.toString()
+                                    is DomainError.Generic -> error.message
+                                }
                             )
                         }
                     }
@@ -148,13 +135,15 @@ class HomeViewModel(
     fun singleRefresh() {
         viewModelScope.launch {
             Logger.d(TAG) { "Single refresh ${this@HomeViewModel}" }
-            _uiState.update { it.copy(isRefreshing = true) }
+            _uiState.update { it.copy(isRefreshing = true, lastErrorMessage = "") }
             val siteRealtimeDeferred = async { fetchSiteRealtimeDataUseCase.singleFetch() }
             val siteDailyDeferred = async { fetchSiteDailyDataUseCase.singleFetch() }
             val weatherDeferred = async { fetchWeatherUseCase.singleFetch() }
 
             val siteRealtimeResult = siteRealtimeDeferred.await()
-            siteRealtimeResult.onRight {
+            siteRealtimeResult.onLeft {
+                handleError("Error fetching real time data", it)
+            }.onRight {
                 _uiState.update { state ->
                     state.copy(
                         callCount = _uiState.value.callCount + 1,
@@ -165,14 +154,18 @@ class HomeViewModel(
             }
 
             val siteDailyResult = siteDailyDeferred.await()
-            siteDailyResult.onRight { dailyData ->
+            siteDailyResult.onLeft {
+                handleError("Error fetching daily data", it)
+            }.onRight { dailyData ->
                 _uiState.update { state ->
                     state.copy(siteDailyData = dailyData)
                 }
             }
 
             val weatherResult = weatherDeferred.await()
-            weatherResult.onRight {
+            weatherResult.onLeft {
+                handleError("Error fetching daily weather", it)
+            }.onRight {
                 _uiState.update { state ->
                     state.copy(weatherForecast = it)
                 }
@@ -207,6 +200,27 @@ class HomeViewModel(
     override fun onCleared() {
         super.onCleared()
         stopAutoRefresh()
+    }
+
+    private fun handleException(log: String, error: Throwable) {
+        Logger.e(TAG) { "$log: $error" }
+        _uiState.update { state ->
+            state.copy(
+                lastErrorMessage = error.message ?: "Unknown error"
+            )
+        }
+    }
+
+    private fun handleError(log: String, error: DomainError) {
+        Logger.e(TAG) { "$log: $error" }
+        _uiState.update { state ->
+            state.copy(
+                lastErrorMessage = when (error) {
+                    is DomainError.Api -> error.error.toString()
+                    is DomainError.Generic -> error.message
+                }
+            )
+        }
     }
 
     companion object {

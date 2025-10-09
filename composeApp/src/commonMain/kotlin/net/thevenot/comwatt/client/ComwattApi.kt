@@ -104,7 +104,7 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         aggregationLevel: AggregationLevel = AggregationLevel.NONE,
         aggregationType: AggregationType? = null
     ): Either<ApiError, SiteTimeSeriesDto> {
-        val timeZone = TimeZone.of("Europe/Paris")
+        val timeZone = TimeZone.currentSystemDefault()
 
         return withContext(Dispatchers.IO) {
             client.safeRequest {
@@ -204,7 +204,7 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         aggregationLevel: AggregationLevel = AggregationLevel.NONE,
         aggregationType: AggregationType? = null
     ): Either<ApiError, TimeSeriesDto> {
-        val timeZone = TimeZone.of("Europe/Paris")
+        val timeZone = TimeZone.currentSystemDefault()
 
         return withContext(Dispatchers.IO) {
             client.safeRequest {

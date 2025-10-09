@@ -9,7 +9,6 @@ data class HomeScreenState(
     val isRefreshing: Boolean = false,
     val isDataLoaded: Boolean = false,
     val callCount: Int = 0,
-    val errorCount: Int = 0,
     val lastErrorMessage: String = "",
     val productionGaugeEnabled: Boolean = true,
     val consumptionGaugeEnabled: Boolean = true,

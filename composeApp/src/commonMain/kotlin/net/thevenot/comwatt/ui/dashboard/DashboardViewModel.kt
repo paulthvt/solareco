@@ -9,13 +9,14 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
+import kotlinx.datetime.toInstant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchParameters
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
@@ -44,7 +45,7 @@ class DashboardViewModel(
     fun startAutoRefresh() {
         Logger.d(TAG) { "startAutoRefresh ${this@DashboardViewModel}" }
         if (autoRefreshJob?.isActive == true) return
-
+        _uiState.update { it.copy(lastErrorMessage = "") }
         autoRefreshJob = viewModelScope.launch {
             loadSelectedTimeUnit()
             launch {
@@ -71,12 +72,14 @@ class DashboardViewModel(
     private suspend fun updateTimeRangeAndFetchData() {
         fetchTimeSeriesUseCase.invoke {
             _uiState.update {
-                it.copy(selectedTimeRange = it.selectedTimeRange.withUpdatedHourRange())
+                it.copy(selectedTimeRange = it.selectedTimeRange.withUpdatedRange())
             }
             Logger.d(TAG) { "startAutoRefresh selectedTimeRange ${_uiState.value.selectedTimeRange}" }
             createFetchParameters()
         }
-            .flowOn(Dispatchers.IO)
+            .flowOn(Dispatchers.IO).catch {
+                handleException("Exception in auto refresh", it)
+            }
             .collect { result ->
                 handleFetchResult(result)
             }
@@ -84,11 +87,8 @@ class DashboardViewModel(
 
     private fun handleFetchResult(result: Either<DomainError, List<ChartTimeSeries>>) {
         result.onLeft { error ->
-            Logger.e(TAG) { "Error in auto refresh: $error" }
-            _uiState.update { state -> state.copy(errorCount = _uiState.value.errorCount + 1) }
-        }
-
-        result.onRight { value ->
+            handleError("Error in data auto refresh", error)
+        }.onRight { value ->
             _charts.value = value
             _uiState.update { state -> state.copy(callCount = _uiState.value.callCount + 1) }
         }
@@ -112,12 +112,14 @@ class DashboardViewModel(
             _uiState.update {
                 it.copy(
                     selectedTimeRange = it.selectedTimeRange.withUpdatedRange(),
-                    isRefreshing = true
+                    isRefreshing = true,
+                    lastErrorMessage = ""
                 )
             }
 
             launch {
                 fetchTimeSeriesUseCase.singleFetch(createFetchParameters())
+                    .onLeft { error -> handleError("Error in data single refresh", error) }
                     .onRight {
                         _charts.value = it
                         _uiState.update { state ->
@@ -136,11 +138,17 @@ class DashboardViewModel(
 
     private fun createFetchParameters(): FetchParameters {
         val currentState = _uiState.value
-
+        val tz = TimeZone.currentSystemDefault()
         return FetchParameters(
             timeUnit = mapDashboardTimeUnitToTimeUnit(currentState.selectedTimeUnit),
-            startTime = getStartTime(currentState.selectedTimeUnit, currentState.selectedTimeRange),
-            endTime = getEndTime(currentState.selectedTimeUnit, currentState.selectedTimeRange)
+            startTime = getStartTime(
+                currentState.selectedTimeUnit,
+                currentState.selectedTimeRange
+            )?.toInstant(tz),
+            endTime = getEndTime(
+                currentState.selectedTimeUnit,
+                currentState.selectedTimeRange
+            ).toInstant(tz)
         )
     }
 
@@ -153,7 +161,10 @@ class DashboardViewModel(
         }
     }
 
-    private fun getStartTime(timeUnit: DashboardTimeUnit, timeRange: SelectedTimeRange): Instant? {
+    private fun getStartTime(
+        timeUnit: DashboardTimeUnit,
+        timeRange: SelectedTimeRange
+    ): LocalDateTime? {
         return when (timeUnit) {
             DashboardTimeUnit.HOUR,
             DashboardTimeUnit.DAY,
@@ -162,10 +173,13 @@ class DashboardViewModel(
         }
     }
 
-    private fun getEndTime(timeUnit: DashboardTimeUnit, timeRange: SelectedTimeRange): Instant {
+    private fun getEndTime(
+        timeUnit: DashboardTimeUnit,
+        timeRange: SelectedTimeRange
+    ): LocalDateTime {
         return when (timeUnit) {
             DashboardTimeUnit.HOUR -> timeRange.hour.end
-            DashboardTimeUnit.DAY -> timeRange.day.value
+            DashboardTimeUnit.DAY -> timeRange.day.end
             DashboardTimeUnit.WEEK -> timeRange.week.end
             DashboardTimeUnit.CUSTOM -> timeRange.custom.end
         }
@@ -271,8 +285,8 @@ class DashboardViewModel(
 
         val result = dataRepository.api.fetchSiteTimeSeries(
             siteId = siteId,
-            startTime = start,
-            endTime = end,
+            startTime = start.toInstant(TimeZone.currentSystemDefault()),
+            endTime = end.toInstant(TimeZone.currentSystemDefault()),
             measureKind = MeasureKind.QUANTITY,
             aggregationLevel = AggregationLevel.NONE,
             aggregationType = AggregationType.SUM
@@ -293,16 +307,10 @@ class DashboardViewModel(
     private fun getRangeBounds(
         unit: DashboardTimeUnit,
         range: SelectedTimeRange
-    ): Pair<Instant, Instant> {
+    ): Pair<LocalDateTime, LocalDateTime> {
         return when (unit) {
             DashboardTimeUnit.HOUR -> range.hour.start to range.hour.end
-            DashboardTimeUnit.DAY -> {
-                val tz = TimeZone.currentSystemDefault()
-                val end = range.day.value
-                val start = end.minus(1, DateTimeUnit.DAY, tz)
-                start to end
-            }
-
+            DashboardTimeUnit.DAY -> range.day.start to range.day.end
             DashboardTimeUnit.WEEK -> range.week.start to range.week.end
             DashboardTimeUnit.CUSTOM -> range.custom.start to range.custom.end
         }
@@ -316,6 +324,27 @@ class DashboardViewModel(
             _uiState.update { it.copy(expandedCards = it.expandedCards - chartName) }
         } else {
             _uiState.update { it.copy(expandedCards = it.expandedCards + chartName) }
+        }
+    }
+
+    private fun handleException(log: String, error: Throwable) {
+        Logger.e(TAG) { "$log: $error" }
+        _uiState.update { state ->
+            state.copy(
+                lastErrorMessage = error.message ?: "Unknown error"
+            )
+        }
+    }
+
+    private fun handleError(log: String, error: DomainError) {
+        Logger.e(TAG) { "$log: $error" }
+        _uiState.update { state ->
+            state.copy(
+                lastErrorMessage = when (error) {
+                    is DomainError.Api -> error.error.toString()
+                    is DomainError.Generic -> error.message
+                }
+            )
         }
     }
 

@@ -132,14 +132,18 @@ fun HomeScreen(
         },
         snackbarHostState = snackbarHostState,
     ) {
-        LoadingView(uiState.isDataLoaded.not()) {
+        LoadingView(
+            isLoading = uiState.isDataLoaded.not(),
+            hasError = uiState.lastErrorMessage.isNotEmpty(),
+            onRefresh = viewModel::singleRefresh
+        ) {
             HomeScreenContent(
-                uiState,
-                viewModel::enableProductionGauge,
-                viewModel::enableConsumptionGauge,
-                viewModel::enableInjectionGauge,
-                viewModel::enableWithdrawalsGauge,
-                viewModel::singleRefresh
+                uiState = uiState,
+                onProductionChecked = viewModel::enableProductionGauge,
+                onConsumptionChecked = viewModel::enableConsumptionGauge,
+                onInjectionChecked = viewModel::enableInjectionGauge,
+                onWithdrawalsChecked = viewModel::enableWithdrawalsGauge,
+                launchSingleDataRefresh = viewModel::singleRefresh
             )
         }
     }
@@ -361,7 +365,6 @@ fun HomeScreenPreview() {
             HomeScreenContent(
                 uiState = HomeScreenState(
                     callCount = 123,
-                    errorCount = 0,
                     isRefreshing = false,
                     siteRealtimeData = SiteRealtimeData(
                         production = 123.0,
