@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import co.touchlab.kermit.Logger
 import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianDrawingContext
 import com.patrykandpatrick.vico.multiplatform.cartesian.CartesianMeasuringContext
@@ -68,13 +67,13 @@ import com.patrykandpatrick.vico.multiplatform.cartesian.layer.rememberLineCarte
 import com.patrykandpatrick.vico.multiplatform.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.multiplatform.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.multiplatform.cartesian.rememberVicoScrollState
+import com.patrykandpatrick.vico.multiplatform.common.Fill
 import com.patrykandpatrick.vico.multiplatform.common.Insets
 import com.patrykandpatrick.vico.multiplatform.common.LegendItem
 import com.patrykandpatrick.vico.multiplatform.common.component.ShapeComponent
 import com.patrykandpatrick.vico.multiplatform.common.component.TextComponent
 import com.patrykandpatrick.vico.multiplatform.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.multiplatform.common.data.ExtraStore
-import com.patrykandpatrick.vico.multiplatform.common.fill
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
 import com.patrykandpatrick.vico.multiplatform.common.shape.CorneredShape
 import comwatt.composeapp.generated.resources.Res
@@ -108,7 +107,6 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
-import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
@@ -272,14 +270,13 @@ fun DashboardScreenContent(
     }
 }
 
-private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String {
-    return when (uiState.selectedTimeUnit) {
+private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String =
+    when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}"
         DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.end.formatDayMonth()
         DashboardTimeUnit.WEEK -> "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${uiState.selectedTimeRange.week.end.formatDayMonth()}"
         DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${uiState.selectedTimeRange.custom.end.formatDayMonth()}"
     }
-}
 
 @Composable
 private fun RangeButton(
@@ -300,30 +297,26 @@ private fun RangeButton(
         DashboardTimeUnit.WEEK -> 52
         DashboardTimeUnit.CUSTOM -> 0
     }
-    Logger.d(TAG) { "selectedIndex $selectedValue" }
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = AppTheme.dimens.paddingNormal),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (uiState.selectedTimeUnit != DashboardTimeUnit.CUSTOM) {
-            OutlinedIconButton(onClick = {
-                onPreviousButtonClick()
-            }, enabled = selectedValue < minBound) {
+            OutlinedIconButton(
+                onClick = onPreviousButtonClick,
+                enabled = selectedValue < minBound
+            ) {
                 Icon(Icons.Default.ChevronLeft, contentDescription = "Previous")
             }
         }
 
-        TextButton(
-            onClick = { showDatePickerDialog() },
-            modifier = Modifier.weight(1f)
-        ) {
+        TextButton(onClick = showDatePickerDialog, modifier = Modifier.weight(1f)) {
             Column(
                 modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Logger.d(TAG) { "selected value ${uiState.selectedTimeRange}" }
                 Text(
                     when (uiState.selectedTimeUnit) {
                         DashboardTimeUnit.HOUR -> pluralStringResource(
@@ -357,43 +350,37 @@ private fun RangeButton(
                 )
 
                 when (uiState.selectedTimeUnit) {
-                    DashboardTimeUnit.HOUR -> {
+                    DashboardTimeUnit.HOUR ->
                         Text(
                             text = "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}",
                             style = MaterialTheme.typography.bodySmall
                         )
-                    }
 
-                    DashboardTimeUnit.DAY -> {
+                    DashboardTimeUnit.DAY ->
                         Text(
                             text = uiState.selectedTimeRange.day.end.formatDayMonth(),
                             style = MaterialTheme.typography.bodySmall
                         )
-                    }
 
-                    DashboardTimeUnit.WEEK -> {
+                    DashboardTimeUnit.WEEK ->
                         Text(
                             text = "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${
                                 uiState.selectedTimeRange.week.end.formatDayMonth()
                             }",
                             style = MaterialTheme.typography.bodySmall
                         )
-                    }
 
-                    DashboardTimeUnit.CUSTOM -> {
+                    DashboardTimeUnit.CUSTOM ->
                         Text(
                             text = "${uiState.selectedTimeRange.custom.start.formatHourMinutes()} - ${uiState.selectedTimeRange.custom.end.formatHourMinutes()}",
                             style = MaterialTheme.typography.bodySmall
                         )
-                    }
                 }
             }
         }
 
         if (uiState.selectedTimeUnit != DashboardTimeUnit.CUSTOM) {
-            OutlinedIconButton(onClick = {
-                onNextButtonClick()
-            }, enabled = selectedValue > 0) {
+            OutlinedIconButton(onClick = onNextButtonClick, enabled = selectedValue > 0) {
                 Icon(Icons.Default.ChevronRight, contentDescription = "Next")
             }
         }
@@ -415,14 +402,10 @@ private fun TimeUnitBar(
         SingleChoiceSegmentedButtonRow {
             options.forEachIndexed { index, (label, timeUnit) ->
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        index = index, count = options.size
-                    ), onClick = {
-                        onTimeUnitSelected(timeUnit)
-                    }, selected = timeUnit == uiState.selectedTimeUnit
-                ) {
-                    Text(label)
-                }
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                    onClick = { onTimeUnitSelected(timeUnit) },
+                    selected = timeUnit == uiState.selectedTimeUnit
+                ) { Text(label) }
             }
         }
     }
@@ -438,18 +421,12 @@ private fun LazyGraphCard(
 
     OutlinedCard {
         Column {
-            Card {
-                Chart(
-                    timeSeries = chart.timeSeries, uiState = uiState
-                )
-            }
+            Card { Chart(timeSeries = chart.timeSeries, uiState = uiState) }
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        horizontal = AppTheme.dimens.paddingNormal,
-                        vertical = AppTheme.dimens.paddingSmall
-                    ),
+                modifier = Modifier.fillMaxWidth().padding(
+                    horizontal = AppTheme.dimens.paddingNormal,
+                    vertical = AppTheme.dimens.paddingSmall
+                ),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -464,9 +441,9 @@ private fun LazyGraphCard(
                 ) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded) else stringResource(
-                            Res.string.dashboard_chart_statistics_expand_icon_description_collapsed
-                        ),
+                        contentDescription = if (isExpanded)
+                            stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded)
+                        else stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_collapsed),
                         modifier = Modifier.size(16.dp)
                     )
                 }
@@ -474,9 +451,7 @@ private fun LazyGraphCard(
 
             if (isExpanded) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppTheme.dimens.paddingNormal)
+                    modifier = Modifier.fillMaxWidth().padding(AppTheme.dimens.paddingNormal)
                 ) {
                     Text(
                         text = stringResource(Res.string.dashboard_chart_statistics_title),
@@ -499,26 +474,42 @@ private fun LazyGraphCard(
 
 @Composable
 fun Chart(
-    timeSeries: List<TimeSeries>, modifier: Modifier = Modifier, uiState: DashboardScreenState
+    timeSeries: List<TimeSeries>,
+    modifier: Modifier = Modifier,
+    uiState: DashboardScreenState
 ) {
-    val chartsData = timeSeries.filter { it.values.values.isNotEmpty() }.map { it.values }
-    val maxValue = remember(chartsData) {
-        chartsData.flatMap { it.values }.maxOrNull() ?: 0f
+    val chartsData = remember(timeSeries) {
+        timeSeries.filter { it.values.values.isNotEmpty() }.map { it.values }
     }
+    val maxValue = remember(chartsData) { chartsData.flatMap { it.values }.maxOrNull() ?: 0f }
     val modelProducer = remember { CartesianChartModelProducer() }
-    val markerValueFormatter = DefaultCartesianMarker.ValueFormatter.default(
-        thousandsSeparator = " ", suffix = " W", decimalCount = 0
-    )
-    val rangeDuration = calculateRangeDuration(chartsData)
+    val markerValueFormatter = remember {
+        DefaultCartesianMarker.ValueFormatter.default(
+            thousandsSeparator = " ",
+            suffix = " W",
+            decimalCount = 0
+        )
+    }
+    val rangeDuration = remember(chartsData) { calculateRangeDuration(chartsData) }
 
-    LaunchedEffect(chartsData) {
+    val colorScheme = MaterialTheme.colorScheme
+    val lineColors = remember(timeSeries, colorScheme) {
+        timeSeries.map {
+            when (it.type) {
+                TimeSeriesType.PRODUCTION -> colorScheme.powerProduction
+                TimeSeriesType.CONSUMPTION -> colorScheme.powerConsumption
+                TimeSeriesType.INJECTION -> colorScheme.powerInjection
+                TimeSeriesType.WITHDRAWAL -> colorScheme.powerWithdrawals
+            }
+        }
+    }
+
+    LaunchedEffect(timeSeries, uiState.selectedTimeUnit) {
         withContext(Dispatchers.Default) {
             modelProducer.runTransaction {
                 lineSeries {
                     chartsData.forEach { data ->
-                        series(
-                            x = data.keys.map { it.epochSeconds }, y = data.values.toList()
-                        )
+                        series(x = data.keys.map { it.epochSeconds }, y = data.values.toList())
                     }
                 }
                 extras { store ->
@@ -529,13 +520,14 @@ fun Chart(
             }
         }
     }
-    val lineColors = getLineColors(timeSeries)
-    CartesianValueFormatter.decimal()
-    val yAxisValueFormatter = CartesianValueFormatter { _, value, _ ->
-        when {
-            value >= 1000 -> "${(value / 1000).toInt()}k"
-            value < 1 && value > 0 -> value.toString()
-            else -> value.toInt().toString()
+
+    val yAxisValueFormatter = remember {
+        CartesianValueFormatter { _, value, _ ->
+            when {
+                value >= 1000 -> "${(value / 1000).toInt()}k"
+                value < 1 && value > 0 -> value.toString()
+                else -> value.toInt().toString()
+            }
         }
     }
     val stepValue = if (maxValue <= 0) 1.0 else {
@@ -560,12 +552,13 @@ fun Chart(
                 lineProvider = LineCartesianLayer.LineProvider.series(
                     lineColors.map { color ->
                         LineCartesianLayer.rememberLine(
-                            fill = LineCartesianLayer.LineFill.single(fill(color)),
+                            fill = LineCartesianLayer.LineFill.single(Fill(color)),
                             areaFill = LineCartesianLayer.AreaFill.single(
-                                fill(
+                                Fill(
                                     Brush.verticalGradient(
                                         listOf(
-                                            color.copy(alpha = 0.4f), Color.Transparent
+                                            color.copy(alpha = 0.4f),
+                                            Color.Transparent
                                         )
                                     )
                                 )
@@ -575,13 +568,14 @@ fun Chart(
                 rangeProvider = rangeProvider,
             ),
             startAxis = VerticalAxis.rememberStart(
-                valueFormatter = yAxisValueFormatter, label = rememberAxisLabelComponent(
-                    minWidth = TextComponent.MinWidth.fixed(30.dp),
-                ), itemPlacer = startAxisItemPlacer
+                valueFormatter = yAxisValueFormatter,
+                label = rememberAxisLabelComponent(minWidth = TextComponent.MinWidth.fixed(30.dp)),
+                itemPlacer = startAxisItemPlacer
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
                 valueFormatter = rememberTimeValueFormatter(rangeDuration),
-                itemPlacer = remember { TimeAlignedItemPlacer() }),
+                itemPlacer = remember { TimeAlignedItemPlacer() }
+            ),
             marker = rememberMarker(markerValueFormatter),
             legend = legend,
         ),
@@ -599,52 +593,32 @@ private fun createChartLegend(
 ) =
     if (timeSeries.size > 1) rememberVerticalLegend<CartesianMeasuringContext, CartesianDrawingContext>(
         items = { extraStore ->
-            extraStore[LegendLabelKey].forEachIndexed { index, label ->
+            val labels = extraStore[LegendLabelKey]
+            labels.forEachIndexed { index, label ->
                 add(
                     LegendItem(
-                        ShapeComponent(fill(lineColors[index]), CorneredShape.Pill),
+                        ShapeComponent(Fill(lineColors[index]), CorneredShape.Pill),
                         legendItemLabelComponent,
                         label,
                     )
                 )
             }
         },
-        padding = Insets(
-            start = AppTheme.dimens.paddingNormal, top = AppTheme.dimens.paddingSmall
-        ),
+        padding = Insets(start = AppTheme.dimens.paddingNormal, top = AppTheme.dimens.paddingSmall),
     ) else null
 
 @Composable
-private fun getLineColors(timeSeries: List<TimeSeries>) = timeSeries.map {
-    when (it.type) {
-        TimeSeriesType.PRODUCTION -> MaterialTheme.colorScheme.powerProduction
-        TimeSeriesType.CONSUMPTION -> MaterialTheme.colorScheme.powerConsumption
-        TimeSeriesType.INJECTION -> MaterialTheme.colorScheme.powerInjection
-        TimeSeriesType.WITHDRAWAL -> MaterialTheme.colorScheme.powerWithdrawals
-    }
-}
-
-@Composable
-fun rememberTimeValueFormatter(rangeDuration: Duration): CartesianValueFormatter {
-    return remember(rangeDuration) {
+fun rememberTimeValueFormatter(rangeDuration: Duration): CartesianValueFormatter =
+    remember(rangeDuration) {
+        val hourMinutesFormat = LocalDateTime.Format { hour(); char(':'); minute() }
+        val dayOfMonthFormat =
+            LocalDateTime.Format { day(); char(' '); monthName(MonthNames.ENGLISH_ABBREVIATED) }
+        val monthYearFormat = LocalDateTime.Format {
+            day(); char(' '); monthName(MonthNames.ENGLISH_ABBREVIATED); char(' '); year()
+        }
         CartesianValueFormatter { _, value, _ ->
             val instant = Instant.fromEpochSeconds(value.toLong())
             val dateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-
-            val hourMinutesFormat = LocalDateTime.Format { hour(); char(':'); minute() }
-            val dayOfMonthFormat = LocalDateTime.Format {
-                day(padding = Padding.NONE)
-                char(' ')
-                monthName(MonthNames.ENGLISH_ABBREVIATED)
-            }
-            val monthYearFormat = LocalDateTime.Format {
-                day(padding = Padding.NONE)
-                char(' ')
-                monthName(MonthNames.ENGLISH_ABBREVIATED)
-                char(' ')
-                year()
-            }
-
             dateTime.format(
                 when {
                     rangeDuration < 4.hours -> hourMinutesFormat
@@ -656,7 +630,6 @@ fun rememberTimeValueFormatter(rangeDuration: Duration): CartesianValueFormatter
             )
         }
     }
-}
 
 @Composable
 fun ChartTitle(icon: ImageVector, title: String) {
@@ -676,9 +649,7 @@ fun ChartTitle(icon: ImageVector, title: String) {
  * This will be used to determine the appropriate interval for chart axis ticks.
  */
 private fun calculateRangeDuration(chartsData: List<Map<Instant, Float>>): Duration {
-    if (chartsData.isEmpty() || chartsData.all { it.isEmpty() }) {
-        return 1.days
-    }
+    if (chartsData.isEmpty() || chartsData.all { it.isEmpty() }) return 1.days
 
     val allTimestamps = chartsData.flatMap { it.keys }
     val earliestTimestamp = allTimestamps.minOrNull() ?: return 1.days
@@ -688,30 +659,24 @@ private fun calculateRangeDuration(chartsData: List<Map<Instant, Float>>): Durat
     return durationSeconds.seconds
 }
 
-private fun formatPowerValue(value: Double): String {
-    return when {
-        value >= 1000 -> "${(value / 1000).toInt()} kW"
-        value < 1 && value > 0 -> "${value.toInt()} W"
-        else -> "${value.toInt()} W"
-    }
+private fun formatPowerValue(value: Double): String = when {
+    value >= 1000 -> "${(value / 1000).toInt()} kW"
+    value < 1 && value > 0 -> "${value.toInt()} W"
+    else -> "${value.toInt()} W"
 }
 
-private fun formatEnergyValue(value: Double): String {
-    return when {
-        value >= 1000 -> "${(value / 1000).toInt()} kWh"
-        value < 1 && value > 0 -> "${value.toInt()} Wh"
-        else -> "${value.toInt()} Wh"
-    }
+private fun formatEnergyValue(value: Double): String = when {
+    value >= 1000 -> "${(value / 1000).toInt()} kWh"
+    value < 1 && value > 0 -> "${value.toInt()} Wh"
+    else -> "${value.toInt()} Wh"
 }
 
 @Composable
-private fun getLineColorForTimeSeries(timeSeries: TimeSeries): Color {
-    return when (timeSeries.type) {
-        TimeSeriesType.PRODUCTION -> MaterialTheme.colorScheme.powerProduction
-        TimeSeriesType.CONSUMPTION -> MaterialTheme.colorScheme.powerConsumption
-        TimeSeriesType.INJECTION -> MaterialTheme.colorScheme.powerInjection
-        TimeSeriesType.WITHDRAWAL -> MaterialTheme.colorScheme.powerWithdrawals
-    }
+private fun getLineColorForTimeSeries(timeSeries: TimeSeries): Color = when (timeSeries.type) {
+    TimeSeriesType.PRODUCTION -> MaterialTheme.colorScheme.powerProduction
+    TimeSeriesType.CONSUMPTION -> MaterialTheme.colorScheme.powerConsumption
+    TimeSeriesType.INJECTION -> MaterialTheme.colorScheme.powerInjection
+    TimeSeriesType.WITHDRAWAL -> MaterialTheme.colorScheme.powerWithdrawals
 }
 
 @Composable
@@ -758,7 +723,7 @@ private fun TimeSeriesStatisticsTable(
             )
         }
 
-        timeSeriesList.forEachIndexed { index, timeSeries ->
+        timeSeriesList.forEachIndexed { index, _ ->
             TimeSeriesStatisticsRow(
                 statistics = statisticsList[index],
                 color = colors[index],
@@ -779,11 +744,7 @@ private fun TimeSeriesStatisticsRow(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        Canvas(
-            modifier = Modifier.size(12.dp)
-        ) {
-            drawCircle(color = color)
-        }
+        Canvas(modifier = Modifier.size(12.dp)) { drawCircle(color = color) }
 
         Text(
             text = formatPowerValue(statistics.min),
