@@ -83,6 +83,17 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
         }
     }
 
+    suspend fun logout(): Either<ApiError, Unit> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Post
+                    path("api/v1/logout")
+                }
+            }
+        }
+    }
+
     suspend fun sites(): Either<ApiError, List<SiteDto>> {
         return withContext(Dispatchers.IO) {
             client.safeRequest {
