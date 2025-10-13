@@ -83,4 +83,9 @@
     <string name="dashboard_chart_statistics_expand_icon_description_collapsed">Expand</string>
     <string name="no_content_available_retry_button">Retry</string>
     <string name="no_content_available_text">No Content Available</string>
+    <string name="user_settings_panel_logout_button">Logout</string>
+    <string name="user_settings_panel_user_avatar_content_description">User avatar</string>
+    <string name="user_settings_panel_close_button_content_description">Close</string>
+    <string name="user_settings_panel_change_site">Change Site</string>
+    <string name="user_settings_panel_settings">Settings</string>
 </resources>

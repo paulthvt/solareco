@@ -1,5 +1,8 @@
 package net.thevenot.comwatt
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -14,7 +17,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
@@ -23,7 +25,7 @@ import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
-import net.thevenot.comwatt.ui.user.UserSettingsDialog
+import net.thevenot.comwatt.ui.user.UserSettingsPanel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -70,7 +72,7 @@ fun MainAppNavHost(
             }
         }
         mainGraph(navController, dataRepository, viewModelStoreOwner, snackbarHostState)
-        addUserSettingsDialog(navController)
+        addUserSettingsDialog(navController, dataRepository)
     }
 }
 
@@ -102,8 +104,50 @@ fun NavGraphBuilder.mainGraph(
     }
 }
 
-fun NavGraphBuilder.addUserSettingsDialog(navController: NavController) {
-    dialog<Screen.UserSettings> {
-        UserSettingsDialog(navController)
+fun NavGraphBuilder.addUserSettingsDialog(
+    navController: NavController,
+    dataRepository: DataRepository
+) {
+    composable<Screen.UserSettings>(
+        enterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(400)
+            )
+        },
+        exitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(400)
+            )
+        },
+        popEnterTransition = {
+            slideInHorizontally(
+                initialOffsetX = { it },
+                animationSpec = tween(400)
+            )
+        },
+        popExitTransition = {
+            slideOutHorizontally(
+                targetOffsetX = { it },
+                animationSpec = tween(400)
+            )
+        }
+    ) {
+        UserSettingsPanel(
+            dataRepository = dataRepository,
+            onSettings = {
+
+            },
+            onChangeSite = {
+                navController.navigate(Screen.SiteChooser)
+            },
+            onLogout = {
+                navController.navigate(Screen.Login) {
+                    popUpTo(0) { inclusive = true }
+                    launchSingleTop = true
+                }
+            }
+        )
     }
 }

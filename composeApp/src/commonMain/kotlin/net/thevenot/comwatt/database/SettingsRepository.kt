@@ -28,6 +28,12 @@ class SettingsRepository(
         }
     }
 
+    suspend fun clearSiteId() {
+        dataStore.edit {
+            it.remove(siteKey)
+        }
+    }
+
     suspend fun saveDashboardSelectedTimeUnitIndex(
         index: Int,
     ) {

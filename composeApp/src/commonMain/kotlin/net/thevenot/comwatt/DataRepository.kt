@@ -23,6 +23,10 @@ class DataRepository(
         settingsRepository.saveSiteId(siteId)
     }
 
+    suspend fun clearSiteId() {
+        settingsRepository.clearSiteId()
+    }
+
     suspend fun saveDashboardSelectedTimeUnitIndex(index: Int) {
         settingsRepository.saveDashboardSelectedTimeUnitIndex(index)
     }
@@ -57,6 +61,12 @@ class DataRepository(
     fun addUser(user: User) {
         scope.launch {
             userDatabase.userDao().insert(user)
+        }
+    }
+
+    fun removeUser(user: User) {
+        scope.launch {
+            userDatabase.userDao().delete(user)
         }
     }
 
