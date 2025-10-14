@@ -147,6 +147,9 @@ fun NavGraphBuilder.addUserSettingsDialog(
                     popUpTo(0) { inclusive = true }
                     launchSingleTop = true
                 }
+            },
+            onClose = {
+                navController.popBackStack()
             }
         )
     }
