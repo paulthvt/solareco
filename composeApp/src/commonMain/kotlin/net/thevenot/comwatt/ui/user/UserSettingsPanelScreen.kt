@@ -63,6 +63,7 @@ fun UserSettingsPanel(
     onLogout: () -> Unit = {},
     onChangeSite: () -> Unit = {},
     onSettings: () -> Unit = {},
+    onClose: () -> Unit = {},
     viewModel: UserSettingsPanelViewModel = viewModel {
         UserSettingsPanelViewModel(dataRepository = dataRepository)
     }
@@ -84,7 +85,8 @@ fun UserSettingsPanel(
                 onChangeSite()
             }
         },
-        onSettingsClick = onSettings
+        onSettingsClick = onSettings,
+        onClose = onClose
     )
 }
 
@@ -94,6 +96,7 @@ private fun UserSettingsPanelScreenContent(
     onLogoutClick: () -> Unit = {},
     onChangeSiteClick: () -> Unit = {},
     onSettingsClick: () -> Unit = {},
+    onClose: () -> Unit = {},
 ) {
     Box(
         modifier = Modifier
@@ -119,7 +122,7 @@ private fun UserSettingsPanelScreenContent(
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     IconButton(
-                        onClick = onLogoutClick
+                        onClick = onClose
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -286,7 +289,7 @@ fun PreviewUserSettingsDialog() {
                 uiState = UserSettingsPanelState(
                     siteName = "My Site",
                     userName = "John Doe"
-                )
+                ),
             )
         }
     }
