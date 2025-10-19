@@ -19,6 +19,7 @@ class SiteStatsCalculatorTest {
             consumptions = consumptions,
             injections = injections,
             withdrawals = withdrawals,
+            productionNoiseThreshold = 5,
             lastTimestamp = lastTs
         )
 
@@ -40,6 +41,7 @@ class SiteStatsCalculatorTest {
             consumptions = listOf(100.0),
             injections = emptyList(),
             withdrawals = listOf(10.0),
+            productionNoiseThreshold = 5,
             lastTimestamp = null
         )
         assertNull(
@@ -57,6 +59,7 @@ class SiteStatsCalculatorTest {
             consumptions = emptyList(),
             injections = emptyList(),
             withdrawals = emptyList(),
+            productionNoiseThreshold = 5,
             lastTimestamp = null
         )
         assertNull(result.selfConsumptionRate)
@@ -71,6 +74,7 @@ class SiteStatsCalculatorTest {
             consumptions = listOf(50.0),
             injections = listOf(1.0), // injection > 0 but production becomes 0, rate must be null
             withdrawals = listOf(5.0),
+            productionNoiseThreshold = 5,
             lastTimestamp = null
         )
         assertEquals(0.0, result.totalProduction, 0.0)
@@ -85,6 +89,7 @@ class SiteStatsCalculatorTest {
             consumptions = listOf(30.0),
             injections = listOf(), // zero injection => rate null
             withdrawals = listOf(2.0),
+            productionNoiseThreshold = 5,
             lastTimestamp = null
         )
         assertEquals(17.0, result.totalProduction, 0.0)
