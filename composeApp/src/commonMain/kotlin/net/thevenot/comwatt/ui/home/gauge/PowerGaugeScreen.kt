@@ -59,7 +59,6 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.home.HomeScreenState
-import net.thevenot.comwatt.ui.home.HomeViewModel.Companion.MAX_POWER
 import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -179,6 +178,7 @@ fun PowerGaugeScreen(
             homeScreenState.siteRealtimeData.withdrawals.toInt(),
             homeScreenState.withdrawalsGaugeEnabled
         ),
+        powerMaxGauge = homeScreenState.powerMaxGauge,
         modifier = modifier,
         onSettingsButtonClick = onSettingsButtonClick
     )
@@ -190,6 +190,7 @@ private fun PowerGaugeScreen(
     consumption: GaugeState,
     injection: GaugeState,
     withdrawals: GaugeState,
+    powerMaxGauge: Int,
     modifier: Modifier = Modifier,
     onSettingsButtonClick: () -> Unit
 ) {
@@ -198,7 +199,14 @@ private fun PowerGaugeScreen(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
-        PowerIndicator(production, consumption, injection, withdrawals, onSettingsButtonClick)
+        PowerIndicator(
+            production,
+            consumption,
+            injection,
+            withdrawals,
+            powerMaxGauge,
+            onSettingsButtonClick
+        )
     }
 }
 
@@ -208,6 +216,7 @@ fun PowerIndicator(
     consumption: GaugeState,
     injection: GaugeState,
     withdrawals: GaugeState,
+    powerMaxGauge: Int,
     onSettingsButtonClick: () -> Unit
 ) {
     Box(
@@ -226,7 +235,8 @@ fun PowerIndicator(
             productionChecked = production.enabled,
             consumptionChecked = consumption.enabled,
             injectionChecked = injection.enabled,
-            withdrawalsChecked = withdrawals.enabled
+            withdrawalsChecked = withdrawals.enabled,
+            powerMaxGauge = powerMaxGauge
         )
         ProductionValue(
             production = production.value,
@@ -322,7 +332,8 @@ fun CircularPowerIndicator(
     productionChecked: Boolean,
     consumptionChecked: Boolean,
     injectionChecked: Boolean,
-    withdrawalsChecked: Boolean
+    withdrawalsChecked: Boolean,
+    powerMaxGauge: Int,
 ) {
     val textMeasurer = rememberTextMeasurer()
     val blurColor = MaterialTheme.colorScheme.primary
@@ -354,7 +365,7 @@ fun CircularPowerIndicator(
             maxEnabledValue,
             angle,
             linesColor,
-            MAX_POWER.toInt(),
+            powerMaxGauge,
             textMeasurer
         )
         if(consumptionChecked){
@@ -519,6 +530,7 @@ fun PowerGaugeScreenPreview() {
                     value = "1000",
                     enabled = true
                 ),
+                powerMaxGauge = 6000,
                 modifier = Modifier.fillMaxWidth(),
                 onSettingsButtonClick = {}
             )

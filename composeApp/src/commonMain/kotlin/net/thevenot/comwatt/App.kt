@@ -23,6 +23,7 @@ import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
+import net.thevenot.comwatt.ui.settings.SettingsScreen
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.user.UserSettingsPanel
@@ -101,6 +102,9 @@ fun NavGraphBuilder.mainGraph(
         composable<Screen.More> {
             Text("Not Implemented Yet")
         }
+        composable<Screen.Settings> {
+            SettingsScreen(dataRepository)
+        }
     }
 }
 
@@ -137,7 +141,7 @@ fun NavGraphBuilder.addUserSettingsDialog(
         UserSettingsPanel(
             dataRepository = dataRepository,
             onSettings = {
-
+                navController.navigate(Screen.Settings)
             },
             onChangeSite = {
                 navController.navigate(Screen.SiteChooser)

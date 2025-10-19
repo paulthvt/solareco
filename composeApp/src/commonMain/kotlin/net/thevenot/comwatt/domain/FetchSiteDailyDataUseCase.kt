@@ -19,6 +19,7 @@ import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
+import net.thevenot.comwatt.ui.settings.SettingsViewModel.Companion.DEFAULT_PRODUCTION_NOISE_THRESHOLD
 import kotlin.time.Clock
 import kotlin.time.Instant
 
@@ -54,8 +55,8 @@ class FetchSiteDailyDataUseCase(private val dataRepository: DataRepository) {
 
     private suspend fun fetchDailyData(): Either<DomainError, SiteDailyData> {
         Logger.d(TAG) { "calling site daily data" }
-        val siteId = dataRepository.getSettings().firstOrNull()?.siteId
-        return siteId?.let { id ->
+        val settings = dataRepository.getSettings().firstOrNull()
+        return settings?.siteId?.let { id ->
             val now = Clock.System.now()
             val timeZone = TimeZone.of("Europe/Paris")
             val startOfDay = now.toLocalDateTime(timeZone).date.atStartOfDayIn(timeZone)
@@ -81,6 +82,9 @@ class FetchSiteDailyDataUseCase(private val dataRepository: DataRepository) {
                         consumptions = timeSeries.consumptions,
                         injections = timeSeries.injections,
                         withdrawals = timeSeries.withdrawals,
+                        productionNoiseThreshold =
+                            settings.productionNoiseThreshold
+                                ?: DEFAULT_PRODUCTION_NOISE_THRESHOLD,
                         lastTimestamp = lastUpdateTimestamp
                     )
 

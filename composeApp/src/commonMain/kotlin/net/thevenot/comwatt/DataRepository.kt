@@ -23,6 +23,14 @@ class DataRepository(
         settingsRepository.saveSiteId(siteId)
     }
 
+    suspend fun saveMaxPowerGauge(maxPower: Int) {
+        settingsRepository.saveMaxPowerGauge(maxPower)
+    }
+
+    suspend fun saveProductionNoiseThreshold(threshold: Int) {
+        settingsRepository.saveProductionNoiseThreshold(threshold)
+    }
+
     suspend fun clearSiteId() {
         settingsRepository.clearSiteId()
     }

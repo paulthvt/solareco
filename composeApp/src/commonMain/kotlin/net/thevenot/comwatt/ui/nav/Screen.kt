@@ -26,4 +26,7 @@ sealed interface Screen {
 
     @Serializable
     data object UserSettings : Screen
+
+    @Serializable
+    data object Settings : Screen
 }
