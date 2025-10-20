@@ -92,6 +92,7 @@ fun HomeScreen(
     snackbarHostState: SnackbarHostState,
     viewModel: HomeViewModel = viewModel {
         HomeViewModel(
+            dataRepository = dataRepository,
             fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(dataRepository),
             fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
             fetchWeatherUseCase = FetchWeatherUseCase(dataRepository),

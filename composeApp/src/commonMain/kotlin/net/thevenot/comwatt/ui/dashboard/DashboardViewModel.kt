@@ -28,6 +28,7 @@ import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
+import net.thevenot.comwatt.ui.settings.SettingsViewModel.Companion.DEFAULT_PRODUCTION_NOISE_THRESHOLD
 import kotlin.time.Instant
 
 class DashboardViewModel(
@@ -298,6 +299,8 @@ class DashboardViewModel(
                 consumptions = ts.consumptions,
                 injections = ts.injections,
                 withdrawals = ts.withdrawals,
+                productionNoiseThreshold = settings.productionNoiseThreshold
+                    ?: DEFAULT_PRODUCTION_NOISE_THRESHOLD,
                 lastTimestamp = lastTs
             )
             _uiState.update { it.copy(rangeStats = stats) }

@@ -110,7 +110,6 @@ private fun UserSettingsPanelScreenContent(
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .clickable(enabled = false) { /* Prevent closing when clicking inside */ },
             color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 8.dp
         ) {
             Column(
                 modifier = Modifier

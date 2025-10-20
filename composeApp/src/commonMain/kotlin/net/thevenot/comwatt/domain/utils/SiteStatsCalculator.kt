@@ -13,13 +13,13 @@ fun computeSiteStats(
     consumptions: List<Double>,
     injections: List<Double>,
     withdrawals: List<Double>,
+    productionNoiseThreshold: Int,
     lastTimestamp: Instant? = null
 ): SiteDailyData {
-    val productionNoiseThreshold = 5.0
 
     val rawTotalProduction = productions.sum()
     val totalProduction =
-        if (rawTotalProduction in 0.0..productionNoiseThreshold) 0.0 else rawTotalProduction
+        if (rawTotalProduction in 0.0..productionNoiseThreshold.toDouble()) 0.0 else rawTotalProduction
     val totalConsumption = consumptions.sum()
     val totalInjection = injections.sum()
     val totalWithdrawals = withdrawals.sum()
