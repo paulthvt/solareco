@@ -59,6 +59,7 @@
     <string name="statistics_card_title_hourly">Statistiques Horaires</string>
     <string name="statistics_card_title_weekly">Statistiques Hebdomadaires</string>
     <string name="statistics_card_title_custom">Statistiques Personnalisées</string>
+    <string name="statistics_card_self_consumption_na">N / A</string>
     <string name="statistics_self_consumption_rate">Autoconsommation d\'énergie</string>
     <string name="statistics_autonomy_rate">Couverture Solaire</string>
     <string name="statistics_self_consumption_tooltip">Pourcentage de votre production solaire qui alimente votre maison directement</string>
@@ -81,4 +82,20 @@
     <string name="dashboard_chart_statistics_sum_title">SOMME</string>
     <string name="dashboard_chart_statistics_expand_icon_description_expanded">Réduire</string>
     <string name="dashboard_chart_statistics_expand_icon_description_collapsed">Agrandir</string>
+    <string name="no_content_available_retry_button">Réessayer</string>
+    <string name="no_content_available_text">Aucun contenu disponible</string>
+    <string name="user_settings_panel_logout_button">Logout</string>
+    <string name="user_settings_panel_user_avatar_content_description">User avatar</string>
+    <string name="user_settings_panel_close_button_content_description">Close</string>
+    <string name="user_settings_panel_change_site">Change Site</string>
+    <string name="user_settings_panel_settings">Settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_max_power_gauge">Max Power for Gauge</string>
+    <string name="settings_max_power_gauge_description">Set the maximum power value (in kW) for the home screen gauges</string>
+    <string name="settings_max_power_gauge_icon_content_description">Max Power</string>
+    <string name="settings_max_power_gauge_subtitle">Max Power</string>
+    <string name="settings_production_noise_threshold">Production Noise Threshold</string>
+    <string name="settings_production_noise_threshold_description">Set the threshold (in W) below which production values are considered noise and set to zero</string>
+    <string name="settings_production_noise_threshold_icon_content_description">Production Noise Threshold</string>
+    <string name="settings_production_noise_threshold_subtitle">Threshold</string>
 </resources>
