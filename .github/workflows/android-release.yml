@@ -40,6 +40,47 @@ jobs:
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RELEASE_STORE_FILE"
 
+      - name: Create google-services.json from secrets
+        shell: bash
+        env:
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_ANDROID_API_KEY: ${{ secrets.FIREBASE_ANDROID_API_KEY }}
+        run: |
+          cat > composeApp/google-services.json << EOF
+          {
+            "project_info": {
+              "project_number": "$FIREBASE_PROJECT_NUMBER",
+              "project_id": "$FIREBASE_PROJECT_ID",
+              "storage_bucket": "$FIREBASE_STORAGE_BUCKET"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "$FIREBASE_ANDROID_APP_ID",
+                  "android_client_info": {
+                    "package_name": "net.thevenot.comwatt"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "$FIREBASE_ANDROID_API_KEY"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+
       - name: Fail workflow if keystore secret is missing
         if: ${{ env.ANDROID_KEYSTORE_BASE64 == '' }}
         shell: bash

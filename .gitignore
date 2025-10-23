@@ -26,3 +26,7 @@ keystore.properties
 **/debug.keystore
 # Optional: any file containing release creds
 release-signing.properties
+
+# Firebase configuration files (use templates instead)
+google-services.json
+GoogleService-Info.plist

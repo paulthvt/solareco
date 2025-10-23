@@ -14,6 +14,11 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
+    apply(plugin = libs.plugins.crashlytics.get().pluginId)
+}
+
 kotlin {
     jvm("desktop")
 
@@ -28,7 +33,6 @@ kotlin {
     }
     
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
@@ -49,6 +53,9 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.activity.compose)
+            if (file("google-services.json").exists()) {
+                api(libs.gitlive.firebase.kotlin.crashlytics)
+            }
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -92,6 +99,9 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            if (file("../iosApp/iosApp/GoogleService-Info.plist").exists()) {
+                api(libs.gitlive.firebase.kotlin.crashlytics)
+            }
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -210,6 +220,5 @@ dependencies {
     add("kspDesktop", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
-    add("kspIosX64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
 }
