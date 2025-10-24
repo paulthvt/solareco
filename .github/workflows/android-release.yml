@@ -68,7 +68,7 @@ jobs:
         run: ./gradlew --no-daemon :composeApp:bundleRelease
 
       - name: Upload AAB/APK artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: android-release-artifacts
           path: |
@@ -77,7 +77,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload R8 mapping file
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: android-mapping
           path: composeApp/build/outputs/mapping/release/mapping.txt
