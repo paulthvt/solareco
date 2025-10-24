@@ -28,6 +28,10 @@ vico = "2.2.1"
 koalaplot = "0.9.1"
 hotPreview = "0.2.0"
 compose-hot-reload = "1.0.0-rc02"
+firebase-android-bom = "34.4.0"
+gradlePlugins-crashlytics = "3.0.6"
+gradlePlugins-google-services = "4.4.4"
+firebase-gitlive-sdk = "2.3.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -73,6 +77,9 @@ koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = 
 test-resources = { module = "com.goncalossilva:resources", version.ref = "testResources" }
 hot-preview = { module = "de.drick.compose:hotpreview", version.ref = "hotPreview" }
 kastro = { module = "dev.jamesyox:kastro", version = "0.4.0" }
+firebase-android-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-android-bom" }
+firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
+gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -85,3 +92,5 @@ kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", versio
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 room = { id = "androidx.room", version.ref = "androidx-room" }
 testResources = { id = "com.goncalossilva.resources", version.ref = "testResources" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "gradlePlugins-crashlytics" }
+google-services = { id = "com.google.gms.google-services", version.ref = "gradlePlugins-google-services" }

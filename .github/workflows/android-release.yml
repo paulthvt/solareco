@@ -40,6 +40,23 @@ jobs:
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RELEASE_STORE_FILE"
 
+      - name: Create google-services.json from template and secrets
+        shell: bash
+        env:
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_ANDROID_API_KEY: ${{ secrets.FIREBASE_ANDROID_API_KEY }}
+        run: |
+          # Use template and replace placeholders with actual values
+          sed -e "s/FIREBASE_PROJECT_NUMBER/$FIREBASE_PROJECT_NUMBER/g" \
+              -e "s/FIREBASE_PROJECT_ID/$FIREBASE_PROJECT_ID/g" \
+              -e "s/FIREBASE_STORAGE_BUCKET/$FIREBASE_STORAGE_BUCKET/g" \
+              -e "s/FIREBASE_ANDROID_APP_ID/$FIREBASE_ANDROID_APP_ID/g" \
+              -e "s/FIREBASE_ANDROID_API_KEY/$FIREBASE_ANDROID_API_KEY/g" \
+              composeApp/google-services.json.template > composeApp/google-services.json
+
       - name: Fail workflow if keystore secret is missing
         if: ${{ env.ANDROID_KEYSTORE_BASE64 == '' }}
         shell: bash

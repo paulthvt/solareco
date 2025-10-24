@@ -1,0 +1,58 @@
+name: iOS Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      versionName:
+        description: 'Version name (optional, for tagging)'
+        required: false
+      versionCode:
+        description: 'Version code override (optional)'
+        required: false
+
+jobs:
+  build-release:
+    runs-on: macos-14
+    env:
+      VERSION_NAME: ${{ github.event.inputs.versionName }}
+      VERSION_CODE: ${{ github.event.inputs.versionCode }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Create GoogleService-Info.plist from template and secrets
+        shell: bash
+        env:
+          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY }}
+          FIREBASE_GCM_SENDER_ID: ${{ secrets.FIREBASE_GCM_SENDER_ID }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+        run: |
+          # Use template and replace placeholders with actual values
+          sed -e "s/FIREBASE_IOS_API_KEY/$FIREBASE_IOS_API_KEY/g" \
+              -e "s/FIREBASE_GCM_SENDER_ID/$FIREBASE_GCM_SENDER_ID/g" \
+              -e "s/FIREBASE_PROJECT_ID/$FIREBASE_PROJECT_ID/g" \
+              -e "s/FIREBASE_STORAGE_BUCKET/$FIREBASE_STORAGE_BUCKET/g" \
+              -e "s/FIREBASE_IOS_APP_ID/$FIREBASE_IOS_APP_ID/g" \
+              iosApp/iosApp/GoogleService-Info.plist.template > iosApp/iosApp/GoogleService-Info.plist
+
+      - name: Build iOS framework
+        run: ./gradlew :composeApp:linkReleaseFrameworkIosArm64
+
+      - name: Upload iOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-release-artifacts
+          path: |
+            composeApp/build/bin/iosArm64/releaseFramework/*.framework
+          if-no-files-found: warn
