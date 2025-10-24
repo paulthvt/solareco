@@ -14,7 +14,16 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
-if (file("google-services.json").exists()) {
+val isReleaseBuild = gradle.startParameter.taskNames.any {
+    it.contains("release", ignoreCase = true)
+}
+
+val isMobileBuild = gradle.startParameter.taskNames.any { taskName ->
+    taskName.contains("android", ignoreCase = true) ||
+            taskName.contains("ios", ignoreCase = true)
+}
+
+if (isReleaseBuild && isMobileBuild) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
     apply(plugin = libs.plugins.crashlytics.get().pluginId)
 }
@@ -53,7 +62,7 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.activity.compose)
-            if (file("google-services.json").exists()) {
+            if (isReleaseBuild && file("google-services.json").exists()) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
         }
@@ -99,7 +108,7 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-            if (file("../iosApp/iosApp/GoogleService-Info.plist").exists()) {
+            if (isReleaseBuild && file("../iosApp/iosApp/GoogleService-Info.plist").exists()) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
         }
