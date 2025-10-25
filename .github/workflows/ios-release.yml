@@ -50,7 +50,7 @@ jobs:
         run: ./gradlew :composeApp:linkReleaseFrameworkIosArm64
 
       - name: Upload iOS artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ios-release-artifacts
           path: |
