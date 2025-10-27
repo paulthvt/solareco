@@ -64,8 +64,8 @@ jobs:
           echo "Error: ANDROID_KEYSTORE_BASE64 secret is missing. Cannot proceed with an unsigned release."
           exit 1
 
-      - name: Build signed AAB
-        run: ./gradlew --no-daemon :composeApp:bundleRelease
+      - name: Build signed APK and AAB
+        run: ./gradlew --no-daemon :composeApp:assembleRelease :composeApp:bundleRelease
 
       - name: Upload AAB/APK artifacts
         uses: actions/upload-artifact@v5
