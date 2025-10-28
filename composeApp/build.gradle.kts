@@ -61,7 +61,6 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.ktor.client.android)
-            implementation(libs.androidx.activity.compose)
             if (isReleaseBuild && file("google-services.json").exists()) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
