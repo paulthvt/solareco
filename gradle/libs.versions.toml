@@ -31,7 +31,7 @@ compose-hot-reload = "1.0.0-rc02"
 firebase-android-bom = "34.4.0"
 gradlePlugins-crashlytics = "3.0.6"
 gradlePlugins-google-services = "4.4.4"
-firebase-gitlive-sdk = "2.3.0"
+firebase-gitlive-sdk = "2.4.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
