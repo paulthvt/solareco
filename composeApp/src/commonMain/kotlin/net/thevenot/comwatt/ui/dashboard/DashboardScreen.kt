@@ -487,7 +487,8 @@ fun Chart(
         DefaultCartesianMarker.ValueFormatter.default(
             thousandsSeparator = " ",
             suffix = " W",
-            decimalCount = 0
+            decimalCount = 0,
+//            colorCode = timeSeries.size > 1
         )
     }
     val rangeDuration = remember(chartsData) { calculateRangeDuration(chartsData) }
@@ -538,10 +539,10 @@ fun Chart(
         if (stepValue <= 0.0) VerticalAxis.ItemPlacer.step() else VerticalAxis.ItemPlacer.step({
             stepValue
         })
-    val rangeProvider =
-        if (maxValue == 0f) CartesianLayerRangeProvider.auto() else CartesianLayerRangeProvider.fixed(
-            maxY = maxValue.toDouble()
-        )
+    val rangeProvider = CartesianLayerRangeProvider.fixed(
+        minY = 0.0,
+        maxY = if (maxValue == 0f) 1.0 else maxValue.toDouble()
+    )
     val legendItemLabelComponent =
         rememberTextComponent(MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.onBackground))
 
@@ -561,6 +562,12 @@ fun Chart(
                                             Color.Transparent
                                         )
                                     )
+                                )
+                            ),
+                            pointProvider = LineCartesianLayer.PointProvider.single(
+                                LineCartesianLayer.Point(
+                                    component = ShapeComponent(Fill(color), CorneredShape.Pill),
+                                    size = 0.dp
                                 )
                             ),
                         )
