@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -78,7 +79,6 @@ import com.patrykandpatrick.vico.multiplatform.common.component.TextComponent
 import com.patrykandpatrick.vico.multiplatform.common.component.rememberTextComponent
 import com.patrykandpatrick.vico.multiplatform.common.data.ExtraStore
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
-import com.patrykandpatrick.vico.multiplatform.common.shape.CorneredShape
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_avg_title
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_expand_icon_description_collapsed
@@ -572,7 +572,7 @@ fun Chart(
                             ),
                             pointProvider = LineCartesianLayer.PointProvider.single(
                                 LineCartesianLayer.Point(
-                                    component = ShapeComponent(Fill(color), CorneredShape.Pill),
+                                    component = ShapeComponent(Fill(color), CircleShape),
                                     size = 0.dp
                                 )
                             ),
@@ -607,7 +607,7 @@ private fun createChartLegend(
             labels.forEachIndexed { index, label ->
                 add(
                     LegendItem(
-                        ShapeComponent(Fill(lineColors[index]), CorneredShape.Pill),
+                        ShapeComponent(Fill(lineColors[index]), CircleShape),
                         legendItemLabelComponent,
                         label,
                     )
