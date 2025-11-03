@@ -22,40 +22,27 @@
     "supplyNumber": "00000000000000",
     "status": "ACTIVATED",
     "owner": {
-      "@id": "2",
       "id": 23481,
+      "uuid": "00000000-0000-0000-0000-000000000000",
       "login": "user@example.com_1",
       "firstName": "John",
       "lastName": "Doe",
       "email": "user@example.com",
-      "newEmail": null,
-      "pseudonym": null,
-      "address": {
-        "address": "123 Placeholder St",
-        "postalCode": "00000",
-        "city": "Placeholder City",
-        "country": "XX"
-      },
-      "phone": {
-        "number": "0000000000",
-        "countryCode": "XX"
-      },
-      "mobilePhone": null,
-      "currency": "EUR",
-      "language": "FR",
-      "activated": true,
-      "deleted": false,
-      "company": null,
-      "createDate": "2024-12-03T10:47:57.123+00:00",
-      "updateDate": "2024-12-03T10:48:27.909+00:00",
-      "agreements": {
-        "termsAndConditionsEndUser": true,
-        "termsAndConditionsInstaller": null,
-        "dataProcessing": true,
-        "noDisclosure": null,
-        "newsletter": false
-      },
-      "uuid": "00000000-0000-0000-0000-000000000000"
+      "profile": {
+        "@id": "1",
+        "id": 2,
+        "label": "End User",
+        "code": "END_USER",
+        "authorities": [],
+        "wattinside": false,
+        "supervisor": false,
+        "installer": false,
+        "admin": false,
+        "datascience": false,
+        "support": false,
+        "coach": false,
+        "globalProfile": false
+      }
     },
     "gateways": [
       {
