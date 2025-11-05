@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -26,6 +25,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -125,9 +125,7 @@ fun HomeScreen(
         title = {
             uiState.siteName?.let { site ->
                 CenteredTitleWithIcon(
-                    icon = Icons.Filled.Home,
-                    title = site,
-                    iconContentDescription = "Site Icon"
+                    icon = Icons.Filled.Home, title = site, iconContentDescription = "Site Icon"
                 )
             }
         },
@@ -150,7 +148,6 @@ fun HomeScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HomeScreenContent(
     uiState: HomeScreenState,
@@ -164,22 +161,28 @@ private fun HomeScreenContent(
 
     val scrollState = rememberScrollState()
     val state = rememberPullToRefreshState()
-    PullToRefreshBox(state = state, isRefreshing = uiState.isRefreshing, onRefresh = {
-        launchSingleDataRefresh()
-    }) {
+    PullToRefreshBox(
+        state = state,
+        isRefreshing = uiState.isRefreshing,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = state,
+                isRefreshing = uiState.isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        },
+        onRefresh = {
+            launchSingleDataRefresh()
+        }) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
+            modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
                 .padding(horizontal = AppTheme.dimens.paddingNormal),
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
         ) {
             Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
 
             RealTimeConsumptionSection(
-                uiState = uiState,
-                onSettingsButtonClick = { showDialog = true }
-            )
+                uiState = uiState, onSettingsButtonClick = { showDialog = true })
             StatisticsCard(
                 siteDailyData = uiState.siteDailyData,
                 totalsLabel = stringResource(Res.string.statistics_card_today_total),
@@ -207,8 +210,7 @@ private fun HomeScreenContent(
 
 @Composable
 private fun RealTimeConsumptionSection(
-    uiState: HomeScreenState,
-    onSettingsButtonClick: () -> Unit
+    uiState: HomeScreenState, onSettingsButtonClick: () -> Unit
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -239,13 +241,11 @@ private fun RealTimeConsumptionSection(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 HouseScreen(
-                    uiState = uiState,
-                    modifier = Modifier.fillMaxWidth().height(300.dp)
+                    uiState = uiState, modifier = Modifier.fillMaxWidth().height(300.dp)
                 )
 
                 ResponsiveGauge(
-                    uiState = uiState,
-                    onSettingsButtonClick = onSettingsButtonClick
+                    uiState = uiState, onSettingsButtonClick = onSettingsButtonClick
                 )
             }
         }
@@ -256,9 +256,7 @@ private fun RealTimeConsumptionSection(
 private fun LastRefreshSection(uiState: HomeScreenState) {
     uiState.timeDifference?.let { timeDiff ->
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
+            modifier = Modifier.fillMaxWidth().padding(
                     horizontal = AppTheme.dimens.paddingExtraSmall,
                     vertical = AppTheme.dimens.paddingSmall
                 ),
@@ -276,9 +274,7 @@ private fun LastRefreshSection(uiState: HomeScreenState) {
                 text = when {
                     timeDiff < 1 -> stringResource(Res.string.last_data_refresh_time_zero)
                     else -> pluralStringResource(
-                        Res.plurals.last_data_refresh_time,
-                        timeDiff,
-                        timeDiff
+                        Res.plurals.last_data_refresh_time, timeDiff, timeDiff
                     )
                 },
                 style = MaterialTheme.typography.labelSmall,
@@ -365,17 +361,14 @@ fun HomeScreenPreview() {
         Surface {
             HomeScreenContent(
                 uiState = HomeScreenState(
-                    callCount = 123,
-                    isRefreshing = false,
-                    siteRealtimeData = SiteRealtimeData(
+                    callCount = 123, isRefreshing = false, siteRealtimeData = SiteRealtimeData(
                         production = 123.0,
                         consumption = 456.0,
                         injection = 789.0,
                         withdrawals = 951.0,
                         updateDate = "2021-09-01T12:00:00Z",
                         lastRefreshDate = "2021-09-01T12:00:00Z",
-                    ),
-                    siteDailyData = SiteDailyData(
+                    ), siteDailyData = SiteDailyData(
                         selfConsumptionRate = 0.75,
                         autonomyRate = 0.68,
                         totalProduction = 45.2,

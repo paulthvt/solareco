@@ -1,8 +1,8 @@
 package net.thevenot.comwatt.ui.nav
 
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
@@ -13,12 +13,12 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun BottomNavigationBar(navController: NavController) {
-    NavigationBar {
+    ShortNavigationBar {
         val currentBackStackEntry = navController.currentBackStackEntryAsState().value
         val currentDestination = currentBackStackEntry?.destination
 
         BottomNavItem.entries.forEach { item ->
-            NavigationBarItem(
+            ShortNavigationBarItem(
                 icon = {
                     Icon(
                         imageVector = item.icon,

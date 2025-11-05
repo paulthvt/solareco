@@ -2,7 +2,6 @@ package net.thevenot.comwatt.ui.theme
 
 import android.app.Activity
 import android.os.Build
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
@@ -44,7 +43,7 @@ actual fun ComwattTheme(
         }
     }
 
-    MaterialTheme(
+    AppComwattTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
         content = content
