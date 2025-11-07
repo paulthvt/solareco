@@ -18,9 +18,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun CenteredTitleWithIcon(
@@ -54,7 +54,7 @@ fun CenteredTitleWithIcon(
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun CenteredTitleWithIconPreview() {
     ComwattTheme {

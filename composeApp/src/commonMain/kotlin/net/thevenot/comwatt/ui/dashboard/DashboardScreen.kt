@@ -124,7 +124,6 @@ import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
-import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -135,6 +134,7 @@ import net.thevenot.comwatt.utils.formatDayMonth
 import net.thevenot.comwatt.utils.formatHourMinutes
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.pow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -785,7 +785,7 @@ private fun TimeSeriesStatisticsRow(
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun TimeUnitBarPreview() {
     val sampleState = DashboardScreenState(
@@ -800,7 +800,7 @@ fun TimeUnitBarPreview() {
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun RangeButtonPreview() {
     val sampleState = DashboardScreenState(
@@ -822,7 +822,7 @@ fun RangeButtonPreview() {
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun LazyGraphCardPreview() {
     val sampleState = DashboardScreenState(
@@ -853,7 +853,7 @@ fun LazyGraphCardPreview() {
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun TimeSeriesStatisticsTablePreview() {
     val sampleTimeSeries1 = TimeSeries(
@@ -886,7 +886,7 @@ fun TimeSeriesStatisticsTablePreview() {
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun DashboardStatisticsCardPreview() {
     val sampleStats = net.thevenot.comwatt.domain.model.SiteDailyData(

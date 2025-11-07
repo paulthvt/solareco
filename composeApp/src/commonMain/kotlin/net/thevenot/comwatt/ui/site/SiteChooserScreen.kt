@@ -33,9 +33,9 @@ import net.thevenot.comwatt.model.PhoneDto
 import net.thevenot.comwatt.model.ProfileDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.UserDto
-import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SiteChooserScreen(
@@ -112,7 +112,7 @@ fun SiteCard(site: SiteDto, userDto: UserDto?, onSiteClick: (SiteDto) -> Unit = 
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 private fun SiteChooserPreview() {
     val userDto = UserDto(
