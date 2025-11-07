@@ -26,7 +26,6 @@ kermit = "2.0.8"
 testResources = "0.10.1"
 vico = "2.3.0"
 koalaplot = "0.9.1"
-hotPreview = "0.2.0"
 compose-hot-reload = "1.0.0-rc02"
 firebase-android-bom = "34.4.0"
 gradlePlugins-crashlytics = "3.0.6"
@@ -75,7 +74,6 @@ vico = { group = "com.patrykandpatrick.vico", name = "multiplatform", version.re
 vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
 koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koalaplot" }
 test-resources = { module = "com.goncalossilva:resources", version.ref = "testResources" }
-hot-preview = { module = "de.drick.compose:hotpreview", version.ref = "hotPreview" }
 kastro = { module = "dev.jamesyox:kastro", version = "0.4.0" }
 firebase-android-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-android-bom" }
 firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }

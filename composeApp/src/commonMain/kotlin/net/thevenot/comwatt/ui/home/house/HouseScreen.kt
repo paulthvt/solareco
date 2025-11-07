@@ -60,7 +60,6 @@ import comwatt.composeapp.generated.resources.house_solar_panel_description
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.domain.model.Trend
 import net.thevenot.comwatt.ui.home.HomeScreenState
-import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
@@ -68,6 +67,7 @@ import net.thevenot.comwatt.ui.theme.powerProduction
 import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.max
@@ -635,7 +635,7 @@ private fun DrawScope.drawMaterialCard(
     )
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun HouseScreenSellingPreview() {
     ComwattTheme {
@@ -655,7 +655,7 @@ fun HouseScreenSellingPreview() {
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun HouseScreenInjectingPreview() {
     ComwattTheme {

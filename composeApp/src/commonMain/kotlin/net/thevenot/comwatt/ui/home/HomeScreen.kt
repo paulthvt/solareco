@@ -54,9 +54,6 @@ import comwatt.composeapp.generated.resources.last_data_refresh_time
 import comwatt.composeapp.generated.resources.last_data_refresh_time_zero
 import comwatt.composeapp.generated.resources.statistics_card_title
 import comwatt.composeapp.generated.resources.statistics_card_today_total
-import de.drick.compose.hotpreview.DisplayCutoutMode
-import de.drick.compose.hotpreview.HotPreview
-import de.drick.compose.hotpreview.NavigationBarMode
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
@@ -73,8 +70,6 @@ import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.home.weather.WeatherCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
-import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
-import net.thevenot.comwatt.ui.preview.HotPreviewScreenSizes
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -84,6 +79,7 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
@@ -345,16 +341,7 @@ fun DialogSettingsRow(
     }
 }
 
-@HotPreview(
-    widthDp = 411,
-    heightDp = 891,
-    density = 2.625f,
-    statusBar = true,
-    navigationBar = NavigationBarMode.GestureBottom,
-    displayCutout = DisplayCutoutMode.CameraTop
-)
-@HotPreviewScreenSizes
-@HotPreviewLightDark
+@Preview
 @Composable
 fun HomeScreenPreview() {
     ComwattTheme {

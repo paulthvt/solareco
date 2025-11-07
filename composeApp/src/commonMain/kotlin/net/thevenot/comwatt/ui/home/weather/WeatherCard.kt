@@ -32,12 +32,12 @@ import net.thevenot.comwatt.domain.model.DailyWeather
 import net.thevenot.comwatt.domain.model.WeatherCondition
 import net.thevenot.comwatt.domain.model.WeatherForecast
 import net.thevenot.comwatt.ui.home.HomeScreenState
-import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.getWeatherIcon
 import net.thevenot.comwatt.utils.DateFormatter
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -206,7 +206,7 @@ private fun WeatherDayItem(
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 private fun WeatherCardPreview() {
     ComwattTheme {

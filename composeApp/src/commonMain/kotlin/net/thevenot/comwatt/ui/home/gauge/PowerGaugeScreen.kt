@@ -59,7 +59,6 @@ import comwatt.composeapp.generated.resources.gauge_subtitle_production
 import comwatt.composeapp.generated.resources.gauge_subtitle_withdrawals
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.home.HomeScreenState
-import net.thevenot.comwatt.ui.preview.HotPreviewLightDark
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -76,6 +75,7 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeStart
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
@@ -504,7 +504,7 @@ fun DrawScope.drawLines(
 
 fun toRadians(deg: Double): Double = deg / 180.0 * PI
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun PowerGaugeScreenPreview() {
     ComwattTheme {
@@ -538,7 +538,7 @@ fun PowerGaugeScreenPreview() {
     }
 }
 
-@HotPreviewLightDark
+@Preview
 @Composable
 fun DefaultPreview() {
     ComwattTheme {
