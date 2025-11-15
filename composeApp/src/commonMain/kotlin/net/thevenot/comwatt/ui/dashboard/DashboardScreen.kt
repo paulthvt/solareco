@@ -96,10 +96,13 @@ import comwatt.composeapp.generated.resources.hour_range_selected_time
 import comwatt.composeapp.generated.resources.range_picker_button_custom
 import comwatt.composeapp.generated.resources.range_picker_button_day
 import comwatt.composeapp.generated.resources.range_picker_button_hour
+import comwatt.composeapp.generated.resources.range_picker_button_sixhour
 import comwatt.composeapp.generated.resources.range_picker_button_week
+import comwatt.composeapp.generated.resources.six_hour_range_selected_time
 import comwatt.composeapp.generated.resources.statistics_card_title
 import comwatt.composeapp.generated.resources.statistics_card_title_custom
 import comwatt.composeapp.generated.resources.statistics_card_title_hourly
+import comwatt.composeapp.generated.resources.statistics_card_title_sixhourly
 import comwatt.composeapp.generated.resources.statistics_card_title_weekly
 import comwatt.composeapp.generated.resources.week_range_selected_time_n_weeks_ago
 import comwatt.composeapp.generated.resources.week_range_selected_time_one_week_ago
@@ -246,6 +249,7 @@ fun DashboardScreenContent(
                         item(key = "range_stats_card") {
                             val statsTitle = when (uiState.selectedTimeUnit) {
                                 DashboardTimeUnit.HOUR -> stringResource(Res.string.statistics_card_title_hourly)
+                                DashboardTimeUnit.SIXHOUR -> stringResource(Res.string.statistics_card_title_sixhourly)
                                 DashboardTimeUnit.DAY -> stringResource(Res.string.statistics_card_title)
                                 DashboardTimeUnit.WEEK -> stringResource(Res.string.statistics_card_title_weekly)
                                 DashboardTimeUnit.CUSTOM -> stringResource(Res.string.statistics_card_title_custom)
@@ -276,6 +280,7 @@ fun DashboardScreenContent(
 private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String =
     when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}"
+        DashboardTimeUnit.SIXHOUR -> "${uiState.selectedTimeRange.sixHour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.sixHour.end.formatHourMinutes()}"
         DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.end.formatDayMonth()
         DashboardTimeUnit.WEEK -> "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${uiState.selectedTimeRange.week.end.formatDayMonth()}"
         DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${uiState.selectedTimeRange.custom.end.formatDayMonth()}"
@@ -290,12 +295,14 @@ private fun RangeButton(
 ) {
     val selectedValue = when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> uiState.selectedTimeRange.hour.selectedValue
+        DashboardTimeUnit.SIXHOUR -> uiState.selectedTimeRange.sixHour.selectedValue
         DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.selectedValue
         DashboardTimeUnit.WEEK -> uiState.selectedTimeRange.week.selectedValue
         DashboardTimeUnit.CUSTOM -> 0
     }
     val minBound = when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> 23
+        DashboardTimeUnit.SIXHOUR -> 7
         DashboardTimeUnit.DAY -> 364
         DashboardTimeUnit.WEEK -> 52
         DashboardTimeUnit.CUSTOM -> 0
@@ -328,6 +335,12 @@ private fun RangeButton(
                             uiState.selectedTimeRange.hour.selectedValue + 1
                         )
 
+                        DashboardTimeUnit.SIXHOUR -> pluralStringResource(
+                            Res.plurals.six_hour_range_selected_time,
+                            (uiState.selectedTimeRange.sixHour.selectedValue * 3) + 6,
+                            (uiState.selectedTimeRange.sixHour.selectedValue * 3) + 6
+                        )
+
                         DashboardTimeUnit.DAY -> when (uiState.selectedTimeRange.day.selectedValue) {
                             0 -> stringResource(Res.string.day_range_selected_time_today)
                             1 -> stringResource(Res.string.day_range_selected_time_yesterday)
@@ -355,6 +368,11 @@ private fun RangeButton(
                 when (uiState.selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> Text(
                         text = "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    DashboardTimeUnit.SIXHOUR -> Text(
+                        text = "${uiState.selectedTimeRange.sixHour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.sixHour.end.formatHourMinutes()}",
                         style = MaterialTheme.typography.bodySmall
                     )
 
@@ -402,6 +420,7 @@ private fun TimeUnitBar(
     ) {
         val options = listOf(
             stringResource(Res.string.range_picker_button_hour) to DashboardTimeUnit.HOUR,
+            stringResource(Res.string.range_picker_button_sixhour) to DashboardTimeUnit.SIXHOUR,
             stringResource(Res.string.range_picker_button_day) to DashboardTimeUnit.DAY,
             stringResource(Res.string.range_picker_button_week) to DashboardTimeUnit.WEEK,
             stringResource(Res.string.range_picker_button_custom) to DashboardTimeUnit.CUSTOM
