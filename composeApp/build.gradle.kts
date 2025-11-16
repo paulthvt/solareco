@@ -14,6 +14,8 @@ plugins {
     alias(libs.plugins.composeHotReload)
 }
 
+version = "1.0.0-SNAPSHOT"
+
 val isReleaseBuild = gradle.startParameter.taskNames.any {
     it.contains("release", ignoreCase = true)
 }
@@ -161,11 +163,22 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
 
-        versionCode =
-            (project.findProperty("VERSION_CODE") ?: System.getenv("VERSION_CODE"))?.toString()
+        // Use VERSION_CODE from project property or environment, or calculate from version
+        versionCode = (project.findProperty("VERSION_CODE") ?: System.getenv("VERSION_CODE"))?.toString()
                 ?.toIntOrNull()
-        versionName =
-            (project.findProperty("VERSION_NAME") ?: System.getenv("VERSION_NAME"))?.toString()
+            ?: run {
+                // Calculate versionCode from version if not provided
+                val versionStr = project.version.toString()
+                val versionParts = versionStr.replace("-SNAPSHOT", "").split(".")
+                val major = versionParts.getOrNull(0)?.toIntOrNull() ?: 1
+                val minor = versionParts.getOrNull(1)?.toIntOrNull() ?: 0
+                val patch = versionParts.getOrNull(2)?.toIntOrNull() ?: 0
+                major * 1000000 + minor * 1000 + patch
+            }
+
+        // Use VERSION_NAME from project property or environment, or use project version
+        versionName = (project.findProperty("VERSION_NAME") ?: System.getenv("VERSION_NAME"))?.toString()
+            ?: project.version.toString()
     }
 
     packaging {
@@ -230,3 +243,4 @@ dependencies {
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)
     add("kspIosArm64", libs.androidx.room.compiler)
 }
+
