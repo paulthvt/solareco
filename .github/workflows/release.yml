@@ -135,17 +135,41 @@ jobs:
             echo "RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD" >> local.properties
           fi
 
-      - name: Setup Firebase config (Android)
-        if: steps.check-release.outputs.should-release == 'true' && secrets.GOOGLE_SERVICES_JSON != ''
+      - name: Create google-services.json from template and secrets
+        if: steps.check-release.outputs.should-release == 'true'
+        shell: bash
         env:
-          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: echo "$GOOGLE_SERVICES_JSON" > composeApp/google-services.json
+          FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
+          FIREBASE_ANDROID_API_KEY: ${{ secrets.FIREBASE_ANDROID_API_KEY }}
+        run: |
+          # Use template and replace placeholders with actual values
+          sed -e "s/FIREBASE_PROJECT_NUMBER/$FIREBASE_PROJECT_NUMBER/g" \
+              -e "s/FIREBASE_PROJECT_ID/$FIREBASE_PROJECT_ID/g" \
+              -e "s/FIREBASE_STORAGE_BUCKET/$FIREBASE_STORAGE_BUCKET/g" \
+              -e "s/FIREBASE_ANDROID_APP_ID/$FIREBASE_ANDROID_APP_ID/g" \
+              -e "s/FIREBASE_ANDROID_API_KEY/$FIREBASE_ANDROID_API_KEY/g" \
+              composeApp/google-services.json.template > composeApp/google-services.json
 
-      - name: Setup Firebase config (iOS)
-        if: steps.check-release.outputs.should-release == 'true' && secrets.GOOGLE_SERVICE_INFO_PLIST != ''
+      - name: Create GoogleService-Info.plist from template and secrets
+        if: steps.check-release.outputs.should-release == 'true'
+        shell: bash
         env:
-          GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST }}
-        run: echo "$GOOGLE_SERVICE_INFO_PLIST" > iosApp/iosApp/GoogleService-Info.plist
+          FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY }}
+          FIREBASE_GCM_SENDER_ID: ${{ secrets.FIREBASE_GCM_SENDER_ID }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
+          FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
+        run: |
+          # Use template and replace placeholders with actual values
+          sed -e "s/FIREBASE_IOS_API_KEY/$FIREBASE_IOS_API_KEY/g" \
+              -e "s/FIREBASE_GCM_SENDER_ID/$FIREBASE_GCM_SENDER_ID/g" \
+              -e "s/FIREBASE_PROJECT_ID/$FIREBASE_PROJECT_ID/g" \
+              -e "s/FIREBASE_STORAGE_BUCKET/$FIREBASE_STORAGE_BUCKET/g" \
+              -e "s/FIREBASE_IOS_APP_ID/$FIREBASE_IOS_APP_ID/g" \
+              iosApp/iosApp/GoogleService-Info.plist.template > iosApp/iosApp/GoogleService-Info.plist
 
       - name: Semantic Release
         if: steps.check-release.outputs.should-release == 'true'
