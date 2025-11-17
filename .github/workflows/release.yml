@@ -105,21 +105,6 @@ jobs:
         if: steps.check-release.outputs.should-release == 'true'
         run: npm ci
 
-      - name: Generate GitHub App Token
-        if: steps.check-release.outputs.should-release == 'true'
-        id: generate-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.SEMANTIC_RELEASE_APP_ID }}
-          private-key: ${{ secrets.SEMANTIC_RELEASE_APP_PRIVATE_KEY }}
-
-      - name: Retrieve GitHub App User ID
-        if: steps.check-release.outputs.should-release == 'true'
-        id: get-user-id
-        env:
-          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
-        run: echo "user-id=$(gh api "/users/${{ steps.generate-token.outputs.app-slug }}[bot]" --jq .id)" >> "$GITHUB_OUTPUT"
-
       - name: Prepare local.properties for signing
         if: steps.check-release.outputs.should-release == 'true'
         env:
@@ -175,11 +160,7 @@ jobs:
         if: steps.check-release.outputs.should-release == 'true'
         id: semantic-release
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
-          GIT_AUTHOR_NAME: ${{ steps.generate-token.outputs.app-slug }}[bot]
-          GIT_AUTHOR_EMAIL: ${{ steps.get-user-id.outputs.user-id }}+${{ steps.generate-token.outputs.app-slug }}[bot]@users.noreply.github.com
-          GIT_COMMITTER_NAME: ${{ steps.generate-token.outputs.app-slug }}[bot]
-          GIT_COMMITTER_EMAIL: ${{ steps.get-user-id.outputs.user-id }}+${{ steps.generate-token.outputs.app-slug }}[bot]@users.noreply.github.com
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx semantic-release
 
       - name: Get Release Version
