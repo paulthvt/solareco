@@ -50,7 +50,7 @@ jobs:
         id: check-release
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "should-release=false" >> $GITHUB_OUTPUT
+            echo "should-release=true" >> $GITHUB_OUTPUT
             echo "Pull request - skipping release"
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]] || \
                [[ "${{ github.ref }}" == "refs/heads/develop" ]] || \
@@ -59,7 +59,7 @@ jobs:
             echo "should-release=true" >> $GITHUB_OUTPUT
             echo "Branch eligible for release"
           else
-            echo "should-release=true" >> $GITHUB_OUTPUT
+            echo "should-release=false" >> $GITHUB_OUTPUT
             echo "Branch not eligible for release"
           fi
 
