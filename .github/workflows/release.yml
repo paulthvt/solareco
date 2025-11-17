@@ -44,7 +44,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          persist-credentials: true
+          persist-credentials: false
 
       - name: Check if release should run
         id: check-release
@@ -156,11 +156,21 @@ jobs:
               -e "s/FIREBASE_IOS_APP_ID/$FIREBASE_IOS_APP_ID/g" \
               iosApp/iosApp/GoogleService-Info.plist.template > iosApp/iosApp/GoogleService-Info.plist
 
+      - name: Configure Git for semantic-release
+        if: steps.check-release.outputs.should-release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+
       - name: Semantic Release
         if: steps.check-release.outputs.should-release == 'true'
         id: semantic-release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+          GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
         run: npx semantic-release
 
       - name: Get Release Version
