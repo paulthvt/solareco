@@ -65,10 +65,6 @@
     {
       "name": "develop",
       "prerelease": "beta"
-    },
-    {
-      "name": "ci/add-semantic-release",
-      "prerelease": "beta"
     }
   ],
   "preset": "conventionalcommits",

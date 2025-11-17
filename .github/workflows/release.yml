@@ -50,7 +50,7 @@ jobs:
         id: check-release
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "should-release=true" >> $GITHUB_OUTPUT
+            echo "should-release=false" >> $GITHUB_OUTPUT
             echo "Pull request - skipping release"
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]] || \
                [[ "${{ github.ref }}" == "refs/heads/develop" ]] || \
