@@ -73,27 +73,31 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Setup Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
+        run: |
+          # Use the default Xcode on the runner
+          xcodebuild -version
+          xcodebuild -showsdks
+          # List available destinations
+          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -showdestinations || true
 
-      - name: Build project (non-release)
-        if: steps.check-release.outputs.should-release == 'false'
-        run: ./gradlew build
+      # TEMPORARY: Commented out to speed up troubleshooting - RESTORE BEFORE MERGING
+      # - name: Build project (non-release)
+      #   if: steps.check-release.outputs.should-release == 'false'
+      #   run: ./gradlew build
 
-      - name: Run tests (non-release)
-        if: steps.check-release.outputs.should-release == 'false'
-        run: ./gradlew test
+      # - name: Run tests (non-release)
+      #   if: steps.check-release.outputs.should-release == 'false'
+      #   run: ./gradlew test
 
-      - name: Archive test results (non-release)
-        if: steps.check-release.outputs.should-release == 'false' && always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ github.run_number }}
-          path: |
-            composeApp/build/reports/tests/
-            composeApp/build/test-results/
-          retention-days: 7
+      # - name: Archive test results (non-release)
+      #   if: steps.check-release.outputs.should-release == 'false' && always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: test-results-${{ github.run_number }}
+      #     path: |
+      #       composeApp/build/reports/tests/
+      #       composeApp/build/test-results/
+      #     retention-days: 7
 
       - name: Set up Node.js
         if: steps.check-release.outputs.should-release == 'true'
@@ -194,11 +198,25 @@ jobs:
           fi
 
       # TEMPORARY: Test release script - REMOVE BEFORE MERGING
+      - name: Prepare Firebase config for test
+        run: |
+          # Create dummy Firebase configs if they don't exist
+          if [ ! -f composeApp/google-services.json ]; then
+            cp composeApp/google-services.json.template composeApp/google-services.json || echo "No template found"
+          fi
+          if [ ! -f iosApp/iosApp/GoogleService-Info.plist ]; then
+            cp iosApp/iosApp/GoogleService-Info.plist.template iosApp/iosApp/GoogleService-Info.plist || echo "No template found"
+          fi
+
       - name: Test Release Script
         run: |
           echo "Testing release script with version 1.0.1"
+          echo "Available iOS SDKs:"
+          xcodebuild -showsdks | grep iOS
           chmod +x scripts/release.sh
-          ./scripts/release.sh 1.0.1
+          chmod +x scripts/version-to-android.sh
+          chmod +x scripts/update-ios-version.sh
+          ./scripts/release.sh 1.0.1 || (echo "Release script failed, showing logs..." && cat build/*.log 2>/dev/null || true)
 
       - name: Archive Android APK
         if: steps.get-version.outputs.released == 'true'

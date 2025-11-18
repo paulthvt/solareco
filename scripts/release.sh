@@ -25,17 +25,20 @@ echo "iOS Framework built successfully."
 
 echo "Building iOS App Archive..."
 # Build the iOS app archive
+# Note: We skip code signing for CI builds - signing should be done separately for distribution
 if ! xcodebuild archive \
   -project iosApp/iosApp.xcodeproj \
   -scheme iosApp \
   -configuration Release \
-  -destination "generic/platform=iOS" \
+  -sdk iphoneos \
+  -arch arm64 \
   -archivePath build/iosApp.xcarchive \
   CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="" \
   CODE_SIGNING_REQUIRED=NO \
   CODE_SIGNING_ALLOWED=NO \
-  DEVELOPMENT_TEAM=""; then
+  DEVELOPMENT_TEAM="" \
+  ONLY_ACTIVE_ARCH=NO; then
   echo "Error: iOS App archive failed"
   exit 1
 fi
