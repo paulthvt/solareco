@@ -23,20 +23,34 @@ echo "Building iOS Framework (required for iOS app)..."
 ./gradlew :composeApp:linkReleaseFrameworkIosArm64
 echo "iOS Framework built successfully."
 
-echo "Building iOS App..."
+echo "Building iOS App Archive..."
 # Build the iOS app archive
-xcodebuild archive \
+if ! xcodebuild archive \
   -project iosApp/iosApp.xcodeproj \
   -scheme iosApp \
   -configuration Release \
+  -destination "generic/platform=iOS" \
   -archivePath build/iosApp.xcarchive \
-  -sdk iphoneos \
-  DEVELOPMENT_TEAM="" \
+  CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="" \
   CODE_SIGNING_REQUIRED=NO \
-  CODE_SIGNING_ALLOWED=NO
-
+  CODE_SIGNING_ALLOWED=NO \
+  DEVELOPMENT_TEAM=""; then
+  echo "Error: iOS App archive failed"
+  exit 1
+fi
 echo "iOS App archived successfully."
+
+echo "Exporting iOS App IPA..."
+# Export the archive to create the .ipa file
+if ! xcodebuild -exportArchive \
+  -archivePath build/iosApp.xcarchive \
+  -exportOptionsPlist iosApp/exportOptions.plist \
+  -exportPath build/ios-release; then
+  echo "Error: iOS App export failed"
+  exit 1
+fi
+echo "iOS App IPA exported successfully."
 
 echo "Building Android Release..."
 ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease -PVERSION_NAME="$VERSION_NAME" -PVERSION_CODE="$VERSION_CODE"
@@ -45,4 +59,5 @@ echo "Android Release built successfully."
 echo "Release artifacts are ready:"
 echo "  - Android APK: composeApp/build/outputs/apk/release/"
 echo "  - Android Bundle: composeApp/build/outputs/bundle/release/"
+echo "  - iOS IPA: build/ios-release/iosApp.ipa"
 echo "  - iOS Archive: build/iosApp.xcarchive/"

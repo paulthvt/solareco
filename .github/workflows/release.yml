@@ -193,6 +193,14 @@ jobs:
             echo "released=false" >> $GITHUB_OUTPUT
           fi
 
+      # TEMPORARY: Test release script - REMOVE BEFORE MERGING
+      - name: Test Release Script
+        if: steps.get-version.outputs.released == 'true'
+        run: |
+          echo "Testing release script with version 1.0.1"
+          chmod +x scripts/release.sh
+          ./scripts/release.sh 1.0.1
+
       - name: Archive Android APK
         if: steps.get-version.outputs.released == 'true'
         uses: actions/upload-artifact@v4
@@ -214,7 +222,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-app-${{ steps.get-version.outputs.version }}
-          path: build/iosApp.xcarchive/
+          path: |
+            build/iosApp.xcarchive/
+            build/ios-release/*.ipa
           retention-days: 30
 
       - name: Build Summary (non-release)
@@ -239,4 +249,5 @@ jobs:
           echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Android APK" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Android Bundle (AAB)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ iOS IPA" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ iOS App Archive" >> $GITHUB_STEP_SUMMARY
