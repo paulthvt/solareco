@@ -23,20 +23,30 @@ echo "Building iOS Framework (required for iOS app)..."
 ./gradlew :composeApp:linkReleaseFrameworkIosArm64
 echo "iOS Framework built successfully."
 
-echo "Building iOS App..."
+echo "Building iOS App Archive..."
 # Build the iOS app archive
-xcodebuild archive \
+# Note: We skip code signing for CI builds - signing should be done separately for distribution
+if ! xcodebuild archive \
   -project iosApp/iosApp.xcodeproj \
   -scheme iosApp \
   -configuration Release \
-  -archivePath build/iosApp.xcarchive \
   -sdk iphoneos \
-  DEVELOPMENT_TEAM="" \
+  -arch arm64 \
+  -archivePath build/iosApp.xcarchive \
+  CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="" \
   CODE_SIGNING_REQUIRED=NO \
-  CODE_SIGNING_ALLOWED=NO
-
+  CODE_SIGNING_ALLOWED=NO \
+  DEVELOPMENT_TEAM="" \
+  ONLY_ACTIVE_ARCH=NO; then
+  echo "Error: iOS App archive failed"
+  exit 1
+fi
 echo "iOS App archived successfully."
+
+echo "Note: Skipping IPA export for unsigned build."
+echo "The .xcarchive contains the app binary and can be used for verification."
+echo "For distribution, the archive needs to be properly signed and exported."
 
 echo "Building Android Release..."
 ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease -PVERSION_NAME="$VERSION_NAME" -PVERSION_CODE="$VERSION_CODE"
@@ -45,4 +55,4 @@ echo "Android Release built successfully."
 echo "Release artifacts are ready:"
 echo "  - Android APK: composeApp/build/outputs/apk/release/"
 echo "  - Android Bundle: composeApp/build/outputs/bundle/release/"
-echo "  - iOS Archive: build/iosApp.xcarchive/"
+echo "  - iOS Archive (unsigned): build/iosApp.xcarchive/"
