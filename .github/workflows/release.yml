@@ -195,7 +195,6 @@ jobs:
 
       # TEMPORARY: Test release script - REMOVE BEFORE MERGING
       - name: Test Release Script
-        if: steps.get-version.outputs.released == 'true'
         run: |
           echo "Testing release script with version 1.0.1"
           chmod +x scripts/release.sh
