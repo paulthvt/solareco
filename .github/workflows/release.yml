@@ -80,25 +80,23 @@ jobs:
           # List available destinations
           xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -showdestinations || true
 
-      # TEMPORARY: Commented out to speed up troubleshooting - RESTORE BEFORE MERGING
-      # - name: Build project (non-release)
-      #   if: steps.check-release.outputs.should-release == 'false'
-      #   run: ./gradlew build
+      - name: Build project (non-release)
+        if: steps.check-release.outputs.should-release == 'false'
+        run: ./gradlew build
 
-      # - name: Run tests (non-release)
-      #   if: steps.check-release.outputs.should-release == 'false'
-      #   run: ./gradlew test
+      - name: Run tests (non-release)
+        if: steps.check-release.outputs.should-release == 'false'
+        run: ./gradlew test
 
-      # - name: Archive test results (non-release)
-      #   if: steps.check-release.outputs.should-release == 'false' && always()
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: test-results-${{ github.run_number }}
-      #     path: |
-      #       composeApp/build/reports/tests/
-      #       composeApp/build/test-results/
-      #     retention-days: 7
-
+      - name: Archive test results (non-release)
+        if: steps.check-release.outputs.should-release == 'false' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ github.run_number }}
+          path: |
+            composeApp/build/reports/tests/
+            composeApp/build/test-results/
+          retention-days: 7
       - name: Set up Node.js
         if: steps.check-release.outputs.should-release == 'true'
         uses: actions/setup-node@v4
@@ -197,17 +195,6 @@ jobs:
             echo "released=false" >> $GITHUB_OUTPUT
           fi
 
-      # TEMPORARY: Test release script - REMOVE BEFORE MERGING
-      - name: Prepare Firebase config for test
-        run: |
-          # Create dummy Firebase configs if they don't exist
-          if [ ! -f composeApp/google-services.json ]; then
-            cp composeApp/google-services.json.template composeApp/google-services.json || echo "No template found"
-          fi
-          if [ ! -f iosApp/iosApp/GoogleService-Info.plist ]; then
-            cp iosApp/iosApp/GoogleService-Info.plist.template iosApp/iosApp/GoogleService-Info.plist || echo "No template found"
-          fi
-
       - name: Test Release Script
         run: |
           echo "Testing release script with version 1.0.1"
@@ -239,9 +226,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ios-app-${{ steps.get-version.outputs.version }}
-          path: |
-            build/iosApp.xcarchive/
-            build/ios-release/*.ipa
+          path: build/iosApp.xcarchive/
           retention-days: 30
 
       - name: Build Summary (non-release)
@@ -266,5 +251,6 @@ jobs:
           echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Android APK" >> $GITHUB_STEP_SUMMARY
           echo "- ✅ Android Bundle (AAB)" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ iOS IPA" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ iOS App Archive" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ iOS Archive (unsigned)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** iOS archive requires signing for distribution. The unsigned archive can be used for verification and can be signed later." >> $GITHUB_STEP_SUMMARY

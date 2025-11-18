@@ -44,16 +44,9 @@ if ! xcodebuild archive \
 fi
 echo "iOS App archived successfully."
 
-echo "Exporting iOS App IPA..."
-# Export the archive to create the .ipa file
-if ! xcodebuild -exportArchive \
-  -archivePath build/iosApp.xcarchive \
-  -exportOptionsPlist iosApp/exportOptions.plist \
-  -exportPath build/ios-release; then
-  echo "Error: iOS App export failed"
-  exit 1
-fi
-echo "iOS App IPA exported successfully."
+echo "Note: Skipping IPA export for unsigned build."
+echo "The .xcarchive contains the app binary and can be used for verification."
+echo "For distribution, the archive needs to be properly signed and exported."
 
 echo "Building Android Release..."
 ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease -PVERSION_NAME="$VERSION_NAME" -PVERSION_CODE="$VERSION_CODE"
@@ -62,5 +55,4 @@ echo "Android Release built successfully."
 echo "Release artifacts are ready:"
 echo "  - Android APK: composeApp/build/outputs/apk/release/"
 echo "  - Android Bundle: composeApp/build/outputs/bundle/release/"
-echo "  - iOS IPA: build/ios-release/iosApp.ipa"
-echo "  - iOS Archive: build/iosApp.xcarchive/"
+echo "  - iOS Archive (unsigned): build/iosApp.xcarchive/"
