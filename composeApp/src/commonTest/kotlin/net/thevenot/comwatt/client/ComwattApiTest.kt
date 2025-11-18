@@ -4,8 +4,10 @@ import com.goncalossilva.resources.Resource
 import io.ktor.http.HttpMethod
 import io.ktor.http.Url
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.TimeZone
 import net.thevenot.comwatt.utils.configureMockEngine
 import net.thevenot.comwatt.utils.mockHttpClient
+import net.thevenot.comwatt.utils.toZoneString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -36,9 +38,17 @@ class ComwattApiTest {
         val serverBaseUrl = "http://localhost"
         val deviceId = 132
         val endTime = Instant.parse("2021-09-01T00:00:00Z")
+
+        // Use the system timezone to generate the expected URL, matching what the API client will do
+        val timeZone = TimeZone.currentSystemDefault()
+        val expectedEndTimeString = endTime.toZoneString(timeZone)
+
+        // URL-encode the timestamp to match what Ktor actually sends
+        val encodedEndTime = expectedEndTimeString.replace(":", "%3A").replace("+", "%2B")
+        
         val client = mockHttpClient(
             configureMockEngine(
-                url = Url("$serverBaseUrl/api/aggregations/time-series?id=$deviceId&measureKind=FLOW&aggregationLevel=NONE&timeAgoUnit=DAY&timeAgoValue=1&end=2021-09-01T02%3A00%3A00%2B02%3A00"),
+                url = Url("$serverBaseUrl/api/aggregations/time-series?id=$deviceId&measureKind=FLOW&aggregationLevel=NONE&timeAgoUnit=DAY&timeAgoValue=1&end=$encodedEndTime"),
                 expectedResponseBody = Resource("src/commonTest/resources/api/responses/time-series-response.json").readText(),
                 httpMethod = HttpMethod.Get
             )
