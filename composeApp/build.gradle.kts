@@ -144,7 +144,13 @@ android {
                 ?: localProps.getProperty("RELEASE_KEY_PASSWORD")
 
             if (!storeFilePath.isNullOrBlank()) {
-                storeFile = file(storeFilePath)
+                val keystoreFile = file(storeFilePath)
+                if (keystoreFile.exists()) {
+                    storeFile = keystoreFile
+                    println("[comwatt] Using keystore file: ${keystoreFile.absolutePath}")
+                } else {
+                    println("[comwatt] WARNING: Keystore file not found at: ${keystoreFile.absolutePath}")
+                }
             }
             if (!storePwd.isNullOrBlank()) {
                 storePassword = storePwd
@@ -199,18 +205,37 @@ android {
                 "proguard-rules.pro"
             )
 
-            val hasSigning = listOf(
-                localProps.getProperty("RELEASE_STORE_FILE") ?: System.getenv("RELEASE_STORE_FILE"),
-                localProps.getProperty("RELEASE_STORE_PASSWORD")
-                    ?: System.getenv("RELEASE_STORE_PASSWORD"),
-                localProps.getProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS"),
-                localProps.getProperty("RELEASE_KEY_PASSWORD")
-                    ?: System.getenv("RELEASE_KEY_PASSWORD"),
-            ).all { it != null && it.isNotBlank() }
-            if (hasSigning) {
-                signingConfig = signingConfigs.getByName("release")
+            val storeFilePath =
+                localProps.getProperty("RELEASE_STORE_FILE") ?: System.getenv("RELEASE_STORE_FILE")
+            val storePwd = localProps.getProperty("RELEASE_STORE_PASSWORD")
+                ?: System.getenv("RELEASE_STORE_PASSWORD")
+            val keyAliasProp =
+                localProps.getProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS")
+            val keyPwd = localProps.getProperty("RELEASE_KEY_PASSWORD")
+                ?: System.getenv("RELEASE_KEY_PASSWORD")
+
+            val hasSigningSecrets = !storeFilePath.isNullOrBlank() &&
+                    !storePwd.isNullOrBlank() &&
+                    !keyAliasProp.isNullOrBlank() &&
+                    !keyPwd.isNullOrBlank()
+
+            val keystoreExists = if (!storeFilePath.isNullOrBlank()) {
+                file(storeFilePath).exists()
             } else {
-                println("[comwatt] Release signing configuration not provided. The release build will be UNSIGNED.")
+                false
+            }
+
+            if (hasSigningSecrets && keystoreExists) {
+                signingConfig = signingConfigs.getByName("release")
+                println("[comwatt] ✅ Release signing configuration applied successfully")
+            } else {
+                println("[comwatt] ⚠️  Release signing configuration not complete:")
+                println("[comwatt]   - Signing secrets present: $hasSigningSecrets")
+                println("[comwatt]   - Keystore file exists: $keystoreExists")
+                if (!storeFilePath.isNullOrBlank() && !keystoreExists) {
+                    println("[comwatt]   - Keystore path: $storeFilePath")
+                }
+                println("[comwatt]   The release build will be UNSIGNED.")
             }
         }
     }
