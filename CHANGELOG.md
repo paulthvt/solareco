@@ -1,3 +1,13 @@
+## [1.0.0-beta.2](https://github.com/paulthvt/solareco/compare/1.0.0-beta.1...1.0.0-beta.2) (2025-11-19)
+
+### Bug Fixes
+
+* enhance Android release workflow with keystore setup and APK signing verification ([56e1b0e](https://github.com/paulthvt/solareco/commit/56e1b0e9bdc02f25260dbc813135262329ab9c3b))
+
+### Continuous Integration
+
+* add automated back-merge from main to develop in CI workflow ([79882f1](https://github.com/paulthvt/solareco/commit/79882f10f32bb592281037cf808d6817f0f70765))
+
 ## 1.0.0-beta.1 (2025-11-18)
 
 ### Features
