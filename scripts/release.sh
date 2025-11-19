@@ -52,7 +52,38 @@ echo "Building Android Release..."
 ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease -PVERSION_NAME="$VERSION_NAME" -PVERSION_CODE="$VERSION_CODE"
 echo "Android Release built successfully."
 
+# Verify APK signing
+echo ""
+echo "Verifying APK signing status..."
+APK_DIR="composeApp/build/outputs/apk/release"
+
+if [ -f "$APK_DIR/composeApp-release.apk" ]; then
+  echo "✅ Found signed APK: composeApp-release.apk"
+  APK_FILE="$APK_DIR/composeApp-release.apk"
+elif [ -f "$APK_DIR/composeApp-release-unsigned.apk" ]; then
+  echo "⚠️  WARNING: Found unsigned APK: composeApp-release-unsigned.apk"
+  echo "⚠️  This APK cannot be installed on devices!"
+  echo "⚠️  Please ensure signing configuration is properly set up."
+  APK_FILE="$APK_DIR/composeApp-release-unsigned.apk"
+else
+  echo "❌ ERROR: No APK found in $APK_DIR"
+  ls -la "$APK_DIR" || true
+  exit 1
+fi
+
+# Try to verify the APK signature using apksigner if available
+#if command -v apksigner &> /dev/null; then
+#  echo ""
+#  echo "Checking APK signature with apksigner..."
+#  if apksigner verify "$APK_FILE" 2>&1 | grep -q "Verified using"; then
+#    echo "✅ APK is properly signed and verified"
+#  else
+#    echo "⚠️  APK signature verification failed or APK is unsigned"
+#  fi
+#fi
+
+echo ""
 echo "Release artifacts are ready:"
-echo "  - Android APK: composeApp/build/outputs/apk/release/"
+echo "  - Android APK: $APK_FILE"
 echo "  - Android Bundle: composeApp/build/outputs/bundle/release/"
 echo "  - iOS Archive (unsigned): build/iosApp.xcarchive/"
