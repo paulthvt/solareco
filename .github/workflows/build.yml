@@ -254,3 +254,33 @@ jobs:
           echo "- ✅ iOS Archive (unsigned)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Note:** iOS archive requires signing for distribution. The unsigned archive can be used for verification and can be signed later." >> $GITHUB_STEP_SUMMARY
+
+      - name: Merge main into develop
+        if: github.ref == 'refs/heads/main' && steps.get-version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          git fetch origin
+          if git rev-parse --verify develop >/dev/null 2>&1; then
+            git checkout develop
+          else
+            if git rev-parse --verify origin/develop >/dev/null 2>&1; then
+              git checkout -b develop origin/develop
+            else
+              echo "WARNING: origin/develop does not exist. Aborting automated back-merge.";
+              exit 0
+            fi
+          fi
+          if git merge --ff-only main; then
+            echo "Fast-forwarded develop to main."
+          else
+            echo "Fast-forward not possible, creating a merge commit."
+            git merge --no-ff main -m "chore(main): merge main changes back into develop"
+          fi
+          if git push origin develop; then
+            echo "Successfully synced main into develop."
+          else
+            echo "WARNING: Push failed (branch protection or permissions). Create a manual PR.";
+          fi
+        continue-on-error: true
