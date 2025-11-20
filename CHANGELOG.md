@@ -1,3 +1,9 @@
+## [1.0.0-beta.4](https://github.com/paulthvt/solareco/compare/1.0.0-beta.3...1.0.0-beta.4) (2025-11-20)
+
+### Bug Fixes
+
+* refine Firebase Crashlytics setup for Android release builds ([b8a3654](https://github.com/paulthvt/solareco/commit/b8a3654c953892933944312a90308d5de85c4caf))
+
 ## [1.0.0-beta.3](https://github.com/paulthvt/solareco/compare/1.0.0-beta.2...1.0.0-beta.3) (2025-11-20)
 
 ### Bug Fixes
