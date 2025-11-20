@@ -1,3 +1,9 @@
+## [1.0.0-beta.3](https://github.com/paulthvt/solareco/compare/1.0.0-beta.2...1.0.0-beta.3) (2025-11-20)
+
+### Bug Fixes
+
+* update Android keystore variable and enhance iOS archive process with zip creation ([d3c141a](https://github.com/paulthvt/solareco/commit/d3c141a1af923c7c0fa85dd2d98cdb579c7a2f8c))
+
 ## [1.0.0-beta.2](https://github.com/paulthvt/solareco/compare/1.0.0-beta.1...1.0.0-beta.2) (2025-11-19)
 
 ### Bug Fixes
