@@ -234,16 +234,6 @@ jobs:
             echo "released=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Test Release Script
-        run: |
-          echo "Testing release script with version 1.0.1"
-          echo "Available iOS SDKs:"
-          xcodebuild -showsdks | grep iOS
-          chmod +x scripts/release.sh
-          chmod +x scripts/version-to-android.sh
-          chmod +x scripts/update-ios-version.sh
-          ./scripts/release.sh 1.0.1 || (echo "Release script failed, showing logs..." && cat build/*.log 2>/dev/null || true)
-
       - name: Archive Android APK
         if: steps.get-version.outputs.released == 'true'
         uses: actions/upload-artifact@v4
