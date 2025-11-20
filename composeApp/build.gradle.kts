@@ -20,12 +20,15 @@ val isReleaseBuild = gradle.startParameter.taskNames.any {
     it.contains("release", ignoreCase = true)
 }
 
-val isMobileBuild = gradle.startParameter.taskNames.any { taskName ->
+val isAndroidBuild = gradle.startParameter.taskNames.any { taskName ->
     taskName.contains("android", ignoreCase = true) ||
-            taskName.contains("ios", ignoreCase = true)
+            taskName.contains("assemble", ignoreCase = true) ||
+            taskName.contains("bundle", ignoreCase = true)
 }
 
-if (isReleaseBuild && isMobileBuild) {
+// Apply Firebase plugins for Android release builds
+// The google-services.json file will be created before the build runs
+if (isReleaseBuild && isAndroidBuild) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
     apply(plugin = libs.plugins.crashlytics.get().pluginId)
 }
@@ -65,7 +68,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.ktor.client.android)
-            if (isReleaseBuild && file("google-services.json").exists()) {
+            if (isReleaseBuild) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
         }
@@ -109,7 +112,7 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-            if (isReleaseBuild && file("../iosApp/iosApp/GoogleService-Info.plist").exists()) {
+            if (isReleaseBuild) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
         }
