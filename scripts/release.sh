@@ -44,6 +44,12 @@ if ! xcodebuild archive \
 fi
 echo "iOS App archived successfully."
 
+echo "Creating zip archive of iOS .xcarchive..."
+cd build
+zip -r -q iosApp.xcarchive.zip iosApp.xcarchive
+cd ..
+echo "iOS Archive zip created: build/iosApp.xcarchive.zip"
+
 echo "Note: Skipping IPA export for unsigned build."
 echo "The .xcarchive contains the app binary and can be used for verification."
 echo "For distribution, the archive needs to be properly signed and exported."
@@ -87,3 +93,4 @@ echo "Release artifacts are ready:"
 echo "  - Android APK: $APK_FILE"
 echo "  - Android Bundle: composeApp/build/outputs/bundle/release/"
 echo "  - iOS Archive (unsigned): build/iosApp.xcarchive/"
+echo "  - iOS Archive (zipped): build/iosApp.xcarchive.zip"

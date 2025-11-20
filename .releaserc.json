@@ -38,7 +38,7 @@
             "label": "Android App Bundle"
           },
           {
-            "path": "build/iosApp.xcarchive/**/*",
+            "path": "build/iosApp.xcarchive.zip",
             "label": "iOS App Archive"
           }
         ]
