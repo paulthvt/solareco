@@ -30,15 +30,15 @@
       {
         "assets": [
           {
-            "path": "composeApp/build/outputs/apk/release/*.apk",
+            "path": "composeApp/build/outputs/apk/release/solareco-*.apk",
             "label": "Android APK"
           },
           {
-            "path": "composeApp/build/outputs/bundle/release/*.aab",
+            "path": "composeApp/build/outputs/bundle/release/solareco-*.aab",
             "label": "Android App Bundle"
           },
           {
-            "path": "build/iosApp.xcarchive.zip",
+            "path": "build/solareco-*-ios.xcarchive.zip",
             "label": "iOS App Archive"
           }
         ]

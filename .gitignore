@@ -28,6 +28,6 @@ keystore.properties
 release-signing.properties
 
 # Firebase configuration files (use templates instead)
-google-services.json
-GoogleService-Info.plist
+**/google-services.json
+**/GoogleService-Info.plist
 node_modules

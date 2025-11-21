@@ -46,9 +46,9 @@ echo "iOS App archived successfully."
 
 echo "Creating zip archive of iOS .xcarchive..."
 cd build
-zip -r -q iosApp.xcarchive.zip iosApp.xcarchive
+zip -r -q solareco-${VERSION_NAME}-ios.xcarchive.zip iosApp.xcarchive
 cd ..
-echo "iOS Archive zip created: build/iosApp.xcarchive.zip"
+echo "iOS Archive zip created: build/solareco-${VERSION_NAME}-ios.xcarchive.zip"
 
 echo "Note: Skipping IPA export for unsigned build."
 echo "The .xcarchive contains the app binary and can be used for verification."
@@ -63,16 +63,17 @@ echo ""
 echo "Verifying APK signing status..."
 APK_DIR="composeApp/build/outputs/apk/release"
 
-if [ -f "$APK_DIR/composeApp-release.apk" ]; then
-  echo "✅ Found signed APK: composeApp-release.apk"
-  APK_FILE="$APK_DIR/composeApp-release.apk"
-elif [ -f "$APK_DIR/composeApp-release-unsigned.apk" ]; then
-  echo "⚠️  WARNING: Found unsigned APK: composeApp-release-unsigned.apk"
+if [ -f "$APK_DIR/solareco-${VERSION_NAME}-release.apk" ]; then
+  echo "✅ Found signed APK: solareco-${VERSION_NAME}-release.apk"
+  APK_FILE="$APK_DIR/solareco-${VERSION_NAME}-release.apk"
+elif [ -f "$APK_DIR/solareco-${VERSION_NAME}-release-unsigned.apk" ]; then
+  echo "⚠️  WARNING: Found unsigned APK: solareco-${VERSION_NAME}-release-unsigned.apk"
   echo "⚠️  This APK cannot be installed on devices!"
   echo "⚠️  Please ensure signing configuration is properly set up."
-  APK_FILE="$APK_DIR/composeApp-release-unsigned.apk"
+  APK_FILE="$APK_DIR/solareco-${VERSION_NAME}-release-unsigned.apk"
 else
   echo "❌ ERROR: No APK found in $APK_DIR"
+  echo "Expected: solareco-${VERSION_NAME}-release.apk"
   ls -la "$APK_DIR" || true
   exit 1
 fi
@@ -91,6 +92,6 @@ fi
 echo ""
 echo "Release artifacts are ready:"
 echo "  - Android APK: $APK_FILE"
-echo "  - Android Bundle: composeApp/build/outputs/bundle/release/"
+echo "  - Android Bundle: composeApp/build/outputs/bundle/release/solareco-${VERSION_NAME}-release.aab"
 echo "  - iOS Archive (unsigned): build/iosApp.xcarchive/"
-echo "  - iOS Archive (zipped): build/iosApp.xcarchive.zip"
+echo "  - iOS Archive (zipped): build/solareco-${VERSION_NAME}-ios.xcarchive.zip"

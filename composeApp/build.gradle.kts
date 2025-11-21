@@ -127,6 +127,12 @@ android {
     namespace = "net.thevenot.comwatt"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
+    val versionName =
+        (project.findProperty("VERSION_NAME") ?: System.getenv("VERSION_NAME"))?.toString()
+            ?: project.version.toString()
+    val cleanVersionName = versionName.replace("-SNAPSHOT", "")
+    setProperty("archivesBaseName", "solareco-$cleanVersionName")
+
     // Load properties from local.properties
     val localProperties = File(rootDir, "local.properties")
     val localProps = Properties().apply {
@@ -184,10 +190,6 @@ android {
                 val patch = versionParts.getOrNull(2)?.toIntOrNull() ?: 0
                 major * 1000000 + minor * 1000 + patch
             }
-
-        // Use VERSION_NAME from project property or environment, or use project version
-        versionName = (project.findProperty("VERSION_NAME") ?: System.getenv("VERSION_NAME"))?.toString()
-            ?: project.version.toString()
     }
 
     packaging {
