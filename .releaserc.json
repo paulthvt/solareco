@@ -8,9 +8,10 @@
       {
         "assets": [
           "CHANGELOG.md",
-          "iosApp/iosApp/Info.plist"
-        ],
-        "message": "chore(release): ${nextRelease.version} \n\n${nextRelease.notes}"
+          "iosApp/iosApp/Info.plist",
+          "package.json",
+          "package-lock.json"
+        ]
       }
     ],
     [
