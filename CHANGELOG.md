@@ -1,3 +1,9 @@
+## [1.0.1-beta.2](https://github.com/paulthvt/solareco/compare/1.0.1-beta.1...1.0.1-beta.2) (2025-11-21)
+
+### Bug Fixes
+
+* remove custom commit message ([#180](https://github.com/paulthvt/solareco/issues/180)) ([caab09e](https://github.com/paulthvt/solareco/commit/caab09efaa38352ab5b3854aab0778442b993396))
+
 ## [1.0.1-beta.1](https://github.com/paulthvt/solareco/compare/1.0.0...1.0.1-beta.1) (2025-11-21)
 
 ### Bug Fixes
