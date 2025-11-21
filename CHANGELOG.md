@@ -1,3 +1,25 @@
+## [1.0.1-beta.1](https://github.com/paulthvt/solareco/compare/1.0.0...1.0.1-beta.1) (2025-11-21)
+
+### Bug Fixes
+
+* enhance Android release workflow with keystore setup and APK signing verification ([d392785](https://github.com/paulthvt/solareco/commit/d392785ab9b4f02e142df896b54854411d57d580))
+* iOS release process with IPA export and summary updates ([#173](https://github.com/paulthvt/solareco/issues/173)) ([73228f7](https://github.com/paulthvt/solareco/commit/73228f7eb818bc6d14f179d0b455d10a212ce83a))
+* refine Firebase Crashlytics setup for Android release builds ([f10395f](https://github.com/paulthvt/solareco/commit/f10395f6df74b383efd1fed74a7906b680fbcbbb))
+* rename release artifacts to include version name ([757d67f](https://github.com/paulthvt/solareco/commit/757d67fb7bad065d22af7fca1e746ccfbb37a895))
+* update Android keystore variable and enhance iOS archive process with zip creation ([336e848](https://github.com/paulthvt/solareco/commit/336e8481ad712c78c03c10c5e43f430cf243ddcc))
+
+### Miscellaneous Chores
+
+* **release:** 1.0.0-beta.1 ([fd42d8c](https://github.com/paulthvt/solareco/commit/fd42d8c9b90a98a7b68948116e0815af3bb30b85))
+* **release:** 1.0.0-beta.2 ([55cb296](https://github.com/paulthvt/solareco/commit/55cb296ab9cad5e7b2079e48737388382c7fe797))
+* **release:** 1.0.0-beta.3 ([de3a6b7](https://github.com/paulthvt/solareco/commit/de3a6b782be1043178ad352999cc80a391144a11))
+* **release:** 1.0.0-beta.4 ([49cc231](https://github.com/paulthvt/solareco/commit/49cc231e048ae8e9ac08726e253dedbc6b4d9cf0))
+* **release:** 1.0.0-beta.5 ([37760b8](https://github.com/paulthvt/solareco/commit/37760b850a6c3b184084979d69c6d46d35f10c02))
+
+### Continuous Integration
+
+* add automated back-merge from main to develop in CI workflow ([ca98d41](https://github.com/paulthvt/solareco/commit/ca98d41cffd4ed177f27ce1104e528aff5a68435))
+
 ## [1.0.0-beta.5](https://github.com/paulthvt/solareco/compare/1.0.0-beta.4...1.0.0-beta.5) (2025-11-21)
 
 ### Bug Fixes
