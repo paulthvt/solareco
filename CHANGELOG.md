@@ -1,3 +1,9 @@
+## [1.0.0-beta.5](https://github.com/paulthvt/solareco/compare/1.0.0-beta.4...1.0.0-beta.5) (2025-11-21)
+
+### Bug Fixes
+
+* rename release artifacts to include version name ([43b8828](https://github.com/paulthvt/solareco/commit/43b8828fbd65254c13d76f5176bc43f743ee5748))
+
 ## [1.0.0-beta.4](https://github.com/paulthvt/solareco/compare/1.0.0-beta.3...1.0.0-beta.4) (2025-11-20)
 
 ### Bug Fixes
