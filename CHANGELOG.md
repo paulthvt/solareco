@@ -1,3 +1,13 @@
+## [1.0.1-beta.3](https://github.com/paulthvt/solareco/compare/1.0.1-beta.2...1.0.1-beta.3) (2025-11-22)
+
+### Bug Fixes
+
+* **deps:** update androidx.room to v2.8.4 ([c3c5bc6](https://github.com/paulthvt/solareco/commit/c3c5bc646ad73385fe02b9464969c40f163a85ea))
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-java action to v5 ([86529c6](https://github.com/paulthvt/solareco/commit/86529c66711b8a67c81d1b606322e8159d562834))
+
 ## [1.0.1-beta.2](https://github.com/paulthvt/solareco/compare/1.0.1-beta.1...1.0.1-beta.2) (2025-11-21)
 
 ### Bug Fixes
