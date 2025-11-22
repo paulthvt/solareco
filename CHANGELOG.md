@@ -1,3 +1,13 @@
+## [1.0.1-beta.5](https://github.com/paulthvt/solareco/compare/1.0.1-beta.4...1.0.1-beta.5) (2025-11-22)
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.6.0 ([d5c11ac](https://github.com/paulthvt/solareco/commit/d5c11ac63c89fa4d3ee53ab6f16537b0c94bdb74))
+
+### Miscellaneous Chores
+
+* **deps:** update actions/checkout action to v6 ([8fd2e82](https://github.com/paulthvt/solareco/commit/8fd2e827303886f44350bcf576044eb2cce73676))
+
 ## [1.0.1-beta.4](https://github.com/paulthvt/solareco/compare/1.0.1-beta.3...1.0.1-beta.4) (2025-11-22)
 
 ### Bug Fixes
