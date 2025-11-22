@@ -101,7 +101,7 @@ jobs:
         if: steps.check-release.outputs.should-release == 'true'
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: NPM Packages Installation
         if: steps.check-release.outputs.should-release == 'true'
