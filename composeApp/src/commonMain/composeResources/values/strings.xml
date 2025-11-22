@@ -97,4 +97,7 @@
     <string name="settings_production_noise_threshold_description">Set the threshold (in W) below which production values are considered noise and set to zero</string>
     <string name="settings_production_noise_threshold_icon_content_description">Production Noise Threshold</string>
     <string name="settings_production_noise_threshold_subtitle">Threshold</string>
+    <string name="user_settings_panel_version">Version %1$s</string>
+    <string name="user_settings_panel_github_repo">View on GitHub</string>
+    <string name="user_settings_panel_report_issue">Report an Issue</string>
 </resources>
