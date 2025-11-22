@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -37,6 +38,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -46,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
@@ -303,63 +304,55 @@ private fun VersionAndLinksSection() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = stringResource(Res.string.user_settings_panel_version, version),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-        
+        TextButton(
+            onClick = {
+                uriHandler.openUri("https://github.com/paulthvt/solareco/releases/tag/$version")
+            },
+            shapes = ButtonDefaults.shapes()
+        ) {
+            Text(
+                text = stringResource(Res.string.user_settings_panel_version, version),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier
-                    .clickable {
-                        uriHandler.openUri("https://github.com/pthevenot/comwatt")
-                    }
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            TextButton(
+                onClick = {
+                    uriHandler.openUri("https://github.com/pthevenot/comwatt")
+                },
+                shapes = ButtonDefaults.shapes()
             ) {
                 Icon(
                     imageVector = Icons.Default.Code,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(AppTheme.dimens.paddingExtraSmall))
                 Text(
                     text = stringResource(Res.string.user_settings_panel_github_repo),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
 
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Row(
-                modifier = Modifier
-                    .clickable {
-                        uriHandler.openUri("https://github.com/pthevenot/comwatt/issues/new")
-                    }
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            TextButton(
+                onClick = {
+                    uriHandler.openUri("https://github.com/pthevenot/comwatt/issues/new")
+                },
+                shapes = ButtonDefaults.shapes()
             ) {
                 Icon(
                     imageVector = Icons.Default.BugReport,
                     contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    modifier = Modifier.size(16.dp)
                 )
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(AppTheme.dimens.paddingExtraSmall))
                 Text(
                     text = stringResource(Res.string.user_settings_panel_report_issue),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    style = MaterialTheme.typography.bodySmall
                 )
             }
         }
