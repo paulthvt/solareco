@@ -98,4 +98,7 @@
     <string name="settings_production_noise_threshold_description">Définissez le seuil (en W) en dessous duquel les valeurs de production sont considérées comme du bruit et réglé sur zéro</string>
     <string name="settings_production_noise_threshold_icon_content_description">Seuil de bruit de production</string>
     <string name="settings_production_noise_threshold_subtitle">Seuil</string>
+    <string name="user_settings_panel_version">Version %1$s</string>
+    <string name="user_settings_panel_github_repo">Voir sur GitHub</string>
+    <string name="user_settings_panel_report_issue">Signaler un problème</string>
 </resources>

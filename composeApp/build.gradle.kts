@@ -190,6 +190,13 @@ android {
                 val patch = versionParts.getOrNull(2)?.toIntOrNull() ?: 0
                 major * 1000000 + minor * 1000 + patch
             }
+
+        // Use the versionName already declared at the top of android block
+        this.versionName = versionName
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     packaging {
