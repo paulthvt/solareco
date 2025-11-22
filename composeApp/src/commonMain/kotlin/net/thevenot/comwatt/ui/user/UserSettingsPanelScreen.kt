@@ -21,7 +21,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
@@ -43,15 +45,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.user_settings_panel_change_site
 import comwatt.composeapp.generated.resources.user_settings_panel_close_button_content_description
+import comwatt.composeapp.generated.resources.user_settings_panel_github_repo
 import comwatt.composeapp.generated.resources.user_settings_panel_logout_button
+import comwatt.composeapp.generated.resources.user_settings_panel_report_issue
 import comwatt.composeapp.generated.resources.user_settings_panel_settings
 import comwatt.composeapp.generated.resources.user_settings_panel_user_avatar_content_description
+import comwatt.composeapp.generated.resources.user_settings_panel_version
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.getAppVersion
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import org.jetbrains.compose.resources.stringResource
@@ -141,6 +149,12 @@ private fun UserSettingsPanelScreenContent(
                     onChangeSiteClick = onChangeSiteClick,
                     onSettingsClick = onSettingsClick
                 )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                VersionAndLinksSection()
+
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -276,6 +290,79 @@ private fun SettingsMenuItem(
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+private fun VersionAndLinksSection() {
+    val uriHandler = LocalUriHandler.current
+    val version = getAppVersion()
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(Res.string.user_settings_panel_version, version),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(
+                modifier = Modifier
+                    .clickable {
+                        uriHandler.openUri("https://github.com/pthevenot/comwatt")
+                    }
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Code,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(Res.string.user_settings_panel_github_repo),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Row(
+                modifier = Modifier
+                    .clickable {
+                        uriHandler.openUri("https://github.com/pthevenot/comwatt/issues/new")
+                    }
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.BugReport,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(Res.string.user_settings_panel_report_issue),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
     }
 }
 
