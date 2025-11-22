@@ -31,7 +31,7 @@ firebase-android-bom = "34.4.0"
 gradlePlugins-crashlytics = "3.0.6"
 gradlePlugins-google-services = "4.4.4"
 firebase-gitlive-sdk = "2.4.0"
-material3 = "1.10.0-alpha04"
+material3 = "1.10.0-alpha05"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
