@@ -1,3 +1,15 @@
+## [1.1.0-beta.1](https://github.com/paulthvt/solareco/compare/1.0.1-beta.6...1.1.0-beta.1) (2025-11-22)
+
+### Features
+
+* add version number in settings ([#191](https://github.com/paulthvt/solareco/issues/191)) ([3cdbe09](https://github.com/paulthvt/solareco/commit/3cdbe09e74df09306ed04bb23e01ee27a22e422e))
+
+### Miscellaneous Chores
+
+* **deps:** update actions/upload-artifact action to v5 ([1626714](https://github.com/paulthvt/solareco/commit/16267144951718bd61de4baa38392ef4be93f45d))
+* **deps:** update dependency conventional-changelog-conventionalcommits to v9 ([ae81e91](https://github.com/paulthvt/solareco/commit/ae81e91f79375885d05f20c29da3abfe7db28880))
+* **deps:** update gradle/actions action to v5 ([a769c55](https://github.com/paulthvt/solareco/commit/a769c550ff17752e6fb36c0bd53a09debfbd5f6f))
+
 ## [1.0.1-beta.6](https://github.com/paulthvt/solareco/compare/1.0.1-beta.5...1.0.1-beta.6) (2025-11-22)
 
 ### Bug Fixes
