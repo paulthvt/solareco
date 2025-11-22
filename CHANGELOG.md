@@ -1,3 +1,13 @@
+## [1.0.1-beta.6](https://github.com/paulthvt/solareco/compare/1.0.1-beta.5...1.0.1-beta.6) (2025-11-22)
+
+### Bug Fixes
+
+* **deps:** update dependency androidx.datastore:datastore-preferences-core to v1.2.0 ([41a673d](https://github.com/paulthvt/solareco/commit/41a673d84eec1339146d9cba47fc6645ce97434b))
+
+### Miscellaneous Chores
+
+* **deps:** update actions/setup-node action to v6 ([0bfc58e](https://github.com/paulthvt/solareco/commit/0bfc58ebe8c97bf7d95ba5a6da4cce18afb8c89b))
+
 ## [1.0.1-beta.5](https://github.com/paulthvt/solareco/compare/1.0.1-beta.4...1.0.1-beta.5) (2025-11-22)
 
 ### Bug Fixes
