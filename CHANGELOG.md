@@ -1,3 +1,13 @@
+## [1.0.1-beta.4](https://github.com/paulthvt/solareco/compare/1.0.1-beta.3...1.0.1-beta.4) (2025-11-22)
+
+### Bug Fixes
+
+* **deps:** update dependency org.jetbrains.compose.material3:material3 to v1.10.0-alpha05 ([e484c6f](https://github.com/paulthvt/solareco/commit/e484c6f6718d86675a0cdc8e776d27dbf506397f))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency org.jetbrains.compose.hot-reload to v1.0.0-rc04 ([7d64d7a](https://github.com/paulthvt/solareco/commit/7d64d7a76ec3050e8e451b11685bb156c4377a55))
+
 ## [1.0.1-beta.3](https://github.com/paulthvt/solareco/compare/1.0.1-beta.2...1.0.1-beta.3) (2025-11-22)
 
 ### Bug Fixes
