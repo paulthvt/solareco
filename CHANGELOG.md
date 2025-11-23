@@ -1,3 +1,9 @@
+## [1.1.0-beta.4](https://github.com/paulthvt/solareco/compare/1.1.0-beta.3...1.1.0-beta.4) (2025-11-23)
+
+### Bug Fixes
+
+* **deps:** update dependency androidx.sqlite:sqlite-bundled to v2.6.2 ([3e1f184](https://github.com/paulthvt/solareco/commit/3e1f18474892de0743ab4e717f80a1765b59a303))
+
 ## [1.1.0-beta.3](https://github.com/paulthvt/solareco/compare/1.1.0-beta.2...1.1.0-beta.3) (2025-11-23)
 
 ### Features
