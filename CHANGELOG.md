@@ -1,3 +1,9 @@
+## [1.1.0-beta.3](https://github.com/paulthvt/solareco/compare/1.1.0-beta.2...1.1.0-beta.3) (2025-11-23)
+
+### Features
+
+* refactor hour and six-hour pickers to use a common interval picker component ([#192](https://github.com/paulthvt/solareco/issues/192)) ([3aa5ed7](https://github.com/paulthvt/solareco/commit/3aa5ed7be36e94f73ff888b1d77d3774570ce8e2))
+
 ## [1.1.0-beta.2](https://github.com/paulthvt/solareco/compare/1.1.0-beta.1...1.1.0-beta.2) (2025-11-23)
 
 ### Bug Fixes
