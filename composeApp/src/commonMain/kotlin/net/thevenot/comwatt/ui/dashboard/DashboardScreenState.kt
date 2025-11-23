@@ -26,6 +26,7 @@ data class DashboardScreenState(
 
 data class SelectedTimeRange(
     val hour: HourRange = HourRange.fromSelectedValue(0),
+    val sixHour: SixHourRange = SixHourRange.fromSelectedValue(0),
     val day: DayRange = DayRange.fromSelectedValue(0),
     val week: WeekRange = WeekRange.fromSelectedValue(0),
     val custom: CustomRange = CustomRange.fromSelectedValues(
@@ -35,6 +36,7 @@ data class SelectedTimeRange(
 ) {
     fun withUpdatedRange(
         hourSelectedValue: Int = hour.selectedValue,
+        sixHourSelectedValue: Int = sixHour.selectedValue,
         daySelectedValue: Int = day.selectedValue,
         weekSelectedValue: Int = week.selectedValue,
         customSelectedStartValue: Instant = custom.selectedStartValue,
@@ -42,6 +44,7 @@ data class SelectedTimeRange(
     ): SelectedTimeRange {
         return this
             .withUpdatedHourRange(hourSelectedValue)
+            .withUpdatedSixHourRange(sixHourSelectedValue)
             .withUpdatedDayRange(daySelectedValue)
             .withUpdatedWeekRange(weekSelectedValue)
             .withUpdatedCustomRange(customSelectedStartValue, customSelectedEndValue)
@@ -50,6 +53,12 @@ data class SelectedTimeRange(
     fun withUpdatedHourRange(selectedValue: Int = hour.selectedValue): SelectedTimeRange {
         return this.copy(
             hour = HourRange.fromSelectedValue(selectedValue)
+        )
+    }
+
+    fun withUpdatedSixHourRange(selectedValue: Int = sixHour.selectedValue): SelectedTimeRange {
+        return this.copy(
+            sixHour = SixHourRange.fromSelectedValue(selectedValue)
         )
     }
 
@@ -90,6 +99,29 @@ data class HourRange(
                 selectedValue,
                 targetHourStart.toLocalDateTime(currentTimeZone),
                 now.toLocalDateTime(currentTimeZone)
+            )
+        }
+    }
+}
+
+data class SixHourRange(
+    val selectedValue: Int,
+    val start: LocalDateTime,
+    val end: LocalDateTime
+) {
+    companion object {
+        fun fromSelectedValue(selectedValue: Int): SixHourRange {
+            val currentTimeZone = TimeZone.currentSystemDefault()
+            val now = Clock.System.now()
+            // Each step is 3 hours (to show 6-hour windows with 3-hour increments)
+            // selectedValue 0: now-6h to now, selectedValue 1: now-9h to now-3h, etc.
+            val targetEnd = now.minus(selectedValue * 3, DateTimeUnit.HOUR)
+            val targetStart = now.minus((selectedValue * 3) + 6, DateTimeUnit.HOUR)
+
+            return SixHourRange(
+                selectedValue,
+                targetStart.toLocalDateTime(currentTimeZone),
+                targetEnd.toLocalDateTime(currentTimeZone)
             )
         }
     }

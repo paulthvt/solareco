@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.hour_range_dialog_picker_yesterday_label
-import comwatt.composeapp.generated.resources.hour_range_selected_time
+import comwatt.composeapp.generated.resources.six_hour_range_selected_time
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -26,7 +26,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.Clock
 
 @Composable
-fun HourPicker(
+fun SixHourPicker(
     currentDateTime: LocalDateTime,
     defaultSelectedTimeRange: Int,
     onIntervalSelected: (Int) -> Unit
@@ -39,23 +39,23 @@ fun HourPicker(
         defaultSelectedIndex = defaultSelectedTimeRange,
         onIntervalSelected = onIntervalSelected,
         buttonContent = { intervalIndex, _, data ->
-            val timeInterval = data as HourInterval
-            HourRangeButtonContent(intervalIndex, timeInterval)
+            val timeInterval = data as SixHourInterval
+            SixHourRangeButtonContent(intervalIndex, timeInterval)
         }
     )
 }
 
 @Composable
-private fun HourRangeButtonContent(
+private fun SixHourRangeButtonContent(
     intervalIndex: Int,
-    timeInterval: HourInterval
+    timeInterval: SixHourInterval
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = pluralStringResource(
-                Res.plurals.hour_range_selected_time,
-                intervalIndex + 1,
-                intervalIndex + 1
+                Res.plurals.six_hour_range_selected_time,
+                (intervalIndex * 3) + 6,
+                (intervalIndex * 3) + 6
             ),
             style = MaterialTheme.typography.titleMedium,
         )
@@ -67,7 +67,7 @@ private fun HourRangeButtonContent(
     }
 }
 
-data class HourInterval(
+data class SixHourInterval(
     val startTime: LocalDateTime,
     val endTime: LocalDateTime
 )
@@ -79,10 +79,12 @@ private fun computeItems(currentDateTime: LocalDateTime, yesterdayLabel: String)
     var previousDay = currentDay
     var intervalIndex = 0
 
-    (0..23).forEach { hourOffset ->
+    // Create intervals: 6h, 9h, 12h, 15h, 18h, 21h, 24h ago, etc.
+    // Each interval is 6 hours long, starting at 3-hour increments
+    (0..7).forEach { stepOffset ->
         val currentTime = currentDateTime.toInstant(TimeZone.currentSystemDefault())
-        val endTime = currentTime.minus(hourOffset, DateTimeUnit.HOUR)
-        val startTime = currentTime.minus(hourOffset + 1, DateTimeUnit.HOUR)
+        val endTime = currentTime.minus(stepOffset * 3, DateTimeUnit.HOUR)
+        val startTime = currentTime.minus((stepOffset * 3) + 6, DateTimeUnit.HOUR)
 
         val startLocalTime = startTime.toLocalDateTime(TimeZone.currentSystemDefault())
         val endLocalTime = endTime.toLocalDateTime(TimeZone.currentSystemDefault())
@@ -95,7 +97,7 @@ private fun computeItems(currentDateTime: LocalDateTime, yesterdayLabel: String)
         result.add(
             PickerListItem.IntervalItem(
                 index = intervalIndex,
-                data = HourInterval(startLocalTime, endLocalTime)
+                data = SixHourInterval(startLocalTime, endLocalTime)
             )
         )
         intervalIndex++
@@ -105,10 +107,10 @@ private fun computeItems(currentDateTime: LocalDateTime, yesterdayLabel: String)
 
 @Preview
 @Composable
-fun HourPickerPreview() {
+fun SixHourPickerPreview() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     ComwattTheme {
-        HourPicker(
+        SixHourPicker(
             currentDateTime = now,
             defaultSelectedTimeRange = 0,
             onIntervalSelected = { _ -> }

@@ -156,6 +156,7 @@ class DashboardViewModel(
     private fun mapDashboardTimeUnitToTimeUnit(unit: DashboardTimeUnit): TimeUnit {
         return when (unit) {
             DashboardTimeUnit.HOUR -> TimeUnit.HOUR
+            DashboardTimeUnit.SIXHOUR -> TimeUnit.HOUR
             DashboardTimeUnit.DAY -> TimeUnit.DAY
             DashboardTimeUnit.WEEK -> TimeUnit.WEEK
             DashboardTimeUnit.CUSTOM -> TimeUnit.CUSTOM
@@ -170,6 +171,7 @@ class DashboardViewModel(
             DashboardTimeUnit.HOUR,
             DashboardTimeUnit.DAY,
             DashboardTimeUnit.WEEK -> null
+            DashboardTimeUnit.SIXHOUR -> timeRange.sixHour.start
             DashboardTimeUnit.CUSTOM -> timeRange.custom.start
         }
     }
@@ -180,6 +182,7 @@ class DashboardViewModel(
     ): LocalDateTime {
         return when (timeUnit) {
             DashboardTimeUnit.HOUR -> timeRange.hour.end
+            DashboardTimeUnit.SIXHOUR -> timeRange.sixHour.end
             DashboardTimeUnit.DAY -> timeRange.day.end
             DashboardTimeUnit.WEEK -> timeRange.week.end
             DashboardTimeUnit.CUSTOM -> timeRange.custom.end
@@ -221,6 +224,14 @@ class DashboardViewModel(
                         )
                     }
 
+                    DashboardTimeUnit.SIXHOUR -> _uiState.update {
+                        it.copy(
+                            selectedTimeRange = it.selectedTimeRange.withUpdatedSixHourRange(
+                                it.selectedTimeRange.sixHour.selectedValue - 1
+                            )
+                        )
+                    }
+
                     DashboardTimeUnit.DAY -> _uiState.update {
                         it.copy(
                             selectedTimeRange = it.selectedTimeRange.withUpdatedDayRange(
@@ -247,6 +258,14 @@ class DashboardViewModel(
                         it.copy(
                             selectedTimeRange = it.selectedTimeRange.withUpdatedHourRange(
                                 it.selectedTimeRange.hour.selectedValue + 1
+                            )
+                        )
+                    }
+
+                    DashboardTimeUnit.SIXHOUR -> _uiState.update {
+                        it.copy(
+                            selectedTimeRange = it.selectedTimeRange.withUpdatedSixHourRange(
+                                it.selectedTimeRange.sixHour.selectedValue + 1
                             )
                         )
                     }
@@ -313,6 +332,7 @@ class DashboardViewModel(
     ): Pair<LocalDateTime, LocalDateTime> {
         return when (unit) {
             DashboardTimeUnit.HOUR -> range.hour.start to range.hour.end
+            DashboardTimeUnit.SIXHOUR -> range.sixHour.start to range.sixHour.end
             DashboardTimeUnit.DAY -> range.day.start to range.day.end
             DashboardTimeUnit.WEEK -> range.week.start to range.week.end
             DashboardTimeUnit.CUSTOM -> range.custom.start to range.custom.end
