@@ -1,3 +1,14 @@
+## [1.1.0-beta.2](https://github.com/paulthvt/solareco/compare/1.1.0-beta.1...1.1.0-beta.2) (2025-11-23)
+
+### Bug Fixes
+
+* **deps:** update vico to v2.3.6 ([baee0cc](https://github.com/paulthvt/solareco/commit/baee0cc9876fe15933e156c6d7ff0953d30d1f81))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency node to v24 ([a4bd141](https://github.com/paulthvt/solareco/commit/a4bd1419bb21a46c93c00b8b9468c310fa0829df))
+* **deps:** update semantic-release monorepo ([cd26701](https://github.com/paulthvt/solareco/commit/cd26701de7dcae3183fdc654b7dc589360d44a32))
+
 ## [1.1.0-beta.1](https://github.com/paulthvt/solareco/compare/1.0.1-beta.6...1.1.0-beta.1) (2025-11-22)
 
 ### Features
