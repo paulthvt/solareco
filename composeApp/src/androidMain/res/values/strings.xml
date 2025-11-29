@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">comwatt</string>
+    <string name="widget_description">Shows your last hour energy consumption</string>
 </resources>

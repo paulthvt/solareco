@@ -22,11 +22,21 @@ actual class Factory {
         return System.getProperty("java.io.tmpdir")
     }
 
-    actual fun createDataStore(): DataStore<Preferences> = createDataStore(
+    actual fun createApi(): ComwattApi = commonCreateApi()
+}
+
+/**
+ * Singleton DataStore instance for iOS
+ * Prevents multiple DataStore instances
+ */
+private val dataStoreSingletonLazy: Lazy<DataStore<Preferences>> = lazy {
+    createDataStore(
         producePath = {
             "${System.getProperty("java.io.tmpdir")}/$dataStoreFileName"
         }
     )
+}
 
-    actual fun createApi(): ComwattApi = commonCreateApi()
+actual fun Factory.getDataStoreSingleton(): DataStore<Preferences> {
+    return dataStoreSingletonLazy.value
 }

@@ -35,8 +35,16 @@ actual class Factory {
         return requireNotNull(documentDirectory?.path)
     }
 
+    actual fun createApi(): ComwattApi = commonCreateApi()
+}
+
+/**
+ * Singleton DataStore instance for iOS
+ * Prevents multiple DataStore instances
+ */
+private val dataStoreSingletonLazy: Lazy<DataStore<Preferences>> = lazy {
     @OptIn(ExperimentalForeignApi::class)
-    actual fun createDataStore(): DataStore<Preferences> = createDataStore(
+    createDataStore(
         producePath = {
             val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(
                 directory = NSDocumentDirectory,
@@ -48,6 +56,12 @@ actual class Factory {
             requireNotNull(documentDirectory).path + "/$dataStoreFileName"
         }
     )
+}
 
-    actual fun createApi(): ComwattApi = commonCreateApi()
+/**
+ * Actual implementation for iOS
+ * Returns singleton DataStore instance
+ */
+actual fun Factory.getDataStoreSingleton(): DataStore<Preferences> {
+    return dataStoreSingletonLazy.value
 }
