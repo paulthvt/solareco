@@ -3,6 +3,8 @@ package net.thevenot.comwatt.widget
 import arrow.core.Either
 import co.touchlab.kermit.Logger
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.domain.FetchWidgetConsumptionUseCase
+import net.thevenot.comwatt.domain.exception.DomainError
 
 /**
  * Cross-platform widget manager
@@ -16,7 +18,7 @@ class WidgetManager(
     /**
      * Update widget data across platforms
      */
-    suspend fun updateWidgetData(siteId: Int): Either<String, Unit> {
+    suspend fun updateWidgetData(siteId: Int): Either<DomainError, Unit> {
         logger.d { "Updating widget data for site $siteId" }
 
         val fetchUseCase = FetchWidgetConsumptionUseCase(dataRepository)
@@ -38,7 +40,7 @@ class WidgetManager(
                     Either.Right(Unit)
                 } catch (e: Exception) {
                     logger.e(e) { "Error updating widgets" }
-                    Either.Left(e.message ?: "Unknown error")
+                    Either.Left(DomainError.Generic(e.message ?: "Unknown error"))
                 }
             }
         }

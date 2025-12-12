@@ -1,12 +1,15 @@
-package net.thevenot.comwatt.widget
+package net.thevenot.comwatt.domain
 
 import arrow.core.Either
 import co.touchlab.kermit.Logger
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.domain.exception.DomainError
+import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.TimeAgoUnit
+import net.thevenot.comwatt.widget.WidgetConsumptionData
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Use case to fetch consumption data for widgets
@@ -19,7 +22,7 @@ class FetchWidgetConsumptionUseCase(
     /**
      * Fetch last hour consumption data for widget display
      */
-    suspend fun execute(siteId: Int): Either<String, WidgetConsumptionData> {
+    suspend fun execute(siteId: Int): Either<DomainError, WidgetConsumptionData> {
         return try {
             logger.d { "Fetching widget consumption data for site $siteId" }
 
@@ -32,9 +35,15 @@ class FetchWidgetConsumptionUseCase(
             )
 
             response.mapLeft { apiError ->
-                val errorMessage = apiError.toString()
-                logger.e { "Failed to fetch widget data: $errorMessage" }
-                errorMessage
+                logger.e { "Failed to fetch widget data: $apiError" }
+
+                // Handle 401 Unauthorized - try auto login
+                if (apiError is ApiError.HttpError && apiError.code == 401) {
+                    logger.d { "Got 401, attempting auto login" }
+                    dataRepository.tryAutoLogin({}, {})
+                }
+
+                DomainError.Api(apiError)
             }.map { siteTimeSeries ->
                 // Convert timestamps to epoch milliseconds
                 val timestamps = siteTimeSeries.timestamps.map { timestamp: String ->
@@ -47,6 +56,7 @@ class FetchWidgetConsumptionUseCase(
                 }
 
                 val consumptions = siteTimeSeries.consumptions
+                val productions = siteTimeSeries.productions
 
                 // Calculate statistics
                 val maxConsumption = consumptions.maxOrNull() ?: 0.0
@@ -56,20 +66,30 @@ class FetchWidgetConsumptionUseCase(
                     0.0
                 }
 
+                val maxProduction = productions.maxOrNull() ?: 0.0
+                val averageProduction = if (productions.isNotEmpty()) {
+                    productions.average()
+                } else {
+                    0.0
+                }
+
                 val widgetData = WidgetConsumptionData(
                     timestamps = timestamps,
                     consumptions = consumptions,
+                    productions = productions,
                     lastUpdateTime = Clock.System.now().toEpochMilliseconds(),
                     maxConsumption = maxConsumption,
-                    averageConsumption = averageConsumption
+                    averageConsumption = averageConsumption,
+                    maxProduction = maxProduction,
+                    averageProduction = averageProduction
                 )
 
-                logger.d { "Widget data fetched successfully: ${consumptions.size} data points" }
+                logger.d { "Widget data fetched successfully: ${consumptions.size} data points (consumption), ${productions.size} data points (production)" }
                 widgetData
             }
         } catch (e: Exception) {
             logger.e(e) { "Exception while fetching widget data" }
-            Either.Left(e.message ?: "Unknown error")
+            Either.Left(DomainError.Generic(e.message ?: "Unknown error"))
         }
     }
 }

@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.widget
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -17,14 +18,30 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import arrow.core.Either
 import co.touchlab.kermit.Logger
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import net.thevenot.comwatt.di.Factory
 import net.thevenot.comwatt.di.dataRepository
 import net.thevenot.comwatt.di.dataStore
+import net.thevenot.comwatt.domain.FetchWidgetConsumptionUseCase
 import java.util.concurrent.TimeUnit
 
 /**
+ * Check if system is in dark mode
+ */
+private fun isSystemInDarkMode(context: Context): Boolean {
+    val nightModeFlags = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+    return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
+}
+
+/**
  * Android Widget using Glance
+ *
+ * Note: This widget operates independently of the main app's UI and ViewModel.
+ * It uses WorkManager for periodic updates (every 15 minutes) and can be
+ * manually updated via WidgetViewModel in the main app.
  */
 class ConsumptionWidget : GlanceAppWidget() {
 
@@ -73,7 +90,7 @@ class ConsumptionWidget : GlanceAppWidget() {
                                 data = result.value,
                                 widthPx = 640,
                                 heightPx = 240,
-                                isDarkMode = true
+                                isDarkMode = isSystemInDarkMode(context)
                             )
 
                             imageBytes?.let { bytes ->
@@ -112,6 +129,8 @@ class ConsumptionWidget : GlanceAppWidget() {
 
         /**
          * Schedule periodic widget updates
+         * Note: Android system may delay updates to optimize battery.
+         * Use the refresh button in the widget for immediate updates.
          */
         fun scheduleWidgetUpdates(context: Context) {
             logger.d { "Scheduling widget updates" }
@@ -125,6 +144,7 @@ class ConsumptionWidget : GlanceAppWidget() {
                 repeatIntervalTimeUnit = TimeUnit.MINUTES
             )
                 .setConstraints(constraints)
+                .setInitialDelay(1, TimeUnit.MINUTES) // Start updating after 1 minute
                 .build()
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
@@ -133,7 +153,7 @@ class ConsumptionWidget : GlanceAppWidget() {
                 workRequest
             )
 
-            logger.d { "Widget updates scheduled" }
+            logger.d { "Widget updates scheduled with 15-minute interval" }
         }
 
         /**
@@ -156,14 +176,31 @@ class ConsumptionWidgetReceiver : GlanceAppWidgetReceiver() {
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
-        logger.d { "Widget enabled, scheduling updates" }
+        logger.d { "Widget enabled, scheduling updates and triggering immediate refresh" }
         ConsumptionWidget.scheduleWidgetUpdates(context)
+        // Trigger immediate update
+        CoroutineScope(Dispatchers.IO).launch {
+            ConsumptionWidget.updateWidgetData(context)
+        }
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
         logger.d { "Widget disabled, cancelling updates" }
         ConsumptionWidget.cancelWidgetUpdates(context)
+    }
+
+    override fun onUpdate(
+        context: Context,
+        appWidgetManager: android.appwidget.AppWidgetManager,
+        appWidgetIds: IntArray
+    ) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
+        logger.d { "Widget update requested (configuration change or system update)" }
+        // Trigger update on configuration changes (like theme changes)
+        CoroutineScope(Dispatchers.IO).launch {
+            ConsumptionWidget.updateWidgetData(context)
+        }
     }
 }
 

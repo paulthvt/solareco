@@ -1,16 +1,23 @@
 package net.thevenot.comwatt.widget
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
+import androidx.glance.action.ActionParameters
+import androidx.glance.appwidget.action.ActionCallback
+import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.layout.Alignment
@@ -29,8 +36,13 @@ import co.touchlab.kermit.Logger
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import net.thevenot.comwatt.R
 import net.thevenot.comwatt.di.dataStore
 import java.io.File
+
+// Power scheme colors (Dark mode values)
+private val PowerProductionColor = Color(0xFF66BB6A)   // Green 400
+private val PowerConsumptionColor = Color(0xFFFFB300)  // Amber 700
 
 @Composable
 fun ConsumptionWidgetContent() {
@@ -59,10 +71,10 @@ fun ConsumptionWidgetContent() {
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
                 .cornerRadius(16.dp)
-                .padding(16.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Header
+            // Header with refresh button
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.Start,
@@ -71,55 +83,80 @@ fun ConsumptionWidgetContent() {
                 Text(
                     text = "⚡",
                     style = TextStyle(
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.Bold
                     )
                 )
 
-                Spacer(modifier = GlanceModifier.width(8.dp))
+                Spacer(modifier = GlanceModifier.width(6.dp))
 
                 Text(
-                    text = "Consumption",
+                    text = "Energy Overview",
                     style = TextStyle(
-                        fontSize = 16.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = GlanceTheme.colors.onSurface
-                    )
+                    ),
+                    modifier = GlanceModifier.defaultWeight()
+                )
+
+                // Refresh button
+                CircleIconButton(
+                    imageProvider = ImageProvider(R.drawable.ic_refresh_dark),
+                    contentDescription = "Refresh",
+                    onClick = actionRunCallback<RefreshWidgetAction>()
                 )
             }
 
-            Spacer(modifier = GlanceModifier.height(8.dp))
+//            Spacer(modifier = GlanceModifier.height(6.dp))
 
-            // Statistics
-            if (widgetData.consumptions.isNotEmpty()) {
+            // Statistics - Compact layout
+            if (widgetData.consumptions.isNotEmpty() || widgetData.productions.isNotEmpty()) {
                 Row(
                     modifier = GlanceModifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.Start
+                    horizontalAlignment = Alignment.Start,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatisticItem(
-                        label = "Current",
-                        value = "${widgetData.consumptions.lastOrNull()?.toInt() ?: 0} W",
-                        valueColor = GlanceTheme.colors.primary
-                    )
+                    // Consumption
+                    if (widgetData.consumptions.isNotEmpty()) {
+                        Text(
+                            text = "🔴",
+                            style = TextStyle(fontSize = 10.sp)
+                        )
+                        Spacer(modifier = GlanceModifier.width(2.dp))
+                        Text(
+                            text = "${widgetData.consumptions.lastOrNull()?.toInt() ?: 0}W",
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GlanceTheme.colors.error // Use error color for consumption (amber/red)
+                            )
+                        )
+                    }
 
-                    Spacer(modifier = GlanceModifier.width(16.dp))
+                    if (widgetData.consumptions.isNotEmpty() && widgetData.productions.isNotEmpty()) {
+                        Spacer(modifier = GlanceModifier.width(12.dp))
+                    }
 
-                    StatisticItem(
-                        label = "Average",
-                        value = "${widgetData.averageConsumption.toInt()} W",
-                        valueColor = GlanceTheme.colors.onSurface
-                    )
-
-                    Spacer(modifier = GlanceModifier.width(16.dp))
-
-                    StatisticItem(
-                        label = "Peak",
-                        value = "${widgetData.maxConsumption.toInt()} W",
-                        valueColor = GlanceTheme.colors.tertiary
-                    )
+                    // Production
+                    if (widgetData.productions.isNotEmpty()) {
+                        Text(
+                            text = "🟢",
+                            style = TextStyle(fontSize = 10.sp)
+                        )
+                        Spacer(modifier = GlanceModifier.width(2.dp))
+                        Text(
+                            text = "${widgetData.productions.lastOrNull()?.toInt() ?: 0}W",
+                            style = TextStyle(
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = GlanceTheme.colors.primary // Use primary color for production (green)
+                            )
+                        )
+                    }
                 }
 
-                Spacer(modifier = GlanceModifier.height(12.dp))
+                Spacer(modifier = GlanceModifier.height(6.dp))
 
                 // Try to load and display chart image
                 val chartImageFile = File(context.filesDir, "widget_chart.png")
@@ -128,10 +165,10 @@ fun ConsumptionWidgetContent() {
                     if (bitmap != null) {
                         Image(
                             provider = ImageProvider(bitmap),
-                            contentDescription = "Consumption chart",
+                            contentDescription = "Energy chart",
                             modifier = GlanceModifier
                                 .fillMaxWidth()
-                                .height(100.dp)
+                                .defaultWeight()
                         )
                     } else {
                         // Fallback to ASCII chart
@@ -142,20 +179,19 @@ fun ConsumptionWidgetContent() {
                     ChartFallback(widgetData)
                 }
 
-                Spacer(modifier = GlanceModifier.height(8.dp))
+                Spacer(modifier = GlanceModifier.height(4.dp))
 
                 // Last update time
                 val lastUpdate = if (widgetData.lastUpdateTime > 0) {
                     val instant = Instant.fromEpochMilliseconds(widgetData.lastUpdateTime)
                     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-                    "Updated: ${
-                        String.format(
-                            java.util.Locale.US,
-                            "%02d:%02d",
-                            localDateTime.hour,
-                            localDateTime.minute
-                        )
-                    }"
+                    val timeStr = String.format(
+                        java.util.Locale.US,
+                        "%02d:%02d",
+                        localDateTime.hour,
+                        localDateTime.minute
+                    )
+                    "Last update: $timeStr"
                 } else {
                     "No data"
                 }
@@ -163,7 +199,7 @@ fun ConsumptionWidgetContent() {
                 Text(
                     text = lastUpdate,
                     style = TextStyle(
-                        fontSize = 10.sp,
+                        fontSize = 9.sp,
                         color = GlanceTheme.colors.onSurfaceVariant
                     )
                 )
@@ -196,31 +232,6 @@ fun ConsumptionWidgetContent() {
 }
 
 @Composable
-private fun StatisticItem(
-    label: String,
-    value: String,
-    valueColor: androidx.glance.unit.ColorProvider
-) {
-    Column {
-        Text(
-            text = label,
-            style = TextStyle(
-                fontSize = 12.sp,
-                color = GlanceTheme.colors.onSurfaceVariant
-            )
-        )
-        Text(
-            text = value,
-            style = TextStyle(
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = valueColor
-            )
-        )
-    }
-}
-
-@Composable
 private fun ChartFallback(data: WidgetConsumptionData) {
     Text(
         text = createSimpleChart(data),
@@ -249,3 +260,16 @@ private fun createSimpleChart(data: WidgetConsumptionData): String {
     }
 }
 
+/**
+ * Action callback for widget refresh button
+ */
+class RefreshWidgetAction : ActionCallback {
+    override suspend fun onAction(
+        context: Context,
+        glanceId: GlanceId,
+        parameters: ActionParameters
+    ) {
+        Logger.withTag("RefreshWidgetAction").d { "Manual refresh triggered" }
+        ConsumptionWidget.updateWidgetData(context)
+    }
+}

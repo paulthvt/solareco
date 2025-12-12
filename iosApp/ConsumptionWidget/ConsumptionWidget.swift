@@ -79,6 +79,12 @@ struct WidgetDataModel: Codable {
     let averageConsumption: Double
 }
 
+// Colors from PowerColorsScheme.kt (Dark mode values as widget background is dark)
+extension Color {
+    static let powerConsumption = Color(red: 1.0, green: 0.70, blue: 0.0) // #FFB300
+    static let powerProduction = Color(red: 0.40, green: 0.73, blue: 0.42) // #66BB6A
+}
+
 struct ConsumptionWidgetEntryView : View {
     var entry: Provider.Entry
     @Environment(\.widgetFamily) var widgetFamily
@@ -118,7 +124,7 @@ struct ConsumptionWidgetEntryView : View {
                             
                             Text("\(Int(entry.consumptions.last ?? 0)) W")
                                 .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(Color(red: 0.30, green: 0.69, blue: 0.31))
+                                .foregroundColor(.powerConsumption)
                         }
                         
                         VStack(alignment: .leading, spacing: 2) {
@@ -138,7 +144,7 @@ struct ConsumptionWidgetEntryView : View {
                             
                             Text("\(Int(entry.maxConsumption)) W")
                                 .font(.system(size: 18, weight: .bold))
-                                .foregroundColor(Color(red: 1.0, green: 0.60, blue: 0.0))
+                                .foregroundColor(.powerConsumption)
                         }
                         
                         Spacer()
@@ -154,7 +160,7 @@ struct ConsumptionWidgetEntryView : View {
                         let formatter = DateFormatter()
                         formatter.dateFormat = "HH:mm"
                         
-                        Text("Updated: \(formatter.string(from: date))")
+                        Text("Last update: \(formatter.string(from: date))")
                             .font(.system(size: 10))
                             .foregroundColor(Color(red: 0.53, green: 0.53, blue: 0.53))
                     }
@@ -207,7 +213,7 @@ struct ChartView: View {
                         }
                     }
                 }
-                .stroke(Color(red: 0.30, green: 0.69, blue: 0.31), lineWidth: 2)
+                .stroke(Color.powerConsumption, lineWidth: 2)
             }
         }
     }
@@ -223,6 +229,20 @@ struct ConsumptionWidget: Widget {
         .configurationDisplayName("Energy Consumption")
         .description("Shows your last hour energy consumption.")
         .supportedFamilies([.systemMedium, .systemLarge])
+    }
+}
+
+struct ConsumptionWidget_Previews: PreviewProvider {
+    static var previews: some View {
+        ConsumptionWidgetEntryView(entry: ConsumptionWidgetEntry(
+            date: Date(),
+            timestamps: [1, 2, 3, 4, 5],
+            consumptions: [1000, 2500, 1500, 3000, 2000],
+            lastUpdateTime: Int64(Date().timeIntervalSince1970 * 1000),
+            maxConsumption: 3000.0,
+            averageConsumption: 2000.0
+        ))
+        .previewContext(WidgetPreviewContext(family: .systemMedium))
     }
 }
 
