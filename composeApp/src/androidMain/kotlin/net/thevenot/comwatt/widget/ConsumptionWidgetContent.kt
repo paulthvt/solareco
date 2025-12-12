@@ -33,12 +33,12 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import co.touchlab.kermit.Logger
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.R
 import net.thevenot.comwatt.di.dataStore
 import java.io.File
+import kotlin.time.Instant
 
 // Power scheme colors (Dark mode values)
 private val PowerProductionColor = Color(0xFF66BB6A)   // Green 400

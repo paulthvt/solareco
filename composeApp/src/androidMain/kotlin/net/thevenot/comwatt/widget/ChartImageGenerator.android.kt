@@ -2,8 +2,10 @@ package net.thevenot.comwatt.widget
 
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.PorterDuff
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,7 +41,6 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             val canvas = Canvas(bitmap)
 
             // Setup colors using power scheme colors
-            val backgroundColor = if (isDarkMode) 0xFF1E1E1E.toInt() else 0xFFFFFFFF.toInt()
             // Production: Green
             val productionColor = if (isDarkMode) 0xFF66BB6A.toInt() else 0xFF43A047.toInt()
             // Consumption: Amber/Orange
@@ -47,8 +48,7 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             val gridColor = if (isDarkMode) 0x33FFFFFF else 0x1F000000
             val textColor = if (isDarkMode) 0xFFBBBBBB.toInt() else 0xFF666666.toInt()
 
-            // Clear background
-            canvas.drawColor(backgroundColor)
+            canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
             val gridPaint = Paint().apply {
                 color = gridColor
