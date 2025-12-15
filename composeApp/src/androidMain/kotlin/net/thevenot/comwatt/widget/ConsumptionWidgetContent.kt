@@ -3,11 +3,9 @@ package net.thevenot.comwatt.widget
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
@@ -20,6 +18,7 @@ import androidx.glance.appwidget.action.actionRunCallback
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
+import androidx.glance.currentState
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
@@ -35,35 +34,32 @@ import androidx.glance.text.TextStyle
 import co.touchlab.kermit.Logger
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.json.Json
 import net.thevenot.comwatt.R
-import net.thevenot.comwatt.di.dataStore
 import java.io.File
 import kotlin.time.Instant
 
-// Power scheme colors (Dark mode values)
-private val PowerProductionColor = Color(0xFF66BB6A)   // Green 400
-private val PowerConsumptionColor = Color(0xFFFFB300)  // Amber 700
+internal val WIDGET_DATA_KEY = stringPreferencesKey("widget_data_json")
+
+private val json = Json {
+    ignoreUnknownKeys = true
+    isLenient = true
+}
 
 @Composable
 fun ConsumptionWidgetContent() {
     val context = LocalContext.current
 
-    // Load widget data repository
-    val widgetDataRepository = try {
-        val factory = net.thevenot.comwatt.di.Factory(context)
-        WidgetDataRepository(factory.dataStore)
-    } catch (e: Exception) {
-        Logger.withTag("ConsumptionWidgetContent")
-            .e(e) { "Failed to create widget data repository" }
-        null
-    }
-
-    // Get widget data
-    val widgetData by (widgetDataRepository?.getWidgetData() ?: kotlinx.coroutines.flow.flowOf(
-        WidgetConsumptionData.empty()
-    )).collectAsState(
-        initial = WidgetConsumptionData.empty()
-    )
+    // Read widget data from Glance state (synchronous, no flickering)
+    val prefs = currentState<androidx.datastore.preferences.core.Preferences>()
+    val widgetData = prefs[WIDGET_DATA_KEY]?.let { jsonString ->
+        try {
+            json.decodeFromString<WidgetConsumptionData>(jsonString)
+        } catch (e: Exception) {
+            Logger.withTag("ConsumptionWidgetContent").e(e) { "Failed to parse widget data" }
+            WidgetConsumptionData.empty()
+        }
+    } ?: WidgetConsumptionData.empty()
 
     GlanceTheme {
         Column(
@@ -119,17 +115,20 @@ fun ConsumptionWidgetContent() {
                 ) {
                     // Consumption
                     if (widgetData.consumptions.isNotEmpty()) {
-                        Text(
-                            text = "🔴",
-                            style = TextStyle(fontSize = 10.sp)
+                        Image(
+                            provider = ImageProvider(R.drawable.ic_arrow_down_consumption),
+                            contentDescription = "Consumption",
+                            modifier = GlanceModifier
+                                .width(14.dp)
+                                .height(14.dp)
                         )
                         Spacer(modifier = GlanceModifier.width(2.dp))
                         Text(
                             text = "${widgetData.consumptions.lastOrNull()?.toInt() ?: 0}W",
                             style = TextStyle(
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = GlanceTheme.colors.error // Use error color for consumption (amber/red)
+                                color = GlanceTheme.colors.onSurface
                             )
                         )
                     }
@@ -140,17 +139,20 @@ fun ConsumptionWidgetContent() {
 
                     // Production
                     if (widgetData.productions.isNotEmpty()) {
-                        Text(
-                            text = "🟢",
-                            style = TextStyle(fontSize = 10.sp)
+                        Image(
+                            provider = ImageProvider(R.drawable.ic_arrow_up_production),
+                            contentDescription = "Production",
+                            modifier = GlanceModifier
+                                .width(14.dp)
+                                .height(14.dp)
                         )
                         Spacer(modifier = GlanceModifier.width(2.dp))
                         Text(
                             text = "${widgetData.productions.lastOrNull()?.toInt() ?: 0}W",
                             style = TextStyle(
-                                fontSize = 13.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = GlanceTheme.colors.primary // Use primary color for production (green)
+                                color = GlanceTheme.colors.onSurface
                             )
                         )
                     }

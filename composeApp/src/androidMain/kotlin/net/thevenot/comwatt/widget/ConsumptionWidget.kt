@@ -79,9 +79,13 @@ class ConsumptionWidget : GlanceAppWidget() {
                     }
 
                     is Either.Right -> {
-                        // Save data for widget
+                        // Save data for widget (to DataStore for backup/persistence)
                         widgetDataRepository.saveWidgetData(result.value)
                         logger.d { "Widget data saved successfully" }
+
+                        // Serialize data for Glance state
+                        val widgetDataJson =
+                            kotlinx.serialization.json.Json.encodeToString(result.value)
 
                         // Generate and save chart image
                         try {
@@ -107,13 +111,14 @@ class ConsumptionWidget : GlanceAppWidget() {
                             .getGlanceIds(ConsumptionWidget::class.java)
 
                         glanceIds.forEach { glanceId ->
+                            // Update Glance state with the serialized data
                             updateAppWidgetState(
                                 context,
                                 PreferencesGlanceStateDefinition,
                                 glanceId
                             ) { prefs ->
                                 prefs.toMutablePreferences().apply {
-                                    // Trigger UI update by changing state
+                                    this[WIDGET_DATA_KEY] = widgetDataJson
                                 }
                             }
                             ConsumptionWidget().update(context, glanceId)
