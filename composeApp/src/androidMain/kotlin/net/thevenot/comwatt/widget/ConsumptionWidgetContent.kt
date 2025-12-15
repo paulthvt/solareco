@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.widget
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
@@ -13,8 +14,10 @@ import androidx.glance.Image
 import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.action.ActionParameters
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.ActionCallback
 import androidx.glance.appwidget.action.actionRunCallback
+import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
@@ -35,6 +38,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
+import net.thevenot.comwatt.MainActivity
 import net.thevenot.comwatt.R
 import java.io.File
 import kotlin.time.Instant
@@ -61,13 +65,19 @@ fun ConsumptionWidgetContent() {
         }
     } ?: WidgetConsumptionData.empty()
 
+    // Create intent to open the app
+    val openAppIntent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+    }
+
     GlanceTheme {
         Column(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
                 .cornerRadius(16.dp)
-                .padding(12.dp),
+                .padding(12.dp)
+                .clickable(actionStartActivity(openAppIntent)),
             verticalAlignment = Alignment.Top
         ) {
             // Header with refresh button
