@@ -6,18 +6,12 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchWidgetConsumptionUseCase
 import net.thevenot.comwatt.domain.exception.DomainError
 
-/**
- * Cross-platform widget manager
- */
 class WidgetManager(
     private val dataRepository: DataRepository,
     private val platformWidgetUpdater: PlatformWidgetUpdater
 ) {
     private val logger = Logger.withTag("WidgetManager")
 
-    /**
-     * Update widget data across platforms
-     */
     suspend fun updateWidgetData(siteId: Int): Either<DomainError, Unit> {
         logger.d { "Updating widget data for site $siteId" }
 
@@ -27,15 +21,10 @@ class WidgetManager(
                 logger.e { "Failed to fetch widget data: ${result.value}" }
                 Either.Left(result.value)
             }
-
             is Either.Right -> {
                 try {
-                    // Save data using platform-specific mechanism
                     platformWidgetUpdater.saveWidgetData(result.value)
-
-                    // Trigger widget refresh
                     platformWidgetUpdater.refreshWidgets()
-
                     logger.d { "Widget data updated successfully" }
                     Either.Right(Unit)
                 } catch (e: Exception) {
@@ -46,24 +35,15 @@ class WidgetManager(
         }
     }
 
-    /**
-     * Schedule periodic widget updates
-     */
     fun schedulePeriodicUpdates() {
         platformWidgetUpdater.schedulePeriodicUpdates()
     }
 
-    /**
-     * Cancel scheduled widget updates
-     */
     fun cancelPeriodicUpdates() {
         platformWidgetUpdater.cancelPeriodicUpdates()
     }
 }
 
-/**
- * Platform-specific widget updater interface
- */
 interface PlatformWidgetUpdater {
     suspend fun saveWidgetData(data: WidgetConsumptionData)
     fun refreshWidgets()
