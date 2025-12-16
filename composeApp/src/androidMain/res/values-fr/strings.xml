@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">comwatt</string>
+    <string name="widget_description">Aperçu Énergie - Affiche vos données de consommation et de production</string>
+    <string name="widget_title">Aperçu Énergie</string>
+    <string name="widget_refresh_button">Actualiser</string>
+    <string name="widget_energy_icon">Énergie</string>
+    <string name="widget_consumption">Consommation</string>
+    <string name="widget_production">Production</string>
+    <string name="widget_chart">Graphique d\'énergie</string>
+    <string name="widget_no_data">Aucune donnée disponible</string>
+    <string name="widget_will_update">Le widget se mettra à jour automatiquement</string>
+    <string name="widget_last_update">Dernière mise à jour : %1$s</string>
+    <string name="widget_no_data_time">Pas de données</string>
+</resources>

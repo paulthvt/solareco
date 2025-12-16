@@ -55,6 +55,10 @@ private val json = Json {
     isLenient = true
 }
 
+private val ICON_SIZE = 18.dp
+private val STAT_ICON_SIZE = 14.dp
+private val CORNER_RADIUS = 16.dp
+
 @Composable
 fun ConsumptionWidgetContent() {
     val context = LocalContext.current
@@ -69,21 +73,21 @@ fun ConsumptionWidgetContent() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
-                .cornerRadius(16.dp)
-                .padding(12.dp)
+                .cornerRadius(CORNER_RADIUS)
+                .padding(AppTheme.dimens.paddingNormal - AppTheme.dimens.paddingExtraSmall)
                 .clickable(actionStartActivity(openAppIntent))
         ) {
             Column(
                 modifier = GlanceModifier.fillMaxSize(),
                 verticalAlignment = Alignment.Top
             ) {
-                WidgetHeader()
-                Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingSmall))
+                WidgetHeader(context)
+                Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingSmall - AppTheme.dimens.paddingExtraSmall))
 
                 if (widgetData.hasData()) {
                     WidgetDataContent(context, widgetData)
                 } else {
-                    WidgetEmptyState()
+                    WidgetEmptyState(context)
                 }
             }
 
@@ -93,7 +97,7 @@ fun ConsumptionWidgetContent() {
             ) {
                 CircleIconButton(
                     imageProvider = ImageProvider(R.drawable.ic_refresh_dark),
-                    contentDescription = "Refresh",
+                    contentDescription = context.getString(R.string.widget_refresh_button),
                     onClick = actionRunCallback<RefreshWidgetAction>()
                 )
             }
@@ -116,7 +120,7 @@ private fun WidgetConsumptionData.hasData(): Boolean =
     consumptions.isNotEmpty() || productions.isNotEmpty()
 
 @Composable
-private fun WidgetHeader() {
+private fun WidgetHeader(context: Context) {
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
@@ -124,12 +128,12 @@ private fun WidgetHeader() {
     ) {
         Image(
             provider = ImageProvider(R.drawable.ic_bolt),
-            contentDescription = "Energy",
-            modifier = GlanceModifier.size(18.dp)
+            contentDescription = context.getString(R.string.widget_energy_icon),
+            modifier = GlanceModifier.size(ICON_SIZE)
         )
         Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingExtraSmall))
         Text(
-            text = "Energy Overview",
+            text = context.getString(R.string.widget_title),
             style = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
@@ -141,20 +145,20 @@ private fun WidgetHeader() {
 
 @Composable
 private fun ColumnScope.WidgetDataContent(context: Context, widgetData: WidgetConsumptionData) {
-    PowerStatsRow(widgetData)
-    Spacer(modifier = GlanceModifier.height(6.dp))
+    PowerStatsRow(context, widgetData)
+    Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingSmall - AppTheme.dimens.paddingExtraSmall))
     ChartImage(context, widgetData, GlanceModifier.fillMaxWidth().defaultWeight())
-    Spacer(modifier = GlanceModifier.height(4.dp))
+    Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingExtraSmall))
     Row(
-        modifier = GlanceModifier.fillMaxWidth().padding(end = AppTheme.dimens.paddingSmall),
-        horizontalAlignment = Alignment.End,
+        modifier = GlanceModifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.End
     ) {
-        LastUpdateText(widgetData.lastUpdateTime)
+        LastUpdateText(context, widgetData.lastUpdateTime)
     }
 }
 
 @Composable
-private fun PowerStatsRow(widgetData: WidgetConsumptionData) {
+private fun PowerStatsRow(context: Context, widgetData: WidgetConsumptionData) {
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
@@ -164,19 +168,19 @@ private fun PowerStatsRow(widgetData: WidgetConsumptionData) {
             PowerStat(
                 iconRes = R.drawable.ic_arrow_down_consumption,
                 value = widgetData.consumptions.lastOrNull()?.toInt() ?: 0,
-                contentDescription = "Consumption"
+                contentDescription = context.getString(R.string.widget_consumption)
             )
         }
 
         if (widgetData.consumptions.isNotEmpty() && widgetData.productions.isNotEmpty()) {
-            Spacer(modifier = GlanceModifier.width(12.dp))
+            Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingNormal - AppTheme.dimens.paddingExtraSmall))
         }
 
         if (widgetData.productions.isNotEmpty()) {
             PowerStat(
                 iconRes = R.drawable.ic_arrow_up_production,
                 value = widgetData.productions.lastOrNull()?.toInt() ?: 0,
-                contentDescription = "Production"
+                contentDescription = context.getString(R.string.widget_production)
             )
         }
     }
@@ -187,9 +191,9 @@ private fun PowerStat(iconRes: Int, value: Int, contentDescription: String) {
     Image(
         provider = ImageProvider(iconRes),
         contentDescription = contentDescription,
-        modifier = GlanceModifier.width(14.dp).height(14.dp)
+        modifier = GlanceModifier.size(STAT_ICON_SIZE)
     )
-    Spacer(modifier = GlanceModifier.width(2.dp))
+    Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingTooSmall))
     Text(
         text = "${value}W",
         style = TextStyle(
@@ -214,7 +218,7 @@ private fun ChartImage(
     if (bitmap != null) {
         Image(
             provider = ImageProvider(bitmap),
-            contentDescription = "Energy chart",
+            contentDescription = context.getString(R.string.widget_chart),
             modifier = modifier
         )
     } else {
@@ -243,13 +247,14 @@ private fun createAsciiChart(data: WidgetConsumptionData): String {
 }
 
 @Composable
-private fun LastUpdateText(lastUpdateTime: Long) {
+private fun LastUpdateText(context: Context, lastUpdateTime: Long) {
     val text = if (lastUpdateTime > 0) {
         val instant = Instant.fromEpochMilliseconds(lastUpdateTime)
         val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-        "Last update: %02d:%02d".format(localDateTime.hour, localDateTime.minute)
+        val timeStr = "%02d:%02d".format(localDateTime.hour, localDateTime.minute)
+        context.getString(R.string.widget_last_update, timeStr)
     } else {
-        "No data"
+        context.getString(R.string.widget_no_data_time)
     }
 
     Text(
@@ -259,19 +264,19 @@ private fun LastUpdateText(lastUpdateTime: Long) {
 }
 
 @Composable
-private fun WidgetEmptyState() {
+private fun WidgetEmptyState(context: Context) {
     Column(
         modifier = GlanceModifier.fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "No data available",
+            text = context.getString(R.string.widget_no_data),
             style = TextStyle(fontSize = 14.sp, color = GlanceTheme.colors.onSurfaceVariant)
         )
-        Spacer(modifier = GlanceModifier.height(4.dp))
+        Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingExtraSmall))
         Text(
-            text = "Widget will update automatically",
+            text = context.getString(R.string.widget_will_update),
             style = TextStyle(fontSize = 12.sp, color = GlanceTheme.colors.onSurfaceVariant)
         )
     }
