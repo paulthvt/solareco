@@ -24,15 +24,16 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.ColumnScope
 import androidx.glance.layout.Row
-import androidx.glance.layout.RowScope
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -43,6 +44,7 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
 import net.thevenot.comwatt.MainActivity
 import net.thevenot.comwatt.R
+import net.thevenot.comwatt.ui.theme.AppTheme
 import java.io.File
 import kotlin.time.Instant
 
@@ -63,21 +65,37 @@ fun ConsumptionWidgetContent() {
     }
 
     GlanceTheme {
-        Column(
+        Box(
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
                 .cornerRadius(16.dp)
                 .padding(12.dp)
-                .clickable(actionStartActivity(openAppIntent)),
-            verticalAlignment = Alignment.Top
+                .clickable(actionStartActivity(openAppIntent))
         ) {
-            WidgetHeader()
+            Column(
+                modifier = GlanceModifier.fillMaxSize(),
+                verticalAlignment = Alignment.Top
+            ) {
+                WidgetHeader()
+                Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingSmall))
 
-            if (widgetData.hasData()) {
-                WidgetDataContent(context, widgetData)
-            } else {
-                WidgetEmptyState()
+                if (widgetData.hasData()) {
+                    WidgetDataContent(context, widgetData)
+                } else {
+                    WidgetEmptyState()
+                }
+            }
+
+            Box(
+                modifier = GlanceModifier.fillMaxSize(),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                CircleIconButton(
+                    imageProvider = ImageProvider(R.drawable.ic_refresh_dark),
+                    contentDescription = "Refresh",
+                    onClick = actionRunCallback<RefreshWidgetAction>()
+                )
             }
         }
     }
@@ -104,31 +122,21 @@ private fun WidgetHeader() {
         horizontalAlignment = Alignment.Start,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "⚡",
-            style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold)
+        Image(
+            provider = ImageProvider(R.drawable.ic_bolt),
+            contentDescription = "Energy",
+            modifier = GlanceModifier.size(18.dp)
         )
-        Spacer(modifier = GlanceModifier.width(6.dp))
-        WidgetTitle()
-        CircleIconButton(
-            imageProvider = ImageProvider(R.drawable.ic_refresh_dark),
-            contentDescription = "Refresh",
-            onClick = actionRunCallback<RefreshWidgetAction>()
+        Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingExtraSmall))
+        Text(
+            text = "Energy Overview",
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = GlanceTheme.colors.onSurface
+            )
         )
     }
-}
-
-@Composable
-private fun RowScope.WidgetTitle() {
-    Text(
-        text = "Energy Overview",
-        style = TextStyle(
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold,
-            color = GlanceTheme.colors.onSurface
-        ),
-        modifier = GlanceModifier.defaultWeight()
-    )
 }
 
 @Composable
@@ -137,7 +145,12 @@ private fun ColumnScope.WidgetDataContent(context: Context, widgetData: WidgetCo
     Spacer(modifier = GlanceModifier.height(6.dp))
     ChartImage(context, widgetData, GlanceModifier.fillMaxWidth().defaultWeight())
     Spacer(modifier = GlanceModifier.height(4.dp))
-    LastUpdateText(widgetData.lastUpdateTime)
+    Row(
+        modifier = GlanceModifier.fillMaxWidth().padding(end = AppTheme.dimens.paddingSmall),
+        horizontalAlignment = Alignment.End,
+    ) {
+        LastUpdateText(widgetData.lastUpdateTime)
+    }
 }
 
 @Composable

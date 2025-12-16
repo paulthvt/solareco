@@ -3,9 +3,11 @@ package net.thevenot.comwatt.widget
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PorterDuff
+import android.graphics.Shader
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -32,7 +34,7 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             val canvas = Canvas(bitmap)
             canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR)
 
-            val colors = ChartColors.forMode(isDarkMode)
+            val colors = Colors(isDarkMode)
             val chartBounds = ChartBounds(widthPx.toFloat(), heightPx.toFloat())
 
             drawGridLines(canvas, chartBounds, colors.grid)
@@ -109,11 +111,18 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             strokeJoin = Paint.Join.ROUND
         }
 
+        val colorWithAlpha =
+            Color.argb(102, Color.red(color), Color.green(color), Color.blue(color))
         val fillPaint = Paint().apply {
-            this.color = color
-            alpha = 40
             style = Paint.Style.FILL
             isAntiAlias = true
+            shader = LinearGradient(
+                0f, bounds.top,
+                0f, bounds.bottom,
+                colorWithAlpha,
+                Color.TRANSPARENT,
+                Shader.TileMode.CLAMP
+            )
         }
 
         val linePath = Path()
@@ -166,29 +175,11 @@ class AndroidChartImageGenerator : ChartImageGenerator {
         }
     }
 
-    private data class ChartColors(
-        val production: Int,
-        val consumption: Int,
-        val grid: Int,
-        val text: Int
-    ) {
-        companion object {
-            fun forMode(isDarkMode: Boolean) = if (isDarkMode) {
-                ChartColors(
-                    production = 0xFF66BB6A.toInt(),
-                    consumption = 0xFFFFB300.toInt(),
-                    grid = 0x33FFFFFF,
-                    text = 0xFFBBBBBB.toInt()
-                )
-            } else {
-                ChartColors(
-                    production = 0xFF43A047.toInt(),
-                    consumption = 0xFFFF8F00.toInt(),
-                    grid = 0x1F000000,
-                    text = 0xFF666666.toInt()
-                )
-            }
-        }
+    private class Colors(isDarkMode: Boolean) {
+        val production = WidgetChartColors.productionColor(isDarkMode)
+        val consumption = WidgetChartColors.consumptionColor(isDarkMode)
+        val grid = WidgetChartColors.gridColor(isDarkMode)
+        val text = WidgetChartColors.textColor(isDarkMode)
     }
 
     private class ChartBounds(canvasWidth: Float, canvasHeight: Float) {
