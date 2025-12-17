@@ -3,6 +3,9 @@ package net.thevenot.comwatt.widget
 import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.res.Configuration
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -24,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
+import net.thevenot.comwatt.R
 import net.thevenot.comwatt.di.Factory
 import net.thevenot.comwatt.di.dataRepository
 import net.thevenot.comwatt.di.dataStore
@@ -52,7 +56,7 @@ class ConsumptionWidget : GlanceAppWidget() {
     companion object {
         private val logger = Logger.withTag("ConsumptionWidget")
 
-        suspend fun updateWidgetData(context: Context) {
+        suspend fun updateWidgetData(context: Context, showErrorToast: Boolean = false) {
             logger.d { "Updating widget data" }
 
             try {
@@ -65,7 +69,12 @@ class ConsumptionWidget : GlanceAppWidget() {
 
                 val fetchUseCase = FetchWidgetConsumptionUseCase(factory.dataRepository)
                 when (val result = fetchUseCase.execute(siteId)) {
-                    is Either.Left -> logger.e { "Failed to fetch widget data: ${result.value}" }
+                    is Either.Left -> {
+                        logger.e { "Failed to fetch widget data: ${result.value}" }
+                        if (showErrorToast) {
+                            showToast(context, R.string.widget_refresh_failed_no_network)
+                        }
+                    }
                     is Either.Right -> {
                         WidgetDataRepository(factory.dataStore).saveWidgetData(result.value)
                         val widgetDataJson = Json.encodeToString(result.value)
@@ -75,6 +84,15 @@ class ConsumptionWidget : GlanceAppWidget() {
                 }
             } catch (e: Exception) {
                 logger.e(e) { "Exception while updating widget data" }
+                if (showErrorToast) {
+                    showToast(context, R.string.widget_refresh_failed)
+                }
+            }
+        }
+
+        private fun showToast(context: Context, messageResId: Int) {
+            Handler(Looper.getMainLooper()).post {
+                Toast.makeText(context, messageResId, Toast.LENGTH_SHORT).show()
             }
         }
 

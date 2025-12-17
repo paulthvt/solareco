@@ -289,6 +289,6 @@ class RefreshWidgetAction : ActionCallback {
         parameters: ActionParameters
     ) {
         Logger.withTag("RefreshWidgetAction").d { "Manual refresh triggered" }
-        ConsumptionWidget.updateWidgetData(context)
+        ConsumptionWidget.updateWidgetData(context, showErrorToast = true)
     }
 }
