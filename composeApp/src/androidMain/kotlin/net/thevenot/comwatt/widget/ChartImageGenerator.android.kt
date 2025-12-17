@@ -11,6 +11,7 @@ import android.graphics.Shader
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.thevenot.comwatt.ui.theme.WidgetColors
 import java.io.ByteArrayOutputStream
 import kotlin.math.max
 
@@ -176,10 +177,10 @@ class AndroidChartImageGenerator : ChartImageGenerator {
     }
 
     private class Colors(isDarkMode: Boolean) {
-        val production = WidgetChartColors.productionColor(isDarkMode)
-        val consumption = WidgetChartColors.consumptionColor(isDarkMode)
-        val grid = WidgetChartColors.gridColor(isDarkMode)
-        val text = WidgetChartColors.textColor(isDarkMode)
+        val production = WidgetColors.productionColor(isDarkMode)
+        val consumption = WidgetColors.consumptionColor(isDarkMode)
+        val grid = WidgetColors.gridColor(isDarkMode)
+        val text = WidgetColors.textColor(isDarkMode)
     }
 
     private class ChartBounds(canvasWidth: Float, canvasHeight: Float) {

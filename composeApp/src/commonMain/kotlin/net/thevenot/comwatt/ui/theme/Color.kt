@@ -253,5 +253,53 @@ val powerWithdrawalsDark = Color(0xFFF57C00)           // Orange 700
 val powerWithdrawalsGaugeStartDark = Color(0xFFFF9800) // Orange 500
 val powerWithdrawalsGaugeEndDark = Color(0xFFE65100)   // Orange 900
 
+// =============================================================================
+// Widget Chart Colors (for native Android Canvas/iOS rendering)
+// These provide Int color values derived from the Compose Color definitions above
+// =============================================================================
+
+/**
+ * Extension function to convert Compose Color to ARGB Int value.
+ * Useful for native Canvas drawing APIs.
+ */
+fun Color.toArgbInt(): Int {
+    val alpha = (this.alpha * 255).toInt()
+    val red = (this.red * 255).toInt()
+    val green = (this.green * 255).toInt()
+    val blue = (this.blue * 255).toInt()
+    return (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+}
+
+/**
+ * Widget chart colors derived from power scheme colors.
+ * Single source of truth for widget rendering on Android/iOS.
+ */
+object WidgetColors {
+    // Production colors (Int format for native rendering)
+    val productionLight: Int get() = powerProductionLight.toArgbInt()
+    val productionDark: Int get() = powerProductionDark.toArgbInt()
+
+    // Consumption colors (Int format for native rendering)
+    val consumptionLight: Int get() = powerConsumptionLight.toArgbInt()
+    val consumptionDark: Int get() = powerConsumptionDark.toArgbInt()
+
+    // Grid lines (semi-transparent)
+    const val GRID_LIGHT = 0x1F000000
+    const val GRID_DARK = 0x33FFFFFF
+
+    // Text labels
+    const val TEXT_LIGHT = 0xFF666666.toInt()
+    const val TEXT_DARK = 0xFFBBBBBB.toInt()
+
+    fun productionColor(isDarkMode: Boolean): Int =
+        if (isDarkMode) productionDark else productionLight
+
+    fun consumptionColor(isDarkMode: Boolean): Int =
+        if (isDarkMode) consumptionDark else consumptionLight
+
+    fun gridColor(isDarkMode: Boolean): Int = if (isDarkMode) GRID_DARK else GRID_LIGHT
+    fun textColor(isDarkMode: Boolean): Int = if (isDarkMode) TEXT_DARK else TEXT_LIGHT
+}
+
 
 
