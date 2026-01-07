@@ -13,8 +13,6 @@ class WidgetManager(
     private val logger = Logger.withTag("WidgetManager")
 
     suspend fun updateWidgetData(siteId: Int): Either<DomainError, Unit> {
-        logger.d { "Updating widget data for site $siteId" }
-
         val fetchUseCase = FetchWidgetConsumptionUseCase(dataRepository)
         return when (val result = fetchUseCase.execute(siteId)) {
             is Either.Left -> {
@@ -25,7 +23,6 @@ class WidgetManager(
                 try {
                     platformWidgetUpdater.saveWidgetData(result.value)
                     platformWidgetUpdater.refreshWidgets()
-                    logger.d { "Widget data updated successfully" }
                     Either.Right(Unit)
                 } catch (e: Exception) {
                     logger.e(e) { "Error updating widgets" }

@@ -15,16 +15,22 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
+private const val APP_GROUP = "group.net.thevenot.comwatt.widget"
+
 actual class Factory {
     actual fun getDatabaseBuilder(): RoomDatabase.Builder<UserDatabase> {
         val dbFile = "${documentDirectory()}/$dbFileName"
-        return Room.databaseBuilder<UserDatabase>(
-            name = dbFile,
-        )
+        return Room.databaseBuilder<UserDatabase>(name = dbFile)
     }
 
     @OptIn(ExperimentalForeignApi::class)
     private fun documentDirectory(): String {
+        val containerUrl =
+            NSFileManager.defaultManager.containerURLForSecurityApplicationGroupIdentifier(APP_GROUP)
+        if (containerUrl != null) {
+            return requireNotNull(containerUrl.path)
+        }
+        
         val documentDirectory = NSFileManager.defaultManager.URLForDirectory(
             directory = NSDocumentDirectory,
             inDomain = NSUserDomainMask,
@@ -38,30 +44,29 @@ actual class Factory {
     actual fun createApi(): ComwattApi = commonCreateApi()
 }
 
-/**
- * Singleton DataStore instance for iOS
- * Prevents multiple DataStore instances
- */
-private val dataStoreSingletonLazy: Lazy<DataStore<Preferences>> = lazy {
+private val dataStoreSingleton: DataStore<Preferences> by lazy {
     @OptIn(ExperimentalForeignApi::class)
     createDataStore(
         producePath = {
-            val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(
-                directory = NSDocumentDirectory,
-                inDomain = NSUserDomainMask,
-                appropriateForURL = null,
-                create = false,
-                error = null,
-            )
-            requireNotNull(documentDirectory).path + "/$dataStoreFileName"
+            val containerUrl =
+                NSFileManager.defaultManager.containerURLForSecurityApplicationGroupIdentifier(
+                    APP_GROUP
+                )
+            val directoryPath = if (containerUrl != null) {
+                requireNotNull(containerUrl.path)
+            } else {
+                val documentDirectory: NSURL? = NSFileManager.defaultManager.URLForDirectory(
+                    directory = NSDocumentDirectory,
+                    inDomain = NSUserDomainMask,
+                    appropriateForURL = null,
+                    create = false,
+                    error = null,
+                )
+                requireNotNull(documentDirectory).path
+            }
+            "$directoryPath/$dataStoreFileName"
         }
     )
 }
 
-/**
- * Actual implementation for iOS
- * Returns singleton DataStore instance
- */
-actual fun Factory.getDataStoreSingleton(): DataStore<Preferences> {
-    return dataStoreSingletonLazy.value
-}
+actual fun Factory.getDataStoreSingleton(): DataStore<Preferences> = dataStoreSingleton

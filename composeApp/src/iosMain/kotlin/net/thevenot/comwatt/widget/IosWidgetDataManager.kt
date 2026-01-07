@@ -5,9 +5,6 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.serialization.json.Json
 import platform.Foundation.NSUserDefaults
 
-/**
- * iOS-specific widget data manager
- */
 @OptIn(ExperimentalForeignApi::class)
 object IosWidgetDataManager {
     private val logger = Logger.withTag("IosWidgetDataManager")
@@ -19,42 +16,28 @@ object IosWidgetDataManager {
         isLenient = true
     }
 
-    /**
-     * Save widget data to shared user defaults
-     */
     fun saveWidgetData(data: WidgetConsumptionData) {
         try {
-            val sharedDefaults = NSUserDefaults(suiteName = APP_GROUP)
-            if (sharedDefaults != null) {
-                val jsonString = json.encodeToString(data)
-                sharedDefaults.setObject(jsonString, forKey = WIDGET_DATA_KEY)
-                sharedDefaults.synchronize()
-                logger.d { "Widget data saved successfully" }
-            } else {
+            val sharedDefaults = NSUserDefaults(suiteName = APP_GROUP) ?: run {
                 logger.e { "Failed to access shared user defaults" }
+                return
             }
+            val jsonString = json.encodeToString(WidgetConsumptionData.serializer(), data)
+            sharedDefaults.setObject(jsonString, forKey = WIDGET_DATA_KEY)
+            sharedDefaults.synchronize()
         } catch (e: Exception) {
             logger.e(e) { "Error saving widget data" }
         }
     }
 
-    /**
-     * Load widget data from shared user defaults
-     */
     fun loadWidgetData(): WidgetConsumptionData? {
-        try {
-            val sharedDefaults = NSUserDefaults(suiteName = APP_GROUP)
-            if (sharedDefaults != null) {
-                val jsonString = sharedDefaults.stringForKey(WIDGET_DATA_KEY)
-                return if (jsonString != null) {
-                    json.decodeFromString<WidgetConsumptionData>(jsonString)
-                } else {
-                    null
-                }
-            }
+        return try {
+            val sharedDefaults = NSUserDefaults(suiteName = APP_GROUP) ?: return null
+            val jsonString = sharedDefaults.stringForKey(WIDGET_DATA_KEY) ?: return null
+            json.decodeFromString(WidgetConsumptionData.serializer(), jsonString)
         } catch (e: Exception) {
             logger.e(e) { "Error loading widget data" }
+            null
         }
-        return null
     }
 }
