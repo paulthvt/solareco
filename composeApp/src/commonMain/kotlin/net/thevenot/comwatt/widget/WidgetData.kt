@@ -26,9 +26,3 @@ data class WidgetConsumptionData(
         )
     }
 }
-
-@Serializable
-data class WidgetConfig(
-    val refreshIntervalMinutes: Int = 15,
-    val showLastHour: Boolean = true
-)

@@ -6,7 +6,7 @@ class IosChartImageGenerator : ChartImageGenerator {
         widthPx: Int,
         heightPx: Int,
         isDarkMode: Boolean
-    ): ByteArray? = null // iOS uses SwiftUI for chart rendering
+    ): ByteArray? = null
 }
 
 actual fun createChartImageGenerator(): ChartImageGenerator = IosChartImageGenerator()

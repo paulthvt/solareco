@@ -5,8 +5,6 @@ import AppIntents
 private let appGroupId = "group.net.thevenot.comwatt.widget"
 private let widgetDataKey = "widget_consumption_data"
 
-// MARK: - Intent
-
 @available(iOS 17.0, *)
 struct RefreshWidgetIntent: AppIntent {
     static var title: LocalizedStringResource = "Refresh Widget"
@@ -17,8 +15,6 @@ struct RefreshWidgetIntent: AppIntent {
         return .result()
     }
 }
-
-// MARK: - Models
 
 struct ConsumptionWidgetEntry: TimelineEntry {
     let date: Date
@@ -71,8 +67,6 @@ struct WidgetDataModel: Codable {
     }
 }
 
-// MARK: - Provider
-
 struct Provider: TimelineProvider {
     func placeholder(in context: Context) -> ConsumptionWidgetEntry { .empty }
     
@@ -112,15 +106,11 @@ struct Provider: TimelineProvider {
     }
 }
 
-// MARK: - Colors
-
 extension Color {
     static let powerConsumption = Color(red: 1.0, green: 0.70, blue: 0.0)
     static let powerProduction = Color(red: 0.40, green: 0.73, blue: 0.42)
     static let boltYellow = Color(red: 1.0, green: 0.76, blue: 0.03)
 }
-
-// MARK: - Views
 
 struct ConsumptionWidgetEntryView: View {
     var entry: Provider.Entry
@@ -150,7 +140,6 @@ struct ConsumptionWidgetEntryView: View {
                 .foregroundColor(Color(UIColor.label))
             
             Spacer()
-            
             refreshButton
         }
     }
@@ -279,8 +268,6 @@ extension View {
         }
     }
 }
-
-// MARK: - Widget
 
 struct ConsumptionWidget: Widget {
     let kind = "ConsumptionWidget"

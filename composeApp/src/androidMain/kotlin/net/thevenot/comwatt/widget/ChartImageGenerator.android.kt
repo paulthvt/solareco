@@ -27,7 +27,6 @@ class AndroidChartImageGenerator : ChartImageGenerator {
     ): ByteArray? = withContext(Dispatchers.Default) {
         try {
             if (data.consumptions.isEmpty() && data.productions.isEmpty()) {
-                logger.w { "No data to render" }
                 return@withContext null
             }
 
@@ -43,7 +42,10 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             val consumptions = data.consumptions.takeLast(60)
             val productions = data.productions.takeLast(60)
             val maxDataPoints = max(consumptions.size, productions.size)
-            val maxValue = calculateMaxValue(data, consumptions, productions)
+            val maxValue = max(
+                max(data.maxConsumption, consumptions.maxOrNull() ?: 1.0),
+                max(data.maxProduction, productions.maxOrNull() ?: 1.0)
+            )
             val stepX =
                 if (maxDataPoints > 1) chartBounds.width / (maxDataPoints - 1) else chartBounds.width
 
@@ -61,23 +63,11 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             val bytes = outputStream.toByteArray()
             bitmap.recycle()
 
-            logger.d { "Chart image generated: ${bytes.size} bytes" }
             bytes
         } catch (e: Exception) {
             logger.e(e) { "Failed to generate chart image" }
             null
         }
-    }
-
-    private fun calculateMaxValue(
-        data: WidgetConsumptionData,
-        consumptions: List<Double>,
-        productions: List<Double>
-    ): Double {
-        return max(
-            max(data.maxConsumption, consumptions.maxOrNull() ?: 1.0),
-            max(data.maxProduction, productions.maxOrNull() ?: 1.0)
-        )
     }
 
     private fun drawGridLines(canvas: Canvas, bounds: ChartBounds, gridColor: Int) {

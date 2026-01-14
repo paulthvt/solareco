@@ -55,10 +55,6 @@ private val json = Json {
     isLenient = true
 }
 
-private val ICON_SIZE = 18.dp
-private val STAT_ICON_SIZE = 14.dp
-private val CORNER_RADIUS = 16.dp
-
 @Composable
 fun ConsumptionWidgetContent() {
     val context = LocalContext.current
@@ -73,7 +69,7 @@ fun ConsumptionWidgetContent() {
             modifier = GlanceModifier
                 .fillMaxSize()
                 .background(GlanceTheme.colors.surface)
-                .cornerRadius(CORNER_RADIUS)
+                .cornerRadius(16.dp)
                 .padding(AppTheme.dimens.paddingNormal - AppTheme.dimens.paddingExtraSmall)
                 .clickable(actionStartActivity(openAppIntent))
         ) {
@@ -129,7 +125,7 @@ private fun WidgetHeader(context: Context) {
         Image(
             provider = ImageProvider(R.drawable.ic_bolt),
             contentDescription = context.getString(R.string.widget_energy_icon),
-            modifier = GlanceModifier.size(ICON_SIZE)
+            modifier = GlanceModifier.size(18.dp)
         )
         Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingExtraSmall))
         Text(
@@ -191,7 +187,7 @@ private fun PowerStat(iconRes: Int, value: Int, contentDescription: String) {
     Image(
         provider = ImageProvider(iconRes),
         contentDescription = contentDescription,
-        modifier = GlanceModifier.size(STAT_ICON_SIZE)
+        modifier = GlanceModifier.size(14.dp)
     )
     Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingTooSmall))
     Text(
@@ -222,16 +218,11 @@ private fun ChartImage(
             modifier = modifier
         )
     } else {
-        ChartFallback(widgetData)
+        Text(
+            text = createAsciiChart(widgetData),
+            style = TextStyle(fontSize = 10.sp, color = GlanceTheme.colors.primary)
+        )
     }
-}
-
-@Composable
-private fun ChartFallback(data: WidgetConsumptionData) {
-    Text(
-        text = createAsciiChart(data),
-        style = TextStyle(fontSize = 10.sp, color = GlanceTheme.colors.primary)
-    )
 }
 
 private fun createAsciiChart(data: WidgetConsumptionData): String {
@@ -288,7 +279,6 @@ class RefreshWidgetAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        Logger.withTag("RefreshWidgetAction").d { "Manual refresh triggered" }
         ConsumptionWidget.updateWidgetData(context, showErrorToast = true)
     }
 }

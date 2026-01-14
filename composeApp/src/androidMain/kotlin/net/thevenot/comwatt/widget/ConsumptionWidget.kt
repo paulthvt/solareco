@@ -40,10 +40,8 @@ private const val CHART_FILE_NAME = "widget_chart.png"
 private const val CHART_WIDTH_PX = 640
 private const val CHART_HEIGHT_PX = 240
 
-private fun isSystemInDarkMode(context: Context): Boolean {
-    val nightModeFlags = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
-    return nightModeFlags == Configuration.UI_MODE_NIGHT_YES
-}
+private fun isSystemInDarkMode(context: Context) =
+    context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
 class ConsumptionWidget : GlanceAppWidget() {
 
@@ -57,15 +55,10 @@ class ConsumptionWidget : GlanceAppWidget() {
         private val logger = Logger.withTag("ConsumptionWidget")
 
         suspend fun updateWidgetData(context: Context, showErrorToast: Boolean = false) {
-            logger.d { "Updating widget data" }
-
             try {
                 val factory = Factory(context)
                 val settings = factory.dataRepository.getSettings().first()
-                val siteId = settings.siteId ?: run {
-                    logger.w { "No site ID configured" }
-                    return
-                }
+                val siteId = settings.siteId ?: return
 
                 val fetchUseCase = FetchWidgetConsumptionUseCase(factory.dataRepository)
                 when (val result = fetchUseCase.execute(siteId)) {
@@ -110,10 +103,9 @@ class ConsumptionWidget : GlanceAppWidget() {
                 )
                 imageBytes?.let { bytes ->
                     File(context.filesDir, CHART_FILE_NAME).writeBytes(bytes)
-                    logger.d { "Chart image saved: ${bytes.size} bytes" }
                 }
             } catch (e: Exception) {
-                logger.e(e) { "Failed to generate/save chart image" }
+                logger.e(e) { "Failed to generate chart image" }
             }
         }
 
@@ -129,7 +121,6 @@ class ConsumptionWidget : GlanceAppWidget() {
                 }
                 ConsumptionWidget().update(context, glanceId)
             }
-            logger.d { "Updated ${glanceIds.size} widget instance(s)" }
         }
 
         fun scheduleWidgetUpdates(context: Context) {
@@ -147,23 +138,19 @@ class ConsumptionWidget : GlanceAppWidget() {
                 ExistingPeriodicWorkPolicy.UPDATE,
                 workRequest
             )
-            logger.d { "Widget updates scheduled" }
         }
 
         fun cancelWidgetUpdates(context: Context) {
             WorkManager.getInstance(context).cancelUniqueWork(WIDGET_UPDATE_WORK_NAME)
-            logger.d { "Widget updates cancelled" }
         }
     }
 }
 
 class ConsumptionWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = ConsumptionWidget()
-    private val logger = Logger.withTag("ConsumptionWidgetReceiver")
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
-        logger.d { "Widget enabled" }
         ConsumptionWidget.scheduleWidgetUpdates(context)
         CoroutineScope(Dispatchers.IO).launch {
             ConsumptionWidget.updateWidgetData(context)
@@ -172,7 +159,6 @@ class ConsumptionWidgetReceiver : GlanceAppWidgetReceiver() {
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
-        logger.d { "Widget disabled" }
         ConsumptionWidget.cancelWidgetUpdates(context)
     }
 
@@ -182,7 +168,6 @@ class ConsumptionWidgetReceiver : GlanceAppWidgetReceiver() {
         appWidgetIds: IntArray
     ) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
-        logger.d { "Widget update requested" }
         CoroutineScope(Dispatchers.IO).launch {
             ConsumptionWidget.updateWidgetData(context)
         }
@@ -194,15 +179,12 @@ class WidgetUpdateWorker(
     params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 
-    private val logger = Logger.withTag("WidgetUpdateWorker")
-
     override suspend fun doWork(): Result {
         return try {
             ConsumptionWidget.updateWidgetData(applicationContext)
-            logger.d { "Widget update completed" }
             Result.success()
         } catch (e: Exception) {
-            logger.e(e) { "Widget update failed" }
+            Logger.withTag("WidgetUpdateWorker").e(e) { "Widget update failed" }
             Result.retry()
         }
     }

@@ -275,19 +275,13 @@ fun Color.toArgbInt(): Int {
  * Single source of truth for widget rendering on Android/iOS.
  */
 object WidgetColors {
-    // Production colors (Int format for native rendering)
     val productionLight: Int get() = powerProductionLight.toArgbInt()
     val productionDark: Int get() = powerProductionDark.toArgbInt()
-
-    // Consumption colors (Int format for native rendering)
     val consumptionLight: Int get() = powerConsumptionLight.toArgbInt()
     val consumptionDark: Int get() = powerConsumptionDark.toArgbInt()
 
-    // Grid lines (semi-transparent)
     const val GRID_LIGHT = 0x1F000000
     const val GRID_DARK = 0x33FFFFFF
-
-    // Text labels
     const val TEXT_LIGHT = 0xFF666666.toInt()
     const val TEXT_DARK = 0xFFBBBBBB.toInt()
 

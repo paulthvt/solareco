@@ -11,33 +11,23 @@ import net.thevenot.comwatt.widget.WidgetConsumptionData
 import kotlin.time.Clock
 import kotlin.time.Instant
 
-/**
- * Use case to fetch consumption data for widgets
- */
 class FetchWidgetConsumptionUseCase(
     private val dataRepository: DataRepository
 ) {
     private val logger = Logger.withTag("FetchWidgetConsumptionUseCase")
 
-    /**
-     * Fetch last hour consumption data for widget display
-     */
     suspend fun execute(siteId: Int): Either<DomainError, WidgetConsumptionData> {
         return try {
-            logger.d { "Fetching widget consumption data for site $siteId" }
-
-            // Fetch time series data for the last hour
             val response = dataRepository.api.fetchSiteTimeSeries(
                 siteId = siteId,
                 timeAgoUnit = TimeAgoUnit.HOUR,
                 timeAgoValue = 1,
-                aggregationLevel = AggregationLevel.NONE // Raw data points
+                aggregationLevel = AggregationLevel.NONE
             )
 
             response.mapLeft { apiError ->
                 logger.e { "Failed to fetch widget data: $apiError" }
 
-                // Handle 401 Unauthorized - try auto login
                 if (apiError is ApiError.HttpError && apiError.code == 401) {
                     logger.d { "Got 401, attempting auto login" }
                     dataRepository.tryAutoLogin({}, {})
@@ -45,7 +35,6 @@ class FetchWidgetConsumptionUseCase(
 
                 DomainError.Api(apiError)
             }.map { siteTimeSeries ->
-                // Convert timestamps to epoch milliseconds
                 val timestamps = siteTimeSeries.timestamps.map { timestamp: String ->
                     try {
                         Instant.parse(timestamp).toEpochMilliseconds()
@@ -58,7 +47,6 @@ class FetchWidgetConsumptionUseCase(
                 val consumptions = siteTimeSeries.consumptions
                 val productions = siteTimeSeries.productions
 
-                // Calculate statistics
                 val maxConsumption = consumptions.maxOrNull() ?: 0.0
                 val averageConsumption = if (consumptions.isNotEmpty()) {
                     consumptions.average()
@@ -73,7 +61,7 @@ class FetchWidgetConsumptionUseCase(
                     0.0
                 }
 
-                val widgetData = WidgetConsumptionData(
+                WidgetConsumptionData(
                     timestamps = timestamps,
                     consumptions = consumptions,
                     productions = productions,
@@ -83,9 +71,6 @@ class FetchWidgetConsumptionUseCase(
                     maxProduction = maxProduction,
                     averageProduction = averageProduction
                 )
-
-                logger.d { "Widget data fetched successfully: ${consumptions.size} data points (consumption), ${productions.size} data points (production)" }
-                widgetData
             }
         } catch (e: Exception) {
             logger.e(e) { "Exception while fetching widget data" }
