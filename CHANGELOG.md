@@ -1,3 +1,15 @@
+## [1.1.0-beta.6](https://github.com/paulthvt/solareco/compare/1.1.0-beta.5...1.1.0-beta.6) (2026-01-14)
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.7.0 ([7f9c089](https://github.com/paulthvt/solareco/commit/7f9c08912843c9ef69dd106f3434638421f6cd75))
+
+### Miscellaneous Chores
+
+* **deps:** update actions/upload-artifact action to v6 ([500fa1b](https://github.com/paulthvt/solareco/commit/500fa1ba377daded7191cd197e57b852e38fbdcf))
+* **deps:** update agp to v8.13.2 ([5081e11](https://github.com/paulthvt/solareco/commit/5081e11bebf67d0edf3c7f169f69e9d3c19c6242))
+* **deps:** update dependency org.jetbrains.compose.hot-reload to v1.0.0 ([1cb29af](https://github.com/paulthvt/solareco/commit/1cb29af154548fd26e0e6812d74debc98dab06e9))
+
 ## [1.1.0-beta.5](https://github.com/paulthvt/solareco/compare/1.1.0-beta.4...1.1.0-beta.5) (2025-11-24)
 
 ### Bug Fixes
