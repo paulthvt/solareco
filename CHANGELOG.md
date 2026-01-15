@@ -1,3 +1,9 @@
+## [1.1.0-beta.8](https://github.com/paulthvt/solareco/compare/1.1.0-beta.7...1.1.0-beta.8) (2026-01-15)
+
+### Bug Fixes
+
+* **deps:** update dependency io.github.koalaplot:koalaplot-core to v0.10.4 ([35e7977](https://github.com/paulthvt/solareco/commit/35e7977072b9be01bd0cfe4c83d22ff91c768ba2))
+
 ## [1.1.0-beta.7](https://github.com/paulthvt/solareco/compare/1.1.0-beta.6...1.1.0-beta.7) (2026-01-15)
 
 ### Features
