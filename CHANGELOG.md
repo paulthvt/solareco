@@ -1,3 +1,9 @@
+## [1.1.0-beta.7](https://github.com/paulthvt/solareco/compare/1.1.0-beta.6...1.1.0-beta.7) (2026-01-15)
+
+### Features
+
+* implement consumption widget with data fetching and chart generation ([af2356d](https://github.com/paulthvt/solareco/commit/af2356d78eadf3a04ff529e71c709ecb9d4c1974))
+
 ## [1.1.0-beta.6](https://github.com/paulthvt/solareco/compare/1.1.0-beta.5...1.1.0-beta.6) (2026-01-14)
 
 ### Bug Fixes
