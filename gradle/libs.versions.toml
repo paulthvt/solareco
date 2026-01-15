@@ -32,6 +32,8 @@ gradlePlugins-crashlytics = "3.0.6"
 gradlePlugins-google-services = "4.4.4"
 firebase-gitlive-sdk = "2.4.0"
 material3 = "1.10.0-alpha05"
+androidx-glance = "1.1.1"
+androidx-work = "2.10.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -78,6 +80,9 @@ kastro = { module = "dev.jamesyox:kastro", version = "0.4.0" }
 firebase-android-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-android-bom" }
 firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
 gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
+androidx-glance = { group = "androidx.glance", name = "glance-appwidget", version.ref = "androidx-glance" }
+androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "androidx-glance" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -68,6 +68,9 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.ktor.client.android)
+            implementation(libs.androidx.glance)
+            implementation(libs.androidx.glance.material3)
+            implementation(libs.androidx.work.runtime)
             if (isReleaseBuild) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
