@@ -1,3 +1,10 @@
+## [1.1.0-beta.9](https://github.com/paulthvt/solareco/compare/1.1.0-beta.8...1.1.0-beta.9) (2026-01-16)
+
+### Bug Fixes
+
+* **deps:** update androidx.lifecycle to v2.9.6 ([8aa82db](https://github.com/paulthvt/solareco/commit/8aa82dbe4d6ac736373ba5352fd6904a15f11e81))
+* **deps:** update ktor monorepo to v3.3.3 ([fde87eb](https://github.com/paulthvt/solareco/commit/fde87eb55e93651d6f91979827ce0685fffd5031))
+
 ## [1.1.0-beta.8](https://github.com/paulthvt/solareco/compare/1.1.0-beta.7...1.1.0-beta.8) (2026-01-15)
 
 ### Bug Fixes
