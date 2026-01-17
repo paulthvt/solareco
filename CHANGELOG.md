@@ -1,3 +1,9 @@
+## [1.1.0-beta.11](https://github.com/paulthvt/solareco/compare/1.1.0-beta.10...1.1.0-beta.11) (2026-01-17)
+
+### Bug Fixes
+
+* **deps:** update dependency androidx.work:work-runtime-ktx to v2.11.0 ([8dd5f58](https://github.com/paulthvt/solareco/commit/8dd5f582a8780a647fa7fba20f967d7916efde95))
+
 ## [1.1.0-beta.10](https://github.com/paulthvt/solareco/compare/1.1.0-beta.9...1.1.0-beta.10) (2026-01-17)
 
 ### Bug Fixes
