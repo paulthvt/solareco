@@ -1,3 +1,13 @@
+## [1.1.0-beta.10](https://github.com/paulthvt/solareco/compare/1.1.0-beta.9...1.1.0-beta.10) (2026-01-17)
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.8.0 ([0b90ff4](https://github.com/paulthvt/solareco/commit/0b90ff4edf823eb2762111ff500900030dc33503))
+
+### Miscellaneous Chores
+
+* **deps:** update Kotlin and KSP versions to 2.3.0 and 2.3.4 respectively ([9672eef](https://github.com/paulthvt/solareco/commit/9672eef074a13f0855cd277a4b61ead2a825ff61))
+
 ## [1.1.0-beta.9](https://github.com/paulthvt/solareco/compare/1.1.0-beta.8...1.1.0-beta.9) (2026-01-16)
 
 ### Bug Fixes
