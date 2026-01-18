@@ -1,3 +1,13 @@
+## [1.1.0-beta.12](https://github.com/paulthvt/solareco/compare/1.1.0-beta.11...1.1.0-beta.12) (2026-01-18)
+
+### Bug Fixes
+
+* **deps:** update vico to v2.4.1 ([10b86c3](https://github.com/paulthvt/solareco/commit/10b86c3aaaf94c90ba816bc2cb5f50aaa04d6493))
+
+### Miscellaneous Chores
+
+* **deps:** bump Compose version to 1.10.0 ([40435ec](https://github.com/paulthvt/solareco/commit/40435ec1b47f9d8d4de339ba5a038e6de0d2d45b))
+
 ## [1.1.0-beta.11](https://github.com/paulthvt/solareco/compare/1.1.0-beta.10...1.1.0-beta.11) (2026-01-17)
 
 ### Bug Fixes
