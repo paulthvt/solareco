@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.hour_range_dialog_picker_yesterday_label
@@ -22,7 +23,6 @@ import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.utils.formatHourMinutes
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.time.Clock
 
 @Composable

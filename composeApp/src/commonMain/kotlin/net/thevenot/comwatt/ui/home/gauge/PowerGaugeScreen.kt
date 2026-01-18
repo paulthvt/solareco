@@ -50,6 +50,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import comwatt.composeapp.generated.resources.Res
@@ -75,7 +76,6 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerWithdrawalsGaugeStart
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
