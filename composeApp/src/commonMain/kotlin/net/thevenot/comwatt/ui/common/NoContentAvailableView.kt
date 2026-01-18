@@ -15,12 +15,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.no_content_available_retry_button
 import net.thevenot.comwatt.ui.theme.AppTheme
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun NoContentAvailableView(

@@ -11,7 +11,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.testResources)
-    alias(libs.plugins.composeHotReload)
 }
 
 version = "1.0.0-SNAPSHOT"
@@ -66,7 +65,7 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
         }
         androidMain.dependencies {
-            implementation(compose.preview)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.ktor.client.android)
             implementation(libs.androidx.glance)
             implementation(libs.androidx.glance.material3)
@@ -76,13 +75,13 @@ kotlin {
             }
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.compose.material.icons.extended)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.component.resources)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.kotlin.stdlib)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
@@ -277,7 +276,7 @@ room {
 }
 
 dependencies {
-    debugImplementation(compose.uiTooling)
+    debugImplementation(libs.compose.ui.tooling)
     add("kspDesktop", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)

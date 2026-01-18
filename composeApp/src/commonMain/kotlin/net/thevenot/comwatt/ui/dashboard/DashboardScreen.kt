@@ -51,6 +51,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -137,7 +139,6 @@ import net.thevenot.comwatt.utils.formatDayMonth
 import net.thevenot.comwatt.utils.formatHourMinutes
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.pow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -906,6 +907,7 @@ fun TimeSeriesStatisticsTablePreview() {
 }
 
 @Preview
+@PreviewLightDark
 @Composable
 fun DashboardStatisticsCardPreview() {
     val sampleStats = net.thevenot.comwatt.domain.model.SiteDailyData(
