@@ -75,7 +75,7 @@ vico = { group = "com.patrykandpatrick.vico", name = "multiplatform", version.re
 vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
 koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koalaplot" }
 test-resources = { module = "com.goncalossilva:resources", version.ref = "testResources" }
-kastro = { module = "dev.jamesyox:kastro", version = "0.4.0" }
+kastro = { module = "dev.jamesyox:kastro", version = "0.5.0" }
 firebase-android-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-android-bom" }
 firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
 gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
