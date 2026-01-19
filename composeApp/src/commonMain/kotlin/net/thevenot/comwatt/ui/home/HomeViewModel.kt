@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toDeprecatedInstant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
@@ -202,7 +201,7 @@ class HomeViewModel(
     }
 
     fun updateSunState(lat: Double, lon: Double) {
-        val sunState = Clock.System.now().toDeprecatedInstant().calculateSolarState(
+        val sunState = Clock.System.now().calculateSolarState(
             latitude = lat,
             longitude = lon,
         )
