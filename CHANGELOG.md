@@ -1,3 +1,10 @@
+## [1.1.0-beta.13](https://github.com/paulthvt/solareco/compare/1.1.0-beta.12...1.1.0-beta.13) (2026-01-20)
+
+### Bug Fixes
+
+* **deps:** update dependency dev.jamesyox:kastro to v0.5.0 ([e37f31c](https://github.com/paulthvt/solareco/commit/e37f31cf3491d22af83d0c95818b40279eeea115))
+* update method to use the latest Clock API for solar state calculation ([aaa5379](https://github.com/paulthvt/solareco/commit/aaa537940e997013b598d5f3574c1bb6fae472ad))
+
 ## [1.1.0-beta.12](https://github.com/paulthvt/solareco/compare/1.1.0-beta.11...1.1.0-beta.12) (2026-01-18)
 
 ### Bug Fixes
