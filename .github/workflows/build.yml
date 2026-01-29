@@ -27,6 +27,8 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+    env:
+      GRADLE_OPTS: -Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       released: ${{ steps.get-version.outputs.released }}
