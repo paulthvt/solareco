@@ -1,3 +1,15 @@
+## [1.1.0-beta.15](https://github.com/paulthvt/solareco/compare/1.1.0-beta.14...1.1.0-beta.15) (2026-01-30)
+
+### Bug Fixes
+
+* **deps:** update ktor monorepo to v3.4.0 ([9ed4f5e](https://github.com/paulthvt/solareco/commit/9ed4f5e3b17e3328383cba278be1b1573c28fa3b))
+* **deps:** update vico to v2.4.3 ([0cfd274](https://github.com/paulthvt/solareco/commit/0cfd274d00ca8e8d305910c573dc74ec38b70501))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency com.google.devtools.ksp to v2.3.5 ([08dd36a](https://github.com/paulthvt/solareco/commit/08dd36aecc8a30707c0d6988f27b952d803b5375))
+* increase Gradle and Kotlin daemon memory limits to improve build performance ([e07c30d](https://github.com/paulthvt/solareco/commit/e07c30dd5ff5e6f1d5dd8fb06626d62103ba9386))
+
 ## [1.1.0-beta.14](https://github.com/paulthvt/solareco/compare/1.1.0-beta.13...1.1.0-beta.14) (2026-01-20)
 
 ### Bug Fixes
