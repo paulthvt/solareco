@@ -1,3 +1,14 @@
+## [1.1.0-beta.16](https://github.com/paulthvt/solareco/compare/1.1.0-beta.15...1.1.0-beta.16) (2026-01-31)
+
+### Features
+
+* add electricity price fetching and display for Tempo tariff ([48a60f3](https://github.com/paulthvt/solareco/commit/48a60f3030ef2ad42f791525b24ad41ad6ca6890))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency @semantic-release/github to v12.0.3 ([f9daa9e](https://github.com/paulthvt/solareco/commit/f9daa9ea6bb67fb9330bb3ae7a681b14eb3ee420))
+* **deps:** update gradle to v8.14.4 ([ad20ae7](https://github.com/paulthvt/solareco/commit/ad20ae7ca8d2cb6336ea82c92dca9ace1daaa47d))
+
 ## [1.1.0-beta.15](https://github.com/paulthvt/solareco/compare/1.1.0-beta.14...1.1.0-beta.15) (2026-01-30)
 
 ### Bug Fixes
