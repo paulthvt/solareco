@@ -58,6 +58,7 @@ import comwatt.composeapp.generated.resources.statistics_card_today_total
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
+import net.thevenot.comwatt.domain.FetchElectricityPriceUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
@@ -69,6 +70,7 @@ import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
+import net.thevenot.comwatt.ui.home.tempo.TempoCard
 import net.thevenot.comwatt.ui.home.weather.WeatherCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.theme.AppTheme
@@ -92,7 +94,8 @@ fun HomeScreen(
             fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(dataRepository),
             fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
             fetchWeatherUseCase = FetchWeatherUseCase(dataRepository),
-            fetchCurrentSiteUseCase = FetchCurrentSiteUseCase(dataRepository)
+            fetchCurrentSiteUseCase = FetchCurrentSiteUseCase(dataRepository),
+            fetchElectricityPriceUseCase = FetchElectricityPriceUseCase(dataRepository)
         )
     }
 ) {
@@ -185,6 +188,7 @@ private fun HomeScreenContent(
                 modifier = Modifier,
                 title = stringResource(Res.string.statistics_card_title)
             )
+            TempoCard(uiState = uiState)
             WeatherCard(uiState = uiState)
             LastRefreshSection(uiState = uiState)
 

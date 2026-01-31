@@ -254,6 +254,46 @@ val powerWithdrawalsGaugeStartDark = Color(0xFFFF9800) // Orange 500
 val powerWithdrawalsGaugeEndDark = Color(0xFFE65100)   // Orange 900
 
 // =============================================================================
+// Tempo Tariff Colors (EDF Tempo pricing days: Blue, White, Red)
+// =============================================================================
+
+// Blue Day - cheapest electricity rate
+// Light mode
+val tempoBlueDayLight = Color(0xFF1976D2)              // Blue 700 - vibrant but not too bright
+val tempoBlueTextLight = Color(0xFFFFFFFF)             // White text on blue
+
+// Dark mode
+val tempoBlueDayDark = Color(0xFF42A5F5)               // Blue 400 - lighter for dark backgrounds
+val tempoBlueTextDark = Color(0xFF000000)              // Black text on lighter blue
+
+// White Day - medium electricity rate
+// Light mode
+val tempoWhiteDayLight = Color(0xFFECEFF1)             // Blue Grey 50 - off-white
+val tempoWhiteTextLight = Color(0xFF37474F)            // Blue Grey 800 - dark text
+
+// Dark mode
+val tempoWhiteDayDark = Color(0xFFB0BEC5)              // Blue Grey 200 - visible on dark
+val tempoWhiteTextDark = Color(0xFF263238)             // Blue Grey 900 - dark text
+
+// Red Day - most expensive electricity rate
+// Light mode
+val tempoRedDayLight = Color(0xFFD32F2F)               // Red 700 - warning red
+val tempoRedTextLight = Color(0xFFFFFFFF)              // White text on red
+
+// Dark mode
+val tempoRedDayDark = Color(0xFFEF5350)                // Red 400 - lighter for dark backgrounds
+val tempoRedTextDark = Color(0xFFFFFFFF)               // White text still works
+
+// Unknown Day - when tomorrow's color is not yet announced
+// Light mode
+val tempoUnknownDayLight = Color(0xFF9E9E9E)           // Grey 500
+val tempoUnknownTextLight = Color(0xFFFFFFFF)          // White text
+
+// Dark mode
+val tempoUnknownDayDark = Color(0xFF757575)            // Grey 600
+val tempoUnknownTextDark = Color(0xFFFFFFFF)           // White text
+
+// =============================================================================
 // Widget Chart Colors (for native Android Canvas/iOS rendering)
 // These provide Int color values derived from the Compose Color definitions above
 // =============================================================================
