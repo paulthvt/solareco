@@ -26,6 +26,7 @@ import kotlinx.serialization.Serializable
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.DailyWeatherResponseDto
 import net.thevenot.comwatt.model.DeviceDto
+import net.thevenot.comwatt.model.ElectricityPriceResponseDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
 import net.thevenot.comwatt.model.TileResponseDto
@@ -298,6 +299,17 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     parameter("zip", "$zip,$countryCode")
                     parameter("units", units)
                     parameter("lang", lang)
+                }
+            }
+        }
+    }
+
+    suspend fun fetchElectricityPrice(): Either<ApiError, ElectricityPriceResponseDto> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/electricityprice")
                 }
             }
         }

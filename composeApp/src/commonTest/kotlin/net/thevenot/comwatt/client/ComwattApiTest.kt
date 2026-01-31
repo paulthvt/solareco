@@ -163,4 +163,43 @@ class ComwattApiTest {
             assertEquals(1.64, firstWeather.rain)
         }
     }
+
+    @Test
+    fun `fetch electricity price`() = runTest {
+        val serverBaseUrl = "http://localhost"
+        val client = mockHttpClient(
+            configureMockEngine(
+                url = Url("$serverBaseUrl/api/electricityprice"),
+                expectedResponseBody = Resource("src/commonTest/resources/api/responses/eletricity-price.json").readText(),
+                httpMethod = HttpMethod.Get
+            )
+        )
+
+        val electricityPrice = ComwattApi(client, serverBaseUrl).fetchElectricityPrice()
+        assertTrue { electricityPrice.isRight() }
+        electricityPrice.onRight { response ->
+            // Verify tempo syntheses
+            assertTrue { response.tempoSynthesesComplete }
+            assertEquals(119, response.tempoSyntheses.blue.numberOfDays)
+            assertEquals(300, response.tempoSyntheses.blue.totalNumberOfDays)
+            assertEquals(26, response.tempoSyntheses.white.numberOfDays)
+            assertEquals(43, response.tempoSyntheses.white.totalNumberOfDays)
+            assertEquals(8, response.tempoSyntheses.red.numberOfDays)
+            assertEquals(22, response.tempoSyntheses.red.totalNumberOfDays)
+
+            // Verify daily data
+            assertEquals(2, response.daily.size)
+
+            // First day
+            val firstDay = response.daily[0]
+            assertEquals("2026-01-30", firstDay.date)
+            assertEquals(net.thevenot.comwatt.model.TempoDayValue.BLUE, firstDay.dayValue)
+            assertEquals(3, firstDay.status.size)
+
+            // Second day
+            val secondDay = response.daily[1]
+            assertEquals("2026-01-31", secondDay.date)
+            assertEquals(net.thevenot.comwatt.model.TempoDayValue.WHITE, secondDay.dayValue)
+        }
+    }
 }

@@ -107,4 +107,14 @@
     <string name="user_settings_panel_version">Version %1$s</string>
     <string name="user_settings_panel_github_repo">Voir sur GitHub</string>
     <string name="user_settings_panel_report_issue">Signaler un problème</string>
+    <string name="tempo_card_title">Tarif Tempo</string>
+    <string name="tempo_today">Aujourd\'hui</string>
+    <string name="tempo_tomorrow">Demain</string>
+    <string name="tempo_day_blue">Bleu</string>
+    <string name="tempo_day_white">Blanc</string>
+    <string name="tempo_day_red">Rouge</string>
+    <string name="tempo_day_unknown">Inconnu</string>
+    <string name="tempo_blue_days">Jours bleus</string>
+    <string name="tempo_white_days">Jours blancs</string>
+    <string name="tempo_red_days">Jours rouges</string>
 </resources>
