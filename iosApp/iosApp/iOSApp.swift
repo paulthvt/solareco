@@ -5,6 +5,7 @@ import BackgroundTasks
 
 @main
 struct iOSApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     
     private static let backgroundTaskId = "net.thevenot.comwatt.widget.refresh"
