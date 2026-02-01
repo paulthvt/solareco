@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LineAxis
 import androidx.compose.material3.ButtonDefaults
@@ -82,6 +83,7 @@ import com.patrykandpatrick.vico.multiplatform.common.component.rememberTextComp
 import com.patrykandpatrick.vico.multiplatform.common.data.ExtraStore
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.dashboard_chart_fullscreen_button_description
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_avg_title
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_expand_icon_description_collapsed
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_expand_icon_description_expanded
@@ -129,6 +131,7 @@ import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
+import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -268,8 +271,19 @@ fun DashboardScreenContent(
                         items(
                             items = charts.withIndex()
                                 .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
-                            key = { it.index to it.value.name }) { (_, chart) ->
-                            LazyGraphCard(uiState, chart) { viewModel.toggleCardExpansion(it) }
+                            key = { it.index to it.value.name }) { (index, chart) ->
+                            LazyGraphCard(
+                                uiState = uiState,
+                                chart = chart,
+                                onFullscreenClick = {
+                                    navController.navigate(
+                                        Screen.FullscreenChart(
+                                            index
+                                        )
+                                    )
+                                },
+                                toggleCardExpansion = { viewModel.toggleCardExpansion(it) }
+                            )
                         }
                     }
                 }
@@ -448,6 +462,7 @@ private fun TimeUnitBar(
 private fun LazyGraphCard(
     uiState: DashboardScreenState,
     chart: ChartTimeSeries,
+    onFullscreenClick: () -> Unit = {},
     toggleCardExpansion: (String) -> Unit = {}
 ) {
     val isExpanded = uiState.expandedCards.contains(chart.name ?: "Unknown")
@@ -467,16 +482,32 @@ private fun LazyGraphCard(
                     chart.timeSeries.first().title.icon, chart.name?.trim() ?: "Unknown"
                 )
 
-                IconButton(
-                    onClick = { toggleCardExpansion(chart.name ?: "Unknown") },
-                    modifier = Modifier.width(32.dp).height(32.dp)
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded)
-                        else stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_collapsed),
-                        modifier = Modifier.size(16.dp)
-                    )
+                    IconButton(
+                        onClick = onFullscreenClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Fullscreen,
+                            contentDescription = stringResource(Res.string.dashboard_chart_fullscreen_button_description),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { toggleCardExpansion(chart.name ?: "Unknown") },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = if (isExpanded) stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded)
+                            else stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_collapsed),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
 

@@ -29,4 +29,7 @@ sealed interface Screen {
 
     @Serializable
     data object Settings : Screen
+
+    @Serializable
+    data class FullscreenChart(val chartIndex: Int) : Screen
 }

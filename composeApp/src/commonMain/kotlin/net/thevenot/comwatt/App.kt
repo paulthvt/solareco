@@ -20,7 +20,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
+import net.thevenot.comwatt.ui.dashboard.FullscreenChartScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
@@ -104,6 +106,14 @@ fun NavGraphBuilder.mainGraph(
         }
         composable<Screen.Settings> {
             SettingsScreen(dataRepository)
+        }
+        composable<Screen.FullscreenChart> { backStackEntry ->
+            val route = backStackEntry.toRoute<Screen.FullscreenChart>()
+            FullscreenChartScreen(
+                navController = navController,
+                chartIndex = route.chartIndex,
+                dataRepository = dataRepository
+            )
         }
     }
 }

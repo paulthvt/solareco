@@ -14,6 +14,7 @@
 		0ADC1F4C2EA971AC000E249D /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 0ADC1F4B2EA971AC000E249D /* FirebaseCrashlytics */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
+		APPDELEGATE0000000001 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = APPDELEGATE0000000002 /* AppDelegate.swift */; };
 		WIDGET001000000000000001 /* ConsumptionWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = WIDGET001000000000000002 /* ConsumptionWidget.swift */; };
 		WIDGET001000000000000003 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = WIDGET001000000000000004 /* WidgetKit.framework */; };
 		WIDGET001000000000000005 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = WIDGET001000000000000006 /* SwiftUI.framework */; };
@@ -54,6 +55,7 @@
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		7555FF8D242A565B00829871 /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		APPDELEGATE0000000002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		WIDGET001000000000000002 /* ConsumptionWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConsumptionWidget.swift; sourceTree = "<group>"; };
 		WIDGET001000000000000004 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		WIDGET001000000000000006 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -125,6 +127,7 @@
 			children = (
 				0ADC1F462EA97042000E249D /* GoogleService-Info.plist */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
+				APPDELEGATE0000000002 /* AppDelegate.swift */,
 				7555FF82242A565900829871 /* ContentView.swift */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				7555FF8D242A565B00829871 /* iosApp.entitlements */,
@@ -282,6 +285,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				APPDELEGATE0000000001 /* AppDelegate.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
 			);

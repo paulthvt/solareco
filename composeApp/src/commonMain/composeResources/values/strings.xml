@@ -87,6 +87,7 @@
     <string name="dashboard_chart_statistics_sum_title">SUM</string>
     <string name="dashboard_chart_statistics_expand_icon_description_expanded">Collapse</string>
     <string name="dashboard_chart_statistics_expand_icon_description_collapsed">Expand</string>
+    <string name="dashboard_chart_fullscreen_button_description">View chart in fullscreen</string>
     <string name="no_content_available_retry_button">Retry</string>
     <string name="no_content_available_text">No Content Available</string>
     <string name="user_settings_panel_logout_button">Logout</string>

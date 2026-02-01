@@ -7,10 +7,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import net.thevenot.comwatt.di.Factory
+import net.thevenot.comwatt.utils.ScreenOrientationController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        ScreenOrientationController.setActivity(this)
 
         setContent {
             App(

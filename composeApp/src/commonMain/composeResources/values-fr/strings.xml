@@ -88,6 +88,7 @@
     <string name="dashboard_chart_statistics_sum_title">SOMME</string>
     <string name="dashboard_chart_statistics_expand_icon_description_expanded">Réduire</string>
     <string name="dashboard_chart_statistics_expand_icon_description_collapsed">Agrandir</string>
+    <string name="dashboard_chart_fullscreen_button_description">Voir le graphique en plein écran</string>
     <string name="no_content_available_retry_button">Réessayer</string>
     <string name="no_content_available_text">Aucun contenu disponible</string>
     <string name="user_settings_panel_logout_button">Déconnexion</string>
