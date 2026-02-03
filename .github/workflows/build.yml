@@ -48,6 +48,28 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
+      - name: Check if release commit (skip build)
+        id: check-skip
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
+          if [[ "$COMMIT_MSG" == *"[release]"* ]] || [[ "$COMMIT_MSG" == *"chore(release):"* ]]; then
+            echo "is-release-commit=true" >> $GITHUB_OUTPUT
+            echo "🔄 This is a release commit - will skip expensive build operations"
+          else
+            echo "is-release-commit=false" >> $GITHUB_OUTPUT
+            echo "📦 Regular commit - full build will run"
+          fi
+
+      - name: Skip build summary (release commit)
+        if: steps.check-skip.outputs.is-release-commit == 'true'
+        run: |
+          echo "## Build Skipped ✅" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This is a **release commit** - expensive build operations are skipped." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** $(git log -1 --pretty=%s)" >> $GITHUB_STEP_SUMMARY
+
       - name: Check if release should run
         id: check-release
         run: |
@@ -66,15 +88,18 @@ jobs:
           fi
 
       - name: Set up JDK 17
+        if: steps.check-skip.outputs.is-release-commit != 'true'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
 
       - name: Setup Gradle
+        if: steps.check-skip.outputs.is-release-commit != 'true'
         uses: gradle/actions/setup-gradle@v5
 
       - name: Setup Xcode
+        if: steps.check-skip.outputs.is-release-commit != 'true'
         run: |
           # Use the default Xcode on the runner
           xcodebuild -version
@@ -83,15 +108,15 @@ jobs:
           xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -showdestinations || true
 
       - name: Build project (non-release) (skip tests)
-        if: steps.check-release.outputs.should-release == 'false'
+        if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true'
         run: ./gradlew build -x test
 
       - name: Run tests (non-release)
-        if: steps.check-release.outputs.should-release == 'false'
+        if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true'
         run: ./gradlew test
 
       - name: Archive test results (non-release)
-        if: steps.check-release.outputs.should-release == 'false' && always()
+        if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true' && always()
         uses: actions/upload-artifact@v6
         with:
           name: test-results-${{ github.run_number }}
