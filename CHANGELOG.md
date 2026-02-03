@@ -1,3 +1,9 @@
+## [1.1.0-beta.17](https://github.com/paulthvt/solareco/compare/1.1.0-beta.16...1.1.0-beta.17) (2026-02-03)
+
+### Features
+
+* implement fullscreen chart mode with landscape orientation support ([a1879a3](https://github.com/paulthvt/solareco/commit/a1879a32695a907da7adb0a023a88ebf36b263d7))
+
 ## [1.1.0-beta.16](https://github.com/paulthvt/solareco/compare/1.1.0-beta.15...1.1.0-beta.16) (2026-01-31)
 
 ### Features
