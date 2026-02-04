@@ -25,6 +25,7 @@
     <string name="gauge_dialog_title">Paramètres de la jauge</string>
     <string name="gauge_dialog_close_button">Fermer</string>
     <string name="range_picker_button_hour">Heure</string>
+    <string name="range_picker_button_sixhour">6 Heures</string>
     <string name="range_picker_button_day">Jour</string>
     <string name="range_picker_button_week">Semaine</string>
     <string name="range_picker_button_custom">Personnalisé</string>
@@ -33,6 +34,10 @@
     <string name="consumption_series_title">Consommation</string>
     <string name="hour_range_dialog_picker_yesterday_label">Hier</string>
     <plurals name="hour_range_selected_time">
+        <item quantity="one">Il y a 1 heure</item>
+        <item quantity="other">Il y a %1$d heures</item>
+    </plurals>
+    <plurals name="six_hour_range_selected_time">
         <item quantity="one">Il y a 1 heure</item>
         <item quantity="other">Il y a %1$d heures</item>
     </plurals>
@@ -57,6 +62,7 @@
     <string name="statistics_card_title">Statistiques Quotidiennes</string>
     <string name="statistics_card_today_total">Totaux du jour</string>
     <string name="statistics_card_title_hourly">Statistiques Horaires</string>
+    <string name="statistics_card_title_sixhourly">Statistiques sur 6 Heures</string>
     <string name="statistics_card_title_weekly">Statistiques Hebdomadaires</string>
     <string name="statistics_card_title_custom">Statistiques Personnalisées</string>
     <string name="statistics_card_self_consumption_na">N / A</string>
@@ -82,6 +88,7 @@
     <string name="dashboard_chart_statistics_sum_title">SOMME</string>
     <string name="dashboard_chart_statistics_expand_icon_description_expanded">Réduire</string>
     <string name="dashboard_chart_statistics_expand_icon_description_collapsed">Agrandir</string>
+    <string name="dashboard_chart_fullscreen_button_description">Voir le graphique en plein écran</string>
     <string name="no_content_available_retry_button">Réessayer</string>
     <string name="no_content_available_text">Aucun contenu disponible</string>
     <string name="user_settings_panel_logout_button">Déconnexion</string>
@@ -98,4 +105,17 @@
     <string name="settings_production_noise_threshold_description">Définissez le seuil (en W) en dessous duquel les valeurs de production sont considérées comme du bruit et réglé sur zéro</string>
     <string name="settings_production_noise_threshold_icon_content_description">Seuil de bruit de production</string>
     <string name="settings_production_noise_threshold_subtitle">Seuil</string>
+    <string name="user_settings_panel_version">Version %1$s</string>
+    <string name="user_settings_panel_github_repo">Voir sur GitHub</string>
+    <string name="user_settings_panel_report_issue">Signaler un problème</string>
+    <string name="tempo_card_title">Tarif Tempo</string>
+    <string name="tempo_today">Aujourd\'hui</string>
+    <string name="tempo_tomorrow">Demain</string>
+    <string name="tempo_day_blue">Bleu</string>
+    <string name="tempo_day_white">Blanc</string>
+    <string name="tempo_day_red">Rouge</string>
+    <string name="tempo_day_unknown">Inconnu</string>
+    <string name="tempo_blue_days">Jours bleus</string>
+    <string name="tempo_white_days">Jours blancs</string>
+    <string name="tempo_red_days">Jours rouges</string>
 </resources>

@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.toDeprecatedInstant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
+import net.thevenot.comwatt.domain.FetchElectricityPriceUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
@@ -33,7 +33,8 @@ class HomeViewModel(
     private val fetchSiteRealtimeDataUseCase: FetchSiteRealtimeDataUseCase,
     private val fetchSiteDailyDataUseCase: FetchSiteDailyDataUseCase,
     private val fetchWeatherUseCase: FetchWeatherUseCase,
-    private val fetchCurrentSiteUseCase: FetchCurrentSiteUseCase
+    private val fetchCurrentSiteUseCase: FetchCurrentSiteUseCase,
+    private val fetchElectricityPriceUseCase: FetchElectricityPriceUseCase
 ) : ViewModel() {
     private var autoRefreshJob: Job? = null
 
@@ -146,6 +147,21 @@ class HomeViewModel(
                     }
                 }
             }
+            launch {
+                fetchElectricityPriceUseCase.invoke().flowOn(Dispatchers.IO).catch {
+                    handleException("Error in electricity price auto refresh", it)
+                }.collect { result ->
+                    result.onLeft { error ->
+                        Logger.e(TAG) { "Error fetching electricity price: $error" }
+                    }
+                    result.onRight { price ->
+                        Logger.d(TAG) { "Electricity price: $price" }
+                        _uiState.update { state ->
+                            state.copy(electricityPrice = price)
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -156,6 +172,7 @@ class HomeViewModel(
             val siteRealtimeDeferred = async { fetchSiteRealtimeDataUseCase.singleFetch() }
             val siteDailyDeferred = async { fetchSiteDailyDataUseCase.singleFetch() }
             val weatherDeferred = async { fetchWeatherUseCase.singleFetch() }
+            val electricityPriceDeferred = async { fetchElectricityPriceUseCase.singleFetch() }
 
             val siteRealtimeResult = siteRealtimeDeferred.await()
             siteRealtimeResult.onLeft {
@@ -189,6 +206,13 @@ class HomeViewModel(
                 updateSunState(it.latitude, it.longitude)
             }
 
+            val electricityPriceResult = electricityPriceDeferred.await()
+            electricityPriceResult.onRight { price ->
+                _uiState.update { state ->
+                    state.copy(electricityPrice = price)
+                }
+            }
+
             _uiState.update { it.copy(isRefreshing = false) }
         }
     }
@@ -202,7 +226,7 @@ class HomeViewModel(
     }
 
     fun updateSunState(lat: Double, lon: Double) {
-        val sunState = Clock.System.now().toDeprecatedInstant().calculateSolarState(
+        val sunState = Clock.System.now().calculateSolarState(
             latitude = lat,
             longitude = lon,
         )

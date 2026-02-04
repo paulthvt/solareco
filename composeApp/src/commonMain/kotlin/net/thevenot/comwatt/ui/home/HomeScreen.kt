@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,6 +58,7 @@ import comwatt.composeapp.generated.resources.statistics_card_today_total
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
+import net.thevenot.comwatt.domain.FetchElectricityPriceUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
@@ -68,6 +70,7 @@ import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
 import net.thevenot.comwatt.ui.home.gauge.SourceTitle
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
+import net.thevenot.comwatt.ui.home.tempo.TempoCard
 import net.thevenot.comwatt.ui.home.weather.WeatherCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.theme.AppTheme
@@ -79,7 +82,6 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HomeScreen(
@@ -92,7 +94,8 @@ fun HomeScreen(
             fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(dataRepository),
             fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
             fetchWeatherUseCase = FetchWeatherUseCase(dataRepository),
-            fetchCurrentSiteUseCase = FetchCurrentSiteUseCase(dataRepository)
+            fetchCurrentSiteUseCase = FetchCurrentSiteUseCase(dataRepository),
+            fetchElectricityPriceUseCase = FetchElectricityPriceUseCase(dataRepository)
         )
     }
 ) {
@@ -185,6 +188,7 @@ private fun HomeScreenContent(
                 modifier = Modifier,
                 title = stringResource(Res.string.statistics_card_title)
             )
+            TempoCard(uiState = uiState)
             WeatherCard(uiState = uiState)
             LastRefreshSection(uiState = uiState)
 

@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.settings_max_power_gauge
@@ -39,7 +40,6 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 private const val MIN_MAX_POWER_GAUGE = 3
 private const val MAX_MAX_POWER_GAUGE = 20

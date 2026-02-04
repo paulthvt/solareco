@@ -24,6 +24,7 @@
     <string name="gauge_dialog_title">Gauge Settings</string>
     <string name="gauge_dialog_close_button">Close</string>
     <string name="range_picker_button_hour">Hour</string>
+    <string name="range_picker_button_sixhour">6 Hours</string>
     <string name="range_picker_button_day">Day</string>
     <string name="range_picker_button_week">Week</string>
     <string name="range_picker_button_custom">Custom</string>
@@ -32,6 +33,10 @@
     <string name="consumption_series_title">Consumption</string>
     <string name="hour_range_dialog_picker_yesterday_label">Yesterday</string>
     <plurals name="hour_range_selected_time">
+        <item quantity="one">1 hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
+    </plurals>
+    <plurals name="six_hour_range_selected_time">
         <item quantity="one">1 hour ago</item>
         <item quantity="other">%1$d hours ago</item>
     </plurals>
@@ -56,6 +61,7 @@
     <string name="statistics_card_title">Daily Statistics</string>
     <string name="statistics_card_today_total">Today's Totals</string>
     <string name="statistics_card_title_hourly">Hourly Statistics</string>
+    <string name="statistics_card_title_sixhourly">6-Hour Statistics</string>
     <string name="statistics_card_title_weekly">Weekly Statistics</string>
     <string name="statistics_card_title_custom">Custom Statistics</string>
     <string name="statistics_card_self_consumption_na">N/A</string>
@@ -81,6 +87,7 @@
     <string name="dashboard_chart_statistics_sum_title">SUM</string>
     <string name="dashboard_chart_statistics_expand_icon_description_expanded">Collapse</string>
     <string name="dashboard_chart_statistics_expand_icon_description_collapsed">Expand</string>
+    <string name="dashboard_chart_fullscreen_button_description">View chart in fullscreen</string>
     <string name="no_content_available_retry_button">Retry</string>
     <string name="no_content_available_text">No Content Available</string>
     <string name="user_settings_panel_logout_button">Logout</string>
@@ -97,4 +104,17 @@
     <string name="settings_production_noise_threshold_description">Set the threshold (in W) below which production values are considered noise and set to zero</string>
     <string name="settings_production_noise_threshold_icon_content_description">Production Noise Threshold</string>
     <string name="settings_production_noise_threshold_subtitle">Threshold</string>
+    <string name="user_settings_panel_version">Version %1$s</string>
+    <string name="user_settings_panel_github_repo">View on GitHub</string>
+    <string name="user_settings_panel_report_issue">Report an Issue</string>
+    <string name="tempo_card_title">Tempo Tariff</string>
+    <string name="tempo_today">Today</string>
+    <string name="tempo_tomorrow">Tomorrow</string>
+    <string name="tempo_day_blue">Blue</string>
+    <string name="tempo_day_white">White</string>
+    <string name="tempo_day_red">Red</string>
+    <string name="tempo_day_unknown">Unknown</string>
+    <string name="tempo_blue_days">Blue days</string>
+    <string name="tempo_white_days">White days</string>
+    <string name="tempo_red_days">Red days</string>
 </resources>

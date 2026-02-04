@@ -11,7 +11,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.room)
     alias(libs.plugins.testResources)
-    alias(libs.plugins.composeHotReload)
 }
 
 version = "1.0.0-SNAPSHOT"
@@ -20,12 +19,15 @@ val isReleaseBuild = gradle.startParameter.taskNames.any {
     it.contains("release", ignoreCase = true)
 }
 
-val isMobileBuild = gradle.startParameter.taskNames.any { taskName ->
+val isAndroidBuild = gradle.startParameter.taskNames.any { taskName ->
     taskName.contains("android", ignoreCase = true) ||
-            taskName.contains("ios", ignoreCase = true)
+            taskName.contains("assemble", ignoreCase = true) ||
+            taskName.contains("bundle", ignoreCase = true)
 }
 
-if (isReleaseBuild && isMobileBuild) {
+// Apply Firebase plugins for Android release builds
+// The google-services.json file will be created before the build runs
+if (isReleaseBuild && isAndroidBuild) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
     apply(plugin = libs.plugins.crashlytics.get().pluginId)
 }
@@ -63,20 +65,23 @@ kotlin {
             implementation(libs.kotlinx.coroutines.swing)
         }
         androidMain.dependencies {
-            implementation(compose.preview)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.ktor.client.android)
-            if (isReleaseBuild && file("google-services.json").exists()) {
+            implementation(libs.androidx.glance)
+            implementation(libs.androidx.glance.material3)
+            implementation(libs.androidx.work.runtime)
+            if (isReleaseBuild) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
-            implementation(compose.materialIconsExtended)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.compose.material.icons.extended)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.component.resources)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.kotlin.stdlib)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
@@ -109,7 +114,7 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-            if (isReleaseBuild && file("../iosApp/iosApp/GoogleService-Info.plist").exists()) {
+            if (isReleaseBuild) {
                 api(libs.gitlive.firebase.kotlin.crashlytics)
             }
         }
@@ -123,6 +128,12 @@ kotlin {
 android {
     namespace = "net.thevenot.comwatt"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
+
+    val versionName =
+        (project.findProperty("VERSION_NAME") ?: System.getenv("VERSION_NAME"))?.toString()
+            ?: project.version.toString()
+    val cleanVersionName = versionName.replace("-SNAPSHOT", "")
+    setProperty("archivesBaseName", "solareco-$cleanVersionName")
 
     // Load properties from local.properties
     val localProperties = File(rootDir, "local.properties")
@@ -144,7 +155,13 @@ android {
                 ?: localProps.getProperty("RELEASE_KEY_PASSWORD")
 
             if (!storeFilePath.isNullOrBlank()) {
-                storeFile = file(storeFilePath)
+                val keystoreFile = file(storeFilePath)
+                if (keystoreFile.exists()) {
+                    storeFile = keystoreFile
+                    println("[comwatt] Using keystore file: ${keystoreFile.absolutePath}")
+                } else {
+                    println("[comwatt] WARNING: Keystore file not found at: ${keystoreFile.absolutePath}")
+                }
             }
             if (!storePwd.isNullOrBlank()) {
                 storePassword = storePwd
@@ -176,9 +193,12 @@ android {
                 major * 1000000 + minor * 1000 + patch
             }
 
-        // Use VERSION_NAME from project property or environment, or use project version
-        versionName = (project.findProperty("VERSION_NAME") ?: System.getenv("VERSION_NAME"))?.toString()
-            ?: project.version.toString()
+        // Use the versionName already declared at the top of android block
+        this.versionName = versionName
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     packaging {
@@ -199,18 +219,37 @@ android {
                 "proguard-rules.pro"
             )
 
-            val hasSigning = listOf(
-                localProps.getProperty("RELEASE_STORE_FILE") ?: System.getenv("RELEASE_STORE_FILE"),
-                localProps.getProperty("RELEASE_STORE_PASSWORD")
-                    ?: System.getenv("RELEASE_STORE_PASSWORD"),
-                localProps.getProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS"),
-                localProps.getProperty("RELEASE_KEY_PASSWORD")
-                    ?: System.getenv("RELEASE_KEY_PASSWORD"),
-            ).all { it != null && it.isNotBlank() }
-            if (hasSigning) {
-                signingConfig = signingConfigs.getByName("release")
+            val storeFilePath =
+                localProps.getProperty("RELEASE_STORE_FILE") ?: System.getenv("RELEASE_STORE_FILE")
+            val storePwd = localProps.getProperty("RELEASE_STORE_PASSWORD")
+                ?: System.getenv("RELEASE_STORE_PASSWORD")
+            val keyAliasProp =
+                localProps.getProperty("RELEASE_KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS")
+            val keyPwd = localProps.getProperty("RELEASE_KEY_PASSWORD")
+                ?: System.getenv("RELEASE_KEY_PASSWORD")
+
+            val hasSigningSecrets = !storeFilePath.isNullOrBlank() &&
+                    !storePwd.isNullOrBlank() &&
+                    !keyAliasProp.isNullOrBlank() &&
+                    !keyPwd.isNullOrBlank()
+
+            val keystoreExists = if (!storeFilePath.isNullOrBlank()) {
+                file(storeFilePath).exists()
             } else {
-                println("[comwatt] Release signing configuration not provided. The release build will be UNSIGNED.")
+                false
+            }
+
+            if (hasSigningSecrets && keystoreExists) {
+                signingConfig = signingConfigs.getByName("release")
+                println("[comwatt] ✅ Release signing configuration applied successfully")
+            } else {
+                println("[comwatt] ⚠️  Release signing configuration not complete:")
+                println("[comwatt]   - Signing secrets present: $hasSigningSecrets")
+                println("[comwatt]   - Keystore file exists: $keystoreExists")
+                if (!storeFilePath.isNullOrBlank() && !keystoreExists) {
+                    println("[comwatt]   - Keystore path: $storeFilePath")
+                }
+                println("[comwatt]   The release build will be UNSIGNED.")
             }
         }
     }
@@ -237,7 +276,7 @@ room {
 }
 
 dependencies {
-    debugImplementation(compose.uiTooling)
+    debugImplementation(libs.compose.ui.tooling)
     add("kspDesktop", libs.androidx.room.compiler)
     add("kspAndroid", libs.androidx.room.compiler)
     add("kspIosSimulatorArm64", libs.androidx.room.compiler)

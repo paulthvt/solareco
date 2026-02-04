@@ -1,0 +1,67 @@
+{
+  "tempoSyntheses": {
+    "WHITE": {
+      "numberOfDays": 26,
+      "totalNumberOfDays": 43
+    },
+    "BLUE": {
+      "numberOfDays": 119,
+      "totalNumberOfDays": 300
+    },
+    "RED": {
+      "numberOfDays": 8,
+      "totalNumberOfDays": 22
+    }
+  },
+  "daily": [
+    {
+      "date": "2026-01-30",
+      "dayValue": "BLUE",
+      "status": [
+        {
+          "value": "RED",
+          "type": "OFFPEAK",
+          "start_time": "00:00",
+          "end_time": "06:00"
+        },
+        {
+          "value": "BLUE",
+          "type": "PEAK",
+          "start_time": "06:00",
+          "end_time": "22:00"
+        },
+        {
+          "value": "BLUE",
+          "type": "OFFPEAK",
+          "start_time": "22:00",
+          "end_time": "23:59"
+        }
+      ]
+    },
+    {
+      "date": "2026-01-31",
+      "dayValue": "WHITE",
+      "status": [
+        {
+          "value": "BLUE",
+          "type": "OFFPEAK",
+          "start_time": "00:00",
+          "end_time": "06:00"
+        },
+        {
+          "value": "WHITE",
+          "type": "PEAK",
+          "start_time": "06:00",
+          "end_time": "22:00"
+        },
+        {
+          "value": "WHITE",
+          "type": "OFFPEAK",
+          "start_time": "22:00",
+          "end_time": "23:59"
+        }
+      ]
+    }
+  ],
+  "tempoSynthesesComplete": true
+}

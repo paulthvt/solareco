@@ -8,9 +8,11 @@
       {
         "assets": [
           "CHANGELOG.md",
-          "iosApp/iosApp/Info.plist"
+          "iosApp/iosApp/Info.plist",
+          "package.json",
+          "package-lock.json"
         ],
-        "message": "chore(release): ${nextRelease.version} \n\n${nextRelease.notes}"
+        "message": "chore(release): ${nextRelease.version} [release]\n\n${nextRelease.notes}"
       }
     ],
     [
@@ -30,15 +32,15 @@
       {
         "assets": [
           {
-            "path": "composeApp/build/outputs/apk/release/*.apk",
+            "path": "composeApp/build/outputs/apk/release/solareco-*.apk",
             "label": "Android APK"
           },
           {
-            "path": "composeApp/build/outputs/bundle/release/*.aab",
+            "path": "composeApp/build/outputs/bundle/release/solareco-*.aab",
             "label": "Android App Bundle"
           },
           {
-            "path": "build/iosApp.xcarchive/**/*",
+            "path": "build/solareco-*-ios.xcarchive.zip",
             "label": "iOS App Archive"
           }
         ]

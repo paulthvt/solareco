@@ -25,6 +25,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.model.AddressDto
@@ -35,7 +36,6 @@ import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SiteChooserScreen(

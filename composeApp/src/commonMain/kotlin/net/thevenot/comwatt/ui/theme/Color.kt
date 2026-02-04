@@ -253,5 +253,87 @@ val powerWithdrawalsDark = Color(0xFFF57C00)           // Orange 700
 val powerWithdrawalsGaugeStartDark = Color(0xFFFF9800) // Orange 500
 val powerWithdrawalsGaugeEndDark = Color(0xFFE65100)   // Orange 900
 
+// =============================================================================
+// Tempo Tariff Colors (EDF Tempo pricing days: Blue, White, Red)
+// =============================================================================
+
+// Blue Day - cheapest electricity rate
+// Light mode
+val tempoBlueDayLight = Color(0xFF1976D2)              // Blue 700 - vibrant but not too bright
+val tempoBlueTextLight = Color(0xFFFFFFFF)             // White text on blue
+
+// Dark mode
+val tempoBlueDayDark = Color(0xFF42A5F5)               // Blue 400 - lighter for dark backgrounds
+val tempoBlueTextDark = Color(0xFF000000)              // Black text on lighter blue
+
+// White Day - medium electricity rate
+// Light mode
+val tempoWhiteDayLight = Color(0xFFECEFF1)             // Blue Grey 50 - off-white
+val tempoWhiteTextLight = Color(0xFF37474F)            // Blue Grey 800 - dark text
+
+// Dark mode
+val tempoWhiteDayDark = Color(0xFFB0BEC5)              // Blue Grey 200 - visible on dark
+val tempoWhiteTextDark = Color(0xFF263238)             // Blue Grey 900 - dark text
+
+// Red Day - most expensive electricity rate
+// Light mode
+val tempoRedDayLight = Color(0xFFD32F2F)               // Red 700 - warning red
+val tempoRedTextLight = Color(0xFFFFFFFF)              // White text on red
+
+// Dark mode
+val tempoRedDayDark = Color(0xFFEF5350)                // Red 400 - lighter for dark backgrounds
+val tempoRedTextDark = Color(0xFFFFFFFF)               // White text still works
+
+// Unknown Day - when tomorrow's color is not yet announced
+// Light mode
+val tempoUnknownDayLight = Color(0xFF9E9E9E)           // Grey 500
+val tempoUnknownTextLight = Color(0xFFFFFFFF)          // White text
+
+// Dark mode
+val tempoUnknownDayDark = Color(0xFF757575)            // Grey 600
+val tempoUnknownTextDark = Color(0xFFFFFFFF)           // White text
+
+// =============================================================================
+// Widget Chart Colors (for native Android Canvas/iOS rendering)
+// These provide Int color values derived from the Compose Color definitions above
+// =============================================================================
+
+/**
+ * Extension function to convert Compose Color to ARGB Int value.
+ * Useful for native Canvas drawing APIs.
+ */
+fun Color.toArgbInt(): Int {
+    val alpha = (this.alpha * 255).toInt()
+    val red = (this.red * 255).toInt()
+    val green = (this.green * 255).toInt()
+    val blue = (this.blue * 255).toInt()
+    return (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+}
+
+/**
+ * Widget chart colors derived from power scheme colors.
+ * Single source of truth for widget rendering on Android/iOS.
+ */
+object WidgetColors {
+    val productionLight: Int get() = powerProductionLight.toArgbInt()
+    val productionDark: Int get() = powerProductionDark.toArgbInt()
+    val consumptionLight: Int get() = powerConsumptionLight.toArgbInt()
+    val consumptionDark: Int get() = powerConsumptionDark.toArgbInt()
+
+    const val GRID_LIGHT = 0x1F000000
+    const val GRID_DARK = 0x33FFFFFF
+    const val TEXT_LIGHT = 0xFF666666.toInt()
+    const val TEXT_DARK = 0xFFBBBBBB.toInt()
+
+    fun productionColor(isDarkMode: Boolean): Int =
+        if (isDarkMode) productionDark else productionLight
+
+    fun consumptionColor(isDarkMode: Boolean): Int =
+        if (isDarkMode) consumptionDark else consumptionLight
+
+    fun gridColor(isDarkMode: Boolean): Int = if (isDarkMode) GRID_DARK else GRID_LIGHT
+    fun textColor(isDarkMode: Boolean): Int = if (isDarkMode) TEXT_DARK else TEXT_LIGHT
+}
+
 
 

@@ -18,6 +18,7 @@ import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.ui.dashboard.pickers.CustomPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.DayPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.HourPicker
+import net.thevenot.comwatt.ui.dashboard.pickers.SixHourPicker
 import net.thevenot.comwatt.ui.dashboard.pickers.WeekPicker
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import org.jetbrains.compose.resources.stringResource
@@ -34,6 +35,7 @@ fun TimePickerDialog(
         remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
 
     var selectedHour by remember { mutableStateOf(defaultSelectedTimeRange.hour.selectedValue) }
+    var selectedSixHour by remember { mutableStateOf(defaultSelectedTimeRange.sixHour.selectedValue) }
     var selectedDay by remember { mutableStateOf(defaultSelectedTimeRange.day.selectedValue) }
     var selectedWeek by remember { mutableStateOf(defaultSelectedTimeRange.week.selectedValue) }
     var selectedCustomStart by
@@ -53,6 +55,16 @@ fun TimePickerDialog(
                                 SelectedTimeRange(
                                     hour = HourRange.fromSelectedValue(
                                         selectedHour
+                                    )
+                                )
+                            )
+                        }
+
+                        DashboardTimeUnit.SIXHOUR -> {
+                            onRangeSelected(
+                                SelectedTimeRange(
+                                    sixHour = SixHourRange.fromSelectedValue(
+                                        selectedSixHour
                                     )
                                 )
                             )
@@ -114,6 +126,14 @@ fun TimePickerDialog(
                     defaultSelectedTimeRange = defaultSelectedTimeRange.hour.selectedValue,
                     onIntervalSelected = { range ->
                         selectedHour = range
+                    }
+                )
+
+                DashboardTimeUnit.SIXHOUR -> SixHourPicker(
+                    currentDateTime = currentDateTime,
+                    defaultSelectedTimeRange = defaultSelectedTimeRange.sixHour.selectedValue,
+                    onIntervalSelected = { range ->
+                        selectedSixHour = range
                     }
                 )
 

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LineAxis
 import androidx.compose.material3.ButtonDefaults
@@ -51,6 +52,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -80,6 +83,7 @@ import com.patrykandpatrick.vico.multiplatform.common.component.rememberTextComp
 import com.patrykandpatrick.vico.multiplatform.common.data.ExtraStore
 import com.patrykandpatrick.vico.multiplatform.common.rememberVerticalLegend
 import comwatt.composeapp.generated.resources.Res
+import comwatt.composeapp.generated.resources.dashboard_chart_fullscreen_button_description
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_avg_title
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_expand_icon_description_collapsed
 import comwatt.composeapp.generated.resources.dashboard_chart_statistics_expand_icon_description_expanded
@@ -96,10 +100,13 @@ import comwatt.composeapp.generated.resources.hour_range_selected_time
 import comwatt.composeapp.generated.resources.range_picker_button_custom
 import comwatt.composeapp.generated.resources.range_picker_button_day
 import comwatt.composeapp.generated.resources.range_picker_button_hour
+import comwatt.composeapp.generated.resources.range_picker_button_sixhour
 import comwatt.composeapp.generated.resources.range_picker_button_week
+import comwatt.composeapp.generated.resources.six_hour_range_selected_time
 import comwatt.composeapp.generated.resources.statistics_card_title
 import comwatt.composeapp.generated.resources.statistics_card_title_custom
 import comwatt.composeapp.generated.resources.statistics_card_title_hourly
+import comwatt.composeapp.generated.resources.statistics_card_title_sixhourly
 import comwatt.composeapp.generated.resources.statistics_card_title_weekly
 import comwatt.composeapp.generated.resources.week_range_selected_time_n_weeks_ago
 import comwatt.composeapp.generated.resources.week_range_selected_time_one_week_ago
@@ -124,6 +131,7 @@ import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
+import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -134,7 +142,6 @@ import net.thevenot.comwatt.utils.formatDayMonth
 import net.thevenot.comwatt.utils.formatHourMinutes
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import kotlin.math.pow
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
@@ -246,6 +253,7 @@ fun DashboardScreenContent(
                         item(key = "range_stats_card") {
                             val statsTitle = when (uiState.selectedTimeUnit) {
                                 DashboardTimeUnit.HOUR -> stringResource(Res.string.statistics_card_title_hourly)
+                                DashboardTimeUnit.SIXHOUR -> stringResource(Res.string.statistics_card_title_sixhourly)
                                 DashboardTimeUnit.DAY -> stringResource(Res.string.statistics_card_title)
                                 DashboardTimeUnit.WEEK -> stringResource(Res.string.statistics_card_title_weekly)
                                 DashboardTimeUnit.CUSTOM -> stringResource(Res.string.statistics_card_title_custom)
@@ -263,8 +271,19 @@ fun DashboardScreenContent(
                         items(
                             items = charts.withIndex()
                                 .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
-                            key = { it.index to it.value.name }) { (_, chart) ->
-                            LazyGraphCard(uiState, chart) { viewModel.toggleCardExpansion(it) }
+                            key = { it.index to it.value.name }) { (index, chart) ->
+                            LazyGraphCard(
+                                uiState = uiState,
+                                chart = chart,
+                                onFullscreenClick = {
+                                    navController.navigate(
+                                        Screen.FullscreenChart(
+                                            index
+                                        )
+                                    )
+                                },
+                                toggleCardExpansion = { viewModel.toggleCardExpansion(it) }
+                            )
                         }
                     }
                 }
@@ -276,6 +295,7 @@ fun DashboardScreenContent(
 private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String =
     when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}"
+        DashboardTimeUnit.SIXHOUR -> "${uiState.selectedTimeRange.sixHour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.sixHour.end.formatHourMinutes()}"
         DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.end.formatDayMonth()
         DashboardTimeUnit.WEEK -> "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${uiState.selectedTimeRange.week.end.formatDayMonth()}"
         DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${uiState.selectedTimeRange.custom.end.formatDayMonth()}"
@@ -290,12 +310,14 @@ private fun RangeButton(
 ) {
     val selectedValue = when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> uiState.selectedTimeRange.hour.selectedValue
+        DashboardTimeUnit.SIXHOUR -> uiState.selectedTimeRange.sixHour.selectedValue
         DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.selectedValue
         DashboardTimeUnit.WEEK -> uiState.selectedTimeRange.week.selectedValue
         DashboardTimeUnit.CUSTOM -> 0
     }
     val minBound = when (uiState.selectedTimeUnit) {
         DashboardTimeUnit.HOUR -> 23
+        DashboardTimeUnit.SIXHOUR -> 7
         DashboardTimeUnit.DAY -> 364
         DashboardTimeUnit.WEEK -> 52
         DashboardTimeUnit.CUSTOM -> 0
@@ -328,6 +350,12 @@ private fun RangeButton(
                             uiState.selectedTimeRange.hour.selectedValue + 1
                         )
 
+                        DashboardTimeUnit.SIXHOUR -> pluralStringResource(
+                            Res.plurals.six_hour_range_selected_time,
+                            (uiState.selectedTimeRange.sixHour.selectedValue * 3) + 6,
+                            (uiState.selectedTimeRange.sixHour.selectedValue * 3) + 6
+                        )
+
                         DashboardTimeUnit.DAY -> when (uiState.selectedTimeRange.day.selectedValue) {
                             0 -> stringResource(Res.string.day_range_selected_time_today)
                             1 -> stringResource(Res.string.day_range_selected_time_yesterday)
@@ -355,6 +383,11 @@ private fun RangeButton(
                 when (uiState.selectedTimeUnit) {
                     DashboardTimeUnit.HOUR -> Text(
                         text = "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+
+                    DashboardTimeUnit.SIXHOUR -> Text(
+                        text = "${uiState.selectedTimeRange.sixHour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.sixHour.end.formatHourMinutes()}",
                         style = MaterialTheme.typography.bodySmall
                     )
 
@@ -402,6 +435,7 @@ private fun TimeUnitBar(
     ) {
         val options = listOf(
             stringResource(Res.string.range_picker_button_hour) to DashboardTimeUnit.HOUR,
+            stringResource(Res.string.range_picker_button_sixhour) to DashboardTimeUnit.SIXHOUR,
             stringResource(Res.string.range_picker_button_day) to DashboardTimeUnit.DAY,
             stringResource(Res.string.range_picker_button_week) to DashboardTimeUnit.WEEK,
             stringResource(Res.string.range_picker_button_custom) to DashboardTimeUnit.CUSTOM
@@ -428,6 +462,7 @@ private fun TimeUnitBar(
 private fun LazyGraphCard(
     uiState: DashboardScreenState,
     chart: ChartTimeSeries,
+    onFullscreenClick: () -> Unit = {},
     toggleCardExpansion: (String) -> Unit = {}
 ) {
     val isExpanded = uiState.expandedCards.contains(chart.name ?: "Unknown")
@@ -447,16 +482,32 @@ private fun LazyGraphCard(
                     chart.timeSeries.first().title.icon, chart.name?.trim() ?: "Unknown"
                 )
 
-                IconButton(
-                    onClick = { toggleCardExpansion(chart.name ?: "Unknown") },
-                    modifier = Modifier.width(32.dp).height(32.dp)
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = if (isExpanded) stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded)
-                        else stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_collapsed),
-                        modifier = Modifier.size(16.dp)
-                    )
+                    IconButton(
+                        onClick = onFullscreenClick,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Fullscreen,
+                            contentDescription = stringResource(Res.string.dashboard_chart_fullscreen_button_description),
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+
+                    IconButton(
+                        onClick = { toggleCardExpansion(chart.name ?: "Unknown") },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            contentDescription = if (isExpanded) stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded)
+                            else stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_collapsed),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
             }
 
@@ -887,6 +938,7 @@ fun TimeSeriesStatisticsTablePreview() {
 }
 
 @Preview
+@PreviewLightDark
 @Composable
 fun DashboardStatisticsCardPreview() {
     val sampleStats = net.thevenot.comwatt.domain.model.SiteDailyData(

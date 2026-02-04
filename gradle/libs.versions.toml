@@ -1,37 +1,38 @@
 [versions]
-agp = "8.13.0"
+agp = "8.13.2"
 android-compileSdk = "35"
 android-minSdk = "24"
 android-targetSdk = "35"
 androidx-activityCompose = "1.10.1"
 androidx-core-ktx = "1.17.0"
 androidx-espresso-core = "3.7.0"
-androidx-lifecycle = "2.9.5"
+androidx-lifecycle = "2.9.6"
 androidx-test-junit = "1.3.0"
-compose-multiplatform = "1.9.3"
+compose-multiplatform = "1.10.0"
 junit = "4.13.2"
-kotlin = "2.2.21"
-ktor = "3.3.2"
+kotlin = "2.3.0"
+ktor = "3.4.0"
 datetime = "0.7.1-0.6.x-compat"
 coroutines = "1.10.2"
 navigationCompose = "2.9.1"
 sha2 = "0.8.0"
 uriKmp = "0.0.21"
-ksp = "2.2.21-2.0.4"
-sqlite = "2.6.1"
-androidx-room = "2.8.3"
-dataStoreVersion = "1.1.7"
-arrow = "2.1.2"
+ksp = "2.3.5"
+sqlite = "2.6.2"
+androidx-room = "2.8.4"
+dataStoreVersion = "1.2.0"
+arrow = "2.2.1.1"
 kermit = "2.0.8"
 testResources = "0.10.1"
-vico = "2.3.3"
-koalaplot = "0.10.2"
-compose-hot-reload = "1.0.0-rc02"
-firebase-android-bom = "34.4.0"
+vico = "2.4.3"
+koalaplot = "0.10.4"
+firebase-android-bom = "34.8.0"
 gradlePlugins-crashlytics = "3.0.6"
 gradlePlugins-google-services = "4.4.4"
 firebase-gitlive-sdk = "2.4.0"
-material3 = "1.10.0-alpha04"
+material3 = "1.10.0-alpha05"
+androidx-glance = "1.1.1"
+androidx-work = "2.11.0"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -74,17 +75,26 @@ vico = { group = "com.patrykandpatrick.vico", name = "multiplatform", version.re
 vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
 koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koalaplot" }
 test-resources = { module = "com.goncalossilva:resources", version.ref = "testResources" }
-kastro = { module = "dev.jamesyox:kastro", version = "0.4.0" }
+kastro = { module = "dev.jamesyox:kastro", version = "0.5.0" }
 firebase-android-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-android-bom" }
 firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
 gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
+androidx-glance = { group = "androidx.glance", name = "glance-appwidget", version.ref = "androidx-glance" }
+androidx-glance-material3 = { group = "androidx.glance", name = "glance-material3", version.ref = "androidx-glance" }
+androidx-work-runtime = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "androidx-work" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose-multiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
+compose-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose-multiplatform" }
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose-multiplatform" }
+compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version = "1.7.3" }
+compose-component-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-composeHotReload = { id = "org.jetbrains.compose.hot-reload", version.ref = "compose-hot-reload" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

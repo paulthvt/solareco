@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
@@ -19,7 +20,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
+import net.thevenot.comwatt.ui.dashboard.FullscreenChartScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
@@ -27,7 +30,6 @@ import net.thevenot.comwatt.ui.settings.SettingsScreen
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.user.UserSettingsPanel
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
@@ -104,6 +106,14 @@ fun NavGraphBuilder.mainGraph(
         }
         composable<Screen.Settings> {
             SettingsScreen(dataRepository)
+        }
+        composable<Screen.FullscreenChart> { backStackEntry ->
+            val route = backStackEntry.toRoute<Screen.FullscreenChart>()
+            FullscreenChartScreen(
+                navController = navController,
+                chartIndex = route.chartIndex,
+                dataRepository = dataRepository
+            )
         }
     }
 }

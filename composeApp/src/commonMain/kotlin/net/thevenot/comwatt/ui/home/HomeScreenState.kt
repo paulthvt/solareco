@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.ui.home
 
+import net.thevenot.comwatt.domain.model.ElectricityPrice
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.domain.model.WeatherForecast
@@ -23,4 +24,5 @@ data class HomeScreenState(
     val isDay: Boolean = true,
     val siteName: String? = null,
     val weatherForecast: WeatherForecast? = null,
+    val electricityPrice: ElectricityPrice? = null,
 )

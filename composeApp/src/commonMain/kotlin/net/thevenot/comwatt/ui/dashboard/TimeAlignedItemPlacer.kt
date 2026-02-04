@@ -37,6 +37,7 @@ class TimeAlignedItemPlacer(
                     context.model.extraStore.getOrNull(TimeUnitIndexKey) ?: DashboardTimeUnit.HOUR
                 when (timeUnitIndex) {
                     DashboardTimeUnit.HOUR -> 15.minutes.inWholeSeconds
+                    DashboardTimeUnit.SIXHOUR -> 30.minutes.inWholeSeconds
                     DashboardTimeUnit.DAY -> 4.hours.inWholeSeconds
                     DashboardTimeUnit.WEEK, DashboardTimeUnit.CUSTOM -> 1.days.inWholeSeconds
                 }
@@ -46,6 +47,7 @@ class TimeAlignedItemPlacer(
             rangeDuration < 30.minutes -> 5.minutes.inWholeSeconds
             rangeDuration < 1.hours -> 10.minutes.inWholeSeconds
             rangeDuration < 4.hours -> 15.minutes.inWholeSeconds
+            rangeDuration < 6.hours -> 1.hours.inWholeSeconds
             rangeDuration < 1.days -> 4.hours.inWholeSeconds
             rangeDuration < 7.days -> 1.days.inWholeSeconds
             else -> 7.days.inWholeSeconds

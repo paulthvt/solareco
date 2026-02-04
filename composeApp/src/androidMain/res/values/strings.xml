@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">comwatt</string>
+    <string name="widget_description">Energy Overview - Shows your consumption and production data</string>
+    <string name="widget_title">Energy Overview</string>
+    <string name="widget_refresh_button">Refresh</string>
+    <string name="widget_energy_icon">Energy</string>
+    <string name="widget_consumption">Consumption</string>
+    <string name="widget_production">Production</string>
+    <string name="widget_chart">Energy chart</string>
+    <string name="widget_no_data">No data available</string>
+    <string name="widget_will_update">Widget will update automatically</string>
+    <string name="widget_last_update">Last update: %1$s</string>
+    <string name="widget_no_data_time">No data</string>
+    <string name="widget_refresh_failed_no_network">Refresh failed: No network connection</string>
+    <string name="widget_refresh_failed">Refresh failed</string>
 </resources>
