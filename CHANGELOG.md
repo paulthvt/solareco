@@ -1,3 +1,9 @@
+## [1.1.1-beta.2](https://github.com/paulthvt/solareco/compare/1.1.1-beta.1...1.1.1-beta.2) (2026-02-05)
+
+### Bug Fixes
+
+* **deps:** update kotlin monorepo to v2.3.10 ([1376b71](https://github.com/paulthvt/solareco/commit/1376b71e0cb027ba40e9dc651ccd43b879f2b653))
+
 ## [1.1.1-beta.1](https://github.com/paulthvt/solareco/compare/1.1.0...1.1.1-beta.1) (2026-02-04)
 
 ### Bug Fixes
