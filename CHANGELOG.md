@@ -1,3 +1,9 @@
+## [1.1.1-beta.3](https://github.com/paulthvt/solareco/compare/1.1.1-beta.2...1.1.1-beta.3) (2026-02-06)
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.9.0 ([abdc2c7](https://github.com/paulthvt/solareco/commit/abdc2c738099bf4b71c57a7dcd6a8349d8a3c2c6))
+
 ## [1.1.1-beta.2](https://github.com/paulthvt/solareco/compare/1.1.1-beta.1...1.1.1-beta.2) (2026-02-05)
 
 ### Bug Fixes
