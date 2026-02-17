@@ -21,7 +21,7 @@ fun BottomNavigationBar(navController: NavController) {
             ShortNavigationBarItem(
                 icon = {
                     Icon(
-                        imageVector = item.icon,
+                        painter = item.icon(),
                         contentDescription = null,
                     )
                 },

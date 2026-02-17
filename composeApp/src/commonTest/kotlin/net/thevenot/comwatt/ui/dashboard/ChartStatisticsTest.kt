@@ -1,7 +1,5 @@
 package net.thevenot.comwatt.ui.dashboard
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType

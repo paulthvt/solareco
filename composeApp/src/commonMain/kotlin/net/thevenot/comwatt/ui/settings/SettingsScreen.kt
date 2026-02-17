@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,6 +36,7 @@ import comwatt.composeapp.generated.resources.settings_title
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
 
 private const val MIN_MAX_POWER_GAUGE = 3
@@ -93,7 +91,7 @@ fun SettingsContent(
                 description = stringResource(Res.string.settings_max_power_gauge_description),
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.Speed,
+                        painter = AppIcons.Speed,
                         contentDescription = stringResource(Res.string.settings_max_power_gauge_icon_content_description)
                     )
                 }
@@ -144,7 +142,7 @@ fun SettingsContent(
                 description = stringResource(Res.string.settings_production_noise_threshold_description),
                 icon = {
                     Icon(
-                        imageVector = Icons.Default.WbSunny,
+                        painter = AppIcons.WbSunny,
                         contentDescription = stringResource(Res.string.settings_production_noise_threshold_icon_content_description)
                     )
                 }

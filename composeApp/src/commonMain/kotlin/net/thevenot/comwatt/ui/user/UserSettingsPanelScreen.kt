@@ -18,16 +18,6 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -46,7 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,6 +54,7 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.getAppVersion
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -133,7 +124,7 @@ private fun UserSettingsPanelScreenContent(
                         onClick = onClose
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Close,
+                            painter = AppIcons.Close,
                             contentDescription = stringResource(Res.string.user_settings_panel_close_button_content_description)
                         )
                     }
@@ -178,7 +169,7 @@ private fun UserProfileSection(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.AccountCircle,
+                painter = AppIcons.AccountCircle,
                 contentDescription = stringResource(Res.string.user_settings_panel_user_avatar_content_description),
                 modifier = Modifier.size(80.dp),
                 tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -189,7 +180,7 @@ private fun UserProfileSection(
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Filled.Person,
+                painter = AppIcons.Person,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )
@@ -202,7 +193,7 @@ private fun UserProfileSection(
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
-                imageVector = Icons.Filled.Home,
+                painter = AppIcons.Home,
                 contentDescription = null,
                 modifier = Modifier.size(14.dp)
             )
@@ -221,7 +212,7 @@ private fun UserProfileSection(
             modifier = Modifier.fillMaxWidth(0.7f)
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.Logout,
+                painter = AppIcons.Logout,
                 contentDescription = null,
                 modifier = Modifier.size(18.dp)
             )
@@ -247,7 +238,7 @@ private fun SettingsCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             SettingsMenuItem(
-                icon = Icons.Default.SwapHoriz,
+                icon = AppIcons.SwapHoriz,
                 title = stringResource(Res.string.user_settings_panel_change_site),
                 onClick = onChangeSiteClick
             )
@@ -255,7 +246,7 @@ private fun SettingsCard(
             HorizontalDivider()
 
             SettingsMenuItem(
-                icon = Icons.Default.Settings,
+                icon = AppIcons.Settings,
                 title = stringResource(Res.string.user_settings_panel_settings),
                 onClick = onSettingsClick
             )
@@ -265,7 +256,7 @@ private fun SettingsCard(
 
 @Composable
 private fun SettingsMenuItem(
-    icon: ImageVector,
+    icon: Painter,
     title: String,
     onClick: () -> Unit
 ) {
@@ -278,7 +269,7 @@ private fun SettingsMenuItem(
         horizontalArrangement = Arrangement.Start
     ) {
         Icon(
-            imageVector = icon,
+            painter = icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp)
@@ -327,7 +318,7 @@ private fun VersionAndLinksSection() {
                 shapes = ButtonDefaults.shapes()
             ) {
                 Icon(
-                    imageVector = Icons.Default.Code,
+                    painter = AppIcons.Code,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp)
                 )
@@ -345,7 +336,7 @@ private fun VersionAndLinksSection() {
                 shapes = ButtonDefaults.shapes()
             ) {
                 Icon(
-                    imageVector = Icons.Default.BugReport,
+                    painter = AppIcons.BugReport,
                     contentDescription = null,
                     modifier = Modifier.size(16.dp)
                 )

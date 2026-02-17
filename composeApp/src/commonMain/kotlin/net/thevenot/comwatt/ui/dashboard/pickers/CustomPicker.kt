@@ -6,9 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.DatePicker
@@ -51,6 +48,7 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.utils.formatHourMinutes
 import net.thevenot.comwatt.utils.formatYearMonthDay
 import org.jetbrains.compose.resources.stringResource
@@ -291,7 +289,7 @@ private fun DateTimeRow(
                             .padding(AppTheme.dimens.paddingSmall)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.CalendarMonth,
+                            painter = AppIcons.CalendarMonth,
                             contentDescription = stringResource(Res.string.custom_range_dialog_picker_date_time_picker_select_date_icon)
                         )
                         Text(
@@ -313,7 +311,7 @@ private fun DateTimeRow(
                             .padding(AppTheme.dimens.paddingSmall)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Schedule,
+                            painter = AppIcons.Schedule,
                             contentDescription = stringResource(Res.string.custom_range_dialog_picker_date_time_picker_select_time_icon)
                         )
                         Text(

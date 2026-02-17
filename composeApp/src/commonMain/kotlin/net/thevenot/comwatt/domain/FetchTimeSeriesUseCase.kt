@@ -1,15 +1,5 @@
 package net.thevenot.comwatt.domain
 
-import Dishwasher
-import Oven
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Blender
-import androidx.compose.material.icons.filled.DeviceUnknown
-import androidx.compose.material.icons.filled.ElectricalServices
-import androidx.compose.material.icons.filled.HeatPump
-import androidx.compose.material.icons.filled.LocalLaundryService
-import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.ui.graphics.vector.ImageVector
 import arrow.core.Either
 import arrow.core.combine
 import arrow.core.flatMap
@@ -206,7 +196,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                         TimeSeries(
                             title = TimeSeriesTitle(
                                 name = device.name ?: "",
-                                icon = mapIcon(device.deviceKind?.icon)
+                                iconKey = device.deviceKind?.icon
                             ),
                             values = series.timestamps.zip(series.values)
                                 .associate { Instant.parse(it.first) to it.second.toFloat() },
@@ -293,7 +283,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         return TimeSeries(
             title = TimeSeriesTitle(
                 name = getString(Res.string.production_series_title),
-                icon = Icons.Default.ElectricalServices
+                iconKey = "icon-ap-injection"
             ),
             values = siteTimeSeries.timestamps.zip(siteTimeSeries.productions)
                 .associate { Instant.parse(it.first) to it.second.toFloat() },
@@ -307,7 +297,7 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         return TimeSeries(
             title = TimeSeriesTitle(
                 name = getString(Res.string.consumption_series_title),
-                icon = Icons.Default.ElectricalServices
+                iconKey = "icon-ap-withdrawal"
             ),
             values = siteTimeSeries.timestamps.zip(siteTimeSeries.consumptions)
                 .associate { Instant.parse(it.first) to it.second.toFloat() },
@@ -426,21 +416,6 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                     else -> MeasureKind.QUANTITY
                 }
             }
-        }
-    }
-
-    private fun mapIcon(icon: String?): ImageVector {
-        return when (icon) {
-            "icon-ico-sun" -> Icons.Default.WbSunny
-            "icon-ap-oven" -> Oven
-            "icon-ap-householdappliance" -> Icons.Default.Blender
-            "icon-ap-heatpump" -> Icons.Default.HeatPump
-            "icon-ap-washingmachine" -> Icons.Default.LocalLaundryService
-            "icon-ap-dishwasher" -> Dishwasher
-            "icon-ap-injection" -> Icons.Default.ElectricalServices
-            "icon-ap-withdrawal" -> Icons.Default.ElectricalServices
-            "icon-ap-plug" -> Icons.Default.ElectricalServices
-            else -> Icons.Default.DeviceUnknown
         }
     }
 
