@@ -1,3 +1,15 @@
+## [1.1.1-beta.4](https://github.com/paulthvt/solareco/compare/1.1.1-beta.3...1.1.1-beta.4) (2026-02-18)
+
+### Miscellaneous Chores
+
+* **deps:** update dependency @semantic-release/github to v12.0.5 ([567a48b](https://github.com/paulthvt/solareco/commit/567a48b3a527c400563ac440f194a36bc4c04a2a))
+* **deps:** update dependency @semantic-release/github to v12.0.6 ([74485a8](https://github.com/paulthvt/solareco/commit/74485a89060869ac530086cf6ff383fdf2dd81c9))
+* **deps:** update dependency org.jetbrains.compose to v1.10.1 ([8b40cf4](https://github.com/paulthvt/solareco/commit/8b40cf46c5cf4ba3ec9b77f7dc9091d5b14422d6))
+
+### Code Refactoring
+
+* replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
+
 ## [1.1.1-beta.3](https://github.com/paulthvt/solareco/compare/1.1.1-beta.2...1.1.1-beta.3) (2026-02-06)
 
 ### Bug Fixes
