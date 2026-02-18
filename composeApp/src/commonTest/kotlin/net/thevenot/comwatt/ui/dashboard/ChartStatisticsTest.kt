@@ -13,7 +13,7 @@ class ChartStatisticsTest {
     fun `computeWithApiSum with empty values should return zeros`() {
         // Given
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Empty Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Empty Series", ""),
             type = TimeSeriesType.CONSUMPTION,
             values = emptyMap()
         )
@@ -33,7 +33,7 @@ class ChartStatisticsTest {
         val instant3 = Instant.fromEpochSeconds(3000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Test Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Test Series", ""),
             type = TimeSeriesType.PRODUCTION,
             values = mapOf(
                 instant1 to 10.0f,
@@ -59,7 +59,7 @@ class ChartStatisticsTest {
         val instant1 = Instant.fromEpochSeconds(1000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Single Value Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Single Value Series", ""),
             type = TimeSeriesType.INJECTION,
             values = mapOf(instant1 to 42.5f)
         )
@@ -82,7 +82,7 @@ class ChartStatisticsTest {
         val instant3 = Instant.fromEpochSeconds(3000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Negative Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Negative Series", ""),
             type = TimeSeriesType.WITHDRAWAL,
             values = mapOf(
                 instant1 to -10.0f,
@@ -109,7 +109,7 @@ class ChartStatisticsTest {
         val instant3 = Instant.fromEpochSeconds(3000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("All Negative Series", Icons.Default.Star),
+            title = TimeSeriesTitle("All Negative Series", ""),
             type = TimeSeriesType.CONSUMPTION,
             values = mapOf(
                 instant1 to -5.0f,
@@ -136,7 +136,7 @@ class ChartStatisticsTest {
         val instant3 = Instant.fromEpochSeconds(3000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Decimal Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Decimal Series", ""),
             type = TimeSeriesType.PRODUCTION,
             values = mapOf(
                 instant1 to 3.14f,
@@ -163,7 +163,7 @@ class ChartStatisticsTest {
         val instant3 = Instant.fromEpochSeconds(3000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Zero Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Zero Series", ""),
             type = TimeSeriesType.CONSUMPTION,
             values = mapOf(
                 instant1 to 0.0f,
@@ -191,7 +191,7 @@ class ChartStatisticsTest {
         val instant4 = Instant.fromEpochSeconds(4000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Mixed Zero Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Mixed Zero Series", ""),
             type = TimeSeriesType.PRODUCTION,
             values = mapOf(
                 instant1 to 0.0f,
@@ -218,7 +218,7 @@ class ChartStatisticsTest {
         val instant2 = Instant.fromEpochSeconds(2000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Small Values Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Small Values Series", ""),
             type = TimeSeriesType.INJECTION,
             values = mapOf(
                 instant1 to 0.001f,
@@ -244,7 +244,7 @@ class ChartStatisticsTest {
         val instant3 = Instant.fromEpochSeconds(3000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Large Values Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Large Values Series", ""),
             type = TimeSeriesType.PRODUCTION,
             values = mapOf(
                 instant1 to 1000000.0f,
@@ -272,7 +272,7 @@ class ChartStatisticsTest {
         val instant4 = Instant.fromEpochSeconds(4000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Duplicate Values Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Duplicate Values Series", ""),
             type = TimeSeriesType.WITHDRAWAL,
             values = mapOf(
                 instant1 to 15.0f,
@@ -300,7 +300,7 @@ class ChartStatisticsTest {
         val instant3 = Instant.fromEpochSeconds(3000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Extreme Range Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Extreme Range Series", ""),
             type = TimeSeriesType.CONSUMPTION,
             values = mapOf(
                 instant1 to -1000.0f,
@@ -325,7 +325,7 @@ class ChartStatisticsTest {
         val instant1 = Instant.fromEpochSeconds(1000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Single Zero Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Single Zero Series", ""),
             type = TimeSeriesType.PRODUCTION,
             values = mapOf(instant1 to 0.0f)
         )
@@ -346,7 +346,7 @@ class ChartStatisticsTest {
         val instant1 = Instant.fromEpochSeconds(1000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Single Negative Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Single Negative Series", ""),
             type = TimeSeriesType.WITHDRAWAL,
             values = mapOf(instant1 to -25.5f)
         )
@@ -368,7 +368,7 @@ class ChartStatisticsTest {
         val instant2 = Instant.fromEpochSeconds(2000)
 
         val timeSeries = TimeSeries(
-            title = TimeSeriesTitle("Loading Test Series", Icons.Default.Star),
+            title = TimeSeriesTitle("Loading Test Series", ""),
             type = TimeSeriesType.PRODUCTION,
             values = mapOf(
                 instant1 to 100.0f,
