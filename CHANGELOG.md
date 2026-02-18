@@ -1,3 +1,13 @@
+## [1.1.1-beta.5](https://github.com/paulthvt/solareco/compare/1.1.1-beta.4...1.1.1-beta.5) (2026-02-18)
+
+### Bug Fixes
+
+* **deps:** update dependency org.jetbrains.androidx.navigation:navigation-compose to v2.9.2 ([47dfe49](https://github.com/paulthvt/solareco/commit/47dfe4970193c27b57773c528e189a526d5ec8d2))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency com.google.devtools.ksp to v2.3.6 ([1a6c248](https://github.com/paulthvt/solareco/commit/1a6c2488025219eddf7fc90226aef088010934ea))
+
 ## [1.1.1-beta.4](https://github.com/paulthvt/solareco/compare/1.1.1-beta.3...1.1.1-beta.4) (2026-02-18)
 
 ### Miscellaneous Chores
