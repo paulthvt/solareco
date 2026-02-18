@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -20,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.no_content_available_retry_button
 import net.thevenot.comwatt.ui.theme.AppTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -33,7 +32,7 @@ fun NoContentAvailableView(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Icon(
-            imageVector = Icons.Filled.ErrorOutline,
+            painter = AppIcons.Error,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
             modifier = Modifier

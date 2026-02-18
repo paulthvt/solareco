@@ -15,8 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
@@ -49,6 +47,7 @@ import net.thevenot.comwatt.domain.model.TempoDayColor
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.ui.theme.tempoBlue
 import net.thevenot.comwatt.ui.theme.tempoBlueText
 import net.thevenot.comwatt.ui.theme.tempoRed
@@ -83,7 +82,7 @@ fun TempoCard(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Bolt,
+                        painter = AppIcons.Bolt,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.primary

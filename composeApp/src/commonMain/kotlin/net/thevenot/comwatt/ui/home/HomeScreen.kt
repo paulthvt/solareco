@@ -11,10 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -75,6 +71,7 @@ import net.thevenot.comwatt.ui.home.weather.WeatherCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
@@ -124,7 +121,7 @@ fun HomeScreen(
         title = {
             uiState.siteName?.let { site ->
                 CenteredTitleWithIcon(
-                    icon = Icons.Filled.Home, title = site, iconContentDescription = "Site Icon"
+                    icon = AppIcons.Home, title = site, iconContentDescription = "Site Icon"
                 )
             }
         },
@@ -224,7 +221,7 @@ private fun RealTimeConsumptionSection(
                 horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Speed,
+                    painter = AppIcons.Speed,
                     contentDescription = null,
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.primary
@@ -264,7 +261,7 @@ private fun LastRefreshSection(uiState: HomeScreenState) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                imageVector = Icons.Default.Refresh,
+                painter = AppIcons.Refresh,
                 contentDescription = null,
                 modifier = Modifier.size(AppTheme.dimens.paddingNormal),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant

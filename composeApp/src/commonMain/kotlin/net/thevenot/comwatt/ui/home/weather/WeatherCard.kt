@@ -7,11 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.WaterDrop
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +31,7 @@ import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.getWeatherIcon
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.utils.DateFormatter
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
@@ -62,7 +58,7 @@ fun WeatherCard(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.WbSunny,
+                        painter = AppIcons.WbSunny,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.primary
@@ -95,7 +91,7 @@ fun WeatherCard(
                         ) {}
 
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
+                            painter = AppIcons.ArrowUp,
                             contentDescription = "Max temperature",
                             modifier = Modifier
                                 .width(40.dp)
@@ -103,7 +99,7 @@ fun WeatherCard(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
+                            painter = AppIcons.ArrowDown,
                             contentDescription = "Min temperature",
                             modifier = Modifier
                                 .width(40.dp)
@@ -111,7 +107,7 @@ fun WeatherCard(
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Icon(
-                            imageVector = Icons.Default.WaterDrop,
+                            painter = AppIcons.WaterDrop,
                             contentDescription = "Precipitation probability",
                             modifier = Modifier
                                 .width(40.dp)
