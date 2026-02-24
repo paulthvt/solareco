@@ -1,3 +1,13 @@
+## [1.1.1-beta.6](https://github.com/paulthvt/solareco/compare/1.1.1-beta.5...1.1.1-beta.6) (2026-02-24)
+
+### Bug Fixes
+
+* **deps:** update dependency io.github.koalaplot:koalaplot-core to v0.11.0 ([2426fdd](https://github.com/paulthvt/solareco/commit/2426fdde3f4e1bc2c76d6bad42b87b86921f5748))
+
+### Miscellaneous Chores
+
+* migrate to SDK 36 and enable edge-to-edge layout support ([b63c074](https://github.com/paulthvt/solareco/commit/b63c0749b76658ef4b5b32bd1993f810c998023f))
+
 ## [1.1.1-beta.5](https://github.com/paulthvt/solareco/compare/1.1.1-beta.4...1.1.1-beta.5) (2026-02-18)
 
 ### Bug Fixes
