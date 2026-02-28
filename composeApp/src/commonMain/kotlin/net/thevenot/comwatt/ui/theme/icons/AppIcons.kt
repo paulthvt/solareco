@@ -4,41 +4,58 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import comwatt.composeapp.generated.resources.Res
 import comwatt.composeapp.generated.resources.ic_account_circle
+import comwatt.composeapp.generated.resources.ic_air
 import comwatt.composeapp.generated.resources.ic_analytics
 import comwatt.composeapp.generated.resources.ic_arrow_back
+import comwatt.composeapp.generated.resources.ic_battery
 import comwatt.composeapp.generated.resources.ic_blender
+import comwatt.composeapp.generated.resources.ic_boiler
 import comwatt.composeapp.generated.resources.ic_bolt
 import comwatt.composeapp.generated.resources.ic_bug_report
 import comwatt.composeapp.generated.resources.ic_calendar_month
 import comwatt.composeapp.generated.resources.ic_chevron_left
 import comwatt.composeapp.generated.resources.ic_chevron_right
 import comwatt.composeapp.generated.resources.ic_close
+import comwatt.composeapp.generated.resources.ic_clothes_dryer
 import comwatt.composeapp.generated.resources.ic_code
+import comwatt.composeapp.generated.resources.ic_coffee
+import comwatt.composeapp.generated.resources.ic_computer
 import comwatt.composeapp.generated.resources.ic_dashboard
 import comwatt.composeapp.generated.resources.ic_dishwasher
 import comwatt.composeapp.generated.resources.ic_electric_bolt
+import comwatt.composeapp.generated.resources.ic_electric_car
 import comwatt.composeapp.generated.resources.ic_electrical_services
 import comwatt.composeapp.generated.resources.ic_error
+import comwatt.composeapp.generated.resources.ic_freezer
+import comwatt.composeapp.generated.resources.ic_fridge
 import comwatt.composeapp.generated.resources.ic_fullscreen
+import comwatt.composeapp.generated.resources.ic_grid
 import comwatt.composeapp.generated.resources.ic_heat_pump
 import comwatt.composeapp.generated.resources.ic_home
 import comwatt.composeapp.generated.resources.ic_info
 import comwatt.composeapp.generated.resources.ic_keyboard_arrow_down
 import comwatt.composeapp.generated.resources.ic_keyboard_arrow_up
+import comwatt.composeapp.generated.resources.ic_laptop
+import comwatt.composeapp.generated.resources.ic_lightbulb
 import comwatt.composeapp.generated.resources.ic_line_axis
 import comwatt.composeapp.generated.resources.ic_local_laundry_service
 import comwatt.composeapp.generated.resources.ic_login
 import comwatt.composeapp.generated.resources.ic_logout
 import comwatt.composeapp.generated.resources.ic_menu
+import comwatt.composeapp.generated.resources.ic_microwave
 import comwatt.composeapp.generated.resources.ic_mobile_question
+import comwatt.composeapp.generated.resources.ic_outlet
 import comwatt.composeapp.generated.resources.ic_oven
 import comwatt.composeapp.generated.resources.ic_person
+import comwatt.composeapp.generated.resources.ic_pool
 import comwatt.composeapp.generated.resources.ic_power
+import comwatt.composeapp.generated.resources.ic_radiator
 import comwatt.composeapp.generated.resources.ic_refresh
 import comwatt.composeapp.generated.resources.ic_schedule
 import comwatt.composeapp.generated.resources.ic_settings
 import comwatt.composeapp.generated.resources.ic_speed
 import comwatt.composeapp.generated.resources.ic_swap_horiz
+import comwatt.composeapp.generated.resources.ic_tv
 import comwatt.composeapp.generated.resources.ic_visibility
 import comwatt.composeapp.generated.resources.ic_visibility_off
 import comwatt.composeapp.generated.resources.ic_water_drop
@@ -205,5 +222,73 @@ object AppIcons {
     val BugReport: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_bug_report)
+
+    val Pool: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_pool)
+
+    val ElectricCar: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_electric_car)
+
+    val Battery: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_battery)
+
+    val Computer: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_computer)
+
+    val Tv: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_tv)
+
+    val Fridge: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_fridge)
+
+    val Radiator: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_radiator)
+
+    val Air: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_air)
+
+    val Laptop: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_laptop)
+
+    val Lightbulb: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_lightbulb)
+
+    val Coffee: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_coffee)
+
+    val Microwave: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_microwave)
+
+    val ClothesDryer: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_clothes_dryer)
+
+    val Outlet: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_outlet)
+
+    val Grid: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_grid)
+
+    val Boiler: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_boiler)
+
+    val Freezer: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_freezer)
 
 }
