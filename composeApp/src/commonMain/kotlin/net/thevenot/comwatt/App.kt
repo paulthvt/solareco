@@ -23,6 +23,7 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.dashboard.FullscreenChartScreen
+import net.thevenot.comwatt.ui.devices.DevicesScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
@@ -99,7 +100,7 @@ fun NavGraphBuilder.mainGraph(
             DashboardScreen(navController, snackbarHostState, dataRepository)
         }
         composable<Screen.Devices> {
-            Text("Not Implemented Yet")
+            DevicesScreen(navController, snackbarHostState, dataRepository)
         }
         composable<Screen.More> {
             Text("Not Implemented Yet")

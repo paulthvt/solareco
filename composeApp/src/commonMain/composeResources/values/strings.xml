@@ -117,4 +117,9 @@
     <string name="tempo_blue_days">Blue days</string>
     <string name="tempo_white_days">White days</string>
     <string name="tempo_red_days">Red days</string>
+    <string name="devices_screen_title">Devices</string>
+    <string name="devices_offline_message">The connected object controlling this device is currently offline. Check that your Comwatt box, smartplug or control module is powered on.</string>
+    <string name="devices_instant_power">Instant</string>
+    <string name="devices_daily_energy">24h</string>
+    <string name="devices_no_devices">No devices found</string>
 </resources>
