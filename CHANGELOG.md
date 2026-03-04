@@ -1,3 +1,16 @@
+## [1.1.1-beta.7](https://github.com/paulthvt/solareco/compare/1.1.1-beta.6...1.1.1-beta.7) (2026-03-04)
+
+### Bug Fixes
+
+* **deps:** update dependency co.touchlab:kermit to v2.1.0 ([43b4a41](https://github.com/paulthvt/solareco/commit/43b4a414e334a416cf78bb987284b76b222ecba0))
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.10.0 ([f86eb1d](https://github.com/paulthvt/solareco/commit/f86eb1d17d29d51fbf5acc64a45d34bc6025e624))
+* **deps:** update ktor monorepo to v3.4.1 ([e761e73](https://github.com/paulthvt/solareco/commit/e761e730be57a00d7918aebe1a5ae22c302b4e10))
+
+### Miscellaneous Chores
+
+* **deps:** update actions/upload-artifact action to v7 ([a12a7ac](https://github.com/paulthvt/solareco/commit/a12a7ace77e90de79af02fe5d6467129993dce06))
+* **deps:** update dependency conventional-changelog-conventionalcommits to v9.2.0 ([18e465c](https://github.com/paulthvt/solareco/commit/18e465c570e4bac6e50fb4070a0287c4b60a7047))
+
 ## [1.1.1-beta.6](https://github.com/paulthvt/solareco/compare/1.1.1-beta.5...1.1.1-beta.6) (2026-02-24)
 
 ### Bug Fixes
