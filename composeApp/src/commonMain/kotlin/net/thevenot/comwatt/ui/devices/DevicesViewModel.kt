@@ -49,7 +49,6 @@ class DevicesViewModel(
     }
 
     fun refresh() {
-        _uiState.update { it.copy(isDataLoaded = false) }
         loadDevices()
     }
 

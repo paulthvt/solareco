@@ -28,15 +28,17 @@ data class TileChartDataDto(
 @Serializable
 data class MeasureKeyDto(
     @SerialName("@class")
-    val atClass: String,
+    val atClass: String? = null,
     @SerialName("@id")
-    val atId: String,
-    val id: Int,
-    val measureKind: MeasureKind,
-    val measureType: MeasureTypeDto,
-    val measureKey: String,
-    val shared: Boolean,
-    val device: DeviceDto?
+    val atId: String? = null,
+    @SerialName("@ref")
+    val atRef: String? = null,
+    val id: Int? = null,
+    val measureKind: MeasureKind? = null,
+    val measureType: MeasureTypeDto? = null,
+    val measureKey: String? = null,
+    val shared: Boolean? = null,
+    val device: DeviceDto? = null
 )
 
 @Serializable

@@ -23,6 +23,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.DailyWeatherResponseDto
 import net.thevenot.comwatt.model.DeviceDto
@@ -311,6 +312,30 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                     method = HttpMethod.Get
                     path("api/electricityprice")
                 }
+            }
+        }
+    }
+
+    suspend fun fetchDevice(deviceId: Int): Either<ApiError, JsonElement> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/devices/$deviceId")
+                }
+            }
+        }
+    }
+
+    suspend fun updateDevice(deviceId: Int, body: JsonElement): Either<ApiError, JsonElement> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Put
+                    path("api/devices/$deviceId")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(body)
             }
         }
     }
