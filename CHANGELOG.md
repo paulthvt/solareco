@@ -1,3 +1,10 @@
+## [1.2.0-beta.1](https://github.com/paulthvt/solareco/compare/1.1.1-beta.7...1.2.0-beta.1) (2026-03-06)
+
+### Features
+
+* add device settings screen with fetching and updating functionality ([27eaeb7](https://github.com/paulthvt/solareco/commit/27eaeb7690bfc24ca9f0968051aa86f2b1042fb4))
+* add devices screen with device fetching and display functionality ([ca24182](https://github.com/paulthvt/solareco/commit/ca2418228cb0187082f16bf2bd5f722cc251ceed))
+
 ## [1.1.1-beta.7](https://github.com/paulthvt/solareco/compare/1.1.1-beta.6...1.1.1-beta.7) (2026-03-04)
 
 ### Bug Fixes
