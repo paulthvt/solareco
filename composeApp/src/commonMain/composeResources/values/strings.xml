@@ -122,4 +122,10 @@
     <string name="devices_instant_power">Instant</string>
     <string name="devices_daily_energy">24h</string>
     <string name="devices_no_devices">No devices found</string>
+    <string name="device_settings_title">Device Settings</string>
+    <string name="device_settings_name_label">Device Name</string>
+    <string name="device_settings_device_kind_label">Device Type</string>
+    <string name="device_settings_save_button">Save</string>
+    <string name="device_settings_save_success">Device saved successfully</string>
+    <string name="device_settings_save_error">Error saving device</string>
 </resources>

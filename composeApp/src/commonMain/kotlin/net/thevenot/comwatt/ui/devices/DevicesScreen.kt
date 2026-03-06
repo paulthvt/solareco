@@ -53,6 +53,7 @@ import net.thevenot.comwatt.domain.model.DeviceUiModel
 import net.thevenot.comwatt.model.DeviceCode
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
+import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.ui.theme.powerConsumption
@@ -100,7 +101,10 @@ fun DevicesScreen(
         ) {
             DevicesContent(
                 uiState = uiState,
-                onRefresh = { viewModel.refresh() }
+                onRefresh = { viewModel.refresh() },
+                onDeviceSettingsClick = { deviceId ->
+                    navController.navigate(Screen.DeviceSettings(deviceId))
+                }
             )
         }
     }
@@ -110,6 +114,7 @@ fun DevicesScreen(
 private fun DevicesContent(
     uiState: DevicesScreenState,
     onRefresh: () -> Unit,
+    onDeviceSettingsClick: (Int) -> Unit,
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -146,7 +151,10 @@ private fun DevicesContent(
             ) {
                 item { Spacer(modifier = Modifier.height(4.dp)) }
                 items(uiState.devices, key = { it.id }) { device ->
-                    DeviceCard(device = device)
+                    DeviceCard(
+                        device = device,
+                        onSettingsClick = { onDeviceSettingsClick(device.id) }
+                    )
                 }
                 item { Spacer(modifier = Modifier.height(8.dp)) }
             }
@@ -155,20 +163,20 @@ private fun DevicesContent(
 }
 
 @Composable
-private fun DeviceCard(device: DeviceUiModel) {
+private fun DeviceCard(device: DeviceUiModel, onSettingsClick: () -> Unit = {}) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         if (device.isOnline) {
-            OnlineDeviceCardContent(device)
+            OnlineDeviceCardContent(device, onSettingsClick = onSettingsClick)
         } else {
-            OfflineDeviceCardContent(device)
+            OfflineDeviceCardContent(device, onSettingsClick = onSettingsClick)
         }
     }
 }
 
 @Composable
-private fun OnlineDeviceCardContent(device: DeviceUiModel) {
+private fun OnlineDeviceCardContent(device: DeviceUiModel, onSettingsClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,7 +231,7 @@ private fun OnlineDeviceCardContent(device: DeviceUiModel) {
         }
 
         // Settings cog
-        IconButton(onClick = { /* TODO: navigate to device settings */ }) {
+        IconButton(onClick = onSettingsClick) {
             Icon(
                 painter = AppIcons.Settings,
                 contentDescription = "Settings",
@@ -235,7 +243,7 @@ private fun OnlineDeviceCardContent(device: DeviceUiModel) {
 }
 
 @Composable
-private fun OfflineDeviceCardContent(device: DeviceUiModel) {
+private fun OfflineDeviceCardContent(device: DeviceUiModel, onSettingsClick: () -> Unit = {}) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -254,7 +262,7 @@ private fun OfflineDeviceCardContent(device: DeviceUiModel) {
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = { /* TODO: navigate to device settings */ }) {
+            IconButton(onClick = onSettingsClick) {
                 Icon(
                     painter = AppIcons.Settings,
                     contentDescription = "Settings",
