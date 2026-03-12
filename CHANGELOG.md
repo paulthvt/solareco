@@ -1,3 +1,10 @@
+## [1.2.0-beta.3](https://github.com/paulthvt/solareco/compare/1.2.0-beta.2...1.2.0-beta.3) (2026-03-12)
+
+### Bug Fixes
+
+* **deps:** update arrow-kt monorepo to v2.2.2 ([5933a7c](https://github.com/paulthvt/solareco/commit/5933a7c180ac8c35a497d57341aed78dd7ab0052))
+* enhance TimeUnitBar with horizontal scrolling and improved text display ([8ad41f0](https://github.com/paulthvt/solareco/commit/8ad41f0dd310874c7b7e0f5ce26cd82567f37b8e))
+
 ## [1.2.0-beta.2](https://github.com/paulthvt/solareco/compare/1.2.0-beta.1...1.2.0-beta.2) (2026-03-12)
 
 ### Bug Fixes
