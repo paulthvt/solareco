@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.ui.dashboard
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
@@ -421,7 +423,10 @@ private fun TimeUnitBar(
     uiState: DashboardScreenState, onTimeUnitSelected: (DashboardTimeUnit) -> Unit = {}
 ) {
     Row(
-        Modifier.padding(horizontal = AppTheme.dimens.paddingSmall).fillMaxWidth(),
+        Modifier
+            .padding(horizontal = AppTheme.dimens.paddingSmall)
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(
             space = ButtonGroupDefaults.ConnectedSpaceBetween,
             alignment = Alignment.CenterHorizontally
@@ -446,7 +451,7 @@ private fun TimeUnitBar(
                         else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                     },
             ) {
-                Text(label)
+                Text(label, maxLines = 1)
             }
         }
     }
@@ -831,7 +836,7 @@ private fun TimeSeriesStatisticsRow(
     }
 }
 
-@Preview
+@Preview(widthDp = 320)
 @Composable
 fun TimeUnitBarPreview() {
     val sampleState = DashboardScreenState(
@@ -842,7 +847,10 @@ fun TimeUnitBarPreview() {
     )
 
     ComwattTheme {
-        TimeUnitBar(uiState = sampleState)
+        Column {
+            TimeUnitBar(uiState = sampleState)
+            TimeUnitBar(uiState = sampleState.copy(selectedTimeUnit = DashboardTimeUnit.CUSTOM))
+        }
     }
 }
 
