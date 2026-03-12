@@ -1,3 +1,15 @@
+## [1.2.0-beta.2](https://github.com/paulthvt/solareco/compare/1.2.0-beta.1...1.2.0-beta.2) (2026-03-12)
+
+### Bug Fixes
+
+* **deps:** update compose.multiplatform to v1.10.2 ([d204f2a](https://github.com/paulthvt/solareco/commit/d204f2ae577a02240eafa5b65467c09ff3bb9861))
+* **deps:** update dependency androidx.core:core-ktx to v1.18.0 ([1692c90](https://github.com/paulthvt/solareco/commit/1692c903fb2b7da97babe02f3c0af17884996a67))
+* **deps:** update dependency androidx.datastore:datastore-preferences-core to v1.2.1 ([23c29a9](https://github.com/paulthvt/solareco/commit/23c29a9f1e5824b9c3adf4a421f5bf5cebc6ba45))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency conventional-changelog-conventionalcommits to v9.3.0 ([ed2a28f](https://github.com/paulthvt/solareco/commit/ed2a28f39c1581697a5f1e113a0ff5564b3c51ae))
+
 ## [1.2.0-beta.1](https://github.com/paulthvt/solareco/compare/1.1.1-beta.7...1.2.0-beta.1) (2026-03-06)
 
 ### Features
