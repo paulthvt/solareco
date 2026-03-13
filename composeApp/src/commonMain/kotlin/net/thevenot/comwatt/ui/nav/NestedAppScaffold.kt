@@ -2,8 +2,6 @@ package net.thevenot.comwatt.ui.nav
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -16,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.navigation.NavController
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,7 +45,7 @@ fun NestedAppScaffold(
                     actionsContent()
                     IconButton(onClick = { navController.navigate(Screen.UserSettings) }) {
                         Icon(
-                            Icons.Default.AccountCircle,
+                            painter = AppIcons.AccountCircle,
                             contentDescription = "account",
                         )
                     }

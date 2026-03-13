@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,15 +14,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 
 @Composable
 fun CenteredTitleWithIcon(
-    icon: ImageVector,
+    icon: Painter,
     title: String,
     iconContentDescription: String? = null
 ) {
@@ -40,7 +39,7 @@ fun CenteredTitleWithIcon(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer
         ) {
             Icon(
-                imageVector = icon,
+                painter = icon,
                 contentDescription = iconContentDescription,
                 modifier = Modifier.padding(AppTheme.dimens.paddingSmall)
             )
@@ -60,7 +59,7 @@ fun CenteredTitleWithIconPreview() {
     ComwattTheme {
         Surface {
             CenteredTitleWithIcon(
-                icon = Icons.Filled.Home,
+                icon = AppIcons.Home,
                 title = "My Solar Site",
                 iconContentDescription = "Site Icon"
             )

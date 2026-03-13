@@ -117,7 +117,7 @@ jobs:
 
       - name: Archive test results (non-release)
         if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true' && always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ github.run_number }}
           path: |
@@ -263,7 +263,7 @@ jobs:
 
       - name: Archive Android APK
         if: steps.get-version.outputs.released == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: android-apk-${{ steps.get-version.outputs.version }}
           path: composeApp/build/outputs/apk/release/*.apk
@@ -271,7 +271,7 @@ jobs:
 
       - name: Archive Android Bundle
         if: steps.get-version.outputs.released == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: android-bundle-${{ steps.get-version.outputs.version }}
           path: composeApp/build/outputs/bundle/release/*.aab
@@ -279,7 +279,7 @@ jobs:
 
       - name: Archive iOS App
         if: steps.get-version.outputs.released == 'true'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: ios-app-${{ steps.get-version.outputs.version }}
           path: build/iosApp.xcarchive/

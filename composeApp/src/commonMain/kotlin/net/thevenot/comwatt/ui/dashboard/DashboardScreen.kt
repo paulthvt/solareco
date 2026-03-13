@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.ui.dashboard
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,15 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Fullscreen
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LineAxis
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
@@ -48,7 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
@@ -134,6 +128,8 @@ import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
+import net.thevenot.comwatt.ui.theme.icons.IconsUtil
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
@@ -204,7 +200,7 @@ fun DashboardScreenContent(
         navController = navController,
         title = {
             CenteredTitleWithIcon(
-                icon = Icons.Filled.LineAxis,
+                icon = AppIcons.LineAxis,
                 title = stringResource(Res.string.dashboard_screen_title),
                 iconContentDescription = "Statistics Icon"
             )
@@ -332,7 +328,7 @@ private fun RangeButton(
                 shape = ButtonDefaults.squareShape,
                 onClick = onPreviousButtonClick, enabled = selectedValue < minBound
             ) {
-                Icon(Icons.Default.ChevronLeft, contentDescription = "Previous")
+                Icon(AppIcons.ChevronLeft, contentDescription = "Previous")
             }
         }
 
@@ -416,7 +412,7 @@ private fun RangeButton(
                 onClick = onNextButtonClick,
                 enabled = selectedValue > 0
             ) {
-                Icon(Icons.Default.ChevronRight, contentDescription = "Next")
+                Icon(AppIcons.ChevronRight, contentDescription = "Next")
             }
         }
     }
@@ -427,7 +423,10 @@ private fun TimeUnitBar(
     uiState: DashboardScreenState, onTimeUnitSelected: (DashboardTimeUnit) -> Unit = {}
 ) {
     Row(
-        Modifier.padding(horizontal = AppTheme.dimens.paddingSmall).fillMaxWidth(),
+        Modifier
+            .padding(horizontal = AppTheme.dimens.paddingSmall)
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(
             space = ButtonGroupDefaults.ConnectedSpaceBetween,
             alignment = Alignment.CenterHorizontally
@@ -452,7 +451,7 @@ private fun TimeUnitBar(
                         else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
                     },
             ) {
-                Text(label)
+                Text(label, maxLines = 1)
             }
         }
     }
@@ -479,7 +478,8 @@ private fun LazyGraphCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 ChartTitle(
-                    chart.timeSeries.first().title.icon, chart.name?.trim() ?: "Unknown"
+                    IconsUtil.mapIconKeyToPainter(chart.timeSeries.first().title.iconKey),
+                    chart.name?.trim() ?: "Unknown"
                 )
 
                 Row(
@@ -491,7 +491,7 @@ private fun LazyGraphCard(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Fullscreen,
+                            painter = AppIcons.FullScreen,
                             contentDescription = stringResource(Res.string.dashboard_chart_fullscreen_button_description),
                             modifier = Modifier.size(18.dp)
                         )
@@ -502,7 +502,7 @@ private fun LazyGraphCard(
                         modifier = Modifier.size(32.dp)
                     ) {
                         Icon(
-                            imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                            painter = if (isExpanded) AppIcons.ArrowUp else AppIcons.ArrowDown,
                             contentDescription = if (isExpanded) stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_expanded)
                             else stringResource(Res.string.dashboard_chart_statistics_expand_icon_description_collapsed),
                             modifier = Modifier.size(16.dp)
@@ -693,7 +693,7 @@ fun rememberTimeValueFormatter(rangeDuration: Duration): CartesianValueFormatter
     }
 
 @Composable
-fun ChartTitle(icon: ImageVector, title: String) {
+fun ChartTitle(icon: Painter, title: String) {
     Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
         Icon(icon, "device_icon")
         Spacer(modifier = Modifier.width(AppTheme.dimens.paddingNormal))
@@ -836,7 +836,7 @@ private fun TimeSeriesStatisticsRow(
     }
 }
 
-@Preview
+@Preview(widthDp = 320)
 @Composable
 fun TimeUnitBarPreview() {
     val sampleState = DashboardScreenState(
@@ -847,7 +847,10 @@ fun TimeUnitBarPreview() {
     )
 
     ComwattTheme {
-        TimeUnitBar(uiState = sampleState)
+        Column {
+            TimeUnitBar(uiState = sampleState)
+            TimeUnitBar(uiState = sampleState.copy(selectedTimeUnit = DashboardTimeUnit.CUSTOM))
+        }
     }
 }
 
@@ -890,7 +893,7 @@ fun LazyGraphCardPreview() {
     }
 
     val sampleTimeSeries = TimeSeries(
-        title = TimeSeriesTitle("Sample", Icons.Default.Info),
+        title = TimeSeriesTitle("Sample", "icon-ap-injection"),
         type = TimeSeriesType.PRODUCTION,
         values = sampleValues
     )
@@ -908,13 +911,13 @@ fun LazyGraphCardPreview() {
 @Composable
 fun TimeSeriesStatisticsTablePreview() {
     val sampleTimeSeries1 = TimeSeries(
-        title = TimeSeriesTitle("Production", Icons.Default.Info),
+        title = TimeSeriesTitle("Production", "icon-ap-injection"),
         type = TimeSeriesType.PRODUCTION,
         values = emptyMap()
     )
 
     val sampleTimeSeries2 = TimeSeries(
-        title = TimeSeriesTitle("Consumption", Icons.Default.Info),
+        title = TimeSeriesTitle("Consumption", "icon-ap-withdrawal"),
         type = TimeSeriesType.CONSUMPTION,
         values = emptyMap()
     )

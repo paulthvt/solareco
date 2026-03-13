@@ -20,8 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +49,7 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import comwatt.composeapp.generated.resources.Res
@@ -62,6 +61,7 @@ import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerConsumptionGaugeEnd
 import net.thevenot.comwatt.ui.theme.powerConsumptionGaugeStart
@@ -286,7 +286,7 @@ private fun SettingsButton(onSettingsButtonClick: () -> Unit) {
         verticalAlignment = Alignment.Top
     ) {
         IconButton(onSettingsButtonClick) {
-            Icon(Icons.Filled.Settings, contentDescription = "Power Gauge Settings")
+            Icon(AppIcons.Settings, contentDescription = "Power Gauge Settings")
         }
     }
 }
@@ -538,6 +538,7 @@ fun PowerGaugeScreenPreview() {
     }
 }
 
+@PreviewLightDark
 @Preview
 @Composable
 fun DefaultPreview() {
@@ -549,8 +550,9 @@ fun DefaultPreview() {
                         production = 256.0,
                         consumption = 120.0,
                         injection = 136.0,
-                        withdrawals = 0.0,
-                    )
+                        withdrawals = 0.0
+                    ),
+                    powerMaxGauge = 9000
                 ),
                 modifier = Modifier.fillMaxWidth(),
             )

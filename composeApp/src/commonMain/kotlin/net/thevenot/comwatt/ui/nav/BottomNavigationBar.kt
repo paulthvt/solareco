@@ -21,11 +21,11 @@ fun BottomNavigationBar(navController: NavController) {
             ShortNavigationBarItem(
                 icon = {
                     Icon(
-                        imageVector = item.icon,
+                        painter = item.icon(),
                         contentDescription = null,
                     )
                 },
-                enabled = item.screen == Screen.Home || item.screen == Screen.Dashboard,
+                enabled = item.screen == Screen.Home || item.screen == Screen.Dashboard || item.screen == Screen.Devices,
                 label = { Text(stringResource(item.label)) },
                 selected = currentDestination?.hierarchy?.any {
                     it.hasRoute(item.screen::class)

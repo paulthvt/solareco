@@ -10,9 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Analytics
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
@@ -55,6 +52,7 @@ import kotlinx.coroutines.launch
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
@@ -82,7 +80,7 @@ fun StatisticsCard(
                     horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Analytics,
+                        painter = AppIcons.Analytics,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.primary
@@ -176,7 +174,7 @@ private fun DonutChartWithPercentage(
                     modifier = Modifier.size(20.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Info,
+                        painter = AppIcons.Info,
                         contentDescription = "Information",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)

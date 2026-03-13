@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +34,7 @@ import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 
 @Composable
 fun SiteChooserScreen(
@@ -88,7 +87,7 @@ fun SiteCard(site: SiteDto, userDto: UserDto?, onSiteClick: (SiteDto) -> Unit = 
         ) {
             Row {
                 Icon(
-                    imageVector = Icons.Filled.Home,
+                    painter = AppIcons.Home,
                     contentDescription = "Site Icon",
                 )
                 Spacer(modifier = Modifier.width(AppTheme.dimens.paddingSmall))

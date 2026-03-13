@@ -12,10 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Login
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -61,6 +57,7 @@ import kotlinx.coroutines.launch
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -152,9 +149,9 @@ fun LoginScreen(
                                 IconButton(onClick = { passwordHidden = !passwordHidden }) {
                                     val visibilityIcon =
                                         if (passwordHidden) {
-                                            Icons.Filled.Visibility
+                                            AppIcons.Visibility
                                         } else {
-                                            Icons.Filled.VisibilityOff
+                                            AppIcons.VisibilityOff
                                         }
                                     val description = stringResource(
                                         if (passwordHidden) {
@@ -164,7 +161,7 @@ fun LoginScreen(
                                         }
                                     )
                                     Icon(
-                                        imageVector = visibilityIcon,
+                                        painter = visibilityIcon,
                                         contentDescription = description,
                                     )
                                 }
@@ -206,7 +203,7 @@ fun LoginScreen(
                                 )
                             } else {
                                 Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.Login,
+                                    painter = AppIcons.Login,
                                     contentDescription = "Login",
                                     modifier = Modifier.size(24.dp)
                                 )

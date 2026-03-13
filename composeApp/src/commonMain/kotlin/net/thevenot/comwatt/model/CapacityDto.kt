@@ -15,6 +15,8 @@ data class CapacityDto(
 data class CapacityDetailDto(
     @SerialName("@id")
     val atId: String?,
+    @SerialName("@ref")
+    val atRef: String?,
     val id: Int?,
     val capacityId: String?,
     val type: String?,
@@ -23,12 +25,16 @@ data class CapacityDetailDto(
     val instance: String?,
     val connectedObjectId: Int?,
     val measureKinds: List<String>?,
+    val measureKind: String?,
     val measureType: MeasureTypeDto?,
     val nativeMeasureType: Boolean?,
+    val deviceId: Int?,
     val global: Boolean?,
     val production: Boolean?,
     val enable: Boolean?,
     val tadoCapacity: String?,
     val selectValues: String?,
-    val calibration: Int?
+    val calibration: Int?,
+    val valorisationIndex: Int?,
+    val multiplication: String?
 )

@@ -10,11 +10,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ElectricBolt
-import androidx.compose.material.icons.filled.ElectricalServices
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -32,8 +27,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
-import androidx.compose.ui.graphics.vector.VectorPainter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -62,6 +56,7 @@ import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.domain.model.Trend
 import net.thevenot.comwatt.ui.home.HomeScreenState
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
@@ -98,10 +93,10 @@ private data class EnergyFlowColors(
 )
 
 private data class EnergyFlowIcons(
-    val solar: VectorPainter,
-    val grid: VectorPainter,
-    val consumption: VectorPainter,
-    val centerBox: VectorPainter
+    val solar: Painter,
+    val grid: Painter,
+    val consumption: Painter,
+    val centerBox: Painter
 )
 
 private data class EnergyFlowStrings(
@@ -191,10 +186,10 @@ private fun rememberEnergyFlowColors() = EnergyFlowColors(
 
 @Composable
 private fun rememberEnergyFlowIcons() = EnergyFlowIcons(
-    solar = rememberVectorPainter(Icons.Default.WbSunny),
-    grid = rememberVectorPainter(Icons.Default.ElectricBolt),
-    consumption = rememberVectorPainter(Icons.Default.ElectricalServices),
-    centerBox = rememberVectorPainter(Icons.Default.Home)
+    solar = AppIcons.WbSunny,
+    grid = AppIcons.ElectricBolt,
+    consumption = AppIcons.ElectricalServices,
+    centerBox = AppIcons.Home
 )
 
 @Composable
@@ -322,7 +317,7 @@ private fun DrawScope.drawCenterBox(
     center: Offset,
     config: EnergyFlowConfig,
     colors: EnergyFlowColors,
-    iconPainter: VectorPainter
+    iconPainter: Painter
 ) {
     // Draw the box
     drawRoundRect(
@@ -498,7 +493,7 @@ private fun DrawScope.drawMaterialCard(
     cardColor: Color,
     watts: Int,
     trend: Trend?,
-    iconPainter: VectorPainter,
+    iconPainter: Painter,
     description: String,
     textMeasurer: TextMeasurer,
     textColor: Color,

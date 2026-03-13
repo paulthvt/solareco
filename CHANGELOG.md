@@ -1,3 +1,92 @@
+## [1.2.0-beta.3](https://github.com/paulthvt/solareco/compare/1.2.0-beta.2...1.2.0-beta.3) (2026-03-12)
+
+### Bug Fixes
+
+* **deps:** update arrow-kt monorepo to v2.2.2 ([5933a7c](https://github.com/paulthvt/solareco/commit/5933a7c180ac8c35a497d57341aed78dd7ab0052))
+* enhance TimeUnitBar with horizontal scrolling and improved text display ([8ad41f0](https://github.com/paulthvt/solareco/commit/8ad41f0dd310874c7b7e0f5ce26cd82567f37b8e))
+
+## [1.2.0-beta.2](https://github.com/paulthvt/solareco/compare/1.2.0-beta.1...1.2.0-beta.2) (2026-03-12)
+
+### Bug Fixes
+
+* **deps:** update compose.multiplatform to v1.10.2 ([d204f2a](https://github.com/paulthvt/solareco/commit/d204f2ae577a02240eafa5b65467c09ff3bb9861))
+* **deps:** update dependency androidx.core:core-ktx to v1.18.0 ([1692c90](https://github.com/paulthvt/solareco/commit/1692c903fb2b7da97babe02f3c0af17884996a67))
+* **deps:** update dependency androidx.datastore:datastore-preferences-core to v1.2.1 ([23c29a9](https://github.com/paulthvt/solareco/commit/23c29a9f1e5824b9c3adf4a421f5bf5cebc6ba45))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency conventional-changelog-conventionalcommits to v9.3.0 ([ed2a28f](https://github.com/paulthvt/solareco/commit/ed2a28f39c1581697a5f1e113a0ff5564b3c51ae))
+
+## [1.2.0-beta.1](https://github.com/paulthvt/solareco/compare/1.1.1-beta.7...1.2.0-beta.1) (2026-03-06)
+
+### Features
+
+* add device settings screen with fetching and updating functionality ([27eaeb7](https://github.com/paulthvt/solareco/commit/27eaeb7690bfc24ca9f0968051aa86f2b1042fb4))
+* add devices screen with device fetching and display functionality ([ca24182](https://github.com/paulthvt/solareco/commit/ca2418228cb0187082f16bf2bd5f722cc251ceed))
+
+## [1.1.1-beta.7](https://github.com/paulthvt/solareco/compare/1.1.1-beta.6...1.1.1-beta.7) (2026-03-04)
+
+### Bug Fixes
+
+* **deps:** update dependency co.touchlab:kermit to v2.1.0 ([43b4a41](https://github.com/paulthvt/solareco/commit/43b4a414e334a416cf78bb987284b76b222ecba0))
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.10.0 ([f86eb1d](https://github.com/paulthvt/solareco/commit/f86eb1d17d29d51fbf5acc64a45d34bc6025e624))
+* **deps:** update ktor monorepo to v3.4.1 ([e761e73](https://github.com/paulthvt/solareco/commit/e761e730be57a00d7918aebe1a5ae22c302b4e10))
+
+### Miscellaneous Chores
+
+* **deps:** update actions/upload-artifact action to v7 ([a12a7ac](https://github.com/paulthvt/solareco/commit/a12a7ace77e90de79af02fe5d6467129993dce06))
+* **deps:** update dependency conventional-changelog-conventionalcommits to v9.2.0 ([18e465c](https://github.com/paulthvt/solareco/commit/18e465c570e4bac6e50fb4070a0287c4b60a7047))
+
+## [1.1.1-beta.6](https://github.com/paulthvt/solareco/compare/1.1.1-beta.5...1.1.1-beta.6) (2026-02-24)
+
+### Bug Fixes
+
+* **deps:** update dependency io.github.koalaplot:koalaplot-core to v0.11.0 ([2426fdd](https://github.com/paulthvt/solareco/commit/2426fdde3f4e1bc2c76d6bad42b87b86921f5748))
+
+### Miscellaneous Chores
+
+* migrate to SDK 36 and enable edge-to-edge layout support ([b63c074](https://github.com/paulthvt/solareco/commit/b63c0749b76658ef4b5b32bd1993f810c998023f))
+
+## [1.1.1-beta.5](https://github.com/paulthvt/solareco/compare/1.1.1-beta.4...1.1.1-beta.5) (2026-02-18)
+
+### Bug Fixes
+
+* **deps:** update dependency org.jetbrains.androidx.navigation:navigation-compose to v2.9.2 ([47dfe49](https://github.com/paulthvt/solareco/commit/47dfe4970193c27b57773c528e189a526d5ec8d2))
+
+### Miscellaneous Chores
+
+* **deps:** update dependency com.google.devtools.ksp to v2.3.6 ([1a6c248](https://github.com/paulthvt/solareco/commit/1a6c2488025219eddf7fc90226aef088010934ea))
+
+## [1.1.1-beta.4](https://github.com/paulthvt/solareco/compare/1.1.1-beta.3...1.1.1-beta.4) (2026-02-18)
+
+### Miscellaneous Chores
+
+* **deps:** update dependency @semantic-release/github to v12.0.5 ([567a48b](https://github.com/paulthvt/solareco/commit/567a48b3a527c400563ac440f194a36bc4c04a2a))
+* **deps:** update dependency @semantic-release/github to v12.0.6 ([74485a8](https://github.com/paulthvt/solareco/commit/74485a89060869ac530086cf6ff383fdf2dd81c9))
+* **deps:** update dependency org.jetbrains.compose to v1.10.1 ([8b40cf4](https://github.com/paulthvt/solareco/commit/8b40cf46c5cf4ba3ec9b77f7dc9091d5b14422d6))
+
+### Code Refactoring
+
+* replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
+
+## [1.1.1-beta.3](https://github.com/paulthvt/solareco/compare/1.1.1-beta.2...1.1.1-beta.3) (2026-02-06)
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.9.0 ([abdc2c7](https://github.com/paulthvt/solareco/commit/abdc2c738099bf4b71c57a7dcd6a8349d8a3c2c6))
+
+## [1.1.1-beta.2](https://github.com/paulthvt/solareco/compare/1.1.1-beta.1...1.1.1-beta.2) (2026-02-05)
+
+### Bug Fixes
+
+* **deps:** update kotlin monorepo to v2.3.10 ([1376b71](https://github.com/paulthvt/solareco/commit/1376b71e0cb027ba40e9dc651ccd43b879f2b653))
+
+## [1.1.1-beta.1](https://github.com/paulthvt/solareco/compare/1.1.0...1.1.1-beta.1) (2026-02-04)
+
+### Bug Fixes
+
+* **deps:** update dependency androidx.work:work-runtime-ktx to v2.11.1 ([5830ae5](https://github.com/paulthvt/solareco/commit/5830ae55f5a6bd67429ed290d69c5547e43c8404))
+
 ## [1.1.0](https://github.com/paulthvt/solareco/compare/1.0.0...1.1.0) (2026-02-04)
 
 ### Features

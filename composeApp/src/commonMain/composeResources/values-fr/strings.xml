@@ -118,4 +118,10 @@
     <string name="tempo_blue_days">Jours bleus</string>
     <string name="tempo_white_days">Jours blancs</string>
     <string name="tempo_red_days">Jours rouges</string>
+    <string name="device_settings_title">Paramètres de l\'appareil</string>
+    <string name="device_settings_name_label">Nom de l\'appareil</string>
+    <string name="device_settings_device_kind_label">Type d\'appareil</string>
+    <string name="device_settings_save_button">Enregistrer</string>
+    <string name="device_settings_save_success">Appareil enregistré avec succès</string>
+    <string name="device_settings_save_error">Erreur lors de l\'enregistrement de l\'appareil</string>
 </resources>

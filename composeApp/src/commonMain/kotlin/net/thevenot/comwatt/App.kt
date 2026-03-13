@@ -23,6 +23,8 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import net.thevenot.comwatt.ui.dashboard.DashboardScreen
 import net.thevenot.comwatt.ui.dashboard.FullscreenChartScreen
+import net.thevenot.comwatt.ui.devices.DevicesScreen
+import net.thevenot.comwatt.ui.devices.settings.DeviceSettingsScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
@@ -99,7 +101,7 @@ fun NavGraphBuilder.mainGraph(
             DashboardScreen(navController, snackbarHostState, dataRepository)
         }
         composable<Screen.Devices> {
-            Text("Not Implemented Yet")
+            DevicesScreen(navController, snackbarHostState, dataRepository)
         }
         composable<Screen.More> {
             Text("Not Implemented Yet")
@@ -112,6 +114,14 @@ fun NavGraphBuilder.mainGraph(
             FullscreenChartScreen(
                 navController = navController,
                 chartIndex = route.chartIndex,
+                dataRepository = dataRepository
+            )
+        }
+        composable<Screen.DeviceSettings> { backStackEntry ->
+            val route = backStackEntry.toRoute<Screen.DeviceSettings>()
+            DeviceSettingsScreen(
+                navController = navController,
+                deviceId = route.deviceId,
                 dataRepository = dataRepository
             )
         }
