@@ -1,160 +1,161 @@
-# Release Process Documentation
+# Release Process
 
 ## Overview
 
-This project uses [semantic-release](https://semantic-release.gitbook.io/) to automate version management and release creation. The release process is triggered automatically when code is merged to `main` or `develop` branches.
+This project uses [semantic-release](https://semantic-release.gitbook.io/) to automate version
+management and release creation. The release process is triggered automatically when code is pushed
+to `main` or `develop`.
 
-## How It Works
-
-### Version Management
-
-The project follows [Semantic Versioning](https://semver.org/) (MAJOR.MINOR.PATCH):
-- **MAJOR**: Breaking changes
-- **MINOR**: New features (backwards compatible)
-- **PATCH**: Bug fixes and minor changes
-
-### Android Version Code
-
-Android requires both a `versionName` (e.g., "1.2.3") and a numeric `versionCode`. The version code is automatically calculated from the semantic version using the formula:
-
-```
-versionCode = MAJOR * 1000000 + MINOR * 1000 + PATCH
-```
-
-**Examples:**
-- `1.0.0` → versionCode: `1000000`
-- `1.2.3` → versionCode: `1002003`
-- `2.5.10` → versionCode: `2005010`
-
-This allows up to version `99.999.999` before requiring changes.
-
-### Commit Convention
+## Commit Convention
 
 The project uses [Conventional Commits](https://www.conventionalcommits.org/) to determine version bumps:
 
-- `feat:` → MINOR version bump (e.g., 1.0.0 → 1.1.0)
-- `fix:` → PATCH version bump (e.g., 1.0.0 → 1.0.1)
-- `perf:` → PATCH version bump
-- `refactor:` → PATCH version bump
-- `BREAKING CHANGE:` → MAJOR version bump (e.g., 1.0.0 → 2.0.0)
-
-**Examples:**
-```bash
-git commit -m "feat: add user authentication"
-git commit -m "fix: resolve crash on startup"
-git commit -m "feat!: migrate to new API" # Breaking change
-git commit -m "refactor: optimize battery usage"
-```
-
-## Release Process Flow
-
-When you merge to `main` or `develop`:
-
-1. **Analyze Commits**: semantic-release analyzes commits since the last release
-2. **Determine Version**: Calculates the next version based on commit types
-3. **Bump Version**: Updates `version` in `composeApp/build.gradle.kts`
-4. **Generate Changelog**: Creates/updates `CHANGELOG.md`
-5. **Commit Changes**: Commits version bump and changelog
-6. **Build Artifacts**: Runs `scripts/release.sh` to build:
-   - Android APK (`composeApp/build/outputs/apk/release/`)
-   - Android Bundle (`composeApp/build/outputs/bundle/release/`)
-   - iOS Framework (`build/ios/Release-iphoneos/`)
-7. **Create Release**: Creates a GitHub release with:
-   - Release notes
-   - Attached APK and AAB files
-8. **Archive Artifacts**: Uploads artifacts to GitHub Actions
+| Prefix                        | Bump                  | Example                          |
+|-------------------------------|-----------------------|----------------------------------|
+| `feat:`                       | Minor (1.0.0 → 1.1.0) | `feat: add device toggle`        |
+| `fix:`                        | Patch (1.0.0 → 1.0.1) | `fix: resolve crash on startup`  |
+| `perf:`                       | Patch                 | `perf: optimize chart rendering` |
+| `refactor:`                   | Patch                 | `refactor: simplify navigation`  |
+| `feat!:` / `BREAKING CHANGE:` | Major (1.0.0 → 2.0.0) | `feat!: new authentication flow` |
 
 ## Branches
 
-- **`main`**: Production releases (e.g., `1.2.3`)
-- **`develop`**: Pre-releases (e.g., `1.2.3-beta.1`)
+| Branch       | Purpose              | Version format |
+|--------------|----------------------|----------------|
+| `main`       | Production releases  | `1.2.3`        |
+| `develop`    | Pre-releases / betas | `1.2.3-beta.1` |
+| `release/**` | Release preparation  | —              |
+| `hotfix/**`  | Hotfixes             | —              |
 
-## GitHub Secrets Required
+## Release Flow
 
-Configure these secrets in your GitHub repository settings:
+When you push to `main` or `develop`, the **Build and Release** workflow (
+`.github/workflows/build.yml`) runs:
 
-### Semantic Release (Optional)
-**For personal repositories:** No secrets needed - uses built-in `GITHUB_TOKEN`
+1. **Analyze commits** — semantic-release inspects commits since the last release
+2. **Determine version** — calculates the next version from commit types
+3. **Build artifacts** — runs `scripts/release.sh` to produce:
+   - Android APK (`composeApp/build/outputs/apk/release/`)
+   - Android Bundle (`composeApp/build/outputs/bundle/release/`)
+   - iOS archive (`build/`)
+4. **Update changelog** — generates / updates `CHANGELOG.md`
+5. **Commit & tag** — commits the version bump + changelog, creates a Git tag
+6. **Create GitHub Release** — publishes release notes with APK, AAB, and iOS archive attached
+7. **Back-merge** — after a production release on `main`, the workflow merges `main` into `develop`
 
-**For enterprise/organization only:**
-- `SEMANTIC_RELEASE_APP_ID`: GitHub App ID for authentication
-- `SEMANTIC_RELEASE_APP_PRIVATE_KEY`: GitHub App private key
+For pull requests, only a build + test run is executed (no release).
 
-### Android Signing (Optional)
-- `RELEASE_STORE_FILE`: Path to keystore file
-- `RELEASE_STORE_PASSWORD`: Keystore password
-- `RELEASE_KEY_ALIAS`: Key alias
-- `RELEASE_KEY_PASSWORD`: Key password
+## Android Version Code
 
-### Firebase (Optional)
-- `GOOGLE_SERVICES_JSON`: Android Firebase config
-- `GOOGLE_SERVICE_INFO_PLIST`: iOS Firebase config
+Android requires a numeric `versionCode` alongside the human-readable `versionName`. It is
+calculated automatically:
 
-## Manual Release (if needed)
-
-To manually trigger a release:
-
-1. Ensure you're on `main` or `develop` branch
-2. Go to GitHub Actions
-3. Select "Release" workflow
-4. Click "Run workflow"
-
-## Testing the Version System
-
-Test version code calculation:
-```bash
-./scripts/version-to-android.sh "1.2.3"
-# Output: 1002003
-
-./scripts/version-to-android.sh "2.0.0"
-# Output: 2000000
+```
+versionCode = MAJOR × 1,000,000 + MINOR × 1,000 + PATCH
 ```
 
-## Local Development
+Examples: `1.0.0` → `1000000` · `1.2.3` → `1002003` · `2.5.10` → `2005010`
 
-To test the build process locally:
+## Android Signing
+
+Release signing is configured in `composeApp/build.gradle.kts`. It reads credentials from
+`local.properties` (local builds) or environment variables (CI):
+
+| Property                 | Description                          |
+|--------------------------|--------------------------------------|
+| `RELEASE_STORE_FILE`     | Absolute path to the `.jks` keystore |
+| `RELEASE_STORE_PASSWORD` | Keystore password                    |
+| `RELEASE_KEY_ALIAS`      | Key alias                            |
+| `RELEASE_KEY_PASSWORD`   | Key password                         |
+
+### Local setup
+
+1. Generate a keystore (once):
+   ```bash
+   keytool -genkeypair -v \
+     -keystore ~/keystores/comwatt-release.jks \
+     -keyalg RSA -keysize 2048 -validity 10000 \
+     -alias comwatt
+   ```
+2. Add to `local.properties` (never committed):
+   ```properties
+   RELEASE_STORE_FILE=/Users/you/keystores/comwatt-release.jks
+   RELEASE_STORE_PASSWORD=your-password
+   RELEASE_KEY_ALIAS=comwatt
+   RELEASE_KEY_PASSWORD=your-password
+   ```
+
+If all four values are present and the keystore exists, the release build is signed automatically;
+otherwise it stays unsigned.
+
+> **Tip:**
+> Prefer [Play App Signing](https://support.google.com/googleplay/android-developer/answer/9842756).
+> Your upload key (this keystore) signs the upload; Google signs the final artifact.
+
+## GitHub Secrets
+
+Configure these in **Settings → Secrets and variables → Actions**:
+
+### Release token
+
+| Secret                   | Purpose                                                                          |
+|--------------------------|----------------------------------------------------------------------------------|
+| `SEMANTIC_RELEASE_TOKEN` | GitHub PAT — used by semantic-release to push commits, tags, and create releases |
+
+### Android signing
+
+| Secret                    | Purpose                                |
+|---------------------------|----------------------------------------|
+| `ANDROID_KEYSTORE_BASE64` | Base64-encoded release `.jks` keystore |
+| `RELEASE_STORE_PASSWORD`  | Keystore password                      |
+| `RELEASE_KEY_ALIAS`       | Key alias (e.g., `comwatt`)            |
+| `RELEASE_KEY_PASSWORD`    | Key password                           |
+
+### Firebase
+
+| Secret                     | Purpose                 |
+|----------------------------|-------------------------|
+| `FIREBASE_PROJECT_NUMBER`  | Firebase project number |
+| `FIREBASE_PROJECT_ID`      | Firebase project ID     |
+| `FIREBASE_STORAGE_BUCKET`  | Firebase storage bucket |
+| `FIREBASE_ANDROID_APP_ID`  | Android app ID          |
+| `FIREBASE_ANDROID_API_KEY` | Android API key         |
+| `FIREBASE_IOS_API_KEY`     | iOS API key             |
+| `FIREBASE_IOS_APP_ID`      | iOS app ID              |
+| `FIREBASE_GCM_SENDER_ID`   | GCM sender ID           |
+
+Firebase config files (`google-services.json`, `GoogleService-Info.plist`) are generated at build
+time from templates and these secrets. They are `.gitignore`'d.
+
+## Manual Release
+
+1. Go to **Actions → Build and Release**
+2. Click **Run workflow**
+3. Select the target branch (`main` or `develop`)
+
+## Local Build
+
 ```bash
-# Build release artifacts
+# Build release artifacts for a given version
 ./scripts/release.sh "1.2.3"
 
-# Or manually with specific versions
+# Or pass version properties directly
 ./gradlew :composeApp:assembleRelease \
   -PVERSION_NAME="1.2.3" \
   -PVERSION_CODE="1002003"
 ```
 
+## Testing the Version System
+
+```bash
+./scripts/version-to-android.sh "1.2.3"   # → 1002003
+./scripts/version-to-android.sh "2.0.0"   # → 2000000
+```
+
 ## Troubleshooting
 
-### No release created
-- Check that commits follow the conventional commit format
-- Verify the branch is `main` or `develop`
-- Review GitHub Actions logs
-
-### Build fails
-- Ensure all dependencies are installed
-- Check that signing configuration is correct
-- Verify Firebase configs are in place (if using Firebase)
-
-### Version mismatch
-- The version in `build.gradle.kts` is the source of truth
-- After semantic-release runs, this file is updated automatically
-- Don't manually edit the version unless necessary
-
-## Migration Notes
-
-### Cleaned Up
-- ✅ Old manual version management removed
-- ✅ `scripts/release.sh` updated to use semantic versioning
-- ✅ Android version code auto-generated from semantic version
-- ✅ Version passed via environment variables (no file modifications needed)
-
-### New Files
-- `.github/workflows/release.yml`: Main release workflow
-- `.github/workflows/ci.yml`: CI checks for PRs
-- `scripts/version-to-android.sh`: Version code calculator
-- `RELEASE.md`: This documentation
-
-### Updated Files
-- `.releaserc.json`: Complete semantic-release configuration
-- `composeApp/build.gradle.kts`: Auto version code calculation
-- `scripts/release.sh`: Version conversion and build
+| Issue              | Fix                                                                                |
+|--------------------|------------------------------------------------------------------------------------|
+| No release created | Ensure commits follow conventional format and branch is `main` or `develop`        |
+| Build fails        | Check signing config and Firebase secrets in GitHub Actions logs                   |
+| Version mismatch   | `composeApp/build.gradle.kts` version is the source of truth — don't edit manually |
