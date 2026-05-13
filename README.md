@@ -1,59 +1,86 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# Comwatt (SolarEco)
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+A [Compose Multiplatform](https://www.jetbrains.com/compose-multiplatform/) application for
+monitoring solar energy production and home consumption on Comwatt-connected devices.
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+**Targets:** Android · iOS · Desktop (JVM)
 
+## Project Structure
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+```
+comwatt/
+├── composeApp/          # Shared Kotlin Multiplatform module
+│   └── src/
+│       ├── commonMain/  # Shared code (UI, data, domain, navigation)
+│       ├── androidMain/ # Android-specific code (widgets, manifest)
+│       ├── iosMain/     # iOS-specific code (platform expect/actual)
+│       └── desktopMain/ # Desktop-specific code
+├── iosApp/              # iOS entry point (Xcode project + SwiftUI bridge)
+├── scripts/             # Build & release helper scripts
+└── .github/workflows/   # CI/CD (GitHub Actions)
+```
 
----
+## Prerequisites
 
-Android release build
+- **JDK 17**
+- **Android SDK** (compileSdk 36, minSdk 24)
+- **Xcode** (macOS only, for iOS builds)
+- **Gradle** is provided via the wrapper — no separate install needed
 
-- Release signing is wired in composeApp/build.gradle.kts. It reads these variables from
-  `local.properties` (preferred for local builds) or environment variables (for CI):
-    - RELEASE_STORE_FILE (absolute path to .jks)
-    - RELEASE_STORE_PASSWORD
-    - RELEASE_KEY_ALIAS
-    - RELEASE_KEY_PASSWORD
-- If all four are present, release builds are signed; otherwise, they’re unsigned.
+## Build & Run
 
-Local build
+### Android
 
-1) Generate a keystore once (replace values):
-   keytool -genkeypair -v -keystore ~/keystores/comwatt-release.jks -keyalg RSA -keysize 2048
-   -validity 10000 -alias comwatt
-2) Put secrets in `local.properties` (not versioned) or export as env vars:
-   RELEASE_STORE_FILE=/Users/you/keystores/comwatt-release.jks
-   RELEASE_STORE_PASSWORD=******
-   RELEASE_KEY_ALIAS=comwatt
-   RELEASE_KEY_PASSWORD=******
-3) Build the app bundle:
-   ./gradlew :composeApp:bundleRelease
-   Artifacts: composeApp/build/outputs/**/*.aab (and APK under apk/ if needed)
+```bash
+./gradlew :composeApp:assembleDebug      # Debug APK
+./gradlew :composeApp:installDebug       # Install on device / emulator
+./gradlew :composeApp:bundleRelease      # Release AAB (requires signing)
+```
 
-CI build (GitHub Actions)
+### iOS
 
-- A workflow is provided at .github/workflows/android-release.yml.
-- Add these GitHub Secrets in the repo:
-    - ANDROID_KEYSTORE_BASE64: base64-encoded release .jks
-    - RELEASE_STORE_PASSWORD
-    - RELEASE_KEY_ALIAS
-    - RELEASE_KEY_PASSWORD
-- The workflow writes the keystore to RELEASE_STORE_FILE and runs :composeApp:bundleRelease, then
-  uploads the AAB/APK as artifacts.
+Open `iosApp/iosApp.xcodeproj` in Xcode, select a destination, and press **⌘R**.
 
-Notes and good practices
+Or from the terminal:
 
-- Do not commit keystores or secret property files. .gitignore was updated to exclude them.
-- Prefer Play App Signing. Your upload key (this keystore) signs the upload; Google signs the final
-  artifact.
-- Avoid hardcoding secrets or API keys in code. Use backend services, remote config, or inject via
-  build-time vars if they’re non-sensitive.
+```bash
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
+  -destination 'platform=iOS Simulator,name=iPhone 16' build
+```
+
+### Desktop
+
+```bash
+./gradlew :composeApp:run                # Run the app
+./gradlew :composeApp:packageDmg         # Package as DMG (macOS)
+```
+
+## Tests
+
+```bash
+./gradlew test                           # All tests
+./gradlew :composeApp:desktopTest        # Common / desktop tests only
+```
+
+## Release & CI
+
+Releases are fully automated with [semantic-release](https://semantic-release.gitbook.io/)
+and [Conventional Commits](https://www.conventionalcommits.org/).
+See **[RELEASE.md](RELEASE.md)** for the full release process, branch strategy, required GitHub
+Secrets, and signing setup.
+
+## Key Libraries
+
+| Area            | Library                                                                                                       |
+|-----------------|---------------------------------------------------------------------------------------------------------------|
+| Networking      | [Ktor](https://ktor.io/)                                                                                      |
+| Database        | [Room Multiplatform](https://developer.android.com/kotlin/multiplatform/room)                                 |
+| Navigation      | [Navigation Compose](https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-navigation-routing.html) |
+| Charts          | [Vico](https://patrykandpatrick.com/vico/) / [KoalaPlot](https://koalaplot.github.io/)                        |
+| Functional      | [Arrow](https://arrow-kt.io/)                                                                                 |
+| Crash Reporting | [Firebase Crashlytics](https://firebase.google.com/docs/crashlytics) (release builds only)                    |
+
+## License
+
+Private — all rights reserved.
