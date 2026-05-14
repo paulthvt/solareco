@@ -55,6 +55,13 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
         }
+        iosTarget.compilations.all {
+            compileTaskProvider.configure {
+                compilerOptions {
+                    freeCompilerArgs.add("-Xoverride-konan-properties=osVersionMin.ios_simulator_arm64=18.0;osVersionMin.ios_arm64=18.0")
+                }
+            }
+        }
     }
     
     sourceSets {

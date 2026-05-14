@@ -9,6 +9,12 @@ repository.
 Multiplatform, targeting Android, iOS, and Desktop (JVM). It monitors solar energy production and
 home consumption for Comwatt-connected devices.
 
+### Platform Requirements
+
+- **Android:** API 24+ (Android 7.0)
+- **iOS:** 18.0+ (required by Compose Multiplatform 1.11.0)
+- **Desktop:** JVM 17+
+
 ## Build Commands
 
 ### Android
