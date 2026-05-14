@@ -101,11 +101,8 @@ jobs:
       - name: Setup Xcode
         if: steps.check-skip.outputs.is-release-commit != 'true'
         run: |
-          # Use the default Xcode on the runner
+          sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
           xcodebuild -version
-          xcodebuild -showsdks
-          # List available destinations
-          xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp -showdestinations || true
 
       - name: Build project (non-release) (skip tests)
         if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true'
