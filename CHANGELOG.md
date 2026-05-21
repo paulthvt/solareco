@@ -1,3 +1,14 @@
+## [1.2.1-beta.1](https://github.com/paulthvt/solareco/compare/1.2.0...1.2.1-beta.1) (2026-05-21)
+
+### Performance Improvements
+
+* optimize CI build times ([039428c](https://github.com/paulthvt/solareco/commit/039428cc26a4e438db3d9e5e11b0324a2c53d2ab))
+
+### Miscellaneous Chores
+
+* update .gitignore and add CLAUDE.md and INSTRUCTIONS.md for project documentation ([24fa8c9](https://github.com/paulthvt/solareco/commit/24fa8c9fb8eb78e032056323b100be5ffdcb5f72))
+* upgrade to Compose Multiplatform 1.11.0 and update dependencies ([4cfeddc](https://github.com/paulthvt/solareco/commit/4cfeddc1a0723d9648d128feecf2385cd3fec4b2))
+
 ## [1.2.0](https://github.com/paulthvt/solareco/compare/1.1.0...1.2.0) (2026-03-13)
 
 ### Features
