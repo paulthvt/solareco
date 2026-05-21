@@ -137,9 +137,9 @@ Use `expect`/`actual` for platform differences:
 
 ## Release Process
 
-### Automated via semantic-release
+### Automated via Release Please
 
-Releases trigger automatically on push to `main` (production) or `develop` (beta).
+Single-branch workflow on `main` using Google's Release Please action.
 
 **Commit Convention:**
 
@@ -149,12 +149,10 @@ Releases trigger automatically on push to `main` (production) or `develop` (beta
 
 **Workflow:**
 
-1. Analyzes commits since last release
-2. Calculates next version
-3. Builds Android APK/AAB and iOS archive via `scripts/release.sh`
-4. Updates `CHANGELOG.md`
-5. Creates GitHub Release with artifacts
-6. Back-merges `main` → `develop` after production releases
+1. Push conventional commits to `main`
+2. Release Please auto-creates/updates a "Release PR" with version bump + CHANGELOG
+3. Merging that PR creates a git tag + GitHub Release
+4. Tag push triggers `release.yml` which builds and uploads artifacts (APK, AAB, iOS archive)
 
 ### Android Version Code
 

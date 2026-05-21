@@ -30,7 +30,7 @@ and device management for Comwatt-connected homes.
 | Dependency Injection | Manual (AppContainer)                  | —       |
 | Serialization        | kotlinx.serialization                  | —       |
 | Code Generation      | KSP                                    | —       |
-| Versioning           | semantic-release                       | —       |
+| Versioning           | Release Please                         | —       |
 | Dependency Updates   | Renovate                               | —       |
 | i18n                 | Crowdin                                | —       |
 
@@ -39,7 +39,6 @@ and device management for Comwatt-connected homes.
 - **JDK 17** — required for Android compilation (`sourceCompatibility` / `targetCompatibility`)
 - **Android SDK** — compileSdk 36, minSdk 24, targetSdk 36
 - **Xcode** (macOS only) — required for iOS builds (latest stable recommended)
-- **Node.js 24** — only needed for the semantic-release workflow
 - **Gradle** — provided via the Gradle Wrapper (`./gradlew`), no separate install needed
 
 ## Project Structure
@@ -205,58 +204,37 @@ using your Firebase project values.
 
 ## CI/CD — GitHub Actions
 
-The main workflow is at `.github/workflows/build.yml`.
+Three workflows in `.github/workflows/`:
 
-### Workflow Triggers
-
-- **Push** to `main`, `develop`, `release/**`, `hotfix/**`
-- **Pull Requests** targeting those branches
-- **Manual** (`workflow_dispatch`)
-
-### What It Does
-
-| Trigger                    | Behavior                            |
-|----------------------------|-------------------------------------|
-| Pull Request               | Build + Run tests (no release)      |
-| Push to `main` / `develop` | Full release via semantic-release   |
-| Release commit detected    | Skip expensive build (already done) |
-
-### Release Pipeline (push to `main` or `develop`)
-
-1. Set up JDK 17, Gradle, Xcode, Node.js 24
-2. Decode Android keystore from secrets
-3. Generate Firebase config files from templates
-4. Run `npx semantic-release` which:
-    - Analyzes commits (conventional commits)
-    - Determines the next version
-    - Builds Android APK/AAB and iOS archive via `scripts/release.sh`
-    - Updates `CHANGELOG.md`
-    - Creates a GitHub Release with artifacts attached
-5. Archive APK, AAB, and iOS app as GitHub Actions artifacts
-6. Auto-merge `main` → `develop` after a production release
+| Workflow              | Trigger            | Purpose                                              |
+|-----------------------|--------------------|------------------------------------------------------|
+| `build.yml`           | Push + PRs to main | Compile all targets (no linking) + run desktop tests |
+| `release-please.yml`  | Push to main       | Manage the Release PR (version bump + CHANGELOG)     |
+| `release.yml`         | Tag push (`X.Y.Z`) | Build signed artifacts and upload to GitHub Release  |
 
 ### Required GitHub Secrets
 
-| Secret                     | Purpose                                                          |
-|----------------------------|------------------------------------------------------------------|
-| `SEMANTIC_RELEASE_TOKEN`   | GitHub PAT for semantic-release (push commits + create releases) |
-| `ANDROID_KEYSTORE_BASE64`  | Base64-encoded release `.jks` keystore                           |
-| `RELEASE_STORE_PASSWORD`   | Keystore password                                                |
-| `RELEASE_KEY_ALIAS`        | Key alias (e.g., `comwatt`)                                      |
-| `RELEASE_KEY_PASSWORD`     | Key password                                                     |
-| `FIREBASE_PROJECT_NUMBER`  | Firebase project number                                          |
-| `FIREBASE_PROJECT_ID`      | Firebase project ID                                              |
-| `FIREBASE_STORAGE_BUCKET`  | Firebase storage bucket                                          |
-| `FIREBASE_ANDROID_APP_ID`  | Firebase Android app ID                                          |
-| `FIREBASE_ANDROID_API_KEY` | Firebase Android API key                                         |
-| `FIREBASE_IOS_API_KEY`     | Firebase iOS API key                                             |
-| `FIREBASE_GCM_SENDER_ID`   | Firebase GCM sender ID                                           |
-| `FIREBASE_IOS_APP_ID`      | Firebase iOS app ID                                              |
+| Secret                     | Purpose                                    |
+|----------------------------|--------------------------------------------|
+| `ANDROID_KEYSTORE_BASE64`  | Base64-encoded release `.jks` keystore     |
+| `RELEASE_STORE_PASSWORD`   | Keystore password                          |
+| `RELEASE_KEY_ALIAS`        | Key alias (e.g., `comwatt`)                |
+| `RELEASE_KEY_PASSWORD`     | Key password                               |
+| `FIREBASE_PROJECT_NUMBER`  | Firebase project number                    |
+| `FIREBASE_PROJECT_ID`      | Firebase project ID                        |
+| `FIREBASE_STORAGE_BUCKET`  | Firebase storage bucket                    |
+| `FIREBASE_ANDROID_APP_ID`  | Firebase Android app ID                    |
+| `FIREBASE_ANDROID_API_KEY` | Firebase Android API key                   |
+| `FIREBASE_IOS_API_KEY`     | Firebase iOS API key                       |
+| `FIREBASE_GCM_SENDER_ID`   | Firebase GCM sender ID                     |
+| `FIREBASE_IOS_APP_ID`      | Firebase iOS app ID                        |
+
+Note: Release Please uses the built-in `GITHUB_TOKEN` — no extra PAT needed.
 
 ## Versioning & Release Process
 
-The project uses [semantic-release](https://semantic-release.gitbook.io/)
-with [Conventional Commits](https://www.conventionalcommits.org/).
+The project uses [Release Please](https://github.com/googleapis/release-please)
+with [Conventional Commits](https://www.conventionalcommits.org/) on a single `main` branch.
 
 ### Commit Convention
 
@@ -268,12 +246,12 @@ with [Conventional Commits](https://www.conventionalcommits.org/).
 | `refactor:`                   | Patch                 | `refactor: simplify navigation`  |
 | `feat!:` / `BREAKING CHANGE:` | Major (1.0.0 → 2.0.0) | `feat!: new authentication flow` |
 
-### Branches
+### How to Release
 
-- **`main`** — Production releases (e.g., `1.2.3`)
-- **`develop`** — Pre-releases / betas (e.g., `1.2.3-beta.1`)
-- **`release/**`** — Release preparation branches
-- **`hotfix/**`** — Hotfix branches
+1. Push conventional commits to `main` (directly or via merged PRs)
+2. Release Please auto-creates/updates a "Release PR" with version bump + CHANGELOG
+3. Merge the Release PR → creates a git tag + GitHub Release
+4. Tag push triggers `release.yml` which builds and uploads artifacts
 
 ### Android Version Code
 

@@ -65,10 +65,9 @@ xcodebuild -project iosApp/iosApp.xcodeproj -scheme iosApp \
 
 ## Release & CI
 
-Releases are fully automated with [semantic-release](https://semantic-release.gitbook.io/)
-and [Conventional Commits](https://www.conventionalcommits.org/).
-See **[RELEASE.md](RELEASE.md)** for the full release process, branch strategy, required GitHub
-Secrets, and signing setup.
+Releases are automated with [Release Please](https://github.com/googleapis/release-please)
+and [Conventional Commits](https://www.conventionalcommits.org/) on a single `main` branch.
+See **[RELEASE.md](RELEASE.md)** for the full release process and required GitHub Secrets.
 
 ## Key Libraries
 
