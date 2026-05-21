@@ -20,100 +20,54 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  build-and-release:
-    name: Build and Release
+  check:
+    name: Check
     runs-on: macos-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
+    if: >-
+      !contains(github.event.head_commit.message, '[release]') &&
+      !startsWith(github.event.head_commit.message, 'chore(release):')
     env:
-      GRADLE_OPTS: -Xmx6g -XX:MaxMetaspaceSize=1024m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
-    outputs:
-      version: ${{ steps.get-version.outputs.version }}
-      released: ${{ steps.get-version.outputs.released }}
-      should-release: ${{ steps.check-release.outputs.should-release }}
+      GRADLE_OPTS: -Xmx6g -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8
 
     steps:
-      - name: Run information
-        run: |
-          echo "Event name: ${{ github.event_name }}"
-          echo "Git ref:    ${{ github.ref }}"
-          echo "GH actor:   ${{ github.actor }}"
-          echo "SHA:        ${{ github.sha }}"
-
-      - name: Checkout Git repository
+      - name: Checkout
         uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Check if release commit (skip build)
-        id: check-skip
-        run: |
-          COMMIT_MSG=$(git log -1 --pretty=%B)
-          echo "Commit message: $COMMIT_MSG"
-          if [[ "$COMMIT_MSG" == *"[release]"* ]] || [[ "$COMMIT_MSG" == *"chore(release):"* ]]; then
-            echo "is-release-commit=true" >> $GITHUB_OUTPUT
-            echo "🔄 This is a release commit - will skip expensive build operations"
-          else
-            echo "is-release-commit=false" >> $GITHUB_OUTPUT
-            echo "📦 Regular commit - full build will run"
-          fi
-
-      - name: Skip build summary (release commit)
-        if: steps.check-skip.outputs.is-release-commit == 'true'
-        run: |
-          echo "## Build Skipped ✅" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "This is a **release commit** - expensive build operations are skipped." >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Commit:** $(git log -1 --pretty=%s)" >> $GITHUB_STEP_SUMMARY
-
-      - name: Check if release should run
-        id: check-release
-        run: |
-          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "should-release=false" >> $GITHUB_OUTPUT
-            echo "Pull request - skipping release"
-          elif [[ "${{ github.ref }}" == "refs/heads/main" ]] || \
-               [[ "${{ github.ref }}" == "refs/heads/develop" ]] || \
-               [[ "${{ github.ref }}" == refs/heads/release/* ]] || \
-               [[ "${{ github.ref }}" == refs/heads/hotfix/* ]]; then
-            echo "should-release=true" >> $GITHUB_OUTPUT
-            echo "Branch eligible for release"
-          else
-            echo "should-release=false" >> $GITHUB_OUTPUT
-            echo "Branch not eligible for release"
-          fi
 
       - name: Set up JDK 17
-        if: steps.check-skip.outputs.is-release-commit != 'true'
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 17
 
       - name: Setup Gradle
-        if: steps.check-skip.outputs.is-release-commit != 'true'
         uses: gradle/actions/setup-gradle@v5
 
       - name: Setup Xcode
-        if: steps.check-skip.outputs.is-release-commit != 'true'
         run: |
           sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
           xcodebuild -version
 
-      - name: Build project (non-release) (skip tests)
-        if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true'
-        run: ./gradlew build -x test
+      - name: Cache Kotlin/Native compiler
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: konan-${{ runner.os }}-
 
-      - name: Run tests (non-release)
-        if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true'
-        run: ./gradlew test
+      - name: Compile (all targets, no linking)
+        run: |
+          ./gradlew \
+            compileKotlinIosArm64 \
+            compileKotlinIosSimulatorArm64 \
+            assembleDebug \
+            desktopMainClasses \
+            --parallel
 
-      - name: Archive test results (non-release)
-        if: steps.check-release.outputs.should-release == 'false' && steps.check-skip.outputs.is-release-commit != 'true' && always()
+      - name: Run tests
+        run: ./gradlew desktopTest --parallel
+
+      - name: Archive test results
+        if: always()
         uses: actions/upload-artifact@v7
         with:
           name: test-results-${{ github.run_number }}
@@ -121,52 +75,86 @@ jobs:
             composeApp/build/reports/tests/
             composeApp/build/test-results/
           retention-days: 7
+
+  release:
+    name: Release
+    runs-on: macos-latest
+    if: >-
+      github.event_name != 'pull_request' &&
+      !contains(github.event.head_commit.message, '[release]') &&
+      !startsWith(github.event.head_commit.message, 'chore(release):')
+    needs: check
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    env:
+      GRADLE_OPTS: -Xmx6g -XX:MaxMetaspaceSize=1024m -Dfile.encoding=UTF-8
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Setup Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+          xcodebuild -version
+
+      - name: Cache Kotlin/Native compiler
+        uses: actions/cache@v4
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: konan-${{ runner.os }}-
+
       - name: Set up Node.js
-        if: steps.check-release.outputs.should-release == 'true'
         uses: actions/setup-node@v6
         with:
           node-version: 24
 
       - name: NPM Packages Installation
-        if: steps.check-release.outputs.should-release == 'true'
         run: npm ci
 
       - name: Decode and setup Android keystore
-        if: steps.check-release.outputs.should-release == 'true'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
         run: |
           if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "Setting up keystore from base64-encoded secret..."
             mkdir -p ~/.android
             echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > ~/.android/release.keystore
             chmod 600 ~/.android/release.keystore
-            echo "✅ Keystore file created at: ~/.android/release.keystore"
-            ls -lh ~/.android/release.keystore
           else
-            echo "⚠️  WARNING: ANDROID_KEYSTORE_BASE64 secret not found. Build will be unsigned."
+            echo "⚠️  ANDROID_KEYSTORE_BASE64 not found. Build will be unsigned."
           fi
 
       - name: Prepare local.properties for signing
-        if: steps.check-release.outputs.should-release == 'true'
         env:
           RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
           if [ -f ~/.android/release.keystore ]; then
-            echo "RELEASE_STORE_FILE=$HOME/.android/release.keystore" >> local.properties
-            echo "RELEASE_STORE_PASSWORD=$RELEASE_STORE_PASSWORD" >> local.properties
-            echo "RELEASE_KEY_ALIAS=$RELEASE_KEY_ALIAS" >> local.properties
-            echo "RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD" >> local.properties
-            echo "✅ Signing configuration added to local.properties"
-          else
-            echo "⚠️  Keystore file not found, skipping signing configuration"
+            cat >> local.properties <<EOF
+          RELEASE_STORE_FILE=$HOME/.android/release.keystore
+          RELEASE_STORE_PASSWORD=$RELEASE_STORE_PASSWORD
+          RELEASE_KEY_ALIAS=$RELEASE_KEY_ALIAS
+          RELEASE_KEY_PASSWORD=$RELEASE_KEY_PASSWORD
+          EOF
           fi
 
-      - name: Create google-services.json from template and secrets
-        if: steps.check-release.outputs.should-release == 'true'
-        shell: bash
+      - name: Create google-services.json from template
         env:
           FIREBASE_PROJECT_NUMBER: ${{ secrets.FIREBASE_PROJECT_NUMBER }}
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
@@ -174,38 +162,14 @@ jobs:
           FIREBASE_ANDROID_APP_ID: ${{ secrets.FIREBASE_ANDROID_APP_ID }}
           FIREBASE_ANDROID_API_KEY: ${{ secrets.FIREBASE_ANDROID_API_KEY }}
         run: |
-          echo "Creating google-services.json for Firebase/Crashlytics..."
-          
-          # Check if all required secrets are present
-          if [ -z "$FIREBASE_PROJECT_NUMBER" ] || [ -z "$FIREBASE_PROJECT_ID" ] || \
-             [ -z "$FIREBASE_STORAGE_BUCKET" ] || [ -z "$FIREBASE_ANDROID_APP_ID" ] || \
-             [ -z "$FIREBASE_ANDROID_API_KEY" ]; then
-            echo "⚠️  WARNING: Some Firebase secrets are missing. Crashlytics may not work properly."
-          fi
-          
-          # Use template and replace placeholders with actual values
           sed -e "s/FIREBASE_PROJECT_NUMBER/$FIREBASE_PROJECT_NUMBER/g" \
               -e "s/FIREBASE_PROJECT_ID/$FIREBASE_PROJECT_ID/g" \
               -e "s/FIREBASE_STORAGE_BUCKET/$FIREBASE_STORAGE_BUCKET/g" \
               -e "s/FIREBASE_ANDROID_APP_ID/$FIREBASE_ANDROID_APP_ID/g" \
               -e "s/FIREBASE_ANDROID_API_KEY/$FIREBASE_ANDROID_API_KEY/g" \
               composeApp/google-services.json.template > composeApp/google-services.json
-          
-          # Verify the file was created and doesn't contain placeholder text
-          if [ -f composeApp/google-services.json ]; then
-            echo "✅ google-services.json created successfully"
-            if grep -q "FIREBASE_" composeApp/google-services.json; then
-              echo "⚠️  WARNING: google-services.json still contains placeholders!"
-              cat composeApp/google-services.json
-            fi
-          else
-            echo "❌ ERROR: Failed to create google-services.json"
-            exit 1
-          fi
 
-      - name: Create GoogleService-Info.plist from template and secrets
-        if: steps.check-release.outputs.should-release == 'true'
-        shell: bash
+      - name: Create GoogleService-Info.plist from template
         env:
           FIREBASE_IOS_API_KEY: ${{ secrets.FIREBASE_IOS_API_KEY }}
           FIREBASE_GCM_SENDER_ID: ${{ secrets.FIREBASE_GCM_SENDER_ID }}
@@ -213,7 +177,6 @@ jobs:
           FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
           FIREBASE_IOS_APP_ID: ${{ secrets.FIREBASE_IOS_APP_ID }}
         run: |
-          # Use template and replace placeholders with actual values
           sed -e "s/FIREBASE_IOS_API_KEY/$FIREBASE_IOS_API_KEY/g" \
               -e "s/FIREBASE_GCM_SENDER_ID/$FIREBASE_GCM_SENDER_ID/g" \
               -e "s/FIREBASE_PROJECT_ID/$FIREBASE_PROJECT_ID/g" \
@@ -222,7 +185,6 @@ jobs:
               iosApp/iosApp/GoogleService-Info.plist.template > iosApp/iosApp/GoogleService-Info.plist
 
       - name: Configure Git for semantic-release
-        if: steps.check-release.outputs.should-release == 'true'
         env:
           GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
         run: |
@@ -231,7 +193,6 @@ jobs:
           git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
 
       - name: Semantic Release
-        if: steps.check-release.outputs.should-release == 'true'
         id: semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
@@ -241,19 +202,11 @@ jobs:
       - name: Get Release Version
         id: get-version
         run: |
-          if [[ "${{ steps.check-release.outputs.should-release }}" == "true" ]]; then
-            if [ -f .VERSION ]; then
-              version=$(cat .VERSION)
-              echo "Release version: $version"
-              echo "version=$version" >> $GITHUB_OUTPUT
-              echo "released=true" >> $GITHUB_OUTPUT
-            else
-              echo "No version file found - no release was created"
-              echo "version=" >> $GITHUB_OUTPUT
-              echo "released=false" >> $GITHUB_OUTPUT
-            fi
+          if [ -f .VERSION ]; then
+            version=$(cat .VERSION)
+            echo "version=$version" >> $GITHUB_OUTPUT
+            echo "released=true" >> $GITHUB_OUTPUT
           else
-            echo "Non-release build - skipping version check"
             echo "version=" >> $GITHUB_OUTPUT
             echo "released=false" >> $GITHUB_OUTPUT
           fi
@@ -282,58 +235,22 @@ jobs:
           path: build/iosApp.xcarchive/
           retention-days: 30
 
-      - name: Build Summary (non-release)
-        if: steps.check-release.outputs.should-release == 'false'
-        run: |
-          echo "## Build Successful ✅" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Event:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Branch:** ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Checks Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Build (tests skipped here)" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Tests (executed in dedicated step)" >> $GITHUB_STEP_SUMMARY
-
-      - name: Release Summary
-        if: steps.get-version.outputs.released == 'true'
-        run: |
-          echo "## Release ${{ steps.get-version.outputs.version }} 🚀" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Successfully released version **${{ steps.get-version.outputs.version }}**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Artifacts" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Android APK" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ Android Bundle (AAB)" >> $GITHUB_STEP_SUMMARY
-          echo "- ✅ iOS Archive (unsigned)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Note:** iOS archive requires signing for distribution. The unsigned archive can be used for verification and can be signed later." >> $GITHUB_STEP_SUMMARY
-
       - name: Merge main into develop
-        if: github.ref == 'refs/heads/main' && steps.get-version.outputs.version != ''
+        if: github.ref == 'refs/heads/main' && steps.get-version.outputs.released == 'true'
         env:
           GH_TOKEN: ${{ secrets.SEMANTIC_RELEASE_TOKEN }}
         run: |
-          git remote set-url origin https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
           git fetch origin
-          if git rev-parse --verify develop >/dev/null 2>&1; then
-            git checkout develop
+          if git rev-parse --verify origin/develop >/dev/null 2>&1; then
+            git checkout -B develop origin/develop
           else
-            if git rev-parse --verify origin/develop >/dev/null 2>&1; then
-              git checkout -b develop origin/develop
-            else
-              echo "WARNING: origin/develop does not exist. Aborting automated back-merge.";
-              exit 0
-            fi
+            echo "origin/develop does not exist. Skipping back-merge."
+            exit 0
           fi
           if git merge --ff-only main; then
             echo "Fast-forwarded develop to main."
           else
-            echo "Fast-forward not possible, creating a merge commit."
             git merge --no-ff main -m "chore(main): merge main changes back into develop"
           fi
-          if git push origin develop; then
-            echo "Successfully synced main into develop."
-          else
-            echo "WARNING: Push failed (branch protection or permissions). Create a manual PR.";
-          fi
+          git push origin develop || echo "Push failed. Create a manual PR."
         continue-on-error: true
