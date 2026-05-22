@@ -93,12 +93,15 @@ data class HourRange(
         fun fromSelectedValue(selectedValue: Int): HourRange {
             val currentTimeZone = TimeZone.currentSystemDefault()
             val now = Clock.System.now()
-            val targetHourStart = now.minus(selectedValue + 1, DateTimeUnit.HOUR)
+            // Each step is 1 hour
+            // selectedValue 0: now-1h to now, selectedValue 1: now-2h to now-1h, etc.
+            val targetEnd = now.minus(selectedValue, DateTimeUnit.HOUR)
+            val targetStart = targetEnd.minus(1, DateTimeUnit.HOUR)
 
             return HourRange(
                 selectedValue,
-                targetHourStart.toLocalDateTime(currentTimeZone),
-                now.toLocalDateTime(currentTimeZone)
+                targetStart.toLocalDateTime(currentTimeZone),
+                targetEnd.toLocalDateTime(currentTimeZone)
             )
         }
     }
