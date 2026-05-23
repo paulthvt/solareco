@@ -46,6 +46,35 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.0.0](https://github.com/paulthvt/solareco/compare/1.2.0...2.0.0) (2026-05-23)
+
+
+### ⚠ BREAKING CHANGES
+
+* releases now managed by Release Please on main branch only
+
+### Features
+
+* replace koala plot by native implementation ([#267](https://github.com/paulthvt/solareco/issues/267)) ([9b28ddd](https://github.com/paulthvt/solareco/commit/9b28ddda784cb7a9669ad3c130f96089c659a442))
+
+
+### Bug Fixes
+
+* correct hour range calculation in DashboardScreenState ([b9f29b3](https://github.com/paulthvt/solareco/commit/b9f29b39ff17383c0b34baaf06c3658b574400f4))
+* **deps:** update dependency org.jetbrains.kotlinx:kotlinx-datetime to v0.8.0-0.6.x-compat ([8f8ccee](https://github.com/paulthvt/solareco/commit/8f8cceeb21c7a57db9608fbf4c9fade847dad52f))
+* **deps:** update ktor monorepo to v3.5.0 ([7a3995f](https://github.com/paulthvt/solareco/commit/7a3995f98d6632c4203d116845ffcf0d15114185))
+* widget refresh on mobile network ([#266](https://github.com/paulthvt/solareco/issues/266)) ([e1f51f8](https://github.com/paulthvt/solareco/commit/e1f51f825831388524b26dcd8cea6193fa399f1c))
+
+
+### Performance Improvements
+
+* optimize CI build times ([039428c](https://github.com/paulthvt/solareco/commit/039428cc26a4e438db3d9e5e11b0324a2c53d2ab))
+
+
+### Continuous Integration
+
+* migrate from semantic-release to Google Release Please ([9cd3253](https://github.com/paulthvt/solareco/commit/9cd3253d7c14fc1f1f7088d89f873a0c5eac96a5))
+
 ## [1.2.0-beta.3](https://github.com/paulthvt/solareco/compare/1.2.0-beta.2...1.2.0-beta.3) (2026-03-12)
 
 ### Bug Fixes
