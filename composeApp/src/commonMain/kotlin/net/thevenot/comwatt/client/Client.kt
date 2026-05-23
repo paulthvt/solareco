@@ -3,6 +3,7 @@ package net.thevenot.comwatt.client
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.cookies.AcceptAllCookiesStorage
 import io.ktor.client.plugins.cookies.HttpCookies
@@ -22,7 +23,12 @@ val cookiesStorage = AcceptAllCookiesStorage()
 fun createClient(): HttpClient {
     return HttpClient(engine()) {
         expectSuccess = true
-        install(HttpCookies){
+        install(HttpTimeout) {
+            requestTimeoutMillis = 30_000
+            connectTimeoutMillis = 15_000
+            socketTimeoutMillis = 30_000
+        }
+        install(HttpCookies) {
             storage = cookiesStorage
         }
         install(ContentNegotiation) {
@@ -49,7 +55,7 @@ fun createClient(): HttpClient {
             }
         }
         install(Logging) {
-            logger = object: Logger {
+            logger = object : Logger {
                 override fun log(message: String) {
                     co.touchlab.kermit.Logger.d("KtorClient") {
                         message
