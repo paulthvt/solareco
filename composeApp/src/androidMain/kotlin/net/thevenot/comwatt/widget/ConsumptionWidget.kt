@@ -149,11 +149,6 @@ class ConsumptionWidget : GlanceAppWidget() {
         fun requestImmediateRefresh(context: Context) {
             val workRequest = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
                 .setInputData(workDataOf(WORKER_KEY_SHOW_ERROR_TOAST to true))
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
-                )
                 .build()
 
             WorkManager.getInstance(context).enqueueUniqueWork(
