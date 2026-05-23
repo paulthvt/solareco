@@ -13,4 +13,6 @@
     <string name="widget_no_data_time">Pas de données</string>
     <string name="widget_refresh_failed_no_network">Échec : pas de connexion réseau</string>
     <string name="widget_refresh_failed">Échec de l\'actualisation</string>
+    <string name="widget_refresh_notification">Actualisation du widget…</string>
+    <string name="widget_refresh_channel_name">Actualisation widget</string>
 </resources>

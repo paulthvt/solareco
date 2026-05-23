@@ -1,11 +1,16 @@
 package net.thevenot.comwatt.widget
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.appwidget.AppWidgetManager
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
@@ -16,10 +21,14 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.ExistingWorkPolicy
+import androidx.work.ForegroundInfo
 import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.workDataOf
 import arrow.core.Either
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -36,9 +45,13 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 private const val WIDGET_UPDATE_WORK_NAME = "widget_update_work"
+private const val WIDGET_REFRESH_WORK_NAME = "widget_refresh_work"
+private const val WORKER_KEY_SHOW_ERROR_TOAST = "show_error_toast"
 private const val CHART_FILE_NAME = "widget_chart.png"
 private const val CHART_WIDTH_PX = 640
 private const val CHART_HEIGHT_PX = 240
+private const val REFRESH_NOTIFICATION_CHANNEL_ID = "widget_refresh"
+private const val REFRESH_NOTIFICATION_ID = 1001
 
 private fun isSystemInDarkMode(context: Context) =
     context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
@@ -141,6 +154,18 @@ class ConsumptionWidget : GlanceAppWidget() {
             )
         }
 
+        fun requestImmediateRefresh(context: Context) {
+            val workRequest = OneTimeWorkRequestBuilder<WidgetRefreshWorker>()
+                .setInputData(workDataOf(WORKER_KEY_SHOW_ERROR_TOAST to true))
+                .build()
+
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                WIDGET_REFRESH_WORK_NAME,
+                ExistingWorkPolicy.KEEP,
+                workRequest
+            )
+        }
+
         fun cancelWidgetUpdates(context: Context) {
             WorkManager.getInstance(context).cancelUniqueWork(WIDGET_UPDATE_WORK_NAME)
         }
@@ -187,6 +212,61 @@ class WidgetUpdateWorker(
         } catch (e: Exception) {
             Logger.withTag("WidgetUpdateWorker").e(e) { "Widget update failed" }
             Result.retry()
+        }
+    }
+}
+
+/**
+ * Foreground worker for user-initiated widget refresh.
+ * Runs as a foreground service to get full network access on mobile data.
+ */
+class WidgetRefreshWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        createNotificationChannel()
+        val notification =
+            NotificationCompat.Builder(applicationContext, REFRESH_NOTIFICATION_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_bolt)
+                .setContentTitle(applicationContext.getString(R.string.widget_refresh_notification))
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setOngoing(true)
+                .build()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            ForegroundInfo(
+                REFRESH_NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            ForegroundInfo(REFRESH_NOTIFICATION_ID, notification)
+        }
+    }
+
+    override suspend fun doWork(): Result {
+        setForeground(getForegroundInfo())
+        val showErrorToast = inputData.getBoolean(WORKER_KEY_SHOW_ERROR_TOAST, false)
+        return try {
+            ConsumptionWidget.updateWidgetData(applicationContext, showErrorToast = showErrorToast)
+            Result.success()
+        } catch (e: Exception) {
+            Logger.withTag("WidgetRefreshWorker").e(e) { "Widget refresh failed" }
+            Result.failure()
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                REFRESH_NOTIFICATION_CHANNEL_ID,
+                applicationContext.getString(R.string.widget_refresh_channel_name),
+                NotificationManager.IMPORTANCE_LOW
+            )
+            val notificationManager =
+                applicationContext.getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
         }
     }
 }

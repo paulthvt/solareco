@@ -279,6 +279,6 @@ class RefreshWidgetAction : ActionCallback {
         glanceId: GlanceId,
         parameters: ActionParameters
     ) {
-        ConsumptionWidget.updateWidgetData(context, showErrorToast = true)
+        ConsumptionWidget.requestImmediateRefresh(context)
     }
 }
