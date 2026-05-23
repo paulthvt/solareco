@@ -153,7 +153,7 @@ class ConsumptionWidget : GlanceAppWidget() {
 
             WorkManager.getInstance(context).enqueueUniqueWork(
                 WIDGET_REFRESH_WORK_NAME,
-                ExistingWorkPolicy.REPLACE,
+                ExistingWorkPolicy.KEEP,
                 workRequest
             )
         }
