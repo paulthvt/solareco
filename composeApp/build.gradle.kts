@@ -46,7 +46,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -63,7 +63,7 @@ kotlin {
             }
         }
     }
-    
+
     sourceSets {
         val desktopMain by getting
         desktopMain.dependencies {
@@ -116,7 +116,7 @@ kotlin {
 
             implementation(libs.vico)
             implementation(libs.vico.multiplatform.m3)
-            implementation(libs.koalaplot.core)
+
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -187,17 +187,18 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
 
         // Use VERSION_CODE from project property or environment, or calculate from version
-        versionCode = (project.findProperty("VERSION_CODE") ?: System.getenv("VERSION_CODE"))?.toString()
+        versionCode =
+            (project.findProperty("VERSION_CODE") ?: System.getenv("VERSION_CODE"))?.toString()
                 ?.toIntOrNull()
-            ?: run {
-                // Calculate versionCode from version if not provided
-                val versionStr = project.version.toString()
-                val versionParts = versionStr.replace("-SNAPSHOT", "").split(".")
-                val major = versionParts.getOrNull(0)?.toIntOrNull() ?: 1
-                val minor = versionParts.getOrNull(1)?.toIntOrNull() ?: 0
-                val patch = versionParts.getOrNull(2)?.toIntOrNull() ?: 0
-                major * 1000000 + minor * 1000 + patch
-            }
+                ?: run {
+                    // Calculate versionCode from version if not provided
+                    val versionStr = project.version.toString()
+                    val versionParts = versionStr.replace("-SNAPSHOT", "").split(".")
+                    val major = versionParts.getOrNull(0)?.toIntOrNull() ?: 1
+                    val minor = versionParts.getOrNull(1)?.toIntOrNull() ?: 0
+                    val patch = versionParts.getOrNull(2)?.toIntOrNull() ?: 0
+                    major * 1000000 + minor * 1000 + patch
+                }
 
         // Use the versionName already declared at the top of android block
         this.versionName = versionName

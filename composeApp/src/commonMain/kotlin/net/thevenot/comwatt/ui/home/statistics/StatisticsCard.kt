@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.ui.home.statistics
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,8 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,9 +50,7 @@ import comwatt.composeapp.generated.resources.statistics_card_self_consumption_n
 import comwatt.composeapp.generated.resources.statistics_card_title
 import comwatt.composeapp.generated.resources.statistics_self_consumption_rate
 import comwatt.composeapp.generated.resources.statistics_self_consumption_tooltip
-import io.github.koalaplot.core.pie.DefaultSlice
-import io.github.koalaplot.core.pie.PieChart
-import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
+
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.ui.theme.AppTheme
@@ -121,7 +124,7 @@ fun StatisticsCard(
     }
 }
 
-@OptIn(ExperimentalKoalaPlotApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DonutChartWithPercentage(
     title: String,
@@ -132,7 +135,6 @@ private fun DonutChartWithPercentage(
     modifier: Modifier = Modifier
 ) {
     val validPercentage = percentage?.coerceIn(0f, 1f)
-    val remainingPercentage = if (validPercentage != null) 1.0f - validPercentage else 1.0f
     val percentageInt = validPercentage?.let { (it * 100).roundToInt() }
     val tooltipState = rememberTooltipState(isPersistent = true)
     val coroutineScope = rememberCoroutineScope()
@@ -183,41 +185,54 @@ private fun DonutChartWithPercentage(
             }
         }
 
+        val trackColor = if (validPercentage != null) {
+            secondaryColor.copy(alpha = 0.2f)
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+        }
+
         Box(
             modifier = Modifier.size(120.dp),
             contentAlignment = Alignment.Center
         ) {
-            PieChart(
-                values = listOf(validPercentage ?: 0f, remainingPercentage),
-                slice = { index ->
-                    DefaultSlice(
-                        color = when {
-                            validPercentage == null -> MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                                alpha = 0.15f
-                            )
-
-                            index == 0 -> primaryColor
-                            else -> secondaryColor.copy(alpha = 0.2f)
-                        },
-                        hoverExpandFactor = 1.0f
-                    )
-                },
-                holeSize = 0.6f,
-                modifier = Modifier.size(120.dp),
-                labelConnector = {}
-            )
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = percentageInt?.let { "$it%" }
-                        ?: stringResource(Res.string.statistics_card_self_consumption_na),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+            Canvas(modifier = Modifier.size(120.dp)) {
+                val strokeWidth = size.width * 0.18f
+                val arcSize = Size(
+                    size.width - strokeWidth,
+                    size.height - strokeWidth
                 )
+                val topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f)
+
+                drawArc(
+                    color = trackColor,
+                    startAngle = 0f,
+                    sweepAngle = 360f,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = arcSize,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+
+                if (validPercentage != null && validPercentage > 0f) {
+                    drawArc(
+                        color = primaryColor,
+                        startAngle = -90f,
+                        sweepAngle = validPercentage * 360f,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    )
+                }
             }
+
+            Text(
+                text = percentageInt?.let { "$it%" }
+                    ?: stringResource(Res.string.statistics_card_self_consumption_na),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
