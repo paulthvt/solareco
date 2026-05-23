@@ -16,13 +16,10 @@ import androidx.glance.state.PreferencesGlanceStateDefinition
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import androidx.work.workDataOf
 import arrow.core.Either
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.CoroutineScope
@@ -39,8 +36,6 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 private const val WIDGET_UPDATE_WORK_NAME = "widget_update_work"
-private const val WIDGET_REFRESH_WORK_NAME = "widget_refresh_work"
-private const val WORKER_KEY_SHOW_ERROR_TOAST = "show_error_toast"
 private const val CHART_FILE_NAME = "widget_chart.png"
 private const val CHART_WIDTH_PX = 640
 private const val CHART_HEIGHT_PX = 240
@@ -146,18 +141,6 @@ class ConsumptionWidget : GlanceAppWidget() {
             )
         }
 
-        fun requestImmediateRefresh(context: Context) {
-            val workRequest = OneTimeWorkRequestBuilder<WidgetUpdateWorker>()
-                .setInputData(workDataOf(WORKER_KEY_SHOW_ERROR_TOAST to true))
-                .build()
-
-            WorkManager.getInstance(context).enqueueUniqueWork(
-                WIDGET_REFRESH_WORK_NAME,
-                ExistingWorkPolicy.KEEP,
-                workRequest
-            )
-        }
-
         fun cancelWidgetUpdates(context: Context) {
             WorkManager.getInstance(context).cancelUniqueWork(WIDGET_UPDATE_WORK_NAME)
         }
@@ -198,9 +181,8 @@ class WidgetUpdateWorker(
 ) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
-        val showErrorToast = inputData.getBoolean(WORKER_KEY_SHOW_ERROR_TOAST, false)
         return try {
-            ConsumptionWidget.updateWidgetData(applicationContext, showErrorToast = showErrorToast)
+            ConsumptionWidget.updateWidgetData(applicationContext)
             Result.success()
         } catch (e: Exception) {
             Logger.withTag("WidgetUpdateWorker").e(e) { "Widget update failed" }
