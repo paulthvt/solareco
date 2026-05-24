@@ -48,14 +48,14 @@ jobs:
       - name: Compile (all targets, no linking)
         run: |
           ./gradlew \
-            compileKotlinIosArm64 \
-            compileKotlinIosSimulatorArm64 \
-            assembleDebug \
-            desktopMainClasses \
+            :shared:compileKotlinIosArm64 \
+            :shared:compileKotlinIosSimulatorArm64 \
+            :androidApp:assembleDebug \
+            :desktopApp:jvmMainClasses \
             --parallel
 
       - name: Run tests
-        run: ./gradlew desktopTest --parallel
+        run: ./gradlew :shared:desktopTest --parallel
 
       - name: Archive test results
         if: always()
@@ -63,6 +63,6 @@ jobs:
         with:
           name: test-results-${{ github.run_number }}
           path: |
-            composeApp/build/reports/tests/
-            composeApp/build/test-results/
+            shared/build/reports/tests/
+            shared/build/test-results/
           retention-days: 7

@@ -9,16 +9,25 @@ monitoring solar energy production and home consumption on Comwatt-connected dev
 
 ```
 comwatt/
-├── composeApp/          # Shared Kotlin Multiplatform module
+├── shared/              # Kotlin Multiplatform library (common code + platform implementations)
 │   └── src/
-│       ├── commonMain/  # Shared code (UI, data, domain, navigation)
-│       ├── androidMain/ # Android-specific code (widgets, manifest)
-│       ├── iosMain/     # iOS-specific code (platform expect/actual)
-│       └── desktopMain/ # Desktop-specific code
-├── iosApp/              # iOS entry point (Xcode project + SwiftUI bridge)
+│       ├── commonMain/  # Shared UI, domain logic, data layer, navigation
+│       ├── androidMain/ # Android platform implementations (expect/actual)
+│       ├── iosMain/     # iOS platform implementations
+│       └── desktopMain/ # Desktop platform implementations
+├── androidApp/          # Android application entry point
+│   └── src/main/        # MainActivity, AndroidManifest, widgets, app resources
+├── desktopApp/          # Desktop (JVM) application entry point
+│   └── src/main/        # Main.kt, desktop configuration
+├── iosApp/              # iOS application (Xcode project + SwiftUI bridge)
 ├── scripts/             # Build & release helper scripts
 └── .github/workflows/   # CI/CD (GitHub Actions)
 ```
+
+**Architecture:** The project follows a clean separation between shared business logic (`shared/`)
+and platform-specific application entry points (`androidApp/`, `desktopApp/`, `iosApp/`). This
+structure aligns with Compose Multiplatform best practices and Android Gradle Plugin 9.0
+requirements.
 
 ## Prerequisites
 

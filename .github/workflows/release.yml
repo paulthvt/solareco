@@ -89,7 +89,7 @@ jobs:
               -e "s/FIREBASE_STORAGE_BUCKET/$FIREBASE_STORAGE_BUCKET/g" \
               -e "s/FIREBASE_ANDROID_APP_ID/$FIREBASE_ANDROID_APP_ID/g" \
               -e "s/FIREBASE_ANDROID_API_KEY/$FIREBASE_ANDROID_API_KEY/g" \
-              composeApp/google-services.json.template > composeApp/google-services.json
+              androidApp/google-services.json.template > androidApp/google-services.json
 
       - name: Create GoogleService-Info.plist from template
         env:
@@ -111,13 +111,13 @@ jobs:
 
       - name: Build Android release
         run: |
-          ./gradlew :composeApp:assembleRelease :composeApp:bundleRelease \
+          ./gradlew :androidApp:assembleRelease :androidApp:bundleRelease \
             -PVERSION_NAME="${{ steps.version.outputs.name }}" \
             -PVERSION_CODE="${{ steps.version.outputs.code }}" \
             --parallel
 
       - name: Build iOS framework
-        run: ./gradlew :composeApp:linkReleaseFrameworkIosArm64
+        run: ./gradlew :shared:linkReleaseFrameworkIosArm64
 
       - name: Build iOS archive
         run: |
@@ -146,7 +146,7 @@ jobs:
         run: |
           VERSION="${{ steps.version.outputs.name }}"
           gh release upload "$VERSION" \
-            "composeApp/build/outputs/apk/release/solareco-${VERSION}-release.apk#Android APK" \
-            "composeApp/build/outputs/bundle/release/solareco-${VERSION}-release.aab#Android App Bundle" \
+            "androidApp/build/outputs/apk/release/solareco-${VERSION}-release.apk#Android APK" \
+            "androidApp/build/outputs/bundle/release/solareco-${VERSION}-release.aab#Android App Bundle" \
             "build/solareco-${VERSION}-ios.xcarchive.zip#iOS App Archive" \
             --clobber

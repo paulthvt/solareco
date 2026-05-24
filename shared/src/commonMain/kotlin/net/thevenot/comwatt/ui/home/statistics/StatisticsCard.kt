@@ -1,0 +1,414 @@
+package net.thevenot.comwatt.ui.home.statistics
+
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import comwatt.shared.generated.resources.Res
+import comwatt.shared.generated.resources.gauge_subtitle_consumption
+import comwatt.shared.generated.resources.gauge_subtitle_injection
+import comwatt.shared.generated.resources.gauge_subtitle_production
+import comwatt.shared.generated.resources.gauge_subtitle_withdrawals
+import comwatt.shared.generated.resources.statistics_autonomy_rate
+import comwatt.shared.generated.resources.statistics_autonomy_tooltip
+import comwatt.shared.generated.resources.statistics_card_self_consumption_na
+import comwatt.shared.generated.resources.statistics_card_title
+import comwatt.shared.generated.resources.statistics_self_consumption_rate
+import comwatt.shared.generated.resources.statistics_self_consumption_tooltip
+
+import kotlinx.coroutines.launch
+import net.thevenot.comwatt.domain.model.SiteDailyData
+import net.thevenot.comwatt.ui.theme.AppTheme
+import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
+import net.thevenot.comwatt.ui.theme.powerConsumption
+import net.thevenot.comwatt.ui.theme.powerInjection
+import net.thevenot.comwatt.ui.theme.powerProduction
+import net.thevenot.comwatt.ui.theme.powerWithdrawals
+import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
+
+@Composable
+fun StatisticsCard(
+    siteDailyData: SiteDailyData?,
+    totalsLabel: String,
+    modifier: Modifier = Modifier,
+    title: String? = null,
+) {
+    siteDailyData?.let { siteData ->
+        ElevatedCard(
+            modifier = modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
+                verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+                ) {
+                    Icon(
+                        painter = AppIcons.Analytics,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = title ?: stringResource(Res.string.statistics_card_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    DonutChartWithPercentage(
+                        title = stringResource(Res.string.statistics_self_consumption_rate),
+                        tooltipText = stringResource(Res.string.statistics_self_consumption_tooltip),
+                        percentage = siteData.selfConsumptionRate?.toFloat(),
+                        primaryColor = MaterialTheme.colorScheme.powerProduction,
+                        secondaryColor = MaterialTheme.colorScheme.powerInjection,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    DonutChartWithPercentage(
+                        title = stringResource(Res.string.statistics_autonomy_rate),
+                        tooltipText = stringResource(Res.string.statistics_autonomy_tooltip),
+                        percentage = siteData.autonomyRate.toFloat(),
+                        primaryColor = MaterialTheme.colorScheme.powerConsumption,
+                        secondaryColor = MaterialTheme.colorScheme.powerWithdrawals,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                DailyTotalsSection(siteData, totalsLabel)
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DonutChartWithPercentage(
+    title: String,
+    tooltipText: String,
+    percentage: Float?,
+    primaryColor: Color,
+    secondaryColor: Color,
+    modifier: Modifier = Modifier
+) {
+    val validPercentage = percentage?.coerceIn(0f, 1f)
+    val percentageInt = validPercentage?.let { (it * 100).roundToInt() }
+    val tooltipState = rememberTooltipState(isPersistent = true)
+    val coroutineScope = rememberCoroutineScope()
+
+    val animatedSweep by animateFloatAsState(
+        targetValue = validPercentage?.times(360f) ?: 0f,
+        animationSpec = tween(durationMillis = 800, easing = FastOutSlowInEasing)
+    )
+
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingExtraSmall)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+                tooltip = {
+                    PlainTooltip {
+                        Text(
+                            text = tooltipText,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                },
+                state = tooltipState
+            ) {
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            tooltipState.show()
+                        }
+                    },
+                    modifier = Modifier.size(20.dp)
+                ) {
+                    Icon(
+                        painter = AppIcons.Info,
+                        contentDescription = "Information",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+
+        val trackColor = if (validPercentage != null) {
+            secondaryColor.copy(alpha = 0.2f)
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.15f)
+        }
+
+        Box(
+            modifier = Modifier.size(120.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Canvas(modifier = Modifier.size(120.dp)) {
+                val strokeWidth = size.width * 0.18f
+                val arcSize = Size(
+                    size.width - strokeWidth,
+                    size.height - strokeWidth
+                )
+                val topLeft = Offset(strokeWidth / 2f, strokeWidth / 2f)
+
+                drawArc(
+                    color = trackColor,
+                    startAngle = 0f,
+                    sweepAngle = 360f,
+                    useCenter = false,
+                    topLeft = topLeft,
+                    size = arcSize,
+                    style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                )
+
+                if (animatedSweep > 0f) {
+                    drawArc(
+                        color = primaryColor,
+                        startAngle = -90f,
+                        sweepAngle = animatedSweep,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                    )
+                }
+            }
+
+            Text(
+                text = percentageInt?.let { "$it%" }
+                    ?: stringResource(Res.string.statistics_card_self_consumption_na),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+    }
+}
+
+@Composable
+private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
+    val maxValue = maxOf(
+        dailyData.totalProduction,
+        dailyData.totalConsumption,
+        dailyData.totalInjection,
+        dailyData.totalWithdrawals
+    )
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = AppTheme.dimens.paddingExtraSmall)
+        )
+
+        // First row: Production and Consumption
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+        ) {
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_production),
+                value = dailyData.totalProduction,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerProduction,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_consumption),
+                value = dailyData.totalConsumption,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerConsumption,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        // Second row: Injection and Withdrawals
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+        ) {
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_injection),
+                value = dailyData.totalInjection,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerInjection,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+
+            DailyTotalCard(
+                title = stringResource(Res.string.gauge_subtitle_withdrawals),
+                value = dailyData.totalWithdrawals,
+                unit = "kWh",
+                color = MaterialTheme.colorScheme.powerWithdrawals,
+                maxValue = maxValue,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun DailyTotalCard(
+    title: String,
+    value: Double,
+    unit: String,
+    color: Color,
+    maxValue: Double,
+    modifier: Modifier = Modifier
+) {
+    val normalizedValue = if (maxValue > 0) (value / maxValue).coerceIn(0.0, 1.0) else 0.0
+    // Convert from Wh to kWh and format with 1 decimal place
+    val valueInKwh = value / 1000.0
+    val formattedValue = "${(valueInKwh * 10).toInt() / 10.0}"
+
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(AppTheme.dimens.paddingSmall),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = formattedValue,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = unit,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(2.dp)
+                    )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(normalizedValue.toFloat())
+                        .height(4.dp)
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(
+                                    color.copy(alpha = 0.9f),
+                                    color.copy(alpha = 0.6f)
+                                )
+                            ),
+                            shape = RoundedCornerShape(2.dp)
+                        )
+                )
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun StatisticsCardPreview() {
+    ComwattTheme {
+        Surface {
+            StatisticsCard(
+                siteDailyData = SiteDailyData(
+                    selfConsumptionRate = 0.75,
+                    autonomyRate = 0.68,
+                    totalProduction = 45123.2,
+                    totalConsumption = 38542.7,
+                    totalInjection = 11542.3,
+                    totalWithdrawals = 12325.4
+                ),
+                totalsLabel = "Today's Totals",
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
