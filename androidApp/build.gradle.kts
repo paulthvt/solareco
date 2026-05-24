@@ -160,7 +160,7 @@ dependencies {
     implementation(projects.shared)
 
     // Activity Compose (for MainActivity)
-    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.activity:activity-compose:1.13.0")
 
     // Compose tooling for preview and debugging
     implementation(libs.compose.ui.tooling.preview)
