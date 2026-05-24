@@ -20,16 +20,16 @@ home consumption for Comwatt-connected devices.
 ### Android
 
 ```bash
-./gradlew :composeApp:assembleDebug        # Debug APK
-./gradlew :composeApp:installDebug         # Install on device/emulator
-./gradlew :composeApp:bundleRelease        # Release AAB (requires signing)
+./gradlew :androidApp:assembleDebug        # Debug APK
+./gradlew :androidApp:installDebug         # Install on device/emulator
+./gradlew :androidApp:bundleRelease        # Release AAB (requires signing)
 ```
 
 ### iOS
 
 ```bash
 # Build shared framework first
-./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+./gradlew :shared:linkDebugFrameworkIosSimulatorArm64
 
 # Then open in Xcode or use xcodebuild
 xcodebuild -project iosApp/iosApp.xcodeproj \
@@ -40,15 +40,15 @@ xcodebuild -project iosApp/iosApp.xcodeproj \
 ### Desktop
 
 ```bash
-./gradlew :composeApp:run                  # Run app
-./gradlew :composeApp:packageDmg           # Package as DMG (macOS)
+./gradlew :desktopApp:run                  # Run app
+./gradlew :desktopApp:packageDmg           # Package as DMG (macOS)
 ```
 
 ### Tests
 
 ```bash
 ./gradlew test                             # All tests
-./gradlew :composeApp:desktopTest          # Common/desktop tests only
+./gradlew :shared:desktopTest              # Common/desktop tests only
 ```
 
 ## Architecture
