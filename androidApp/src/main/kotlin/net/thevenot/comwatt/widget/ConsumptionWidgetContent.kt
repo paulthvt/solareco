@@ -203,20 +203,22 @@ private fun PowerStatsRow(context: Context, widgetData: WidgetConsumptionData) {
 
 @Composable
 private fun PowerStat(iconRes: Int, value: Int, contentDescription: String) {
-    Image(
-        provider = ImageProvider(iconRes),
-        contentDescription = contentDescription,
-        modifier = GlanceModifier.size(14.dp)
-    )
-    Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingTooSmall))
-    Text(
-        text = "${value}W",
-        style = TextStyle(
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
-            color = GlanceTheme.colors.onSurface
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Image(
+            provider = ImageProvider(iconRes),
+            contentDescription = contentDescription,
+            modifier = GlanceModifier.size(14.dp)
         )
-    )
+        Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingTooSmall))
+        Text(
+            text = "${value}W",
+            style = TextStyle(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = GlanceTheme.colors.onSurface
+            )
+        )
+    }
 }
 
 @Composable
