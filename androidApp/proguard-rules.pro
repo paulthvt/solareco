@@ -19,5 +19,16 @@
 
 # Room ships consumer rules; no additional rules required here.
 
+# Glance ActionCallback classes are instantiated via reflection by the framework.
+# AGP 9 may not pick up Glance's consumer rules correctly.
+-keep class * implements androidx.glance.appwidget.action.ActionCallback { <init>(); }
+
+# GlanceAppWidget and GlanceAppWidgetReceiver are resolved by name from the manifest.
+-keep class * extends androidx.glance.appwidget.GlanceAppWidget { *; }
+-keep class * extends androidx.glance.appwidget.GlanceAppWidgetReceiver { *; }
+
+# WorkManager workers are instantiated via reflection by WorkerFactory.
+-keep class * extends androidx.work.ListenableWorker { <init>(android.content.Context, androidx.work.WorkerParameters); }
+
 # If you see specific warnings during shrink, add targeted -dontwarn entries rather than broad -dontoptimize.
 
