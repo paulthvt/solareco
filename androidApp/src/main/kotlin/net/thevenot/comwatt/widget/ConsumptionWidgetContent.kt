@@ -57,9 +57,14 @@ private val json = Json {
 
 @Composable
 fun ConsumptionWidgetContent() {
-    val context = LocalContext.current
     val prefs = currentState<Preferences>()
     val widgetData = parseWidgetData(prefs)
+    ConsumptionWidgetContent(widgetData)
+}
+
+@Composable
+internal fun ConsumptionWidgetContent(widgetData: WidgetConsumptionData) {
+    val context = LocalContext.current
     val openAppIntent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
     }
@@ -179,6 +184,20 @@ private fun PowerStatsRow(context: Context, widgetData: WidgetConsumptionData) {
                 contentDescription = context.getString(R.string.widget_production)
             )
         }
+
+        if (widgetData.consumptions.isNotEmpty() && widgetData.productions.isNotEmpty()) {
+            val currentProduction = widgetData.productions.lastOrNull() ?: 0.0
+            val currentConsumption = widgetData.consumptions.lastOrNull() ?: 0.0
+            val availableSolar = (currentProduction - currentConsumption).coerceAtLeast(0.0).toInt()
+            if (availableSolar > 0) {
+                Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingNormal - AppTheme.dimens.paddingExtraSmall))
+                PowerStat(
+                    iconRes = R.drawable.ic_solar_available,
+                    value = availableSolar,
+                    contentDescription = context.getString(R.string.widget_available_solar)
+                )
+            }
+        }
     }
 }
 
@@ -282,3 +301,5 @@ class RefreshWidgetAction : ActionCallback {
         ConsumptionWidget.requestImmediateRefresh(context)
     }
 }
+
+
