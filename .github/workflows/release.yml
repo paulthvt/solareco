@@ -116,6 +116,14 @@ jobs:
             -PVERSION_CODE="${{ steps.version.outputs.code }}" \
             --parallel
 
+      - name: Rename Android artifacts
+        run: |
+          VERSION="${{ steps.version.outputs.name }}"
+          mv androidApp/build/outputs/apk/release/androidApp-release.apk \
+             androidApp/build/outputs/apk/release/solareco-${VERSION}-release.apk
+          mv androidApp/build/outputs/bundle/release/androidApp-release.aab \
+             androidApp/build/outputs/bundle/release/solareco-${VERSION}-release.aab
+
       - name: Build iOS framework
         run: ./gradlew :shared:linkReleaseFrameworkIosArm64
 
