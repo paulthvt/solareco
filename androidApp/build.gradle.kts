@@ -165,6 +165,7 @@ dependencies {
     // Compose tooling for preview and debugging
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
+    implementation(libs.compose.foundation)
 
     // Android-specific dependencies
     implementation(libs.androidx.glance)

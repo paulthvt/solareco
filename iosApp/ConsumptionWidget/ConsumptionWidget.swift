@@ -42,6 +42,7 @@ struct ConsumptionWidgetEntry: TimelineEntry {
     var hasData: Bool { !consumptions.isEmpty || !productions.isEmpty }
     var currentConsumption: Int { Int(consumptions.last ?? 0) }
     var currentProduction: Int { Int(productions.last ?? 0) }
+    var availableSolar: Int { max(0, currentProduction - currentConsumption) }
 }
 
 struct WidgetDataModel: Codable {
@@ -109,6 +110,7 @@ struct Provider: TimelineProvider {
 extension Color {
     static let powerConsumption = Color(red: 1.0, green: 0.70, blue: 0.0)
     static let powerProduction = Color(red: 0.40, green: 0.73, blue: 0.42)
+    static let solarAvailable = Color(red: 0.26, green: 0.65, blue: 0.96)
     static let boltYellow = Color(red: 1.0, green: 0.76, blue: 0.03)
 }
 
@@ -173,6 +175,9 @@ struct ConsumptionWidgetEntryView: View {
             }
             if !entry.productions.isEmpty {
                 PowerStat(iconName: "arrow.up", value: entry.currentProduction, color: .powerProduction)
+            }
+            if !entry.consumptions.isEmpty && !entry.productions.isEmpty && entry.availableSolar > 0 {
+                PowerStat(iconName: "sun.max.fill", value: entry.availableSolar, color: .solarAvailable)
             }
             Spacer()
         }

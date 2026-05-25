@@ -6,6 +6,7 @@
     <string name="widget_energy_icon">Énergie</string>
     <string name="widget_consumption">Consommation</string>
     <string name="widget_production">Production</string>
+    <string name="widget_available_solar">Solaire disponible</string>
     <string name="widget_chart">Graphique d\'énergie</string>
     <string name="widget_no_data">Aucune donnée disponible</string>
     <string name="widget_will_update">Le widget se mettra à jour automatiquement</string>
