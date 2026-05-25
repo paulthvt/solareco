@@ -78,9 +78,6 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.ktor.client.android)
-            if (isReleaseBuild) {
-                api(libs.gitlive.firebase.kotlin.crashlytics)
-            }
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

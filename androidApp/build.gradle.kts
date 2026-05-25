@@ -160,7 +160,7 @@ dependencies {
     implementation(projects.shared)
 
     // Activity Compose (for MainActivity)
-    implementation("androidx.activity:activity-compose:1.13.0")
+    implementation(libs.androidx.activity.compose)
 
     // Compose tooling for preview and debugging
     implementation(libs.compose.ui.tooling.preview)
@@ -179,6 +179,7 @@ dependencies {
     implementation(libs.ktor.serialization.kotlinx.json)
 
     if (isReleaseBuild) {
+        implementation(platform(libs.firebase.bom))
         implementation(libs.gitlive.firebase.kotlin.crashlytics)
     }
 }
