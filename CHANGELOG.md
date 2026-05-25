@@ -46,6 +46,13 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.1.1](https://github.com/paulthvt/solareco/compare/2.1.0...2.1.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* **build:** resolve Firebase dependency in release builds ([8dcc9d8](https://github.com/paulthvt/solareco/commit/8dcc9d82a32df42ba7be9dd75cdd7ab26cb949a5))
+
 ## [2.1.0](https://github.com/paulthvt/solareco/compare/2.0.0...2.1.0) (2026-05-25)
 
 
