@@ -46,6 +46,15 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.1.3](https://github.com/paulthvt/solareco/compare/2.1.2...2.1.3) (2026-05-25)
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.firebase:firebase-bom to v34 ([9746ae7](https://github.com/paulthvt/solareco/commit/9746ae7ae73749ead5e8fd544360b771dbd1bb32))
+* **widget:** add ProGuard keep rules for Glance and WorkManager classes ([3f45138](https://github.com/paulthvt/solareco/commit/3f45138907023c5d873d0159b0feb782c75dd67c))
+* **widget:** wrap PowerStat icon+text in Row to prevent clipping ([f29bbe3](https://github.com/paulthvt/solareco/commit/f29bbe3068616a90502628326ac74a448191f167))
+
 ## [2.1.2](https://github.com/paulthvt/solareco/compare/2.1.1...2.1.2) (2026-05-25)
 
 
