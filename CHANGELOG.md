@@ -46,6 +46,13 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.1.2](https://github.com/paulthvt/solareco/compare/2.1.1...2.1.2) (2026-05-25)
+
+
+### Bug Fixes
+
+* **ci:** rename Android artifacts after build ([48d0444](https://github.com/paulthvt/solareco/commit/48d0444f600e9389b51a360f4d78cc59d9978ca8))
+
 ## [2.1.1](https://github.com/paulthvt/solareco/compare/2.1.0...2.1.1) (2026-05-25)
 
 
