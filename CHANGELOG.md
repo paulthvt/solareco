@@ -46,6 +46,20 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.1.0](https://github.com/paulthvt/solareco/compare/2.0.0...2.1.0) (2026-05-25)
+
+
+### Features
+
+* **build:** migrate to AGP 9.0 with full module restructure ([ae9f958](https://github.com/paulthvt/solareco/commit/ae9f958c9ef36514a2dc6a8104592c762df0a63d))
+* **widget:** add available solar energy stat to home screen widget ([b1770fa](https://github.com/paulthvt/solareco/commit/b1770fab20c55352ad2dee134ebd622bccbb78ff))
+
+
+### Bug Fixes
+
+* **deps:** update dependency androidx.activity:activity-compose to v1.13.0 ([e83fbc5](https://github.com/paulthvt/solareco/commit/e83fbc5cba27024931150b9ed44946d7dc25547a))
+* **ios:** let Compose handle all safe area insets ([9e252e5](https://github.com/paulthvt/solareco/commit/9e252e5700f43279a405d55e166ddd16b4b15fab))
+
 ## [2.0.0](https://github.com/paulthvt/solareco/compare/1.2.0...2.0.0) (2026-05-23)
 
 
