@@ -46,6 +46,13 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.2.0](https://github.com/paulthvt/solareco/compare/2.1.3...2.2.0) (2026-05-26)
+
+
+### Features
+
+* **widget:** add statistics widget and improve widget headers ([2762f23](https://github.com/paulthvt/solareco/commit/2762f232bf06aaf7ceba9db8cdab5cefd307d0d8))
+
 ## [2.1.3](https://github.com/paulthvt/solareco/compare/2.1.2...2.1.3) (2026-05-25)
 
 
