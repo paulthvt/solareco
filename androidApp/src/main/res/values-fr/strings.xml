@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">comwatt</string>
     <string name="widget_description">Aperçu Énergie - Affiche vos données de consommation et de production</string>
-    <string name="widget_title">Aperçu Énergie</string>
+    <string name="widget_title">Énergie (1h)</string>
     <string name="widget_refresh_button">Actualiser</string>
     <string name="widget_energy_icon">Énergie</string>
     <string name="widget_consumption">Consommation</string>
@@ -10,10 +10,14 @@
     <string name="widget_chart">Graphique d\'énergie</string>
     <string name="widget_no_data">Aucune donnée disponible</string>
     <string name="widget_will_update">Le widget se mettra à jour automatiquement</string>
-    <string name="widget_last_update">Dernière mise à jour : %1$s</string>
-    <string name="widget_no_data_time">Pas de données</string>
+
     <string name="widget_refresh_failed_no_network">Échec : pas de connexion réseau</string>
     <string name="widget_refresh_failed">Échec de l\'actualisation</string>
     <string name="widget_refresh_notification">Actualisation du widget…</string>
     <string name="widget_refresh_channel_name">Actualisation widget</string>
+    <string name="statistics_widget_description">Statistiques Énergie - Affiche les taux d\'autoconsommation et d\'autonomie</string>
+    <string name="statistics_widget_title">Stats (1h)</string>
+    <string name="statistics_widget_chart">Graphique statistiques</string>
+    <string name="statistics_self_consumption_label">Autocons.</string>
+    <string name="statistics_autonomy_label">Autonomie</string>
 </resources>

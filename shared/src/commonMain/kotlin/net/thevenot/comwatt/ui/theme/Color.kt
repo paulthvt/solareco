@@ -319,6 +319,10 @@ object WidgetColors {
     val productionDark: Int get() = powerProductionDark.toArgbInt()
     val consumptionLight: Int get() = powerConsumptionLight.toArgbInt()
     val consumptionDark: Int get() = powerConsumptionDark.toArgbInt()
+    val injectionLight: Int get() = powerInjectionLight.toArgbInt()
+    val injectionDark: Int get() = powerInjectionDark.toArgbInt()
+    val withdrawalsLight: Int get() = powerWithdrawalsLight.toArgbInt()
+    val withdrawalsDark: Int get() = powerWithdrawalsDark.toArgbInt()
 
     const val GRID_LIGHT = 0x1F000000
     const val GRID_DARK = 0x33FFFFFF
@@ -330,6 +334,12 @@ object WidgetColors {
 
     fun consumptionColor(isDarkMode: Boolean): Int =
         if (isDarkMode) consumptionDark else consumptionLight
+
+    fun injectionColor(isDarkMode: Boolean): Int =
+        if (isDarkMode) injectionDark else injectionLight
+
+    fun withdrawalsColor(isDarkMode: Boolean): Int =
+        if (isDarkMode) withdrawalsDark else withdrawalsLight
 
     fun gridColor(isDarkMode: Boolean): Int = if (isDarkMode) GRID_DARK else GRID_LIGHT
     fun textColor(isDarkMode: Boolean): Int = if (isDarkMode) TEXT_DARK else TEXT_LIGHT

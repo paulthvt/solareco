@@ -63,7 +63,10 @@ fun ConsumptionWidgetContent() {
 }
 
 @Composable
-internal fun ConsumptionWidgetContent(widgetData: WidgetConsumptionData) {
+internal fun ConsumptionWidgetContent(
+    widgetData: WidgetConsumptionData,
+    previewBitmap: android.graphics.Bitmap? = null,
+) {
     val context = LocalContext.current
     val openAppIntent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -82,11 +85,11 @@ internal fun ConsumptionWidgetContent(widgetData: WidgetConsumptionData) {
                 modifier = GlanceModifier.fillMaxSize(),
                 verticalAlignment = Alignment.Top
             ) {
-                WidgetHeader(context)
+                WidgetHeader(context, widgetData.lastUpdateTime)
                 Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingSmall - AppTheme.dimens.paddingExtraSmall))
 
                 if (widgetData.hasData()) {
-                    WidgetDataContent(context, widgetData)
+                    WidgetDataContent(context, widgetData, previewBitmap)
                 } else {
                     WidgetEmptyState(context)
                 }
@@ -121,7 +124,7 @@ private fun WidgetConsumptionData.hasData(): Boolean =
     consumptions.isNotEmpty() || productions.isNotEmpty()
 
 @Composable
-private fun WidgetHeader(context: Context) {
+private fun WidgetHeader(context: Context, lastUpdateTime: Long) {
     Row(
         modifier = GlanceModifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start,
@@ -130,7 +133,7 @@ private fun WidgetHeader(context: Context) {
         Image(
             provider = ImageProvider(R.drawable.ic_bolt),
             contentDescription = context.getString(R.string.widget_energy_icon),
-            modifier = GlanceModifier.size(18.dp)
+            modifier = GlanceModifier.size(16.dp)
         )
         Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingExtraSmall))
         Text(
@@ -141,21 +144,30 @@ private fun WidgetHeader(context: Context) {
                 color = GlanceTheme.colors.onSurface
             )
         )
+        if (lastUpdateTime > 0) {
+            val instant = Instant.fromEpochMilliseconds(lastUpdateTime)
+            val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+            val timeStr = "%02d:%02d".format(localDateTime.hour, localDateTime.minute)
+            Text(
+                text = " · ↻ $timeStr",
+                style = TextStyle(
+                    fontSize = 11.sp,
+                    color = GlanceTheme.colors.onSurfaceVariant
+                )
+            )
+        }
     }
 }
 
 @Composable
-private fun ColumnScope.WidgetDataContent(context: Context, widgetData: WidgetConsumptionData) {
+private fun ColumnScope.WidgetDataContent(
+    context: Context,
+    widgetData: WidgetConsumptionData,
+    previewBitmap: android.graphics.Bitmap? = null,
+) {
     PowerStatsRow(context, widgetData)
     Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingSmall - AppTheme.dimens.paddingExtraSmall))
-    ChartImage(context, widgetData, GlanceModifier.fillMaxWidth().defaultWeight())
-    Spacer(modifier = GlanceModifier.height(AppTheme.dimens.paddingExtraSmall))
-    Row(
-        modifier = GlanceModifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.End
-    ) {
-        LastUpdateText(context, widgetData.lastUpdateTime)
-    }
+    ChartImage(context, widgetData, GlanceModifier.fillMaxWidth().defaultWeight(), previewBitmap)
 }
 
 @Composable
@@ -225,23 +237,26 @@ private fun PowerStat(iconRes: Int, value: Int, contentDescription: String) {
 private fun ChartImage(
     context: Context,
     widgetData: WidgetConsumptionData,
-    modifier: GlanceModifier
+    modifier: GlanceModifier,
+    previewBitmap: android.graphics.Bitmap? = null,
 ) {
-    val chartImageFile = File(context.filesDir, "widget_chart.png")
-    val bitmap = if (chartImageFile.exists()) {
-        BitmapFactory.decodeFile(chartImageFile.absolutePath)
-    } else null
+    val bitmap = previewBitmap ?: run {
+        val chartImageFile = File(context.filesDir, "widget_chart.png")
+        if (chartImageFile.exists()) {
+            BitmapFactory.decodeFile(chartImageFile.absolutePath)
+        } else null
+    }
 
     if (bitmap != null) {
         Image(
             provider = ImageProvider(bitmap),
             contentDescription = context.getString(R.string.widget_chart),
-            modifier = modifier
+            modifier = modifier,
         )
     } else {
         Text(
             text = createAsciiChart(widgetData),
-            style = TextStyle(fontSize = 10.sp, color = GlanceTheme.colors.primary)
+            style = TextStyle(fontSize = 10.sp, color = GlanceTheme.colors.primary),
         )
     }
 }
@@ -258,22 +273,6 @@ private fun createAsciiChart(data: WidgetConsumptionData): String {
     }
 }
 
-@Composable
-private fun LastUpdateText(context: Context, lastUpdateTime: Long) {
-    val text = if (lastUpdateTime > 0) {
-        val instant = Instant.fromEpochMilliseconds(lastUpdateTime)
-        val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-        val timeStr = "%02d:%02d".format(localDateTime.hour, localDateTime.minute)
-        context.getString(R.string.widget_last_update, timeStr)
-    } else {
-        context.getString(R.string.widget_no_data_time)
-    }
-
-    Text(
-        text = text,
-        style = TextStyle(fontSize = 9.sp, color = GlanceTheme.colors.onSurfaceVariant)
-    )
-}
 
 @Composable
 private fun WidgetEmptyState(context: Context) {
