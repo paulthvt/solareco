@@ -7,6 +7,7 @@
     <string name="widget_consumption">Consumption</string>
     <string name="widget_production">Production</string>
     <string name="widget_available_solar">Available solar</string>
+    <string name="widget_withdrawal">Grid withdrawal</string>
     <string name="widget_chart">Energy chart</string>
     <string name="widget_no_data">No data available</string>
     <string name="widget_will_update">Widget will update automatically</string>

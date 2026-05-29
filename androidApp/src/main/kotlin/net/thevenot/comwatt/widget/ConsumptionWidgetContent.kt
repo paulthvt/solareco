@@ -179,7 +179,7 @@ private fun PowerStatsRow(context: Context, widgetData: WidgetConsumptionData) {
     ) {
         if (widgetData.consumptions.isNotEmpty()) {
             PowerStat(
-                iconRes = R.drawable.ic_arrow_down_consumption,
+                iconRes = R.drawable.ic_stat_consumption,
                 value = widgetData.consumptions.lastOrNull()?.toInt() ?: 0,
                 contentDescription = context.getString(R.string.widget_consumption)
             )
@@ -191,7 +191,7 @@ private fun PowerStatsRow(context: Context, widgetData: WidgetConsumptionData) {
 
         if (widgetData.productions.isNotEmpty()) {
             PowerStat(
-                iconRes = R.drawable.ic_arrow_up_production,
+                iconRes = R.drawable.ic_stat_production,
                 value = widgetData.productions.lastOrNull()?.toInt() ?: 0,
                 contentDescription = context.getString(R.string.widget_production)
             )
@@ -200,13 +200,20 @@ private fun PowerStatsRow(context: Context, widgetData: WidgetConsumptionData) {
         if (widgetData.consumptions.isNotEmpty() && widgetData.productions.isNotEmpty()) {
             val currentProduction = widgetData.productions.lastOrNull() ?: 0.0
             val currentConsumption = widgetData.consumptions.lastOrNull() ?: 0.0
-            val availableSolar = (currentProduction - currentConsumption).coerceAtLeast(0.0).toInt()
-            if (availableSolar > 0) {
-                Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingNormal - AppTheme.dimens.paddingExtraSmall))
+            val balance = currentProduction - currentConsumption
+
+            Spacer(modifier = GlanceModifier.width(AppTheme.dimens.paddingNormal - AppTheme.dimens.paddingExtraSmall))
+            if (balance >= 0) {
                 PowerStat(
                     iconRes = R.drawable.ic_solar_available,
-                    value = availableSolar,
+                    value = balance.toInt(),
                     contentDescription = context.getString(R.string.widget_available_solar)
+                )
+            } else {
+                PowerStat(
+                    iconRes = R.drawable.ic_stat_withdrawals,
+                    value = (-balance).toInt(),
+                    contentDescription = context.getString(R.string.widget_withdrawal)
                 )
             }
         }

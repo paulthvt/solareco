@@ -137,7 +137,7 @@ private fun WidgetHeader(context: Context, lastUpdateTime: Long) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            provider = ImageProvider(R.drawable.ic_bolt),
+            provider = ImageProvider(R.drawable.ic_analytics),
             contentDescription = context.getString(R.string.widget_energy_icon),
             modifier = GlanceModifier.size(16.dp),
         )
@@ -236,13 +236,13 @@ private fun HorizontalBarsSection(data: WidgetStatisticsData) {
     if (maxValue <= 0.0) return
 
     Column(modifier = GlanceModifier.fillMaxWidth()) {
-        HorizontalBarRow("Prod", data.totalProduction, maxValue, BarColor.PRODUCTION)
+        HorizontalBarRow(R.drawable.ic_stat_production, data.totalProduction, maxValue, BarColor.PRODUCTION)
         Spacer(modifier = GlanceModifier.height(1.dp))
-        HorizontalBarRow("Cons", data.totalConsumption, maxValue, BarColor.CONSUMPTION)
+        HorizontalBarRow(R.drawable.ic_stat_consumption, data.totalConsumption, maxValue, BarColor.CONSUMPTION)
         Spacer(modifier = GlanceModifier.height(1.dp))
-        HorizontalBarRow("Inj", data.totalInjection, maxValue, BarColor.INJECTION)
+        HorizontalBarRow(R.drawable.ic_stat_injection, data.totalInjection, maxValue, BarColor.INJECTION)
         Spacer(modifier = GlanceModifier.height(1.dp))
-        HorizontalBarRow("Wdrl", data.totalWithdrawals, maxValue, BarColor.WITHDRAWALS)
+        HorizontalBarRow(R.drawable.ic_stat_withdrawals, data.totalWithdrawals, maxValue, BarColor.WITHDRAWALS)
     }
 }
 
@@ -252,12 +252,18 @@ private enum class BarColor {
 
 @Composable
 private fun HorizontalBarRow(
-    label: String,
+    iconRes: Int,
     value: Double,
     maxValue: Double,
     barColor: BarColor,
 ) {
     val valueKwh = value / 1000.0
+    val displayedKwh = if (valueKwh >= 10) {
+        valueKwh.roundToInt().toDouble()
+    } else {
+        (valueKwh * 10).roundToInt() / 10.0
+    }
+    val maxKwh = maxValue / 1000.0
     val valueText = if (valueKwh >= 10) {
         "${valueKwh.roundToInt()} kWh"
     } else {
@@ -268,12 +274,13 @@ private fun HorizontalBarRow(
         modifier = GlanceModifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(
-            text = label,
-            style = TextStyle(fontSize = 11.sp, color = GlanceTheme.colors.onSurfaceVariant),
-            modifier = GlanceModifier.width(36.dp),
+        Image(
+            provider = ImageProvider(iconRes),
+            contentDescription = null,
+            modifier = GlanceModifier.size(16.dp),
         )
-        BarIndicator(value, maxValue, barColor, GlanceModifier.defaultWeight().height(8.dp))
+        Spacer(modifier = GlanceModifier.width(4.dp))
+        BarIndicator(displayedKwh, maxKwh, barColor, GlanceModifier.defaultWeight().height(8.dp))
         Spacer(modifier = GlanceModifier.width(6.dp))
         Text(
             text = valueText,
@@ -294,9 +301,13 @@ private fun BarIndicator(
     barColor: BarColor,
     modifier: GlanceModifier,
 ) {
-    val fraction = (value / maxValue).toFloat().coerceIn(0.02f, 1f)
+    val fraction = if (maxValue > 0 && value > 0) {
+        (value / maxValue).toFloat().coerceIn(0f, 1f)
+    } else {
+        0f
+    }
     val maxBarWidthDp = 150
-    val barWidth = (maxBarWidthDp * fraction).toInt().coerceAtLeast(4)
+    val barWidth = (maxBarWidthDp * fraction).toInt().coerceAtLeast(if (fraction > 0f) 4 else 0)
     val color = when (barColor) {
         BarColor.PRODUCTION -> ColorProvider(powerProductionLight)
         BarColor.CONSUMPTION -> ColorProvider(powerConsumptionLight)
@@ -305,13 +316,15 @@ private fun BarIndicator(
     }
 
     Box(modifier = modifier) {
-        Box(
-            modifier = GlanceModifier
-                .width(barWidth.dp)
-                .fillMaxHeight()
-                .cornerRadius(4.dp)
-                .background(color),
-        ) {}
+        if (barWidth > 0) {
+            Box(
+                modifier = GlanceModifier
+                    .width(barWidth.dp)
+                    .fillMaxHeight()
+                    .cornerRadius(4.dp)
+                    .background(color),
+            ) {}
+        }
     }
 }
 

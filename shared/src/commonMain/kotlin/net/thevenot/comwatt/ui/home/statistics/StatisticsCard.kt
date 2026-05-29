@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -265,7 +266,6 @@ private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
             modifier = Modifier.padding(bottom = AppTheme.dimens.paddingExtraSmall)
         )
 
-        // First row: Production and Consumption
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
@@ -276,6 +276,7 @@ private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
                 unit = "kWh",
                 color = MaterialTheme.colorScheme.powerProduction,
                 maxValue = maxValue,
+                icon = AppIcons.WbSunny,
                 modifier = Modifier.weight(1f)
             )
 
@@ -285,11 +286,11 @@ private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
                 unit = "kWh",
                 color = MaterialTheme.colorScheme.powerConsumption,
                 maxValue = maxValue,
+                icon = AppIcons.Home,
                 modifier = Modifier.weight(1f)
             )
         }
 
-        // Second row: Injection and Withdrawals
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
@@ -300,6 +301,7 @@ private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
                 unit = "kWh",
                 color = MaterialTheme.colorScheme.powerInjection,
                 maxValue = maxValue,
+                icon = AppIcons.ArrowUp,
                 modifier = Modifier.weight(1f)
             )
 
@@ -309,6 +311,7 @@ private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
                 unit = "kWh",
                 color = MaterialTheme.colorScheme.powerWithdrawals,
                 maxValue = maxValue,
+                icon = AppIcons.ArrowDown,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -322,10 +325,10 @@ private fun DailyTotalCard(
     unit: String,
     color: Color,
     maxValue: Double,
+    icon: Painter,
     modifier: Modifier = Modifier
 ) {
     val normalizedValue = if (maxValue > 0) (value / maxValue).coerceIn(0.0, 1.0) else 0.0
-    // Convert from Wh to kWh and format with 1 decimal place
     val valueInKwh = value / 1000.0
     val formattedValue = "${(valueInKwh * 10).toInt() / 10.0}"
 
@@ -339,13 +342,24 @@ private fun DailyTotalCard(
             modifier = Modifier.padding(AppTheme.dimens.paddingSmall),
             horizontalAlignment = Alignment.Start
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Icon(
+                    painter = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = color
+                )
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
