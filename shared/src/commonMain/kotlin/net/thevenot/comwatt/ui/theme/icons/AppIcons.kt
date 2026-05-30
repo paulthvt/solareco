@@ -30,6 +30,8 @@ import comwatt.shared.generated.resources.ic_freezer
 import comwatt.shared.generated.resources.ic_fridge
 import comwatt.shared.generated.resources.ic_fullscreen
 import comwatt.shared.generated.resources.ic_grid
+import comwatt.shared.generated.resources.ic_grid_export
+import comwatt.shared.generated.resources.ic_grid_import
 import comwatt.shared.generated.resources.ic_heat_pump
 import comwatt.shared.generated.resources.ic_home
 import comwatt.shared.generated.resources.ic_info
@@ -53,6 +55,7 @@ import comwatt.shared.generated.resources.ic_radiator
 import comwatt.shared.generated.resources.ic_refresh
 import comwatt.shared.generated.resources.ic_schedule
 import comwatt.shared.generated.resources.ic_settings
+import comwatt.shared.generated.resources.ic_solar_power
 import comwatt.shared.generated.resources.ic_speed
 import comwatt.shared.generated.resources.ic_swap_horiz
 import comwatt.shared.generated.resources.ic_tv
@@ -282,6 +285,18 @@ object AppIcons {
     val Grid: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_grid)
+
+    val GridExport: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_grid_export)
+
+    val GridImport: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_grid_import)
+
+    val SolarPower: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_solar_power)
 
     val Boiler: Painter
         @Composable
