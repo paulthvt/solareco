@@ -24,10 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import comwatt.shared.generated.resources.Res
-import comwatt.shared.generated.resources.settings_max_power_gauge
-import comwatt.shared.generated.resources.settings_max_power_gauge_description
-import comwatt.shared.generated.resources.settings_max_power_gauge_icon_content_description
-import comwatt.shared.generated.resources.settings_max_power_gauge_subtitle
 import comwatt.shared.generated.resources.settings_production_noise_threshold
 import comwatt.shared.generated.resources.settings_production_noise_threshold_description
 import comwatt.shared.generated.resources.settings_production_noise_threshold_icon_content_description
@@ -39,8 +35,6 @@ import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
 
-private const val MIN_MAX_POWER_GAUGE = 3
-private const val MAX_MAX_POWER_GAUGE = 20
 private const val MIN_PRODUCTION_NOISE_THRESHOLD = 0
 private const val MAX_PRODUCTION_NOISE_THRESHOLD = 50
 
@@ -49,15 +43,10 @@ fun SettingsScreen(
     dataRepository: DataRepository,
     viewModel: SettingsViewModel = viewModel { SettingsViewModel(dataRepository) }
 ) {
-    val maxPowerGauge by viewModel.maxPowerGauge.collectAsState()
     val productionNoiseThreshold by viewModel.productionNoiseThreshold.collectAsState()
 
     SettingsContent(
-        maxPower = maxPowerGauge,
         productionNoiseThreshold = productionNoiseThreshold,
-        onMaxPowerChange = { newValue ->
-            viewModel.updateMaxPowerGauge(newValue.toInt())
-        },
         onProductionNoiseThresholdChange = { newValue ->
             viewModel.updateProductionNoiseThreshold(newValue.toInt())
         }
@@ -66,9 +55,7 @@ fun SettingsScreen(
 
 @Composable
 fun SettingsContent(
-    maxPower: Int,
     productionNoiseThreshold: Int,
-    onMaxPowerChange: (Float) -> Unit = {},
     onProductionNoiseThresholdChange: (Float) -> Unit = {}
 ) {
     Scaffold { paddingValues ->
@@ -85,57 +72,6 @@ fun SettingsContent(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(bottom = AppTheme.dimens.paddingSmall)
             )
-
-            SettingCard(
-                title = stringResource(Res.string.settings_max_power_gauge),
-                description = stringResource(Res.string.settings_max_power_gauge_description),
-                icon = {
-                    Icon(
-                        painter = AppIcons.Speed,
-                        contentDescription = stringResource(Res.string.settings_max_power_gauge_icon_content_description)
-                    )
-                }
-            ) {
-                Column {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.settings_max_power_gauge_subtitle),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Text(
-                            text = "$maxPower kW",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    Slider(
-                        value = maxPower.toFloat(),
-                        onValueChange = onMaxPowerChange,
-                        valueRange = MIN_MAX_POWER_GAUGE.toFloat()..MAX_MAX_POWER_GAUGE.toFloat(),
-                        steps = 16,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "$MIN_MAX_POWER_GAUGE kW",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "$MAX_MAX_POWER_GAUGE kW",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
 
             SettingCard(
                 title = stringResource(Res.string.settings_production_noise_threshold),
@@ -233,6 +169,6 @@ fun SettingCard(
 @Composable
 fun PreviewSettingsScreen() {
     ComwattTheme {
-        SettingsContent(9, 5)
+        SettingsContent(5)
     }
 }

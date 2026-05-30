@@ -4,7 +4,6 @@ import net.thevenot.comwatt.domain.model.ElectricityPrice
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.domain.model.WeatherForecast
-import net.thevenot.comwatt.ui.settings.SettingsViewModel.Companion.DEFAULT_MAX_POWER_GAUGE
 import kotlin.time.Instant
 
 data class HomeScreenState(
@@ -12,11 +11,6 @@ data class HomeScreenState(
     val isDataLoaded: Boolean = false,
     val callCount: Int = 0,
     val lastErrorMessage: String = "",
-    val productionGaugeEnabled: Boolean = true,
-    val consumptionGaugeEnabled: Boolean = true,
-    val injectionGaugeEnabled: Boolean = true,
-    val powerMaxGauge: Int = DEFAULT_MAX_POWER_GAUGE,
-    val withdrawalsGaugeEnabled: Boolean = true,
     val lastRefreshInstant: Instant? = null,
     val timeDifference: Int? = null,
     val siteRealtimeData: SiteRealtimeData = SiteRealtimeData(),

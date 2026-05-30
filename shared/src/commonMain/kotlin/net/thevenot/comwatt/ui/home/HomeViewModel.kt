@@ -13,23 +13,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchElectricityPriceUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.domain.exception.DomainError
-import net.thevenot.comwatt.ui.settings.SettingsViewModel.Companion.DEFAULT_MAX_POWER_GAUGE
 import kotlin.time.Clock
 
 
 class HomeViewModel(
-    dataRepository: DataRepository,
     private val fetchSiteRealtimeDataUseCase: FetchSiteRealtimeDataUseCase,
     private val fetchSiteDailyDataUseCase: FetchSiteDailyDataUseCase,
     private val fetchWeatherUseCase: FetchWeatherUseCase,
@@ -40,34 +35,6 @@ class HomeViewModel(
 
     private val _uiState = MutableStateFlow(HomeScreenState())
     val uiState: StateFlow<HomeScreenState> get() = _uiState
-
-    init {
-        dataRepository.getSettings()
-            .onEach { settings ->
-                _uiState.update {
-                    it.copy(
-                        powerMaxGauge = (settings.maxPowerGauge ?: DEFAULT_MAX_POWER_GAUGE) * 1000
-                    )
-                }
-            }
-            .launchIn(viewModelScope)
-    }
-
-    fun enableProductionGauge(enabled: Boolean) {
-        _uiState.update { it.copy(productionGaugeEnabled = enabled) }
-    }
-
-    fun enableConsumptionGauge(enabled: Boolean) {
-        _uiState.update { it.copy(consumptionGaugeEnabled = enabled) }
-    }
-
-    fun enableInjectionGauge(enabled: Boolean) {
-        _uiState.update { it.copy(injectionGaugeEnabled = enabled) }
-    }
-
-    fun enableWithdrawalsGauge(enabled: Boolean) {
-        _uiState.update { it.copy(withdrawalsGaugeEnabled = enabled) }
-    }
 
     fun startAutoRefresh() {
         Logger.d(TAG) { "startAutoRefresh ${this@HomeViewModel}" }

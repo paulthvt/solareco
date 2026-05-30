@@ -301,7 +301,7 @@ private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
                 unit = "kWh",
                 color = MaterialTheme.colorScheme.powerInjection,
                 maxValue = maxValue,
-                icon = AppIcons.GridExport,
+                icon = AppIcons.GridImport,
                 modifier = Modifier.weight(1f)
             )
 
@@ -311,7 +311,7 @@ private fun DailyTotalsSection(dailyData: SiteDailyData, label: String) {
                 unit = "kWh",
                 color = MaterialTheme.colorScheme.powerWithdrawals,
                 maxValue = maxValue,
-                icon = AppIcons.GridImport,
+                icon = AppIcons.GridExport,
                 modifier = Modifier.weight(1f)
             )
         }

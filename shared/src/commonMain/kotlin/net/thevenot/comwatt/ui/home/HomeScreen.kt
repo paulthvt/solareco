@@ -11,15 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -27,12 +24,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -40,12 +33,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.error_fetching_data
-import comwatt.shared.generated.resources.gauge_dialog_close_button
-import comwatt.shared.generated.resources.gauge_dialog_title
-import comwatt.shared.generated.resources.gauge_subtitle_consumption
-import comwatt.shared.generated.resources.gauge_subtitle_injection
-import comwatt.shared.generated.resources.gauge_subtitle_production
-import comwatt.shared.generated.resources.gauge_subtitle_withdrawals
 import comwatt.shared.generated.resources.home_screen_real_time_consumption_title
 import comwatt.shared.generated.resources.last_data_refresh_time
 import comwatt.shared.generated.resources.last_data_refresh_time_zero
@@ -62,8 +49,7 @@ import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
 import net.thevenot.comwatt.ui.common.LoadingView
-import net.thevenot.comwatt.ui.home.gauge.ResponsiveGauge
-import net.thevenot.comwatt.ui.home.gauge.SourceTitle
+import net.thevenot.comwatt.ui.home.gauge.PowerFlowBalance
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.home.tempo.TempoCard
@@ -72,11 +58,6 @@ import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
-import net.thevenot.comwatt.ui.theme.powerConsumption
-import net.thevenot.comwatt.ui.theme.powerInjection
-import net.thevenot.comwatt.ui.theme.powerProduction
-import net.thevenot.comwatt.ui.theme.powerWithdrawals
-import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -87,7 +68,6 @@ fun HomeScreen(
     snackbarHostState: SnackbarHostState,
     viewModel: HomeViewModel = viewModel {
         HomeViewModel(
-            dataRepository = dataRepository,
             fetchSiteRealtimeDataUseCase = FetchSiteRealtimeDataUseCase(dataRepository),
             fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
             fetchWeatherUseCase = FetchWeatherUseCase(dataRepository),
@@ -134,10 +114,6 @@ fun HomeScreen(
         ) {
             HomeScreenContent(
                 uiState = uiState,
-                onProductionChecked = viewModel::enableProductionGauge,
-                onConsumptionChecked = viewModel::enableConsumptionGauge,
-                onInjectionChecked = viewModel::enableInjectionGauge,
-                onWithdrawalsChecked = viewModel::enableWithdrawalsGauge,
                 launchSingleDataRefresh = viewModel::singleRefresh
             )
         }
@@ -147,14 +123,8 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenContent(
     uiState: HomeScreenState,
-    onProductionChecked: (Boolean) -> Unit = {},
-    onConsumptionChecked: (Boolean) -> Unit = {},
-    onInjectionChecked: (Boolean) -> Unit = {},
-    onWithdrawalsChecked: (Boolean) -> Unit = {},
     launchSingleDataRefresh: () -> Unit = {}
 ) {
-    var showDialog by remember { mutableStateOf(false) }
-
     val scrollState = rememberScrollState()
     val state = rememberPullToRefreshState()
     PullToRefreshBox(
@@ -177,8 +147,7 @@ private fun HomeScreenContent(
         ) {
             Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
 
-            RealTimeConsumptionSection(
-                uiState = uiState, onSettingsButtonClick = { showDialog = true })
+            RealTimeConsumptionSection(uiState = uiState)
             StatisticsCard(
                 siteDailyData = uiState.siteDailyData,
                 totalsLabel = stringResource(Res.string.statistics_card_today_total),
@@ -190,24 +159,13 @@ private fun HomeScreenContent(
             LastRefreshSection(uiState = uiState)
 
             Spacer(modifier = Modifier.height(AppTheme.dimens.paddingNormal))
-
-            if (showDialog) {
-                GaugeSettingsDialog(
-                    onDismiss = { showDialog = false },
-                    uiState = uiState,
-                    onProductionChecked = onProductionChecked,
-                    onConsumptionChecked = onConsumptionChecked,
-                    onInjectionChecked = onInjectionChecked,
-                    onWithdrawalsChecked = onWithdrawalsChecked
-                )
-            }
         }
     }
 }
 
 @Composable
 private fun RealTimeConsumptionSection(
-    uiState: HomeScreenState, onSettingsButtonClick: () -> Unit
+    uiState: HomeScreenState
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -241,9 +199,7 @@ private fun RealTimeConsumptionSection(
                     uiState = uiState, modifier = Modifier.fillMaxWidth().height(300.dp)
                 )
 
-                ResponsiveGauge(
-                    uiState = uiState, onSettingsButtonClick = onSettingsButtonClick
-                )
+                PowerFlowBalance(uiState = uiState)
             }
         }
     }
@@ -278,67 +234,6 @@ private fun LastRefreshSection(uiState: HomeScreenState) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-}
-
-@Composable
-fun GaugeSettingsDialog(
-    onDismiss: () -> Unit,
-    uiState: HomeScreenState,
-    onProductionChecked: (Boolean) -> Unit,
-    onConsumptionChecked: (Boolean) -> Unit,
-    onInjectionChecked: (Boolean) -> Unit,
-    onWithdrawalsChecked: (Boolean) -> Unit
-) {
-    AlertDialog(onDismissRequest = onDismiss, title = {
-        Text(stringResource(Res.string.gauge_dialog_title))
-    }, confirmButton = {
-        TextButton(onClick = onDismiss) {
-            Text(stringResource(Res.string.gauge_dialog_close_button))
-        }
-    }, text = {
-        Column {
-            DialogSettingsRow(
-                title = Res.string.gauge_subtitle_production,
-                color = MaterialTheme.colorScheme.powerProduction,
-                checked = uiState.productionGaugeEnabled,
-                onCheckedChange = onProductionChecked
-            )
-            DialogSettingsRow(
-                title = Res.string.gauge_subtitle_consumption,
-                color = MaterialTheme.colorScheme.powerConsumption,
-                checked = uiState.consumptionGaugeEnabled,
-                onCheckedChange = onConsumptionChecked
-            )
-            DialogSettingsRow(
-                title = Res.string.gauge_subtitle_injection,
-                color = MaterialTheme.colorScheme.powerInjection,
-                checked = uiState.injectionGaugeEnabled,
-                onCheckedChange = onInjectionChecked
-            )
-            DialogSettingsRow(
-                title = Res.string.gauge_subtitle_withdrawals,
-                color = MaterialTheme.colorScheme.powerWithdrawals,
-                checked = uiState.withdrawalsGaugeEnabled,
-                onCheckedChange = onWithdrawalsChecked
-            )
-        }
-    })
-}
-
-@Composable
-fun DialogSettingsRow(
-    title: StringResource, color: Color, checked: Boolean, onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        SourceTitle(
-            title = title, color = color, fontStyle = MaterialTheme.typography.bodyMedium
-        )
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 
