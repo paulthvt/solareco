@@ -46,6 +46,20 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.3.0](https://github.com/paulthvt/solareco/compare/2.2.0...2.3.0) (2026-05-30)
+
+
+### Features
+
+* **ui:** replace power gauge with energy flow balance ([579d007](https://github.com/paulthvt/solareco/commit/579d0072d64eece36bef17e363a253e2538506d2))
+* **ui:** use solar panel and transmission tower icons ([7a7c4a4](https://github.com/paulthvt/solareco/commit/7a7c4a43209be2801d3a3bb66edb12d652967916))
+* **widget:** replace text labels with icons and fix bar sizing ([35cb1f0](https://github.com/paulthvt/solareco/commit/35cb1f081805eeb3d1c8d2add2c8c57fe994d0d8))
+
+
+### Bug Fixes
+
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.14.0 ([534f210](https://github.com/paulthvt/solareco/commit/534f21083bed0de5a34c25c9c081efdce325a253))
+
 ## [2.2.0](https://github.com/paulthvt/solareco/compare/2.1.3...2.2.0) (2026-05-26)
 
 
