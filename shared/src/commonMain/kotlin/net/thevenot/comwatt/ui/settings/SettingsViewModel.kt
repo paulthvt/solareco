@@ -12,12 +12,8 @@ import net.thevenot.comwatt.DataRepository
 class SettingsViewModel(val dataRepository: DataRepository) : ViewModel() {
 
     companion object {
-        const val DEFAULT_MAX_POWER_GAUGE = 9
         const val DEFAULT_PRODUCTION_NOISE_THRESHOLD = 5
     }
-
-    private val _maxPowerGauge = MutableStateFlow(DEFAULT_MAX_POWER_GAUGE)
-    val maxPowerGauge: StateFlow<Int> = _maxPowerGauge
 
     private val _productionNoiseThreshold = MutableStateFlow(DEFAULT_PRODUCTION_NOISE_THRESHOLD)
     val productionNoiseThreshold: StateFlow<Int> = _productionNoiseThreshold
@@ -25,17 +21,10 @@ class SettingsViewModel(val dataRepository: DataRepository) : ViewModel() {
     init {
         dataRepository.getSettings()
             .onEach { settings ->
-                _maxPowerGauge.value = settings.maxPowerGauge ?: DEFAULT_MAX_POWER_GAUGE
                 _productionNoiseThreshold.value =
                     settings.productionNoiseThreshold ?: DEFAULT_PRODUCTION_NOISE_THRESHOLD
             }
             .launchIn(viewModelScope)
-    }
-
-    fun updateMaxPowerGauge(maxPower: Int) {
-        viewModelScope.launch {
-            dataRepository.saveMaxPowerGauge(maxPower)
-        }
     }
 
     fun updateProductionNoiseThreshold(threshold: Int) {
