@@ -19,7 +19,7 @@ androidx-room = "2.8.4"
 dataStoreVersion = "1.2.1"
 arrow = "2.2.2.1"
 kermit = "2.1.0"
-testResources = "0.10.1"
+testResources = "0.15.0"
 vico = "2.5.1"
 
 gradlePlugins-crashlytics = "3.0.7"
