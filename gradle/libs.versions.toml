@@ -20,7 +20,7 @@ dataStoreVersion = "1.2.1"
 arrow = "2.2.2.1"
 kermit = "2.1.0"
 testResources = "0.10.1"
-vico = "2.5.0"
+vico = "2.5.1"
 
 gradlePlugins-crashlytics = "3.0.7"
 gradlePlugins-google-services = "4.4.4"
