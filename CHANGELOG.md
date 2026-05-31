@@ -46,6 +46,14 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.3.1](https://github.com/paulthvt/solareco/compare/2.3.0...2.3.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* **deps:** update vico to v2.5.1 ([0116530](https://github.com/paulthvt/solareco/commit/0116530289a8db002f7ca8944d124bff78c2dd6b))
+* **model:** make TempoDayValue nullable in DayStatusDto ([2d8f7af](https://github.com/paulthvt/solareco/commit/2d8f7af449edf6dd0b1e9b4679ebb34bbb0a03ef))
+
 ## [2.3.0](https://github.com/paulthvt/solareco/compare/2.2.0...2.3.0) (2026-05-30)
 
 
