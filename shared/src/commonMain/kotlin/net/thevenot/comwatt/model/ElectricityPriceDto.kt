@@ -35,7 +35,7 @@ data class DailyElectricityPriceDto(
 
 @Serializable
 data class DayStatusDto(
-    val value: TempoDayValue,
+    val value: TempoDayValue?,
     val type: PeakType,
     @SerialName("start_time")
     val startTime: String,
