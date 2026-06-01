@@ -271,21 +271,9 @@ fun DashboardScreenContent(
                                 siteDailyData = stats,
                                 totalsLabel = buildRangeTotalsLabel(uiState),
                                 modifier = Modifier.fillMaxWidth(),
-                                title = statsTitle
+                                title = statsTitle,
+                                topConsumers = uiState.topConsumers
                             )
-                        }
-                    }
-
-                    if (uiState.topConsumers.isNotEmpty()) {
-                        item(key = "top_consumers_card") {
-                            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                                TopConsumersCard(
-                                    devices = uiState.topConsumers,
-                                    displayMode = ConsumerDisplayMode.ENERGY,
-                                    title = stringResource(Res.string.top_consumers_title),
-                                    modifier = Modifier.fillMaxWidth().padding(AppTheme.dimens.paddingNormal)
-                                )
-                            }
                         }
                     }
 

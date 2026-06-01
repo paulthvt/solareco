@@ -154,18 +154,6 @@ private fun HomeScreenContent(
 
             RealTimeConsumptionSection(uiState = uiState)
 
-            // Top realtime consumers card
-            if (uiState.topRealtimeConsumers.isNotEmpty()) {
-                ElevatedCard(modifier = Modifier.fillMaxWidth()) {
-                    TopConsumersCard(
-                        devices = uiState.topRealtimeConsumers,
-                        displayMode = ConsumerDisplayMode.INSTANT_POWER,
-                        title = stringResource(Res.string.top_consumers_realtime_title),
-                        modifier = Modifier.fillMaxWidth().padding(AppTheme.dimens.paddingNormal)
-                    )
-                }
-            }
-
             StatisticsCard(
                 siteDailyData = uiState.siteDailyData,
                 totalsLabel = stringResource(Res.string.statistics_card_today_total),
@@ -219,6 +207,16 @@ private fun RealTimeConsumptionSection(
                 )
 
                 PowerFlowBalance(uiState = uiState)
+            }
+
+            // Top realtime consumers - added back inside with extra spacing
+            if (uiState.topRealtimeConsumers.isNotEmpty()) {
+                TopConsumersCard(
+                    devices = uiState.topRealtimeConsumers,
+                    displayMode = ConsumerDisplayMode.INSTANT_POWER,
+                    title = stringResource(Res.string.top_consumers_realtime_title),
+                    modifier = Modifier.fillMaxWidth().padding(top = AppTheme.dimens.paddingNormal)
+                )
             }
         }
     }
