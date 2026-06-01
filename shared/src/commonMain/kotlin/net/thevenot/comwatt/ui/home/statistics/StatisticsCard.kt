@@ -133,7 +133,7 @@ fun StatisticsCard(
                 if (topConsumers.isNotEmpty()) {
                     TopConsumersCard(
                         devices = topConsumers,
-                        displayMode = ConsumerDisplayMode.ENERGY_WITH_PERIOD,
+                        displayMode = ConsumerDisplayMode.ENERGY,
                         title = stringResource(Res.string.top_consumers_daily_title),
                         modifier = Modifier.fillMaxWidth()
                     )

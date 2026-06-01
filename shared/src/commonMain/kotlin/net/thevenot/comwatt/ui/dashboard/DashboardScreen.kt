@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -277,12 +278,14 @@ fun DashboardScreenContent(
 
                     if (uiState.topConsumers.isNotEmpty()) {
                         item(key = "top_consumers_card") {
-                            TopConsumersCard(
-                                devices = uiState.topConsumers,
-                                displayMode = ConsumerDisplayMode.ENERGY,
-                                title = stringResource(Res.string.top_consumers_title),
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+                                TopConsumersCard(
+                                    devices = uiState.topConsumers,
+                                    displayMode = ConsumerDisplayMode.ENERGY,
+                                    title = stringResource(Res.string.top_consumers_title),
+                                    modifier = Modifier.fillMaxWidth().padding(AppTheme.dimens.paddingNormal)
+                                )
+                            }
                         }
                     }
 

@@ -132,6 +132,34 @@ class HomeViewModel(
                     }
                 }
             }
+            // Fetch top consumers on initial load
+            launch {
+                // Fetch top realtime consumers
+                fetchTopConsumersUseCase.execute(
+                    limit = 2,
+                    sortBy = ConsumerMetric.INSTANT_POWER
+                ).fold(
+                    ifLeft = { error ->
+                        Logger.e(TAG) { "Failed to fetch top realtime consumers: $error" }
+                    },
+                    ifRight = { consumers ->
+                        _uiState.update { it.copy(topRealtimeConsumers = consumers) }
+                    }
+                )
+
+                // Fetch top daily consumers
+                fetchTopConsumersUseCase.execute(
+                    limit = 2,
+                    sortBy = ConsumerMetric.DAILY_ENERGY
+                ).fold(
+                    ifLeft = { error ->
+                        Logger.e(TAG) { "Failed to fetch top daily consumers: $error" }
+                    },
+                    ifRight = { consumers ->
+                        _uiState.update { it.copy(topDailyConsumers = consumers) }
+                    }
+                )
+            }
         }
     }
 
