@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.ui.home
 
+import net.thevenot.comwatt.domain.model.DeviceUiModel
 import net.thevenot.comwatt.domain.model.ElectricityPrice
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
@@ -19,4 +20,5 @@ data class HomeScreenState(
     val siteName: String? = null,
     val weatherForecast: WeatherForecast? = null,
     val electricityPrice: ElectricityPrice? = null,
+    val topRealtimeConsumers: List<DeviceUiModel> = emptyList(),
 )
