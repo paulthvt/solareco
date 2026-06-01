@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -102,6 +103,7 @@ import comwatt.shared.generated.resources.statistics_card_title_custom
 import comwatt.shared.generated.resources.statistics_card_title_hourly
 import comwatt.shared.generated.resources.statistics_card_title_sixhourly
 import comwatt.shared.generated.resources.statistics_card_title_weekly
+import comwatt.shared.generated.resources.top_consumers_title
 import comwatt.shared.generated.resources.week_range_selected_time_n_weeks_ago
 import comwatt.shared.generated.resources.week_range_selected_time_one_week_ago
 import comwatt.shared.generated.resources.week_range_selected_time_past_seven_days
@@ -116,12 +118,15 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchTopConsumersUseCase
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
+import net.thevenot.comwatt.ui.common.ConsumerDisplayMode
 import net.thevenot.comwatt.ui.common.LoadingView
+import net.thevenot.comwatt.ui.common.TopConsumersCard
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
@@ -153,7 +158,11 @@ fun DashboardScreen(
     snackbarHostState: SnackbarHostState,
     dataRepository: DataRepository,
     viewModel: DashboardViewModel = viewModel {
-        DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
+        DashboardViewModel(
+            FetchTimeSeriesUseCase(dataRepository),
+            dataRepository,
+            FetchTopConsumersUseCase(dataRepository)
+        )
     }
 ) {
     DashboardScreenContent(navController, dataRepository, snackbarHostState, viewModel)
@@ -165,7 +174,11 @@ fun DashboardScreenContent(
     dataRepository: DataRepository,
     snackbarHostState: SnackbarHostState,
     viewModel: DashboardViewModel = viewModel {
-        DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
+        DashboardViewModel(
+            FetchTimeSeriesUseCase(dataRepository),
+            dataRepository,
+            FetchTopConsumersUseCase(dataRepository)
+        )
     }
 ) {
     LifecycleResumeEffect(Unit) {
@@ -258,7 +271,9 @@ fun DashboardScreenContent(
                                 siteDailyData = stats,
                                 totalsLabel = buildRangeTotalsLabel(uiState),
                                 modifier = Modifier.fillMaxWidth(),
-                                title = statsTitle
+                                title = statsTitle,
+                                topConsumers = uiState.topConsumers,
+                                topConsumersTitle = stringResource(Res.string.top_consumers_title)
                             )
                         }
                     }

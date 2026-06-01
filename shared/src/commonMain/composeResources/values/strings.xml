@@ -128,4 +128,7 @@
     <string name="device_settings_save_button">Save</string>
     <string name="device_settings_save_success">Device saved successfully</string>
     <string name="device_settings_save_error">Error saving device</string>
+    <string name="top_consumers_title">Top Consumers</string>
+    <string name="top_consumers_realtime_title">Top Consumers Now</string>
+    <string name="top_consumers_daily_title">Biggest Consumers Today</string>
 </resources>

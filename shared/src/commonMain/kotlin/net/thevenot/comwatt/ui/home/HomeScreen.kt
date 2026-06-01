@@ -38,17 +38,21 @@ import comwatt.shared.generated.resources.last_data_refresh_time
 import comwatt.shared.generated.resources.last_data_refresh_time_zero
 import comwatt.shared.generated.resources.statistics_card_title
 import comwatt.shared.generated.resources.statistics_card_today_total
+import comwatt.shared.generated.resources.top_consumers_realtime_title
 import kotlinx.coroutines.delay
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchElectricityPriceUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
+import net.thevenot.comwatt.domain.FetchTopConsumersUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.domain.model.SiteDailyData
 import net.thevenot.comwatt.domain.model.SiteRealtimeData
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
+import net.thevenot.comwatt.ui.common.ConsumerDisplayMode
 import net.thevenot.comwatt.ui.common.LoadingView
+import net.thevenot.comwatt.ui.common.TopConsumersCard
 import net.thevenot.comwatt.ui.home.gauge.PowerFlowBalance
 import net.thevenot.comwatt.ui.home.house.HouseScreen
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
@@ -72,7 +76,8 @@ fun HomeScreen(
             fetchSiteDailyDataUseCase = FetchSiteDailyDataUseCase(dataRepository),
             fetchWeatherUseCase = FetchWeatherUseCase(dataRepository),
             fetchCurrentSiteUseCase = FetchCurrentSiteUseCase(dataRepository),
-            fetchElectricityPriceUseCase = FetchElectricityPriceUseCase(dataRepository)
+            fetchElectricityPriceUseCase = FetchElectricityPriceUseCase(dataRepository),
+            fetchTopConsumersUseCase = FetchTopConsumersUseCase(dataRepository)
         )
     }
 ) {
@@ -148,9 +153,11 @@ private fun HomeScreenContent(
             Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
 
             RealTimeConsumptionSection(uiState = uiState)
+
             StatisticsCard(
                 siteDailyData = uiState.siteDailyData,
                 totalsLabel = stringResource(Res.string.statistics_card_today_total),
+                topConsumers = uiState.topDailyConsumers,
                 modifier = Modifier,
                 title = stringResource(Res.string.statistics_card_title)
             )
@@ -200,6 +207,16 @@ private fun RealTimeConsumptionSection(
                 )
 
                 PowerFlowBalance(uiState = uiState)
+            }
+
+            // Top realtime consumers - added back inside with extra spacing
+            if (uiState.topRealtimeConsumers.isNotEmpty()) {
+                TopConsumersCard(
+                    devices = uiState.topRealtimeConsumers,
+                    displayMode = ConsumerDisplayMode.INSTANT_POWER,
+                    title = stringResource(Res.string.top_consumers_realtime_title),
+                    modifier = Modifier.fillMaxWidth().padding(top = AppTheme.dimens.paddingNormal)
+                )
             }
         }
     }

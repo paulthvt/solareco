@@ -53,6 +53,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchTopConsumersUseCase
 import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.LoadingView
@@ -78,7 +79,11 @@ fun FullscreenChartScreen(
     dataRepository: DataRepository,
     chartIndex: Int,
     viewModel: DashboardViewModel = viewModel {
-        DashboardViewModel(FetchTimeSeriesUseCase(dataRepository), dataRepository)
+        DashboardViewModel(
+            FetchTimeSeriesUseCase(dataRepository),
+            dataRepository,
+            FetchTopConsumersUseCase(dataRepository)
+        )
     }
 ) {
     // Lock to landscape when entering, unlock when leaving

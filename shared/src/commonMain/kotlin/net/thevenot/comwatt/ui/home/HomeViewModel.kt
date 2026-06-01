@@ -19,8 +19,10 @@ import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchElectricityPriceUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
 import net.thevenot.comwatt.domain.FetchSiteRealtimeDataUseCase
+import net.thevenot.comwatt.domain.FetchTopConsumersUseCase
 import net.thevenot.comwatt.domain.FetchWeatherUseCase
 import net.thevenot.comwatt.domain.exception.DomainError
+import net.thevenot.comwatt.domain.model.ConsumerMetric
 import kotlin.time.Clock
 
 
@@ -29,7 +31,8 @@ class HomeViewModel(
     private val fetchSiteDailyDataUseCase: FetchSiteDailyDataUseCase,
     private val fetchWeatherUseCase: FetchWeatherUseCase,
     private val fetchCurrentSiteUseCase: FetchCurrentSiteUseCase,
-    private val fetchElectricityPriceUseCase: FetchElectricityPriceUseCase
+    private val fetchElectricityPriceUseCase: FetchElectricityPriceUseCase,
+    private val fetchTopConsumersUseCase: FetchTopConsumersUseCase
 ) : ViewModel() {
     private var autoRefreshJob: Job? = null
 
@@ -129,6 +132,34 @@ class HomeViewModel(
                     }
                 }
             }
+            // Fetch top consumers on initial load
+            launch {
+                // Fetch top realtime consumers
+                fetchTopConsumersUseCase.execute(
+                    limit = 2,
+                    sortBy = ConsumerMetric.INSTANT_POWER
+                ).fold(
+                    ifLeft = { error ->
+                        Logger.e(TAG) { "Failed to fetch top realtime consumers: $error" }
+                    },
+                    ifRight = { consumers ->
+                        _uiState.update { it.copy(topRealtimeConsumers = consumers) }
+                    }
+                )
+
+                // Fetch top daily consumers
+                fetchTopConsumersUseCase.execute(
+                    limit = 2,
+                    sortBy = ConsumerMetric.DAILY_ENERGY
+                ).fold(
+                    ifLeft = { error ->
+                        Logger.e(TAG) { "Failed to fetch top daily consumers: $error" }
+                    },
+                    ifRight = { consumers ->
+                        _uiState.update { it.copy(topDailyConsumers = consumers) }
+                    }
+                )
+            }
         }
     }
 
@@ -179,6 +210,32 @@ class HomeViewModel(
                     state.copy(electricityPrice = price)
                 }
             }
+
+            // Fetch top realtime consumers
+            fetchTopConsumersUseCase.execute(
+                limit = 2,
+                sortBy = ConsumerMetric.INSTANT_POWER
+            ).fold(
+                ifLeft = { error ->
+                    Logger.e(TAG) { "Failed to fetch top realtime consumers: $error" }
+                },
+                ifRight = { consumers ->
+                    _uiState.update { it.copy(topRealtimeConsumers = consumers) }
+                }
+            )
+
+            // Fetch top daily consumers
+            fetchTopConsumersUseCase.execute(
+                limit = 2,
+                sortBy = ConsumerMetric.DAILY_ENERGY
+            ).fold(
+                ifLeft = { error ->
+                    Logger.e(TAG) { "Failed to fetch top daily consumers: $error" }
+                },
+                ifRight = { consumers ->
+                    _uiState.update { it.copy(topDailyConsumers = consumers) }
+                }
+            )
 
             _uiState.update { it.copy(isRefreshing = false) }
         }

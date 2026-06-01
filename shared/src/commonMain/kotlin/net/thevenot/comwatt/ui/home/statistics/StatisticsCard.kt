@@ -55,9 +55,13 @@ import comwatt.shared.generated.resources.statistics_card_self_consumption_na
 import comwatt.shared.generated.resources.statistics_card_title
 import comwatt.shared.generated.resources.statistics_self_consumption_rate
 import comwatt.shared.generated.resources.statistics_self_consumption_tooltip
+import comwatt.shared.generated.resources.top_consumers_daily_title
 
 import kotlinx.coroutines.launch
+import net.thevenot.comwatt.domain.model.DeviceUiModel
 import net.thevenot.comwatt.domain.model.SiteDailyData
+import net.thevenot.comwatt.ui.common.ConsumerDisplayMode
+import net.thevenot.comwatt.ui.common.TopConsumersCard
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
@@ -74,6 +78,8 @@ fun StatisticsCard(
     totalsLabel: String,
     modifier: Modifier = Modifier,
     title: String? = null,
+    topConsumers: List<DeviceUiModel> = emptyList(),
+    topConsumersTitle: String? = null
 ) {
     siteDailyData?.let { siteData ->
         ElevatedCard(
@@ -124,6 +130,15 @@ fun StatisticsCard(
                 }
 
                 DailyTotalsSection(siteData, totalsLabel)
+
+                if (topConsumers.isNotEmpty()) {
+                    TopConsumersCard(
+                        devices = topConsumers,
+                        displayMode = ConsumerDisplayMode.ENERGY,
+                        title = topConsumersTitle ?: stringResource(Res.string.top_consumers_daily_title),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
             }
         }
     }
