@@ -156,6 +156,7 @@ private fun HomeScreenContent(
             StatisticsCard(
                 siteDailyData = uiState.siteDailyData,
                 totalsLabel = stringResource(Res.string.statistics_card_today_total),
+                topConsumers = uiState.topDailyConsumers,
                 modifier = Modifier,
                 title = stringResource(Res.string.statistics_card_title)
             )

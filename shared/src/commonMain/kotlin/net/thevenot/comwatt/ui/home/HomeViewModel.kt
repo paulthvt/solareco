@@ -196,6 +196,19 @@ class HomeViewModel(
                 }
             )
 
+            // Fetch top daily consumers
+            fetchTopConsumersUseCase.execute(
+                limit = 2,
+                sortBy = ConsumerMetric.DAILY_ENERGY
+            ).fold(
+                ifLeft = { error ->
+                    Logger.e(TAG) { "Failed to fetch top daily consumers: $error" }
+                },
+                ifRight = { consumers ->
+                    _uiState.update { it.copy(topDailyConsumers = consumers) }
+                }
+            )
+
             _uiState.update { it.copy(isRefreshing = false) }
         }
     }

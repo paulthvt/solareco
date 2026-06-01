@@ -21,4 +21,5 @@ data class HomeScreenState(
     val weatherForecast: WeatherForecast? = null,
     val electricityPrice: ElectricityPrice? = null,
     val topRealtimeConsumers: List<DeviceUiModel> = emptyList(),
+    val topDailyConsumers: List<DeviceUiModel> = emptyList(),
 )
