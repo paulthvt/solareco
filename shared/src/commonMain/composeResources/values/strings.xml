@@ -131,4 +131,9 @@
     <string name="top_consumers_title">Top Consumers</string>
     <string name="top_consumers_realtime_title">Top Consumers Now</string>
     <string name="top_consumers_daily_title">Biggest Consumers Today</string>
+    <string name="top_consumers_past_hour">Biggest Consumers in the Past Hour</string>
+    <string name="top_consumers_past_6h">Biggest Consumers in the Past 6 Hours</string>
+    <string name="top_consumers_today">Biggest Consumers Today</string>
+    <string name="top_consumers_this_week">Biggest Consumers This Week</string>
+    <string name="top_consumers_custom">Biggest Consumers</string>
 </resources>

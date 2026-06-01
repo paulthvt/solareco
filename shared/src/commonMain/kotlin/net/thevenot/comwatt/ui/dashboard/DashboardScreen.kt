@@ -104,6 +104,11 @@ import comwatt.shared.generated.resources.statistics_card_title_hourly
 import comwatt.shared.generated.resources.statistics_card_title_sixhourly
 import comwatt.shared.generated.resources.statistics_card_title_weekly
 import comwatt.shared.generated.resources.top_consumers_title
+import comwatt.shared.generated.resources.top_consumers_past_hour
+import comwatt.shared.generated.resources.top_consumers_past_6h
+import comwatt.shared.generated.resources.top_consumers_today
+import comwatt.shared.generated.resources.top_consumers_this_week
+import comwatt.shared.generated.resources.top_consumers_custom
 import comwatt.shared.generated.resources.week_range_selected_time_n_weeks_ago
 import comwatt.shared.generated.resources.week_range_selected_time_one_week_ago
 import comwatt.shared.generated.resources.week_range_selected_time_past_seven_days
@@ -267,12 +272,20 @@ fun DashboardScreenContent(
                                 DashboardTimeUnit.WEEK -> stringResource(Res.string.statistics_card_title_weekly)
                                 DashboardTimeUnit.CUSTOM -> stringResource(Res.string.statistics_card_title_custom)
                             }
+                            val topConsumersTitle = when (uiState.selectedTimeUnit) {
+                                DashboardTimeUnit.HOUR -> stringResource(Res.string.top_consumers_past_hour)
+                                DashboardTimeUnit.SIXHOUR -> stringResource(Res.string.top_consumers_past_6h)
+                                DashboardTimeUnit.DAY -> stringResource(Res.string.top_consumers_today)
+                                DashboardTimeUnit.WEEK -> stringResource(Res.string.top_consumers_this_week)
+                                DashboardTimeUnit.CUSTOM -> stringResource(Res.string.top_consumers_custom)
+                            }
                             StatisticsCard(
                                 siteDailyData = stats,
                                 totalsLabel = buildRangeTotalsLabel(uiState),
                                 modifier = Modifier.fillMaxWidth(),
                                 title = statsTitle,
-                                topConsumers = uiState.topConsumers
+                                topConsumers = uiState.topConsumers,
+                                topConsumersTitle = topConsumersTitle
                             )
                         }
                     }

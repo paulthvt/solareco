@@ -78,7 +78,8 @@ fun StatisticsCard(
     totalsLabel: String,
     modifier: Modifier = Modifier,
     title: String? = null,
-    topConsumers: List<DeviceUiModel> = emptyList()
+    topConsumers: List<DeviceUiModel> = emptyList(),
+    topConsumersTitle: String? = null
 ) {
     siteDailyData?.let { siteData ->
         ElevatedCard(
@@ -134,7 +135,7 @@ fun StatisticsCard(
                     TopConsumersCard(
                         devices = topConsumers,
                         displayMode = ConsumerDisplayMode.ENERGY,
-                        title = stringResource(Res.string.top_consumers_daily_title),
+                        title = topConsumersTitle ?: stringResource(Res.string.top_consumers_daily_title),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
