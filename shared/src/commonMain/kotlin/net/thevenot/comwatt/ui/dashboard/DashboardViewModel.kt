@@ -20,8 +20,10 @@ import kotlinx.datetime.toInstant
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchParameters
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
+import net.thevenot.comwatt.domain.FetchTopConsumersUseCase
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
+import net.thevenot.comwatt.domain.model.ConsumerMetric
 import net.thevenot.comwatt.domain.model.TimeUnit
 import net.thevenot.comwatt.domain.utils.computeSiteStats
 import net.thevenot.comwatt.model.type.AggregationLevel
@@ -33,7 +35,8 @@ import kotlin.time.Instant
 
 class DashboardViewModel(
     private val fetchTimeSeriesUseCase: FetchTimeSeriesUseCase,
-    private val dataRepository: DataRepository
+    private val dataRepository: DataRepository,
+    private val fetchTopConsumersUseCase: FetchTopConsumersUseCase
 ): ViewModel() {
     private var autoRefreshJob: Job? = null
 
@@ -54,6 +57,9 @@ class DashboardViewModel(
             }
             launch {
                 refreshRangeStats()
+            }
+            launch {
+                fetchTopConsumersForCurrentRange()
             }
         }
     }
@@ -133,6 +139,9 @@ class DashboardViewModel(
             }
             launch {
                 refreshRangeStats()
+            }
+            launch {
+                fetchTopConsumersForCurrentRange()
             }
         }
     }
@@ -337,6 +346,30 @@ class DashboardViewModel(
             DashboardTimeUnit.WEEK -> range.week.start to range.week.end
             DashboardTimeUnit.CUSTOM -> range.custom.start to range.custom.end
         }
+    }
+
+    private suspend fun fetchTopConsumersForCurrentRange() {
+        val (start, end) = getRangeBounds(
+            _uiState.value.selectedTimeUnit,
+            _uiState.value.selectedTimeRange
+        )
+
+        val startTime = start.toInstant(TimeZone.currentSystemDefault())
+        val endTime = end.toInstant(TimeZone.currentSystemDefault())
+
+        fetchTopConsumersUseCase.execute(
+            limit = 2,
+            sortBy = ConsumerMetric.CUSTOM_RANGE,
+            startTime = startTime,
+            endTime = endTime
+        ).fold(
+            ifLeft = { error ->
+                Logger.e(TAG) { "Failed to fetch top consumers: $error" }
+            },
+            ifRight = { consumers ->
+                _uiState.update { it.copy(topConsumers = consumers) }
+            }
+        )
     }
 
     fun toggleCardExpansion(chartName: String) {
