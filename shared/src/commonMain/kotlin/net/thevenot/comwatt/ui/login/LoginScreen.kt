@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -37,9 +39,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -76,6 +84,8 @@ fun LoginScreen(
     val coroutineScope = rememberCoroutineScope()
     var passwordHidden by rememberSaveable { mutableStateOf(true) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val passwordFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         viewModel.tryAutoLogin(onLogin)
@@ -136,11 +146,21 @@ fun LoginScreen(
                             value = email,
                             onValueChange = viewModel::updateEmail,
                             label = { Text(stringResource(Res.string.email_placeholder)) },
-                            shape = RoundedCornerShape(percent = 100)
+                            shape = RoundedCornerShape(percent = 100),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Next
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                            ),
+                            singleLine = true
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         OutlinedTextField(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(passwordFocusRequester),
                             value = password,
                             onValueChange = viewModel::updatePassword,
                             label = { Text(stringResource(Res.string.password_placeholder)) },
@@ -166,7 +186,18 @@ fun LoginScreen(
                                     )
                                 }
                             },
-                            shape = RoundedCornerShape(percent = 100)
+                            shape = RoundedCornerShape(percent = 100),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    keyboardController?.hide()
+                                    viewModel.login(onLogin)
+                                }
+                            ),
+                            singleLine = true
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
