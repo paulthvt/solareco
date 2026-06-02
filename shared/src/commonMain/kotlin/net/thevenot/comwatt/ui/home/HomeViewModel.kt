@@ -15,6 +15,9 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.FetchElectricityPriceUseCase
 import net.thevenot.comwatt.domain.FetchSiteDailyDataUseCase
@@ -147,10 +150,18 @@ class HomeViewModel(
                     }
                 )
 
-                // Fetch top daily consumers
+                // Fetch top daily consumers (today: midnight to now)
+                val now = Clock.System.now()
+                val todayStart = now.toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+                    .atStartOfDayIn(TimeZone.currentSystemDefault())
+                    .let { kotlin.time.Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) }
+
                 fetchTopConsumersUseCase.execute(
                     limit = 2,
-                    sortBy = ConsumerMetric.DAILY_ENERGY
+                    sortBy = ConsumerMetric.CUSTOM_RANGE,
+                    startTime = todayStart,
+                    endTime = now
                 ).fold(
                     ifLeft = { error ->
                         Logger.e(TAG) { "Failed to fetch top daily consumers: $error" }
@@ -224,10 +235,18 @@ class HomeViewModel(
                 }
             )
 
-            // Fetch top daily consumers
+            // Fetch top daily consumers (today: midnight to now)
+            val now = Clock.System.now()
+            val todayStart = now.toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+                .atStartOfDayIn(TimeZone.currentSystemDefault())
+                .let { kotlin.time.Instant.fromEpochMilliseconds(it.toEpochMilliseconds()) }
+
             fetchTopConsumersUseCase.execute(
                 limit = 2,
-                sortBy = ConsumerMetric.DAILY_ENERGY
+                sortBy = ConsumerMetric.CUSTOM_RANGE,
+                startTime = todayStart,
+                endTime = now
             ).fold(
                 ifLeft = { error ->
                     Logger.e(TAG) { "Failed to fetch top daily consumers: $error" }
