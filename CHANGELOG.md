@@ -46,6 +46,22 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.4.0](https://github.com/paulthvt/solareco/compare/2.3.0...2.4.0) (2026-06-03)
+
+
+### Features
+
+* add biggest consumer component ([#292](https://github.com/paulthvt/solareco/issues/292)) ([1374123](https://github.com/paulthvt/solareco/commit/1374123640d0ea95c11d560ecd8f6c06269c6583))
+* **login:** add keyboard actions for better UX ([9b5448a](https://github.com/paulthvt/solareco/commit/9b5448a8ec92ed29d785b3651b26d46146904a40))
+
+
+### Bug Fixes
+
+* **deps:** update compose.multiplatform to v1.11.1 ([12639e1](https://github.com/paulthvt/solareco/commit/12639e1b1225225ce25235e897ece2375d0c7a89))
+* **deps:** update vico to v2.5.1 ([0116530](https://github.com/paulthvt/solareco/commit/0116530289a8db002f7ca8944d124bff78c2dd6b))
+* **home:** use today (midnight to now) for daily top consumers ([50962a1](https://github.com/paulthvt/solareco/commit/50962a107eaf5cd01ac1ebd10b2e7800ac016c49))
+* **model:** make TempoDayValue nullable in DayStatusDto ([2d8f7af](https://github.com/paulthvt/solareco/commit/2d8f7af449edf6dd0b1e9b4679ebb34bbb0a03ef))
+
 ## [2.3.0](https://github.com/paulthvt/solareco/compare/2.2.0...2.3.0) (2026-05-30)
 
 
