@@ -83,6 +83,21 @@ class DashboardSortTest {
     }
 
     @Test
+    fun `overview stays pinned even when its consumption ranks lowest in DESC`() {
+        // Overview has the lowest consumption here; pinning must be positional, not value-based.
+        val lowOverview = consumptionChart("Overview", sum = 0.0)
+        val charts = listOf(
+            lowOverview,
+            consumptionChart("High", 50.0),
+            consumptionChart("Mid", 25.0),
+        )
+
+        val result = sortDashboardCharts(charts, DashboardSortMode.CONSUMPTION_DESC)
+
+        assertEquals(listOf("Overview", "High", "Mid"), result.map { it.name })
+    }
+
+    @Test
     fun `charts without consumption series rank as zero and fall to bottom in DESC`() {
         val charts = listOf(
             overview,
