@@ -39,6 +39,14 @@ class DataRepository(
         settingsRepository.saveDashboardSelectedTimeUnitIndex(index)
     }
 
+    suspend fun saveDashboardHiddenDevices(devices: Set<String>) {
+        settingsRepository.saveDashboardHiddenDevices(devices)
+    }
+
+    suspend fun saveDashboardSortMode(mode: String) {
+        settingsRepository.saveDashboardSortMode(mode)
+    }
+
     fun getSettings(): Flow<SolarEcoSettings> {
         return settingsRepository.settings
     }
@@ -52,6 +60,7 @@ class DataRepository(
                     is Either.Left -> {
                         onFail(authenticateResponse.value.errorMessage)
                     }
+
                     is Either.Right -> {
                         withContext(Dispatchers.Main) {
                             onLogin()
