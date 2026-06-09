@@ -574,6 +574,7 @@ private fun DeviceFilterSheet(
  * Pure content of the device filter sheet, extracted so it can be rendered in previews
  * without a real [ModalBottomSheet].
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DeviceFilterSheetContent(
     uiState: DashboardScreenState,
