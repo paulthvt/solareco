@@ -80,6 +80,14 @@ class DashboardViewModel(
             _uiState.update { it.copy(hiddenDevices = devices) }
             Logger.d(TAG) { "Loaded hidden devices: $devices" }
         }
+
+        // Load sort mode
+        settings?.dashboardSortMode?.let { stored ->
+            val mode = DashboardSortMode.entries.find { it.name == stored }
+                ?: DashboardSortMode.NAME
+            _uiState.update { it.copy(sortMode = mode) }
+            Logger.d(TAG) { "Loaded sort mode: $mode" }
+        }
     }
 
     private suspend fun updateTimeRangeAndFetchData() {
@@ -261,6 +269,14 @@ class DashboardViewModel(
             _uiState.update { it.copy(hiddenDevices = newHidden) }
             dataRepository.saveDashboardHiddenDevices(newHidden)
             Logger.d(TAG) { "Set all devices visible=$visible, now hidden: $newHidden" }
+        }
+    }
+
+    fun setSortMode(mode: DashboardSortMode) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(sortMode = mode) }
+            dataRepository.saveDashboardSortMode(mode.name)
+            Logger.d(TAG) { "Sort mode set: $mode" }
         }
     }
 
