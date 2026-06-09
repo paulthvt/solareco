@@ -26,6 +26,7 @@ import comwatt.shared.generated.resources.ic_electric_bolt
 import comwatt.shared.generated.resources.ic_electric_car
 import comwatt.shared.generated.resources.ic_electrical_services
 import comwatt.shared.generated.resources.ic_error
+import comwatt.shared.generated.resources.ic_filter_list
 import comwatt.shared.generated.resources.ic_freezer
 import comwatt.shared.generated.resources.ic_fridge
 import comwatt.shared.generated.resources.ic_fullscreen
@@ -145,6 +146,10 @@ object AppIcons {
     val Error: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_error)
+
+    val FilterList: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_filter_list)
 
     val ArrowBack: Painter
         @Composable

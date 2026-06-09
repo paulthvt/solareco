@@ -37,7 +37,7 @@ class DashboardViewModel(
     private val fetchTimeSeriesUseCase: FetchTimeSeriesUseCase,
     private val dataRepository: DataRepository,
     private val fetchTopConsumersUseCase: FetchTopConsumersUseCase
-): ViewModel() {
+) : ViewModel() {
     private var autoRefreshJob: Job? = null
 
     private val _charts = MutableStateFlow<List<ChartTimeSeries>>(listOf())
@@ -65,14 +65,20 @@ class DashboardViewModel(
     }
 
     private suspend fun loadSelectedTimeUnit() {
-        val selectedTimeUnitIndex =
-            dataRepository.getSettings().firstOrNull()?.dashboardSelectedTimeUnitIndex
+        val settings = dataRepository.getSettings().firstOrNull()
+        val selectedTimeUnitIndex = settings?.dashboardSelectedTimeUnitIndex
         Logger.d(TAG) { "startAutoRefresh selectedTimeUnitIndex $selectedTimeUnitIndex" }
 
         selectedTimeUnitIndex?.let { index ->
             val timeUnit = DashboardTimeUnit.entries.getOrNull(index) ?: DashboardTimeUnit.HOUR
             _uiState.update { it.copy(selectedTimeUnit = timeUnit) }
             Logger.d(TAG) { "startAutoRefresh selectedTimeUnit ${_uiState.value.selectedTimeUnit}" }
+        }
+
+        // Load hidden devices
+        settings?.dashboardHiddenDevices?.let { devices ->
+            _uiState.update { it.copy(hiddenDevices = devices) }
+            Logger.d(TAG) { "Loaded hidden devices: $devices" }
         }
     }
 
@@ -98,6 +104,17 @@ class DashboardViewModel(
         }.onRight { value ->
             _charts.value = value
             _uiState.update { state -> state.copy(callCount = _uiState.value.callCount + 1) }
+
+            // Update available devices with their icon keys
+            val deviceMap = value.mapNotNull { chart ->
+                chart.name?.trim()?.let { name ->
+                    val iconKey = chart.timeSeries.firstOrNull()?.title?.iconKey
+                    name to iconKey
+                }
+            }.toMap()
+            _uiState.update { state ->
+                state.copy(availableDevices = deviceMap)
+            }
         }
 
         _uiState.update { state ->
@@ -180,6 +197,7 @@ class DashboardViewModel(
             DashboardTimeUnit.HOUR,
             DashboardTimeUnit.DAY,
             DashboardTimeUnit.WEEK -> null
+
             DashboardTimeUnit.SIXHOUR -> timeRange.sixHour.start
             DashboardTimeUnit.CUSTOM -> timeRange.custom.start
         }
@@ -214,6 +232,36 @@ class DashboardViewModel(
         _uiState.update { it.copy(selectedTimeRange = range) }
         Logger.d(TAG) { "onTimeSelected range $range" }
         singleRefresh()
+    }
+    fun toggleDeviceVisibility(deviceName: String) {
+        viewModelScope.launch {
+            val currentHidden = _uiState.value.hiddenDevices
+            val newHidden = if (currentHidden.contains(deviceName)) {
+                currentHidden - deviceName
+            } else {
+                currentHidden + deviceName
+            }
+            _uiState.update { it.copy(hiddenDevices = newHidden) }
+            dataRepository.saveDashboardHiddenDevices(newHidden)
+            Logger.d(TAG) { "Device visibility toggled: $deviceName, now hidden: $newHidden" }
+        }
+    }
+
+    /**
+     * Shows or hides every available device at once. Showing all clears the hidden set;
+     * hiding all puts every known device name into it.
+     */
+    fun setAllDevicesVisible(visible: Boolean) {
+        viewModelScope.launch {
+            val newHidden = if (visible) {
+                emptySet()
+            } else {
+                _uiState.value.availableDevices.keys.toSet()
+            }
+            _uiState.update { it.copy(hiddenDevices = newHidden) }
+            dataRepository.saveDashboardHiddenDevices(newHidden)
+            Logger.d(TAG) { "Set all devices visible=$visible, now hidden: $newHidden" }
+        }
     }
 
     override fun onCleared() {

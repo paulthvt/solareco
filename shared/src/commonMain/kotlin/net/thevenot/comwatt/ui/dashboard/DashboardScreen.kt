@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.ui.dashboard
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -17,19 +19,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ButtonGroupDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TriStateCheckbox
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.ToggleButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -47,6 +57,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -86,6 +97,9 @@ import comwatt.shared.generated.resources.dashboard_chart_statistics_max_title
 import comwatt.shared.generated.resources.dashboard_chart_statistics_min_title
 import comwatt.shared.generated.resources.dashboard_chart_statistics_sum_title
 import comwatt.shared.generated.resources.dashboard_chart_statistics_title
+import comwatt.shared.generated.resources.dashboard_filter_devices_label
+import comwatt.shared.generated.resources.dashboard_filter_select_all
+import comwatt.shared.generated.resources.dashboard_filter_sheet_title
 import comwatt.shared.generated.resources.dashboard_screen_title
 import comwatt.shared.generated.resources.day_range_selected_time_n_days_gao
 import comwatt.shared.generated.resources.day_range_selected_time_today
@@ -124,9 +138,7 @@ import net.thevenot.comwatt.domain.model.TimeSeries
 import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
-import net.thevenot.comwatt.ui.common.ConsumerDisplayMode
 import net.thevenot.comwatt.ui.common.LoadingView
-import net.thevenot.comwatt.ui.common.TopConsumersCard
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
@@ -188,6 +200,7 @@ fun DashboardScreenContent(
         }
     }
     val showDatePickerDialog = remember { mutableStateOf(false) }
+    val showFilterSheet = remember { mutableStateOf(false) }
     val charts by viewModel.charts.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
     val state = rememberPullToRefreshState()
@@ -209,6 +222,15 @@ fun DashboardScreenContent(
             })
     }
 
+    if (showFilterSheet.value) {
+        DeviceFilterSheet(
+            uiState = uiState,
+            onDeviceToggle = { viewModel.toggleDeviceVisibility(it) },
+            onSetAllVisible = { viewModel.setAllDevicesVisible(it) },
+            onDismiss = { showFilterSheet.value = false }
+        )
+    }
+
     NestedAppScaffold(
         navController = navController,
         title = {
@@ -216,6 +238,12 @@ fun DashboardScreenContent(
                 icon = AppIcons.LineAxis,
                 title = stringResource(Res.string.dashboard_screen_title),
                 iconContentDescription = "Statistics Icon"
+            )
+        },
+        actionsContent = {
+            DeviceFilterButton(
+                uiState = uiState,
+                onClick = { showFilterSheet.value = true }
             )
         },
         snackbarHostState = snackbarHostState,
@@ -279,8 +307,12 @@ fun DashboardScreenContent(
                     }
 
                     if (charts.isNotEmpty()) {
+                        val filteredCharts = charts.filterNot { chart ->
+                            chart.name?.trim() in uiState.hiddenDevices
+                        }
+
                         items(
-                            items = charts.withIndex()
+                            items = filteredCharts.withIndex()
                                 .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
                             key = { it.index to it.value.name }) { (index, chart) ->
                             LazyGraphCard(
@@ -467,6 +499,159 @@ private fun TimeUnitBar(
                     },
             ) {
                 Text(label, maxLines = 1)
+            }
+        }
+    }
+}
+
+/**
+ * Top-app-bar trigger for the device filter. Shows a badge with the number of hidden
+ * devices. Renders nothing until devices are available to filter.
+ */
+@Composable
+private fun DeviceFilterButton(
+    uiState: DashboardScreenState,
+    onClick: () -> Unit = {}
+) {
+    if (uiState.availableDevices.isEmpty()) return
+
+    val hiddenCount = uiState.hiddenDevices.size
+
+    BadgedBox(
+        badge = {
+            if (hiddenCount > 0) {
+                Badge { Text(hiddenCount.toString()) }
+            }
+        }
+    ) {
+        IconButton(onClick = onClick) {
+            Icon(
+                painter = AppIcons.FilterList,
+                contentDescription = stringResource(Res.string.dashboard_filter_devices_label)
+            )
+        }
+    }
+}
+
+/**
+ * Modal bottom sheet listing every available device with its image and a checkbox.
+ * Checked = visible; unchecking adds the device to the hidden set (hide-list semantics).
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun DeviceFilterSheet(
+    uiState: DashboardScreenState,
+    onDeviceToggle: (String) -> Unit = {},
+    onSetAllVisible: (Boolean) -> Unit = {},
+    onDismiss: () -> Unit = {}
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState
+    ) {
+        DeviceFilterSheetContent(
+            uiState = uiState,
+            onDeviceToggle = onDeviceToggle,
+            onSetAllVisible = onSetAllVisible
+        )
+    }
+}
+
+/**
+ * Pure content of the device filter sheet, extracted so it can be rendered in previews
+ * without a real [ModalBottomSheet].
+ */
+@Composable
+private fun DeviceFilterSheetContent(
+    uiState: DashboardScreenState,
+    onDeviceToggle: (String) -> Unit = {},
+    onSetAllVisible: (Boolean) -> Unit = {}
+) {
+    val hiddenCount = uiState.hiddenDevices.size
+    val allState = when (hiddenCount) {
+        0 -> ToggleableState.On
+        uiState.availableDevices.size -> ToggleableState.Off
+        else -> ToggleableState.Indeterminate
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+            .padding(bottom = AppTheme.dimens.paddingNormal)
+    ) {
+        Text(
+            text = stringResource(Res.string.dashboard_filter_sheet_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = AppTheme.dimens.paddingNormal)
+        )
+
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = AppTheme.dimens.paddingSmall)
+        )
+
+        // "All devices" tristate header: tapping shows all when not all shown,
+        // otherwise hides all.
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .clickable { onSetAllVisible(allState != ToggleableState.On) }
+                .padding(
+                    horizontal = AppTheme.dimens.paddingNormal,
+                    vertical = AppTheme.dimens.paddingSmall
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
+        ) {
+            Text(
+                text = stringResource(Res.string.dashboard_filter_select_all),
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.weight(1f)
+            )
+            TriStateCheckbox(
+                state = allState,
+                onClick = { onSetAllVisible(allState != ToggleableState.On) }
+            )
+        }
+
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = AppTheme.dimens.paddingSmall)
+        )
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .heightIn(max = 400.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
+            uiState.availableDevices.keys.sorted().forEach { deviceName ->
+                val iconKey = uiState.availableDevices[deviceName]
+                val isVisible = deviceName !in uiState.hiddenDevices
+
+                Row(
+                    modifier = Modifier.fillMaxWidth()
+                        .clickable { onDeviceToggle(deviceName) }
+                        .padding(
+                            horizontal = AppTheme.dimens.paddingNormal,
+                            vertical = AppTheme.dimens.paddingSmall
+                        ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
+                ) {
+                    Icon(
+                        painter = IconsUtil.mapIconKeyToPainter(iconKey),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = deviceName,
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Checkbox(
+                        checked = isVisible,
+                        onCheckedChange = { onDeviceToggle(deviceName) }
+                    )
+                }
             }
         }
     }
@@ -848,6 +1033,53 @@ private fun TimeSeriesStatisticsRow(
             modifier = Modifier.weight(1f),
             textAlign = androidx.compose.ui.text.style.TextAlign.Center
         )
+    }
+}
+
+@Preview
+@Composable
+fun DeviceFilterSheetPreview() {
+    val sampleDevices = mapOf(
+        "Solar Panel" to "icon-ico-sun",
+        "Kitchen" to "icon-ap-householdappliance",
+        "Heat Pump" to "icon-ap-heatpump",
+        "EV Charger" to "icon-ap-plug",
+        "Dishwasher" to "icon-ap-dishwasher"
+    )
+
+    val sampleStateNoFilter = DashboardScreenState(
+        isDataLoaded = true,
+        availableDevices = sampleDevices,
+        hiddenDevices = emptySet()
+    )
+
+    val sampleStateWithFilter = DashboardScreenState(
+        isDataLoaded = true,
+        availableDevices = sampleDevices,
+        hiddenDevices = setOf("Heat Pump", "Dishwasher")
+    )
+
+    ComwattTheme {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(vertical = AppTheme.dimens.paddingNormal),
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingLarge)
+        ) {
+            Text(
+                "Nothing hidden",
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(horizontal = AppTheme.dimens.paddingNormal)
+            )
+            DeviceFilterSheetContent(uiState = sampleStateNoFilter)
+
+            HorizontalDivider()
+
+            Text(
+                "Two devices hidden",
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(horizontal = AppTheme.dimens.paddingNormal)
+            )
+            DeviceFilterSheetContent(uiState = sampleStateWithFilter)
+        }
     }
 }
 

@@ -23,7 +23,9 @@ data class DashboardScreenState(
     val selectedTimeRange: SelectedTimeRange = SelectedTimeRange(),
     val rangeStats: SiteDailyData? = null,
     val expandedCards: Set<String> = emptySet(),
-    val topConsumers: List<DeviceUiModel> = emptyList()
+    val topConsumers: List<DeviceUiModel> = emptyList(),
+    val hiddenDevices: Set<String> = emptySet(),
+    val availableDevices: Map<String, String?> = emptyMap(), // deviceName to iconKey
 )
 
 data class SelectedTimeRange(
