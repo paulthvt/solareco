@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -18,6 +19,8 @@ class SettingsRepository(
         intPreferencesKey("dashboard_selected_time_unit_index")
     private val dashboardHiddenDevicesKey =
         stringSetPreferencesKey("dashboard_hidden_devices")
+    private val dashboardSortModeKey =
+        stringPreferencesKey("dashboard_sort_mode")
 
     val settings: Flow<SolarEcoSettings> = dataStore.data.map {
         SolarEcoSettings(
@@ -25,7 +28,8 @@ class SettingsRepository(
             dashboardSelectedTimeUnitIndex = it[dashboardSelectedTimeUnitIndex],
             maxPowerGauge = it[maxPowerGaugeKey],
             productionNoiseThreshold = it[productionNoiseThresholdKey],
-            dashboardHiddenDevices = it[dashboardHiddenDevicesKey]
+            dashboardHiddenDevices = it[dashboardHiddenDevicesKey],
+            dashboardSortMode = it[dashboardSortModeKey]
         )
     }
 
@@ -72,6 +76,14 @@ class SettingsRepository(
     ) {
         dataStore.edit {
             it[dashboardHiddenDevicesKey] = devices
+        }
+    }
+
+    suspend fun saveDashboardSortMode(
+        mode: String,
+    ) {
+        dataStore.edit {
+            it[dashboardSortModeKey] = mode
         }
     }
 }

@@ -5,5 +5,6 @@ data class SolarEcoSettings(
     val dashboardSelectedTimeUnitIndex: Int?,
     val maxPowerGauge: Int?,
     val productionNoiseThreshold: Int?,
-    val dashboardHiddenDevices: Set<String>?
+    val dashboardHiddenDevices: Set<String>?,
+    val dashboardSortMode: String?
 )

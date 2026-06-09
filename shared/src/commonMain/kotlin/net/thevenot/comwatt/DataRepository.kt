@@ -43,6 +43,10 @@ class DataRepository(
         settingsRepository.saveDashboardHiddenDevices(devices)
     }
 
+    suspend fun saveDashboardSortMode(mode: String) {
+        settingsRepository.saveDashboardSortMode(mode)
+    }
+
     fun getSettings(): Flow<SolarEcoSettings> {
         return settingsRepository.settings
     }
