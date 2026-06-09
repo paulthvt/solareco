@@ -46,6 +46,21 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.5.0](https://github.com/paulthvt/solareco/compare/2.4.0...2.5.0) (2026-06-09)
+
+
+### Features
+
+* **dashboard:** device filter + chart sort, with bottom-sheet controls ([#300](https://github.com/paulthvt/solareco/issues/300)) ([9232454](https://github.com/paulthvt/solareco/commit/92324543af3fbd0a5ce8d2d3234131ea86074fd9))
+* **login:** add keyboard actions — Email field uses ImeAction.Next, password uses ImeAction.Done to submit; focus management between fields; both fields single-line. ([9232454](https://github.com/paulthvt/solareco/commit/92324543af3fbd0a5ce8d2d3234131ea86074fd9))
+
+
+### Bug Fixes
+
+* **deps:** update arrow-kt monorepo to v2.2.3 ([cf7240a](https://github.com/paulthvt/solareco/commit/cf7240abe8ab61415ba97aaa32a44a79bda4211e))
+* **deps:** update firebase.bom to v34.14.1 ([a07cafd](https://github.com/paulthvt/solareco/commit/a07cafd739de80e179d797c314c3514ac65c346a))
+* **deps:** update kotlin monorepo to v2.4.0 ([e2a5443](https://github.com/paulthvt/solareco/commit/e2a5443cc7fc74bb8cc949fe3cea699032e5471f))
+
 ## [2.4.0](https://github.com/paulthvt/solareco/compare/2.3.0...2.4.0) (2026-06-03)
 
 
