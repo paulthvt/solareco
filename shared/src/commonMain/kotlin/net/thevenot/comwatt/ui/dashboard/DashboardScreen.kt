@@ -1100,13 +1100,15 @@ fun DeviceFilterSheetPreview() {
     val sampleStateNoFilter = DashboardScreenState(
         isDataLoaded = true,
         availableDevices = sampleDevices,
-        hiddenDevices = emptySet()
+        hiddenDevices = emptySet(),
+        sortMode = DashboardSortMode.NAME
     )
 
     val sampleStateWithFilter = DashboardScreenState(
         isDataLoaded = true,
         availableDevices = sampleDevices,
-        hiddenDevices = setOf("Heat Pump", "Dishwasher")
+        hiddenDevices = setOf("Heat Pump", "Dishwasher"),
+        sortMode = DashboardSortMode.CONSUMPTION_DESC
     )
 
     ComwattTheme {
