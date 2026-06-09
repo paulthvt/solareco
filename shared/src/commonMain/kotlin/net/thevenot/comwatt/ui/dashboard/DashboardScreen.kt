@@ -35,6 +35,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -101,6 +104,10 @@ import comwatt.shared.generated.resources.dashboard_filter_devices_label
 import comwatt.shared.generated.resources.dashboard_filter_select_all
 import comwatt.shared.generated.resources.dashboard_filter_sheet_title
 import comwatt.shared.generated.resources.dashboard_screen_title
+import comwatt.shared.generated.resources.dashboard_sort_consumption_asc
+import comwatt.shared.generated.resources.dashboard_sort_consumption_desc
+import comwatt.shared.generated.resources.dashboard_sort_label
+import comwatt.shared.generated.resources.dashboard_sort_name
 import comwatt.shared.generated.resources.day_range_selected_time_n_days_gao
 import comwatt.shared.generated.resources.day_range_selected_time_today
 import comwatt.shared.generated.resources.day_range_selected_time_yesterday
@@ -227,6 +234,7 @@ fun DashboardScreenContent(
             uiState = uiState,
             onDeviceToggle = { viewModel.toggleDeviceVisibility(it) },
             onSetAllVisible = { viewModel.setAllDevicesVisible(it) },
+            onSortSelected = { viewModel.setSortMode(it) },
             onDismiss = { showFilterSheet.value = false }
         )
     }
@@ -544,6 +552,7 @@ private fun DeviceFilterSheet(
     uiState: DashboardScreenState,
     onDeviceToggle: (String) -> Unit = {},
     onSetAllVisible: (Boolean) -> Unit = {},
+    onSortSelected: (DashboardSortMode) -> Unit = {},
     onDismiss: () -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -555,7 +564,8 @@ private fun DeviceFilterSheet(
         DeviceFilterSheetContent(
             uiState = uiState,
             onDeviceToggle = onDeviceToggle,
-            onSetAllVisible = onSetAllVisible
+            onSetAllVisible = onSetAllVisible,
+            onSortSelected = onSortSelected
         )
     }
 }
@@ -568,7 +578,8 @@ private fun DeviceFilterSheet(
 private fun DeviceFilterSheetContent(
     uiState: DashboardScreenState,
     onDeviceToggle: (String) -> Unit = {},
-    onSetAllVisible: (Boolean) -> Unit = {}
+    onSetAllVisible: (Boolean) -> Unit = {},
+    onSortSelected: (DashboardSortMode) -> Unit = {}
 ) {
     val hiddenCount = uiState.hiddenDevices.size
     val allState = when (hiddenCount) {
@@ -587,6 +598,43 @@ private fun DeviceFilterSheetContent(
             modifier = Modifier.fillMaxWidth()
                 .padding(horizontal = AppTheme.dimens.paddingNormal)
         )
+
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = AppTheme.dimens.paddingSmall)
+        )
+
+        Column(
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = AppTheme.dimens.paddingNormal)
+        ) {
+            Text(
+                text = stringResource(Res.string.dashboard_sort_label),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
+
+            val sortOptions = listOf(
+                DashboardSortMode.NAME to stringResource(Res.string.dashboard_sort_name),
+                DashboardSortMode.CONSUMPTION_DESC to stringResource(Res.string.dashboard_sort_consumption_desc),
+                DashboardSortMode.CONSUMPTION_ASC to stringResource(Res.string.dashboard_sort_consumption_asc),
+            )
+
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                sortOptions.forEachIndexed { index, (mode, label) ->
+                    SegmentedButton(
+                        selected = uiState.sortMode == mode,
+                        onClick = { onSortSelected(mode) },
+                        shape = SegmentedButtonDefaults.itemShape(
+                            index = index,
+                            count = sortOptions.size
+                        )
+                    ) {
+                        Text(label, maxLines = 1)
+                    }
+                }
+            }
+        }
 
         HorizontalDivider(
             modifier = Modifier.padding(vertical = AppTheme.dimens.paddingSmall)
