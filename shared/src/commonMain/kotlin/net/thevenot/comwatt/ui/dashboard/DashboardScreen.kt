@@ -307,9 +307,10 @@ fun DashboardScreenContent(
                     }
 
                     if (charts.isNotEmpty()) {
-                        val filteredCharts = charts.filterNot { chart ->
+                        val visibleCharts = charts.filterNot { chart ->
                             chart.name?.trim() in uiState.hiddenDevices
                         }
+                        val filteredCharts = sortDashboardCharts(visibleCharts, uiState.sortMode)
 
                         items(
                             items = filteredCharts.withIndex()
