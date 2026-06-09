@@ -91,6 +91,10 @@
     <string name="dashboard_filter_devices_label">Filter Devices</string>
     <string name="dashboard_filter_sheet_title">Filter devices</string>
     <string name="dashboard_filter_select_all">All devices</string>
+    <string name="dashboard_sort_label">Sort</string>
+    <string name="dashboard_sort_name">Name</string>
+    <string name="dashboard_sort_consumption_desc">Cons ↓</string>
+    <string name="dashboard_sort_consumption_asc">Cons ↑</string>
     <string name="no_content_available_retry_button">Retry</string>
     <string name="no_content_available_text">No Content Available</string>
     <string name="user_settings_panel_logout_button">Logout</string>
