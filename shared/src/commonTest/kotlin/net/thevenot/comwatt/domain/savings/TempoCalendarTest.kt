@@ -31,8 +31,8 @@ class TempoCalendarTest {
                 date = "2026-07-10",
                 dayValue = TempoDayValue.RED,
                 status = listOf(
-                    DayStatusDto(TempoDayValue.RED, PeakType.OFFPEAK, "22:00", "06:00"),
-                    DayStatusDto(TempoDayValue.RED, PeakType.PEAK, "06:00", "22:00"),
+                    DayStatusDto(value = null, type = PeakType.OFFPEAK, startTime = "22:00", endTime = "06:00"),
+                    DayStatusDto(value = null, type = PeakType.PEAK, startTime = "06:00", endTime = "22:00"),
                 ),
             ),
         )
@@ -51,5 +51,20 @@ class TempoCalendarTest {
             windows = listOf(TempoWindow(PeakType.PEAK, net.thevenot.comwatt.model.savings.TimeWindow(LocalTime(6, 0), LocalTime(7, 0)))),
         )
         assertNull(day.peakTypeAt(LocalTime(12, 0)))
+    }
+
+    @Test
+    fun skipsDayWithMalformedTimeString() {
+        val dto = response(
+            DailyElectricityPriceDto(
+                date = "2026-07-11",
+                dayValue = TempoDayValue.BLUE,
+                status = listOf(
+                    DayStatusDto(value = null, type = PeakType.PEAK, startTime = "bad", endTime = "06:00"),
+                ),
+            ),
+        )
+        val cal = buildTempoCalendar(dto)
+        assertEquals(0, cal.size)
     }
 }
