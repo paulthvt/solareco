@@ -67,6 +67,8 @@ import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 private const val MIN_PRODUCTION_NOISE_THRESHOLD = 0
 private const val MAX_PRODUCTION_NOISE_THRESHOLD = 50
@@ -357,7 +359,8 @@ fun RateField(
     onValueChange: (Double) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var text by remember(value) { mutableStateOf(String.format("%.4f", value)) }
+    // Manual 4-decimal formatting: multiplatform-safe (String.format is JVM-only)
+    var text by remember(value) { mutableStateOf(formatRate(value)) }
 
     OutlinedTextField(
         value = text,
@@ -372,6 +375,14 @@ fun RateField(
     )
 }
 
+private fun formatRate(value: Double): String {
+    // 4-decimal formatting for tariff rates
+    val scaled = (abs(value) * 10000).roundToInt()
+    val whole = scaled / 10000
+    val frac = (scaled % 10000).toString().padStart(4, '0')
+    return if (value < 0) "-$whole.$frac" else "$whole.$frac"
+}
+
 @Composable
 fun TimeField(
     label: String,
@@ -379,7 +390,8 @@ fun TimeField(
     onValueChange: (LocalTime) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var text by remember(value) { mutableStateOf(String.format("%02d:%02d", value.hour, value.minute)) }
+    // Manual HH:mm formatting: multiplatform-safe
+    var text by remember(value) { mutableStateOf(formatTime(value)) }
 
     OutlinedTextField(
         value = text,
@@ -400,6 +412,10 @@ fun TimeField(
         singleLine = true,
         modifier = modifier
     )
+}
+
+private fun formatTime(time: LocalTime): String {
+    return "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
 }
 
 @Preview

@@ -16,12 +16,12 @@ import net.thevenot.comwatt.model.savings.TariffConfig
 import net.thevenot.comwatt.model.savings.TempoSubtotals
 import net.thevenot.comwatt.model.savings.toRange
 import net.thevenot.comwatt.model.type.AggregationLevel
+import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import kotlin.time.Instant
 
-// If euro values later appear ~1000x off, the API is returning Wh not kWh — change this to 1000.0.
-// Chosen 1.0 for consistency with FetchSiteDailyDataUseCase which sums QUANTITY values directly.
-private const val KWH_DIVISOR = 1.0
+// API QUANTITY series is in Wh (see FetchTopConsumersUseCase.dailyEnergyWh and formatEnergyValue); convert to kWh before applying €/kWh rates.
+private const val KWH_DIVISOR = 1000.0
 
 interface SavingsDataSource {
     suspend fun siteTimeSeriesHourly(
@@ -44,7 +44,8 @@ class DataRepositorySavingsSource(private val dataRepository: DataRepository) : 
             startTime = start,
             endTime = end,
             measureKind = MeasureKind.QUANTITY,
-            aggregationLevel = AggregationLevel.HOUR
+            aggregationLevel = AggregationLevel.HOUR,
+            aggregationType = AggregationType.SUM
         )
 
     override suspend fun electricityPrice(): Either<ApiError, ElectricityPriceResponseDto> =
@@ -102,16 +103,22 @@ class ComputeSavingsUseCase(private val source: SavingsDataSource) {
             val injected = dto.injections.getOrElse(i) { 0.0 } / KWH_DIVISOR
             val withdrawn = dto.withdrawals.getOrElse(i) { 0.0 } / KWH_DIVISOR
 
+            // Always accumulate kWh totals (energy figures remain complete regardless of rate availability)
             selfKwh += selfConsumed
             injKwh += injected
             wKwh += withdrawn
-            earned += injected * config.resalePrice
 
+            // When rate is unknown (e.g., TEMPO on a date without colour), skip ALL monetary contributions for
+            // this hour so euro figures are internally consistent (all-or-nothing per hour). kWh totals above
+            // are unaffected — they remain complete.
             val rate = resolver.rateFor(ldt)
             if (rate == null) {
                 partial = true
                 continue
             }
+
+            // Accumulate monetary values only when rate is known
+            earned += injected * config.resalePrice
             val savedHour = selfConsumed * rate
             val spentHour = withdrawn * rate
             saved += savedHour

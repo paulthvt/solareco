@@ -64,6 +64,8 @@ import net.thevenot.comwatt.ui.theme.tempoBlue
 import net.thevenot.comwatt.ui.theme.tempoRed
 import net.thevenot.comwatt.ui.theme.tempoWhite
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 @Composable
 fun SavingsScreen(
@@ -448,9 +450,19 @@ private fun SetRatesCTACard(onEditRatesClick: () -> Unit = {}) {
 
 // Number formatting helpers
 private fun formatEuros(value: Double): String {
-    return "€%.2f".format(value)
+    // Manual 2-decimal formatting: multiplatform-safe (String.format is JVM-only)
+    val cents = (abs(value) * 100).roundToInt()
+    val wholePart = cents / 100
+    val fractionalPart = (cents % 100).toString().padStart(2, '0')
+    val formatted = if (value < 0) "-$wholePart.$fractionalPart" else "$wholePart.$fractionalPart"
+    return "€$formatted"
 }
 
 private fun formatKwh(value: Double): String {
-    return "%.1f kWh".format(value)
+    // Manual 1-decimal formatting: multiplatform-safe
+    val tenths = (abs(value) * 10).roundToInt()
+    val wholePart = tenths / 10
+    val fractionalPart = tenths % 10
+    val formatted = if (value < 0) "-$wholePart.$fractionalPart" else "$wholePart.$fractionalPart"
+    return "$formatted kWh"
 }

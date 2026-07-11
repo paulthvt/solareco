@@ -40,13 +40,14 @@ class FakeSavingsDataSource(
 }
 
 class ComputeSavingsUseCaseTest {
-    // Two hours of BASE-tariff data, kWh assumed (divisor 1.0, consistent with FetchSiteDailyDataUseCase).
+    // Two hours of BASE-tariff data in Wh (API QUANTITY series is Wh; divisor is 1000.0).
+    // Values scaled ×1000 so post-conversion kWh match original test intent: prod 3/2 kWh, inj 1/0 kWh, wdr 0/1 kWh.
     private fun series() = SiteTimeSeriesDto(
         timestamps = listOf("2026-07-10T10:00:00Z", "2026-07-10T11:00:00Z"),
-        productions = listOf(3.0, 2.0),
-        consumptions = listOf(2.0, 2.0),
-        injections = listOf(1.0, 0.0),
-        withdrawals = listOf(0.0, 1.0),
+        productions = listOf(3000.0, 2000.0),
+        consumptions = listOf(2000.0, 2000.0),
+        injections = listOf(1000.0, 0.0),
+        withdrawals = listOf(0.0, 1000.0),
         charges = emptyList(),
         discharges = emptyList(),
         autoProductionRates = emptyList(),
@@ -107,8 +108,8 @@ class ComputeSavingsUseCaseTest {
 
     @Test
     fun tempoSubtotalsAreNetEurosPerColor() = runTest {
-        // Two hours on a RED day during PEAK hours (06:00-22:00).
-        // prod=3/2, inj=1/0, cons=2/2, withdrawal=0/1
+        // Two hours on a RED day during PEAK hours (06:00-22:00), in Wh (divisor 1000.0).
+        // prod=3000/2000 Wh (3/2 kWh), inj=1000/0 Wh (1/0 kWh), cons=2000/2000 Wh, wdr=0/1000 Wh (0/1 kWh)
         // selfConsumed = (3-1)=2, (2-0)=2 → 4 kWh total
         // injected = 1 kWh
         // withdrawn = 1 kWh
@@ -118,10 +119,10 @@ class ComputeSavingsUseCaseTest {
         // RED net = (1.5124-0.0000) + (1.5124-0.7562) = 1.5124 + 0.7562 = 2.2686
         val tempoSeries = SiteTimeSeriesDto(
             timestamps = listOf("2026-07-10T10:00:00Z", "2026-07-10T11:00:00Z"),
-            productions = listOf(3.0, 2.0),
-            consumptions = listOf(2.0, 2.0),
-            injections = listOf(1.0, 0.0),
-            withdrawals = listOf(0.0, 1.0),
+            productions = listOf(3000.0, 2000.0),
+            consumptions = listOf(2000.0, 2000.0),
+            injections = listOf(1000.0, 0.0),
+            withdrawals = listOf(0.0, 1000.0),
             charges = emptyList(),
             discharges = emptyList(),
             autoProductionRates = emptyList(),
@@ -187,5 +188,59 @@ class ComputeSavingsUseCaseTest {
         assertEquals(0.0, ts.blueEuros, 1e-9)
         assertEquals(0.0, ts.whiteEuros, 1e-9)
         assertTrue(!b.partial)
+    }
+
+    @Test
+    fun tempoWithEmptyCalendarReturnsZeroEurosButNonZeroKwhAndPartial() = runTest {
+        // TEMPO config, but empty calendar (electricityPrice fetch fails / empty response).
+        // Every hour's rate is null → all euro figures = 0, partial = true, kWh totals remain complete.
+        val tempoSeries = SiteTimeSeriesDto(
+            timestamps = listOf("2026-07-10T10:00:00Z", "2026-07-10T11:00:00Z"),
+            productions = listOf(3000.0, 2000.0),
+            consumptions = listOf(2000.0, 2000.0),
+            injections = listOf(1000.0, 0.0),
+            withdrawals = listOf(0.0, 1000.0),
+            charges = emptyList(),
+            discharges = emptyList(),
+            autoProductionRates = emptyList(),
+            autoConsumptionRates = emptyList(),
+            injectionRates = emptyList(),
+            withdrawalRates = emptyList()
+        )
+
+        val source = FakeSavingsDataSource(
+            siteSeries = tempoSeries.right(),
+            // priceResponse = error (defaults to GenericError) → empty calendar
+            priceResponse = Either.Left(ApiError.GenericError("test", "test"))
+        )
+
+        val config = TariffConfig.defaults().copy(
+            contractType = ContractType.TEMPO,
+            resalePrice = 0.10
+        )
+
+        val result = ComputeSavingsUseCase(source)(
+            siteId = 1,
+            period = SavingsPeriod.Custom(
+                Instant.parse("2026-07-10T10:00:00Z"),
+                Instant.parse("2026-07-10T12:00:00Z")
+            ),
+            config = config,
+            now = Instant.parse("2026-07-10T12:00:00Z"),
+            zone = TimeZone.UTC
+        )
+
+        val b = (result as Either.Right).value
+        // All euro figures must be 0 (no rates available)
+        assertEquals(0.0, b.savedEuros, 1e-9)
+        assertEquals(0.0, b.earnedEuros, 1e-9)
+        assertEquals(0.0, b.spentEuros, 1e-9)
+        assertEquals(0.0, b.netEuros, 1e-9)
+        // kWh totals remain complete: selfConsumed=(3-1)+(2-0)=4, injected=1, withdrawn=1
+        assertEquals(4.0, b.selfConsumedKwh, 1e-9)
+        assertEquals(1.0, b.injectedKwh, 1e-9)
+        assertEquals(1.0, b.withdrawnKwh, 1e-9)
+        // partial must be true (rates unavailable)
+        assertTrue(b.partial)
     }
 }

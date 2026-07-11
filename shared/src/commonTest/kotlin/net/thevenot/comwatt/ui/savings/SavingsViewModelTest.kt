@@ -40,10 +40,12 @@ class SavingsViewModelTest {
 
     private fun twoHourSeries() = SiteTimeSeriesDto(
         timestamps = listOf("2026-07-10T10:00:00Z", "2026-07-10T11:00:00Z"),
-        productions = listOf(3.0, 2.0),
-        consumptions = listOf(2.0, 2.0),
-        injections = listOf(1.0, 0.0),
-        withdrawals = listOf(0.0, 1.0),
+        // Values in Wh (API QUANTITY series is Wh; divisor is 1000.0)
+        // Scaled ×1000 so post-conversion matches test expectations: prod 3/2 kWh, inj 1/0 kWh, wdr 0/1 kWh
+        productions = listOf(3000.0, 2000.0),
+        consumptions = listOf(2000.0, 2000.0),
+        injections = listOf(1000.0, 0.0),
+        withdrawals = listOf(0.0, 1000.0),
         charges = emptyList(),
         discharges = emptyList(),
         autoProductionRates = emptyList(),
