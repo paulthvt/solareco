@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import net.thevenot.comwatt.client.ComwattApi
+import net.thevenot.comwatt.client.TempoApiClient
 import net.thevenot.comwatt.database.UserDatabase
 import net.thevenot.comwatt.database.createDataStore
 import net.thevenot.comwatt.database.dataStoreFileName
@@ -44,6 +45,8 @@ actual class Factory(
     }
 
     actual fun createApi(): ComwattApi = commonCreateApi()
+
+    actual fun createTempoApi(): TempoApiClient = commonCreateTempoApi()
 
     actual fun getAppVersion(): String = appVersion
 }
