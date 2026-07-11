@@ -111,7 +111,7 @@ fun NavGraphBuilder.mainGraph(
             )
         }
         composable<Screen.Settings> {
-            SettingsScreen(dataRepository)
+            SettingsScreen(navController, dataRepository)
         }
         composable<Screen.FullscreenChart> { backStackEntry ->
             val route = backStackEntry.toRoute<Screen.FullscreenChart>()
