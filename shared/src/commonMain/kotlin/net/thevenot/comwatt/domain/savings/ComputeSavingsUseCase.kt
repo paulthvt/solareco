@@ -19,8 +19,8 @@ import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.MeasureKind
 import kotlin.time.Instant
 
-// Unit: Consistent with FetchSiteDailyDataUseCase which sums QUANTITY values directly.
-// If the API is later confirmed to return Wh, change to 1000.0 — see Task 10 manual verification.
+// If euro values later appear ~1000x off, the API is returning Wh not kWh — change this to 1000.0.
+// Chosen 1.0 for consistency with FetchSiteDailyDataUseCase which sums QUANTITY values directly.
 private const val KWH_DIVISOR = 1.0
 
 interface SavingsDataSource {
@@ -64,6 +64,8 @@ class ComputeSavingsUseCase(private val source: SavingsDataSource) {
         val (start, end) = period.toRange(now, zone)
 
         val calendar = if (config.contractType == ContractType.TEMPO) {
+            // If the price fetch fails for a TEMPO contract, the calendar is empty, every hour's rate is unknown,
+            // and the result is returned with partial=true rather than as an error — graceful degradation.
             source.electricityPrice().fold({ emptyMap() }, { buildTempoCalendar(it) })
         } else {
             emptyMap()
@@ -115,11 +117,13 @@ class ComputeSavingsUseCase(private val source: SavingsDataSource) {
             saved += savedHour
             spent += spentHour
 
+            // Per-colour subtotal = net euros (self-consumption savings minus grid-withdrawal cost) attributable
+            // to that Tempo colour; shows where solar helped most (typically red days).
             if (config.contractType == ContractType.TEMPO) {
                 when (resolver.tempoColorAt(ldt)) {
-                    TempoDayValue.BLUE -> blue += savedHour + spentHour
-                    TempoDayValue.WHITE -> white += savedHour + spentHour
-                    TempoDayValue.RED -> red += savedHour + spentHour
+                    TempoDayValue.BLUE -> blue += savedHour - spentHour
+                    TempoDayValue.WHITE -> white += savedHour - spentHour
+                    TempoDayValue.RED -> red += savedHour - spentHour
                     null -> {}
                 }
             }

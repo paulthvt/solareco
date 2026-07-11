@@ -5,8 +5,14 @@ import arrow.core.right
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import net.thevenot.comwatt.model.ApiError
+import net.thevenot.comwatt.model.DailyElectricityPriceDto
+import net.thevenot.comwatt.model.DayStatusDto
 import net.thevenot.comwatt.model.ElectricityPriceResponseDto
+import net.thevenot.comwatt.model.PeakType
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
+import net.thevenot.comwatt.model.TempoDaySynthesisDto
+import net.thevenot.comwatt.model.TempoDayValue
+import net.thevenot.comwatt.model.TempoSynthesesDto
 import net.thevenot.comwatt.model.savings.ContractType
 import net.thevenot.comwatt.model.savings.SavingsPeriod
 import net.thevenot.comwatt.model.savings.TariffConfig
@@ -34,7 +40,7 @@ class FakeSavingsDataSource(
 }
 
 class ComputeSavingsUseCaseTest {
-    // Two hours of BASE-tariff data, kWh assumed (divisor 1.0 per verified facts).
+    // Two hours of BASE-tariff data, kWh assumed (divisor 1.0, consistent with FetchSiteDailyDataUseCase).
     private fun series() = SiteTimeSeriesDto(
         timestamps = listOf("2026-07-10T10:00:00Z", "2026-07-10T11:00:00Z"),
         productions = listOf(3.0, 2.0),
@@ -97,5 +103,89 @@ class ComputeSavingsUseCaseTest {
         )
         val b = (result as Either.Right).value
         assertEquals(0.0, b.netEuros, 1e-9)
+    }
+
+    @Test
+    fun tempoSubtotalsAreNetEurosPerColor() = runTest {
+        // Two hours on a RED day during PEAK hours (06:00-22:00).
+        // prod=3/2, inj=1/0, cons=2/2, withdrawal=0/1
+        // selfConsumed = (3-1)=2, (2-0)=2 → 4 kWh total
+        // injected = 1 kWh
+        // withdrawn = 1 kWh
+        // redHp = 0.7562 (from defaults)
+        // savedHour: h0 = 2*0.7562 = 1.5124, h1 = 2*0.7562 = 1.5124
+        // spentHour: h0 = 0*0.7562 = 0.0000, h1 = 1*0.7562 = 0.7562
+        // RED net = (1.5124-0.0000) + (1.5124-0.7562) = 1.5124 + 0.7562 = 2.2686
+        val tempoSeries = SiteTimeSeriesDto(
+            timestamps = listOf("2026-07-10T10:00:00Z", "2026-07-10T11:00:00Z"),
+            productions = listOf(3.0, 2.0),
+            consumptions = listOf(2.0, 2.0),
+            injections = listOf(1.0, 0.0),
+            withdrawals = listOf(0.0, 1.0),
+            charges = emptyList(),
+            discharges = emptyList(),
+            autoProductionRates = emptyList(),
+            autoConsumptionRates = emptyList(),
+            injectionRates = emptyList(),
+            withdrawalRates = emptyList()
+        )
+
+        val priceDto = ElectricityPriceResponseDto(
+            tempoSyntheses = TempoSynthesesDto(
+                white = TempoDaySynthesisDto(0, 100),
+                blue = TempoDaySynthesisDto(0, 100),
+                red = TempoDaySynthesisDto(1, 100)
+            ),
+            daily = listOf(
+                DailyElectricityPriceDto(
+                    date = "2026-07-10",
+                    dayValue = TempoDayValue.RED,
+                    status = listOf(
+                        DayStatusDto(
+                            value = TempoDayValue.RED,
+                            type = PeakType.OFFPEAK,
+                            startTime = "22:00",
+                            endTime = "06:00"
+                        ),
+                        DayStatusDto(
+                            value = TempoDayValue.RED,
+                            type = PeakType.PEAK,
+                            startTime = "06:00",
+                            endTime = "22:00"
+                        )
+                    )
+                )
+            ),
+            tempoSynthesesComplete = true
+        )
+
+        val source = FakeSavingsDataSource(
+            siteSeries = tempoSeries.right(),
+            priceResponse = priceDto.right()
+        )
+
+        val config = TariffConfig.defaults().copy(
+            contractType = ContractType.TEMPO,
+            resalePrice = 0.10
+        )
+
+        val result = ComputeSavingsUseCase(source)(
+            siteId = 1,
+            period = SavingsPeriod.Custom(
+                Instant.parse("2026-07-10T10:00:00Z"),
+                Instant.parse("2026-07-10T12:00:00Z")
+            ),
+            config = config,
+            now = Instant.parse("2026-07-10T12:00:00Z"),
+            zone = TimeZone.UTC
+        )
+
+        val b = (result as Either.Right).value
+        val ts = b.tempoSubtotals!!
+        // Expected: RED = 2.2686 (net), BLUE = 0.0, WHITE = 0.0
+        assertEquals(2.2686, ts.redEuros, 1e-9)
+        assertEquals(0.0, ts.blueEuros, 1e-9)
+        assertEquals(0.0, ts.whiteEuros, 1e-9)
+        assertTrue(!b.partial)
     }
 }
