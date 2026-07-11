@@ -4,13 +4,11 @@ import arrow.core.Either
 import arrow.core.right
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import net.thevenot.comwatt.database.SolarEcoSettings
 import net.thevenot.comwatt.domain.savings.ComputeSavingsUseCase
 import net.thevenot.comwatt.domain.savings.FakeSavingsDataSource
 import net.thevenot.comwatt.domain.savings.FakeTempoColorSource
@@ -19,6 +17,7 @@ import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
 import net.thevenot.comwatt.model.savings.ContractType
 import net.thevenot.comwatt.model.savings.TariffConfig
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -68,22 +67,11 @@ class SavingsViewModelTest {
         val fakeSource = FakeSavingsDataSource(siteSeries = twoHourSeries().right())
         val tempoRepo = TempoColorRepository(FakeTempoColorSource())
         val computeUseCase = ComputeSavingsUseCase(fakeSource, tempoRepo)
-        val settings = MutableStateFlow(
-            SolarEcoSettings(
-                siteId = 1,
-                maxPowerGauge = null,
-                productionNoiseThreshold = null,
-                dashboardSelectedTimeUnitIndex = null,
-                dashboardHiddenDevices = null,
-                dashboardSortMode = null,
-                tariffConfigJson = baseTariffConfig().encode()
-            )
-        )
 
         val vm = SavingsViewModel(
             computeSavingsUseCase = computeUseCase,
             siteIdProvider = { 1 },
-            settingsFlow = { settings }
+            settingsProvider = { baseTariffConfig() }
         )
 
         advanceUntilIdle()
@@ -106,26 +94,41 @@ class SavingsViewModelTest {
         )
         val tempoRepo = TempoColorRepository(FakeTempoColorSource())
         val computeUseCase = ComputeSavingsUseCase(fakeSource, tempoRepo)
-        val settings = MutableStateFlow(
-            SolarEcoSettings(
-                siteId = 1,
-                maxPowerGauge = null,
-                productionNoiseThreshold = null,
-                dashboardSelectedTimeUnitIndex = null,
-                dashboardHiddenDevices = null,
-                dashboardSortMode = null,
-                tariffConfigJson = baseTariffConfig().encode()
-            )
-        )
 
         val vm = SavingsViewModel(
             computeSavingsUseCase = computeUseCase,
             siteIdProvider = { 1 },
-            settingsFlow = { settings }
+            settingsProvider = { baseTariffConfig() }
         )
 
         advanceUntilIdle()
 
         assertTrue(vm.uiState.value.hasError)
+    }
+
+    @Test
+    fun onTimeUnitSelectedWeekStillSucceeds() = runTest {
+        val fakeSource = FakeSavingsDataSource(siteSeries = twoHourSeries().right())
+        val tempoRepo = TempoColorRepository(FakeTempoColorSource())
+        val computeUseCase = ComputeSavingsUseCase(fakeSource, tempoRepo)
+
+        val vm = SavingsViewModel(
+            computeSavingsUseCase = computeUseCase,
+            siteIdProvider = { 1 },
+            settingsProvider = { baseTariffConfig() }
+        )
+
+        advanceUntilIdle()
+
+        // Change to WEEK time unit
+        vm.onTimeUnitSelected(DashboardTimeUnit.WEEK)
+        advanceUntilIdle()
+
+        val state = vm.uiState.value
+        assertFalse(state.isLoading)
+        assertFalse(state.hasError)
+        // Should still work with WEEK bounds
+        assertEquals(0.70, state.breakdown.netEuros, 1e-9)
+        assertEquals(DashboardTimeUnit.WEEK, state.selectedTimeUnit)
     }
 }
