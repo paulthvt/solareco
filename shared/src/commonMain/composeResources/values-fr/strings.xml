@@ -149,4 +149,23 @@
     <string name="savings_tempo_blue">Bleu</string>
     <string name="savings_tempo_white">Blanc</string>
     <string name="savings_tempo_red">Rouge</string>
+    <string name="settings_tariff_title">Tarifs d\'électricité</string>
+    <string name="settings_tariff_description">Définissez votre type de contrat et vos prix pour calculer les économies.</string>
+    <string name="settings_tariff_icon_content_description">Tarifs d\'électricité</string>
+    <string name="settings_contract_base">Base</string>
+    <string name="settings_contract_hphc">HP/HC</string>
+    <string name="settings_contract_tempo">Tempo</string>
+    <string name="settings_rate_base">Tarif de base (€/kWh)</string>
+    <string name="settings_rate_hp">Tarif heures pleines (€/kWh)</string>
+    <string name="settings_rate_hc">Tarif heures creuses (€/kWh)</string>
+    <string name="settings_rate_resale">Prix de revente (€/kWh)</string>
+    <string name="settings_offpeak_window">Heures creuses</string>
+    <string name="settings_offpeak_start">Début (HH:mm)</string>
+    <string name="settings_offpeak_end">Fin (HH:mm)</string>
+    <string name="settings_tempo_blue_hp">Bleu pleines</string>
+    <string name="settings_tempo_blue_hc">Bleu creuses</string>
+    <string name="settings_tempo_white_hp">Blanc pleines</string>
+    <string name="settings_tempo_white_hc">Blanc creuses</string>
+    <string name="settings_tempo_red_hp">Rouge pleines</string>
+    <string name="settings_tempo_red_hc">Rouge creuses</string>
 </resources>

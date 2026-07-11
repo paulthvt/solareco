@@ -155,4 +155,23 @@
     <string name="savings_tempo_blue">Blue</string>
     <string name="savings_tempo_white">White</string>
     <string name="savings_tempo_red">Red</string>
+    <string name="settings_tariff_title">Electricity rates</string>
+    <string name="settings_tariff_description">Set your contract type and prices to compute savings.</string>
+    <string name="settings_tariff_icon_content_description">Electricity rates</string>
+    <string name="settings_contract_base">Base</string>
+    <string name="settings_contract_hphc">HP/HC</string>
+    <string name="settings_contract_tempo">Tempo</string>
+    <string name="settings_rate_base">Base rate (€/kWh)</string>
+    <string name="settings_rate_hp">Peak rate (€/kWh)</string>
+    <string name="settings_rate_hc">Off-peak rate (€/kWh)</string>
+    <string name="settings_rate_resale">Resale price (€/kWh)</string>
+    <string name="settings_offpeak_window">Off-peak hours</string>
+    <string name="settings_offpeak_start">Start (HH:mm)</string>
+    <string name="settings_offpeak_end">End (HH:mm)</string>
+    <string name="settings_tempo_blue_hp">Blue peak</string>
+    <string name="settings_tempo_blue_hc">Blue off-peak</string>
+    <string name="settings_tempo_white_hp">White peak</string>
+    <string name="settings_tempo_white_hc">White off-peak</string>
+    <string name="settings_tempo_red_hp">Red peak</string>
+    <string name="settings_tempo_red_hc">Red off-peak</string>
 </resources>
