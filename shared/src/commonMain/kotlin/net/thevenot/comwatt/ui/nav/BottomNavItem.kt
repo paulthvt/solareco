@@ -7,6 +7,7 @@ import comwatt.shared.generated.resources.bottom_nav_dashboard
 import comwatt.shared.generated.resources.bottom_nav_devices
 import comwatt.shared.generated.resources.bottom_nav_home
 import comwatt.shared.generated.resources.bottom_nav_more
+import comwatt.shared.generated.resources.bottom_nav_savings
 import kotlinx.serialization.Serializable
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.StringResource
@@ -28,6 +29,10 @@ enum class BottomNavItem(
         label = Res.string.bottom_nav_devices,
         screen = Screen.Devices,
     ),
+    Savings(
+        label = Res.string.bottom_nav_savings,
+        screen = Screen.Savings,
+    ),
     More(
         label = Res.string.bottom_nav_more,
         screen = Screen.More,
@@ -38,6 +43,7 @@ enum class BottomNavItem(
         Home -> AppIcons.Home
         Dashboard -> AppIcons.Dashboard
         Devices -> AppIcons.Power
+        Savings -> AppIcons.SolarPower
         More -> AppIcons.Menu
     }
 }

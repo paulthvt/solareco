@@ -28,6 +28,7 @@ import net.thevenot.comwatt.ui.devices.settings.DeviceSettingsScreen
 import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
+import net.thevenot.comwatt.ui.savings.SavingsScreen
 import net.thevenot.comwatt.ui.settings.SettingsScreen
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -102,6 +103,13 @@ fun NavGraphBuilder.mainGraph(
         }
         composable<Screen.Devices> {
             DevicesScreen(navController, snackbarHostState, dataRepository)
+        }
+        composable<Screen.Savings> {
+            SavingsScreen(
+                navController = navController,
+                snackbarHostState = snackbarHostState,
+                dataRepository = dataRepository
+            )
         }
         composable<Screen.More> {
             Text("Not Implemented Yet")

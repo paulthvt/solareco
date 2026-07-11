@@ -19,6 +19,9 @@ sealed interface Screen {
     data object Devices : Screen
 
     @Serializable
+    data object Savings : Screen
+
+    @Serializable
     data object More : Screen
 
     @Serializable
