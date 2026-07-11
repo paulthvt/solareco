@@ -15,7 +15,6 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.database.SolarEcoSettings
 import net.thevenot.comwatt.domain.FetchCurrentSiteUseCase
 import net.thevenot.comwatt.domain.savings.ComputeSavingsUseCase
-import net.thevenot.comwatt.model.savings.SavingsPeriod
 import net.thevenot.comwatt.model.savings.TariffConfig
 
 class SavingsViewModel(
@@ -42,10 +41,11 @@ class SavingsViewModel(
         refresh()
     }
 
-    fun selectPeriod(period: SavingsPeriod) {
-        _uiState.update { it.copy(period = period) }
-        refresh()
-    }
+    // TODO(Task 7/8): Restore period selection once SavingsPeriod is reimplemented
+    // fun selectPeriod(period: SavingsPeriod) {
+    //     _uiState.update { it.copy(period = period) }
+    //     refresh()
+    // }
 
     fun refresh() {
         viewModelScope.launch {
@@ -59,12 +59,18 @@ class SavingsViewModel(
                 return@launch
             }
 
+            // TODO(Task 7/8): Replace placeholder period with real UI period selection
+            val now = Clock.System.now()
+            val zone = TimeZone.currentSystemDefault()
+            val start = now  // Placeholder: use today's start
+            val end = now    // Placeholder: use now
+
             val result = computeSavingsUseCase(
                 siteId = siteId,
-                period = _uiState.value.period,
+                start = start,
+                end = end,
                 config = config,
-                now = Clock.System.now(),
-                zone = TimeZone.currentSystemDefault(),
+                zone = zone,
             )
             _uiState.update {
                 when (result) {

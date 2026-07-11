@@ -13,6 +13,8 @@ import kotlinx.coroutines.test.setMain
 import net.thevenot.comwatt.database.SolarEcoSettings
 import net.thevenot.comwatt.domain.savings.ComputeSavingsUseCase
 import net.thevenot.comwatt.domain.savings.FakeSavingsDataSource
+import net.thevenot.comwatt.domain.savings.FakeTempoColorSource
+import net.thevenot.comwatt.domain.tempo.TempoColorRepository
 import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
 import net.thevenot.comwatt.model.savings.ContractType
@@ -64,7 +66,8 @@ class SavingsViewModelTest {
     @Test
     fun successPopulatesBreakdownAndClearsLoading() = runTest {
         val fakeSource = FakeSavingsDataSource(siteSeries = twoHourSeries().right())
-        val computeUseCase = ComputeSavingsUseCase(fakeSource)
+        val tempoRepo = TempoColorRepository(FakeTempoColorSource())
+        val computeUseCase = ComputeSavingsUseCase(fakeSource, tempoRepo)
         val settings = MutableStateFlow(
             SolarEcoSettings(
                 siteId = 1,
@@ -101,7 +104,8 @@ class SavingsViewModelTest {
         val fakeSource = FakeSavingsDataSource(
             siteSeries = Either.Left(ApiError.GenericError("test error", "test error"))
         )
-        val computeUseCase = ComputeSavingsUseCase(fakeSource)
+        val tempoRepo = TempoColorRepository(FakeTempoColorSource())
+        val computeUseCase = ComputeSavingsUseCase(fakeSource, tempoRepo)
         val settings = MutableStateFlow(
             SolarEcoSettings(
                 siteId = 1,

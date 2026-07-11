@@ -53,7 +53,6 @@ import comwatt.shared.generated.resources.savings_tempo_title
 import comwatt.shared.generated.resources.savings_tempo_white
 import comwatt.shared.generated.resources.savings_title
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.model.savings.SavingsPeriod
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
@@ -94,7 +93,7 @@ fun SavingsScreen(
         ) {
             SavingsScreenContent(
                 state = state,
-                onPeriodSelected = viewModel::selectPeriod,
+                onPeriodSelected = {}, // TODO(Task 7/8): Restore once SavingsPeriod is reimplemented
                 onEditRatesClick = { navController.navigate(Screen.Settings) }
             )
         }
@@ -104,7 +103,7 @@ fun SavingsScreen(
 @Composable
 private fun SavingsScreenContent(
     state: SavingsScreenState,
-    onPeriodSelected: (SavingsPeriod) -> Unit = {},
+    onPeriodSelected: () -> Unit = {}, // TODO(Task 7/8): Restore period parameter
     onEditRatesClick: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
@@ -118,11 +117,11 @@ private fun SavingsScreenContent(
     ) {
         Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
 
-        // Period selector
-        PeriodSelector(
-            selectedPeriod = state.period,
-            onPeriodSelected = onPeriodSelected
-        )
+        // TODO(Task 7/8): Restore Period selector once SavingsPeriod is reimplemented
+        // PeriodSelector(
+        //     selectedPeriod = state.period,
+        //     onPeriodSelected = onPeriodSelected
+        // )
 
         if (!state.configConfirmed) {
             // CTA card when rates not configured
@@ -222,51 +221,52 @@ private fun SavingsScreenContent(
     }
 }
 
-@Composable
-private fun PeriodSelector(
-    selectedPeriod: SavingsPeriod,
-    onPeriodSelected: (SavingsPeriod) -> Unit = {}
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(
-            space = ButtonGroupDefaults.ConnectedSpaceBetween,
-            alignment = Alignment.CenterHorizontally
-        )
-    ) {
-        val options = listOf(
-            stringResource(Res.string.savings_period_today) to SavingsPeriod.Today,
-            stringResource(Res.string.savings_period_month) to SavingsPeriod.ThisMonth,
-            stringResource(Res.string.savings_period_year) to SavingsPeriod.ThisYear,
-            stringResource(Res.string.savings_period_custom) to null // Custom is deferred
-        )
-
-        options.forEachIndexed { index, (label, period) ->
-            val isSelected = when {
-                period == null -> selectedPeriod is SavingsPeriod.Custom
-                else -> selectedPeriod == period
-            }
-
-            ToggleButton(
-                checked = isSelected,
-                onCheckedChange = {
-                    period?.let { onPeriodSelected(it) }
-                    // Custom period picker deferred for follow-up
-                },
-                modifier = Modifier
-                    .weight(1f)
-                    .semantics { role = Role.RadioButton },
-                shapes = when (index) {
-                    0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                    options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                    else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                },
-            ) {
-                Text(label, maxLines = 1)
-            }
-        }
-    }
-}
+// TODO(Task 7/8): Restore PeriodSelector once SavingsPeriod is reimplemented
+// @Composable
+// private fun PeriodSelector(
+//     selectedPeriod: SavingsPeriod,
+//     onPeriodSelected: (SavingsPeriod) -> Unit = {}
+// ) {
+//     Row(
+//         modifier = Modifier.fillMaxWidth(),
+//         horizontalArrangement = Arrangement.spacedBy(
+//             space = ButtonGroupDefaults.ConnectedSpaceBetween,
+//             alignment = Alignment.CenterHorizontally
+//         )
+//     ) {
+//         val options = listOf(
+//             stringResource(Res.string.savings_period_today) to SavingsPeriod.Today,
+//             stringResource(Res.string.savings_period_month) to SavingsPeriod.ThisMonth,
+//             stringResource(Res.string.savings_period_year) to SavingsPeriod.ThisYear,
+//             stringResource(Res.string.savings_period_custom) to null // Custom is deferred
+//         )
+//
+//         options.forEachIndexed { index, (label, period) ->
+//             val isSelected = when {
+//                 period == null -> selectedPeriod is SavingsPeriod.Custom
+//                 else -> selectedPeriod == period
+//             }
+//
+//             ToggleButton(
+//                 checked = isSelected,
+//                 onCheckedChange = {
+//                     period?.let { onPeriodSelected(it) }
+//                     // Custom period picker deferred for follow-up
+//                 },
+//                 modifier = Modifier
+//                     .weight(1f)
+//                     .semantics { role = Role.RadioButton },
+//                 shapes = when (index) {
+//                     0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+//                     options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+//                     else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+//                 },
+//             ) {
+//                 Text(label, maxLines = 1)
+//             }
+//         }
+//     }
+// }
 
 @Composable
 private fun NetBenefitHeroCard(netEuros: Double) {

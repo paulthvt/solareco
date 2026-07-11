@@ -3,22 +3,18 @@ package net.thevenot.comwatt.domain.savings
 import arrow.core.Either
 import arrow.core.right
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import net.thevenot.comwatt.domain.tempo.TempoColorRepository
+import net.thevenot.comwatt.domain.tempo.TempoColorSource
+import net.thevenot.comwatt.database.TempoColorEntity
 import net.thevenot.comwatt.model.ApiError
-import net.thevenot.comwatt.model.DailyElectricityPriceDto
-import net.thevenot.comwatt.model.DayStatusDto
-import net.thevenot.comwatt.model.ElectricityPriceResponseDto
-import net.thevenot.comwatt.model.PeakType
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
-import net.thevenot.comwatt.model.TempoDaySynthesisDto
 import net.thevenot.comwatt.model.TempoDayValue
-import net.thevenot.comwatt.model.TempoSynthesesDto
 import net.thevenot.comwatt.model.savings.ContractType
-import net.thevenot.comwatt.model.savings.SavingsPeriod
 import net.thevenot.comwatt.model.savings.TariffConfig
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.Ignore
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -26,18 +22,36 @@ class FakeSavingsDataSource(
     private val siteSeries: Either<ApiError, SiteTimeSeriesDto> = SiteTimeSeriesDto(
         emptyList(), emptyList(), emptyList(), emptyList(), emptyList(),
         emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList()
-    ).right(),
-    private val priceResponse: Either<ApiError, ElectricityPriceResponseDto> = Either.Left(
-        ApiError.GenericError("test error", "test error")
-    )
+    ).right()
 ) : SavingsDataSource {
     override suspend fun siteTimeSeriesHourly(
         siteId: Int,
         start: kotlin.time.Instant,
         end: kotlin.time.Instant
     ): Either<ApiError, SiteTimeSeriesDto> = siteSeries
+}
 
-    override suspend fun electricityPrice(): Either<ApiError, ElectricityPriceResponseDto> = priceResponse
+class FakeTempoColorSource(
+    private val colorMap: Map<LocalDate, TempoDayValue> = emptyMap()
+) : TempoColorSource {
+    override suspend fun getByDates(dates: List<String>): List<TempoColorEntity> =
+        dates.mapNotNull { dateStr ->
+            val date = LocalDate.parse(dateStr)
+            colorMap[date]?.let { color ->
+                TempoColorEntity(dateStr, color.toCode())
+            }
+        }
+
+    override suspend fun upsertAll(entities: List<TempoColorEntity>) {}
+
+    override suspend fun fetchColor(date: LocalDate): Either<ApiError, Int> =
+        Either.Right(colorMap[date]?.toCode() ?: 0)
+
+    private fun TempoDayValue.toCode(): Int = when (this) {
+        TempoDayValue.BLUE -> 1
+        TempoDayValue.WHITE -> 2
+        TempoDayValue.RED -> 3
+    }
 }
 
 class ComputeSavingsUseCaseTest {
@@ -60,7 +74,8 @@ class ComputeSavingsUseCaseTest {
     @Test
     fun baseTariffComputesSavedEarnedSpentNet() = runTest {
         val source = FakeSavingsDataSource(siteSeries = series().right())
-        val useCase = ComputeSavingsUseCase(source)
+        val tempoRepo = TempoColorRepository(FakeTempoColorSource())
+        val useCase = ComputeSavingsUseCase(source, tempoRepo)
         val config = TariffConfig.defaults().copy(
             contractType = ContractType.BASE,
             baseRate = 0.20,
@@ -69,12 +84,9 @@ class ComputeSavingsUseCaseTest {
 
         val result = useCase(
             siteId = 1,
-            period = SavingsPeriod.Custom(
-                Instant.parse("2026-07-10T10:00:00Z"),
-                Instant.parse("2026-07-10T12:00:00Z")
-            ),
+            start = Instant.parse("2026-07-10T10:00:00Z"),
+            end = Instant.parse("2026-07-10T12:00:00Z"),
             config = config,
-            now = Instant.parse("2026-07-10T12:00:00Z"),
             zone = TimeZone.UTC
         )
 
@@ -96,11 +108,12 @@ class ComputeSavingsUseCaseTest {
             emptyList(), emptyList(), emptyList(), emptyList(), emptyList(), emptyList()
         )
         val source = FakeSavingsDataSource(siteSeries = empty.right())
-        val result = ComputeSavingsUseCase(source)(
+        val tempoRepo = TempoColorRepository(FakeTempoColorSource())
+        val result = ComputeSavingsUseCase(source, tempoRepo)(
             1,
-            SavingsPeriod.Today,
-            TariffConfig.defaults(),
+            Instant.parse("2026-07-10T10:00:00Z"),
             Instant.parse("2026-07-10T12:00:00Z"),
+            TariffConfig.defaults(),
             TimeZone.UTC
         )
         val b = (result as Either.Right).value
@@ -108,7 +121,6 @@ class ComputeSavingsUseCaseTest {
     }
 
     @Test
-    @Ignore("Task 5: requires colour map to be extracted from ElectricityPriceResponseDto")
     fun tempoSubtotalsAreNetEurosPerColor() = runTest {
         // Two hours on a RED day during PEAK hours (06:00-22:00), in Wh (divisor 1000.0).
         // prod=3000/2000 Wh (3/2 kWh), inj=1000/0 Wh (1/0 kWh), cons=2000/2000 Wh, wdr=0/1000 Wh (0/1 kWh)
@@ -133,53 +145,23 @@ class ComputeSavingsUseCaseTest {
             withdrawalRates = emptyList()
         )
 
-        val priceDto = ElectricityPriceResponseDto(
-            tempoSyntheses = TempoSynthesesDto(
-                white = TempoDaySynthesisDto(0, 100),
-                blue = TempoDaySynthesisDto(0, 100),
-                red = TempoDaySynthesisDto(1, 100)
-            ),
-            daily = listOf(
-                DailyElectricityPriceDto(
-                    date = "2026-07-10",
-                    dayValue = TempoDayValue.RED,
-                    status = listOf(
-                        DayStatusDto(
-                            value = TempoDayValue.RED,
-                            type = PeakType.OFFPEAK,
-                            startTime = "22:00",
-                            endTime = "06:00"
-                        ),
-                        DayStatusDto(
-                            value = TempoDayValue.RED,
-                            type = PeakType.PEAK,
-                            startTime = "06:00",
-                            endTime = "22:00"
-                        )
-                    )
-                )
-            ),
-            tempoSynthesesComplete = true
-        )
+        // Fake repo returns RED for 2026-07-10
+        val colorMap = mapOf(LocalDate.parse("2026-07-10") to TempoDayValue.RED)
+        val fakeTempoSource = FakeTempoColorSource(colorMap)
+        val tempoRepo = TempoColorRepository(fakeTempoSource)
 
-        val source = FakeSavingsDataSource(
-            siteSeries = tempoSeries.right(),
-            priceResponse = priceDto.right()
-        )
+        val source = FakeSavingsDataSource(siteSeries = tempoSeries.right())
 
         val config = TariffConfig.defaults().copy(
             contractType = ContractType.TEMPO,
             resalePrice = 0.10
         )
 
-        val result = ComputeSavingsUseCase(source)(
+        val result = ComputeSavingsUseCase(source, tempoRepo)(
             siteId = 1,
-            period = SavingsPeriod.Custom(
-                Instant.parse("2026-07-10T10:00:00Z"),
-                Instant.parse("2026-07-10T12:00:00Z")
-            ),
+            start = Instant.parse("2026-07-10T10:00:00Z"),
+            end = Instant.parse("2026-07-10T12:00:00Z"),
             config = config,
-            now = Instant.parse("2026-07-10T12:00:00Z"),
             zone = TimeZone.UTC
         )
 
@@ -194,7 +176,7 @@ class ComputeSavingsUseCaseTest {
 
     @Test
     fun tempoWithEmptyCalendarReturnsZeroEurosButNonZeroKwhAndPartial() = runTest {
-        // TEMPO config, but empty calendar (electricityPrice fetch fails / empty response).
+        // TEMPO config, but empty calendar (repo returns no colors).
         // Every hour's rate is null → all euro figures = 0, partial = true, kWh totals remain complete.
         val tempoSeries = SiteTimeSeriesDto(
             timestamps = listOf("2026-07-10T10:00:00Z", "2026-07-10T11:00:00Z"),
@@ -210,25 +192,20 @@ class ComputeSavingsUseCaseTest {
             withdrawalRates = emptyList()
         )
 
-        val source = FakeSavingsDataSource(
-            siteSeries = tempoSeries.right(),
-            // priceResponse = error (defaults to GenericError) → empty calendar
-            priceResponse = Either.Left(ApiError.GenericError("test", "test"))
-        )
+        val source = FakeSavingsDataSource(siteSeries = tempoSeries.right())
+        // Empty color map → empty calendar
+        val tempoRepo = TempoColorRepository(FakeTempoColorSource(emptyMap()))
 
         val config = TariffConfig.defaults().copy(
             contractType = ContractType.TEMPO,
             resalePrice = 0.10
         )
 
-        val result = ComputeSavingsUseCase(source)(
+        val result = ComputeSavingsUseCase(source, tempoRepo)(
             siteId = 1,
-            period = SavingsPeriod.Custom(
-                Instant.parse("2026-07-10T10:00:00Z"),
-                Instant.parse("2026-07-10T12:00:00Z")
-            ),
+            start = Instant.parse("2026-07-10T10:00:00Z"),
+            end = Instant.parse("2026-07-10T12:00:00Z"),
             config = config,
-            now = Instant.parse("2026-07-10T12:00:00Z"),
             zone = TimeZone.UTC
         )
 
