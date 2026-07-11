@@ -2,7 +2,6 @@ package net.thevenot.comwatt.domain.savings
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import net.thevenot.comwatt.model.ElectricityPriceResponseDto
 import net.thevenot.comwatt.model.PeakType
 import net.thevenot.comwatt.model.TempoDayValue
 import net.thevenot.comwatt.model.savings.TimeWindow
@@ -14,22 +13,11 @@ data class TempoDay(val color: TempoDayValue, val windows: List<TempoWindow>) {
         windows.firstOrNull { it.window.contains(time) }?.type
 }
 
-private fun parseTime(raw: String): LocalTime? = runCatching {
-    val parts = raw.split(":")
-    LocalTime(
-        parts[0].toInt(),
-        parts.getOrNull(1)?.toIntOrNull() ?: 0,
-        parts.getOrNull(2)?.toIntOrNull() ?: 0
-    )
-}.getOrNull()
+// Tempo peak/off-peak is fixed nationally: HC 22:00–06:00, HP 06:00–22:00.
+private val NATIONAL_WINDOWS = listOf(
+    TempoWindow(PeakType.OFFPEAK, TimeWindow(LocalTime(22, 0), LocalTime(6, 0))),
+    TempoWindow(PeakType.PEAK, TimeWindow(LocalTime(6, 0), LocalTime(22, 0))),
+)
 
-fun buildTempoCalendar(dto: ElectricityPriceResponseDto): Map<LocalDate, TempoDay> =
-    dto.daily.mapNotNull day@{ day ->
-        val date = runCatching { LocalDate.parse(day.date) }.getOrNull() ?: return@day null
-        val windows = day.status.map {
-            val startTime = parseTime(it.startTime) ?: return@day null
-            val endTime = parseTime(it.endTime) ?: return@day null
-            TempoWindow(it.type, TimeWindow(startTime, endTime))
-        }
-        date to TempoDay(day.dayValue, windows)
-    }.toMap()
+fun buildTempoCalendar(colors: Map<LocalDate, TempoDayValue>): Map<LocalDate, TempoDay> =
+    colors.mapValues { (_, color) -> TempoDay(color, NATIONAL_WINDOWS) }

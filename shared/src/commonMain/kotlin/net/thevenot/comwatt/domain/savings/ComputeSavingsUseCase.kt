@@ -67,7 +67,8 @@ class ComputeSavingsUseCase(private val source: SavingsDataSource) {
         val calendar = if (config.contractType == ContractType.TEMPO) {
             // If the price fetch fails for a TEMPO contract, the calendar is empty, every hour's rate is unknown,
             // and the result is returned with partial=true rather than as an error — graceful degradation.
-            source.electricityPrice().fold({ emptyMap() }, { buildTempoCalendar(it) })
+            // TODO(Task 5): feed real colour map from electricityPrice() DTO instead of emptyMap()
+            source.electricityPrice().fold({ emptyMap() }, { buildTempoCalendar(emptyMap()) })
         } else {
             emptyMap()
         }

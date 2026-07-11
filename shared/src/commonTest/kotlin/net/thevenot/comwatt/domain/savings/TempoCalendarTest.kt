@@ -2,41 +2,16 @@ package net.thevenot.comwatt.domain.savings
 
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import net.thevenot.comwatt.model.DailyElectricityPriceDto
-import net.thevenot.comwatt.model.DayStatusDto
-import net.thevenot.comwatt.model.ElectricityPriceResponseDto
 import net.thevenot.comwatt.model.PeakType
-import net.thevenot.comwatt.model.TempoDaySynthesisDto
 import net.thevenot.comwatt.model.TempoDayValue
-import net.thevenot.comwatt.model.TempoSynthesesDto
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
 class TempoCalendarTest {
-    private fun response(vararg days: DailyElectricityPriceDto) = ElectricityPriceResponseDto(
-        tempoSyntheses = TempoSynthesesDto(
-            white = TempoDaySynthesisDto(0, 43),
-            blue = TempoDaySynthesisDto(0, 300),
-            red = TempoDaySynthesisDto(0, 22),
-        ),
-        daily = days.toList(),
-        tempoSynthesesComplete = true,
-    )
-
     @Test
-    fun buildsCalendarKeyedByDateWithWindows() {
-        val dto = response(
-            DailyElectricityPriceDto(
-                date = "2026-07-10",
-                dayValue = TempoDayValue.RED,
-                status = listOf(
-                    DayStatusDto(value = null, type = PeakType.OFFPEAK, startTime = "22:00", endTime = "06:00"),
-                    DayStatusDto(value = null, type = PeakType.PEAK, startTime = "06:00", endTime = "22:00"),
-                ),
-            ),
-        )
-        val cal = buildTempoCalendar(dto)
+    fun buildsFixedWindowsFromColourMap() {
+        val cal = buildTempoCalendar(mapOf(LocalDate(2026, 7, 10) to TempoDayValue.RED))
         val day = cal.getValue(LocalDate(2026, 7, 10))
         assertEquals(TempoDayValue.RED, day.color)
         assertEquals(PeakType.PEAK, day.peakTypeAt(LocalTime(12, 0)))
@@ -45,26 +20,7 @@ class TempoCalendarTest {
     }
 
     @Test
-    fun peakTypeAtReturnsNullWhenNoWindowMatches() {
-        val day = TempoDay(
-            color = TempoDayValue.BLUE,
-            windows = listOf(TempoWindow(PeakType.PEAK, net.thevenot.comwatt.model.savings.TimeWindow(LocalTime(6, 0), LocalTime(7, 0)))),
-        )
-        assertNull(day.peakTypeAt(LocalTime(12, 0)))
-    }
-
-    @Test
-    fun skipsDayWithMalformedTimeString() {
-        val dto = response(
-            DailyElectricityPriceDto(
-                date = "2026-07-11",
-                dayValue = TempoDayValue.BLUE,
-                status = listOf(
-                    DayStatusDto(value = null, type = PeakType.PEAK, startTime = "bad", endTime = "06:00"),
-                ),
-            ),
-        )
-        val cal = buildTempoCalendar(dto)
-        assertEquals(0, cal.size)
+    fun emptyColourMapProducesEmptyCalendar() {
+        assertNull(buildTempoCalendar(emptyMap())[LocalDate(2026, 7, 10)])
     }
 }
