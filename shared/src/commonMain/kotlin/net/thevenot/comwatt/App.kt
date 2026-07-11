@@ -6,7 +6,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -110,9 +109,6 @@ fun NavGraphBuilder.mainGraph(
                 snackbarHostState = snackbarHostState,
                 dataRepository = dataRepository
             )
-        }
-        composable<Screen.More> {
-            Text("Not Implemented Yet")
         }
         composable<Screen.Settings> {
             SettingsScreen(dataRepository)
