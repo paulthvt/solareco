@@ -47,6 +47,10 @@ import comwatt.shared.generated.resources.savings_period_year
 import comwatt.shared.generated.resources.savings_saved
 import comwatt.shared.generated.resources.savings_set_rates_cta
 import comwatt.shared.generated.resources.savings_spent
+import comwatt.shared.generated.resources.savings_tempo_blue
+import comwatt.shared.generated.resources.savings_tempo_red
+import comwatt.shared.generated.resources.savings_tempo_title
+import comwatt.shared.generated.resources.savings_tempo_white
 import comwatt.shared.generated.resources.savings_title
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.model.savings.SavingsPeriod
@@ -76,7 +80,7 @@ fun SavingsScreen(
             CenteredTitleWithIcon(
                 icon = AppIcons.Analytics,
                 title = stringResource(Res.string.savings_title),
-                iconContentDescription = "Savings Icon"
+                iconContentDescription = null
             )
         },
         snackbarHostState = snackbarHostState,
@@ -351,7 +355,7 @@ private fun TempoSubtotalsCard(
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
         ) {
             Text(
-                text = "Tempo",
+                text = stringResource(Res.string.savings_tempo_title),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -361,17 +365,17 @@ private fun TempoSubtotalsCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 TempoSubtotalItem(
-                    label = "Blue",
+                    label = stringResource(Res.string.savings_tempo_blue),
                     euros = blueEuros,
                     color = MaterialTheme.colorScheme.tempoBlue
                 )
                 TempoSubtotalItem(
-                    label = "White",
+                    label = stringResource(Res.string.savings_tempo_white),
                     euros = whiteEuros,
                     color = MaterialTheme.colorScheme.tempoWhite
                 )
                 TempoSubtotalItem(
-                    label = "Red",
+                    label = stringResource(Res.string.savings_tempo_red),
                     euros = redEuros,
                     color = MaterialTheme.colorScheme.tempoRed
                 )

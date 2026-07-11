@@ -151,4 +151,8 @@
     <string name="savings_partial_data">Some periods lack pricing data — totals are partial.</string>
     <string name="savings_set_rates_cta">Set your electricity rates to see your savings</string>
     <string name="savings_edit_rates">Edit rates</string>
+    <string name="savings_tempo_title">Tempo</string>
+    <string name="savings_tempo_blue">Blue</string>
+    <string name="savings_tempo_white">White</string>
+    <string name="savings_tempo_red">Red</string>
 </resources>

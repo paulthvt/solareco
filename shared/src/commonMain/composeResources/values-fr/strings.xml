@@ -145,4 +145,8 @@
     <string name="savings_partial_data">Certaines périodes n\'ont pas de données tarifaires — les totaux sont partiels.</string>
     <string name="savings_set_rates_cta">Configurez vos tarifs d\'électricité pour voir vos économies</string>
     <string name="savings_edit_rates">Modifier les tarifs</string>
+    <string name="savings_tempo_title">Tempo</string>
+    <string name="savings_tempo_blue">Bleu</string>
+    <string name="savings_tempo_white">Blanc</string>
+    <string name="savings_tempo_red">Rouge</string>
 </resources>
