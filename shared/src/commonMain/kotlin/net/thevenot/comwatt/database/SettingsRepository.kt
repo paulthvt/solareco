@@ -17,6 +17,8 @@ class SettingsRepository(
     private val productionNoiseThresholdKey = intPreferencesKey("production_noise_threshold")
     private val dashboardSelectedTimeUnitIndex =
         intPreferencesKey("dashboard_selected_time_unit_index")
+    private val savingsSelectedTimeUnitIndex =
+        intPreferencesKey("savings_selected_time_unit_index")
     private val dashboardHiddenDevicesKey =
         stringSetPreferencesKey("dashboard_hidden_devices")
     private val dashboardSortModeKey =
@@ -27,6 +29,7 @@ class SettingsRepository(
         SolarEcoSettings(
             siteId = it[siteKey],
             dashboardSelectedTimeUnitIndex = it[dashboardSelectedTimeUnitIndex],
+            savingsSelectedTimeUnitIndex = it[savingsSelectedTimeUnitIndex],
             maxPowerGauge = it[maxPowerGaugeKey],
             productionNoiseThreshold = it[productionNoiseThresholdKey],
             dashboardHiddenDevices = it[dashboardHiddenDevicesKey],
@@ -70,6 +73,14 @@ class SettingsRepository(
     ) {
         dataStore.edit {
             it[dashboardSelectedTimeUnitIndex] = index
+        }
+    }
+
+    suspend fun saveSavingsSelectedTimeUnitIndex(
+        index: Int,
+    ) {
+        dataStore.edit {
+            it[savingsSelectedTimeUnitIndex] = index
         }
     }
 

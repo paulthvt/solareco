@@ -42,6 +42,10 @@ class DataRepository(
         settingsRepository.saveDashboardSelectedTimeUnitIndex(index)
     }
 
+    suspend fun saveSavingsSelectedTimeUnitIndex(index: Int) {
+        settingsRepository.saveSavingsSelectedTimeUnitIndex(index)
+    }
+
     suspend fun saveDashboardHiddenDevices(devices: Set<String>) {
         settingsRepository.saveDashboardHiddenDevices(devices)
     }

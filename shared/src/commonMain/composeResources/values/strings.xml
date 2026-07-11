@@ -11,7 +11,6 @@
     <string name="bottom_nav_home">Home</string>
     <string name="bottom_nav_dashboard">Dashboard</string>
     <string name="bottom_nav_devices">Devices</string>
-    <string name="bottom_nav_more">More</string>
     <string name="gauge_subtitle_production">Production</string>
     <string name="gauge_subtitle_consumption">Consumption</string>
     <string name="gauge_subtitle_withdrawals">Withdrawals</string>
@@ -140,10 +139,6 @@
     <string name="top_consumers_daily_title">Biggest Consumers Today</string>
     <string name="bottom_nav_savings">Savings</string>
     <string name="savings_title">Savings</string>
-    <string name="savings_period_today">Today</string>
-    <string name="savings_period_month">Month</string>
-    <string name="savings_period_year">Year</string>
-    <string name="savings_period_custom">Custom</string>
     <string name="savings_net_benefit">Net benefit</string>
     <string name="savings_saved">Saved</string>
     <string name="savings_earned">Earned</string>

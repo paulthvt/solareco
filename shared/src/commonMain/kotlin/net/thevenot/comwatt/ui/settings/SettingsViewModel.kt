@@ -59,8 +59,9 @@ class SettingsViewModel(val dataRepository: DataRepository) : ViewModel() {
                         redHc = t.rougeHC,
                     ),
                 )
-                _tariffConfig.value = updated
-                dataRepository.saveTariffConfig(updated.copy(confirmedByUser = true))
+                val confirmed = updated.copy(confirmedByUser = true)
+                _tariffConfig.value = confirmed
+                dataRepository.saveTariffConfig(confirmed)
             }
         }
     }

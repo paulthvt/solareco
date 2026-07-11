@@ -32,6 +32,7 @@ class TempoColorRepository(private val source: TempoColorSource) {
         val cached = source.getByDates(distinct.map { it.toString() }).associateBy { it.date }
         val result = mutableMapOf<LocalDate, TempoDayValue>()
         val toCache = mutableListOf<TempoColorEntity>()
+        // NOTE: uncached dates are fetched sequentially (one GET each). Fine for presets (max WEEK=7 days); a manually-chosen wide Custom range backfills many dates on first view, then caches. TODO: batch/parallelise if wide ranges become common.
         for (date in distinct) {
             val key = date.toString()
             val code = cached[key]?.code ?: run {

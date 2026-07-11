@@ -22,6 +22,8 @@ class SavingsViewModel(
     private val computeSavingsUseCase: ComputeSavingsUseCase,
     private val siteIdProvider: suspend () -> Int?,
     private val settingsProvider: suspend () -> TariffConfig,
+    private val initialTimeUnitProvider: suspend () -> DashboardTimeUnit? = { null },
+    private val persistTimeUnit: suspend (Int) -> Unit = {},
 ) : ViewModel() {
     constructor(dataRepository: DataRepository) : this(
         computeSavingsUseCase = ComputeSavingsUseCase(dataRepository),
@@ -35,15 +37,30 @@ class SavingsViewModel(
             dataRepository.getSettings().first().tariffConfigJson
                 ?.let { TariffConfig.decode(it) } ?: TariffConfig.defaults()
         },
+        initialTimeUnitProvider = {
+            dataRepository.getSettings().first().savingsSelectedTimeUnitIndex
+                ?.let { DashboardTimeUnit.entries.getOrNull(it) }
+        },
+        persistTimeUnit = { idx -> dataRepository.saveSavingsSelectedTimeUnitIndex(idx) },
     )
 
     private val _uiState = MutableStateFlow(SavingsScreenState())
     val uiState: StateFlow<SavingsScreenState> get() = _uiState
 
-    init { refresh() }
+    init {
+        viewModelScope.launch {
+            initialTimeUnitProvider()?.let { unit ->
+                _uiState.update { it.copy(selectedTimeUnit = unit) }
+            }
+        }
+        refresh()
+    }
 
     fun onTimeUnitSelected(unit: DashboardTimeUnit) {
         _uiState.update { it.copy(selectedTimeUnit = unit) }
+        viewModelScope.launch {
+            persistTimeUnit(unit.ordinal)
+        }
         refresh()
     }
 

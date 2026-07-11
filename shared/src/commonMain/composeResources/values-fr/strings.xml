@@ -12,7 +12,6 @@
     <string name="bottom_nav_home">Accueil</string>
     <string name="bottom_nav_dashboard">Tableau de bord</string>
     <string name="bottom_nav_devices">Appareils</string>
-    <string name="bottom_nav_more">Plus</string>
     <string name="gauge_subtitle_production">Production</string>
     <string name="gauge_subtitle_consumption">Consommation</string>
     <string name="gauge_subtitle_withdrawals">Retraits</string>
@@ -134,10 +133,6 @@
     <string name="top_consumers_daily_title">Plus Gros Consommateurs Aujourd\'hui</string>
     <string name="bottom_nav_savings">Économies</string>
     <string name="savings_title">Économies</string>
-    <string name="savings_period_today">Aujourd\'hui</string>
-    <string name="savings_period_month">Mois</string>
-    <string name="savings_period_year">Année</string>
-    <string name="savings_period_custom">Personnalisé</string>
     <string name="savings_net_benefit">Bénéfice net</string>
     <string name="savings_saved">Économisé</string>
     <string name="savings_earned">Gagné</string>
