@@ -47,6 +47,10 @@ class DataRepository(
         settingsRepository.saveDashboardSortMode(mode)
     }
 
+    suspend fun saveTariffConfig(config: net.thevenot.comwatt.model.savings.TariffConfig) {
+        settingsRepository.saveTariffConfig(config.encode())
+    }
+
     fun getSettings(): Flow<SolarEcoSettings> {
         return settingsRepository.settings
     }

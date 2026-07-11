@@ -21,6 +21,7 @@ class SettingsRepository(
         stringSetPreferencesKey("dashboard_hidden_devices")
     private val dashboardSortModeKey =
         stringPreferencesKey("dashboard_sort_mode")
+    private val tariffConfigKey = stringPreferencesKey("tariff_config")
 
     val settings: Flow<SolarEcoSettings> = dataStore.data.map {
         SolarEcoSettings(
@@ -29,7 +30,8 @@ class SettingsRepository(
             maxPowerGauge = it[maxPowerGaugeKey],
             productionNoiseThreshold = it[productionNoiseThresholdKey],
             dashboardHiddenDevices = it[dashboardHiddenDevicesKey],
-            dashboardSortMode = it[dashboardSortModeKey]
+            dashboardSortMode = it[dashboardSortModeKey],
+            tariffConfigJson = it[tariffConfigKey]
         )
     }
 
@@ -84,6 +86,12 @@ class SettingsRepository(
     ) {
         dataStore.edit {
             it[dashboardSortModeKey] = mode
+        }
+    }
+
+    suspend fun saveTariffConfig(json: String) {
+        dataStore.edit {
+            it[tariffConfigKey] = json
         }
     }
 }
