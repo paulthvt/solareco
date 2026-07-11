@@ -124,4 +124,25 @@
     <string name="device_settings_save_button">Enregistrer</string>
     <string name="device_settings_save_success">Appareil enregistré avec succès</string>
     <string name="device_settings_save_error">Erreur lors de l\'enregistrement de l\'appareil</string>
+    <string name="devices_screen_title">Appareils</string>
+    <string name="devices_offline_message">L\'objet connecté contrôlant cet appareil est actuellement hors ligne. Vérifiez que votre boîtier Comwatt, prise intelligente ou module de contrôle est allumé.</string>
+    <string name="devices_instant_power">Instantané</string>
+    <string name="devices_daily_energy">24h</string>
+    <string name="devices_no_devices">Aucun appareil trouvé</string>
+    <string name="top_consumers_title">Principaux Consommateurs</string>
+    <string name="top_consumers_realtime_title">Principaux Consommateurs Maintenant</string>
+    <string name="top_consumers_daily_title">Plus Gros Consommateurs Aujourd\'hui</string>
+    <string name="bottom_nav_savings">Économies</string>
+    <string name="savings_title">Économies</string>
+    <string name="savings_period_today">Aujourd\'hui</string>
+    <string name="savings_period_month">Mois</string>
+    <string name="savings_period_year">Année</string>
+    <string name="savings_period_custom">Personnalisé</string>
+    <string name="savings_net_benefit">Bénéfice net</string>
+    <string name="savings_saved">Économisé</string>
+    <string name="savings_earned">Gagné</string>
+    <string name="savings_spent">Dépensé</string>
+    <string name="savings_partial_data">Certaines périodes n\'ont pas de données tarifaires — les totaux sont partiels.</string>
+    <string name="savings_set_rates_cta">Configurez vos tarifs d\'électricité pour voir vos économies</string>
+    <string name="savings_edit_rates">Modifier les tarifs</string>
 </resources>
