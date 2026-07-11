@@ -22,6 +22,7 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,6 +56,7 @@ import comwatt.shared.generated.resources.settings_tempo_blue_hc
 import comwatt.shared.generated.resources.settings_tempo_blue_hp
 import comwatt.shared.generated.resources.settings_tempo_red_hc
 import comwatt.shared.generated.resources.settings_tempo_red_hp
+import comwatt.shared.generated.resources.settings_tempo_reset_rates
 import comwatt.shared.generated.resources.settings_tempo_white_hc
 import comwatt.shared.generated.resources.settings_tempo_white_hp
 import comwatt.shared.generated.resources.settings_title
@@ -89,7 +91,8 @@ fun SettingsScreen(
         tariffConfig = tariffConfig,
         onTariffConfigChange = { newConfig ->
             viewModel.updateTariffConfig(newConfig)
-        }
+        },
+        onResetTempoRates = viewModel::resetTempoRatesToOfficial
     )
 }
 
@@ -98,7 +101,8 @@ fun SettingsContent(
     productionNoiseThreshold: Int,
     onProductionNoiseThresholdChange: (Float) -> Unit = {},
     tariffConfig: TariffConfig = TariffConfig.defaults(),
-    onTariffConfigChange: (TariffConfig) -> Unit = {}
+    onTariffConfigChange: (TariffConfig) -> Unit = {},
+    onResetTempoRates: () -> Unit = {}
 ) {
     Scaffold { paddingValues ->
         Column(
@@ -178,7 +182,8 @@ fun SettingsContent(
             ) {
                 TariffConfigEditor(
                     config = tariffConfig,
-                    onConfigChange = onTariffConfigChange
+                    onConfigChange = onTariffConfigChange,
+                    onResetTempoRates = onResetTempoRates
                 )
             }
         }
@@ -226,7 +231,8 @@ fun SettingCard(
 @Composable
 fun TariffConfigEditor(
     config: TariffConfig,
-    onConfigChange: (TariffConfig) -> Unit
+    onConfigChange: (TariffConfig) -> Unit,
+    onResetTempoRates: () -> Unit = {}
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
@@ -347,6 +353,9 @@ fun TariffConfigEditor(
                     value = config.resalePrice,
                     onValueChange = { onConfigChange(config.copy(resalePrice = it)) }
                 )
+                TextButton(onClick = onResetTempoRates) {
+                    Text(stringResource(Res.string.settings_tempo_reset_rates))
+                }
             }
         }
     }

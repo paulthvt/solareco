@@ -168,4 +168,5 @@
     <string name="settings_tempo_white_hc">Blanc creuses</string>
     <string name="settings_tempo_red_hp">Rouge pleines</string>
     <string name="settings_tempo_red_hc">Rouge creuses</string>
+    <string name="settings_tempo_reset_rates">Réinitialiser aux tarifs officiels</string>
 </resources>

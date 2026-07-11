@@ -45,4 +45,23 @@ class SettingsViewModel(val dataRepository: DataRepository) : ViewModel() {
             dataRepository.saveTariffConfig(config.copy(confirmedByUser = true))
         }
     }
+
+    fun resetTempoRatesToOfficial() {
+        viewModelScope.launch {
+            dataRepository.tempoApi.tarifs().onRight { t ->
+                val updated = _tariffConfig.value.copy(
+                    tempo = _tariffConfig.value.tempo.copy(
+                        blueHp = t.bleuHP,
+                        blueHc = t.bleuHC,
+                        whiteHp = t.blancHP,
+                        whiteHc = t.blancHC,
+                        redHp = t.rougeHP,
+                        redHc = t.rougeHC,
+                    ),
+                )
+                _tariffConfig.value = updated
+                dataRepository.saveTariffConfig(updated.copy(confirmedByUser = true))
+            }
+        }
+    }
 }

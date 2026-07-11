@@ -174,4 +174,5 @@
     <string name="settings_tempo_white_hc">White off-peak</string>
     <string name="settings_tempo_red_hp">Red peak</string>
     <string name="settings_tempo_red_hc">Red off-peak</string>
+    <string name="settings_tempo_reset_rates">Reset to official rates</string>
 </resources>
