@@ -146,6 +146,8 @@ import net.thevenot.comwatt.domain.model.TimeSeriesTitle
 import net.thevenot.comwatt.domain.model.TimeSeriesType
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
 import net.thevenot.comwatt.ui.common.LoadingView
+import net.thevenot.comwatt.ui.common.timerange.RangeButton
+import net.thevenot.comwatt.ui.common.timerange.TimeUnitBar
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.home.statistics.StatisticsCard
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
@@ -279,19 +281,23 @@ fun DashboardScreenContent(
                     contentPadding = PaddingValues(bottom = AppTheme.dimens.paddingNormal)
                 ) {
                     item {
-                        TimeUnitBar(uiState) { viewModel.onTimeUnitSelected(it) }
+                        TimeUnitBar(uiState.selectedTimeUnit) { viewModel.onTimeUnitSelected(it) }
                     }
 
                     item {
-                        RangeButton(uiState = uiState, onPreviousButtonClick = {
-                            viewModel.dragRange(RangeSelectionButton.PREV)
-                            viewModel.singleRefresh()
-                        }, onNextButtonClick = {
-                            viewModel.dragRange(RangeSelectionButton.NEXT)
-                            viewModel.singleRefresh()
-                        }) {
-                            showDatePickerDialog.value = true
-                        }
+                        RangeButton(
+                            selectedTimeUnit = uiState.selectedTimeUnit,
+                            selectedTimeRange = uiState.selectedTimeRange,
+                            onPrevious = {
+                                viewModel.dragRange(RangeSelectionButton.PREV)
+                                viewModel.singleRefresh()
+                            },
+                            onNext = {
+                                viewModel.dragRange(RangeSelectionButton.NEXT)
+                                viewModel.singleRefresh()
+                            },
+                            onOpenPicker = { showDatePickerDialog.value = true }
+                        )
                     }
 
                     uiState.rangeStats?.let { stats ->
@@ -352,166 +358,6 @@ private fun buildRangeTotalsLabel(uiState: DashboardScreenState): String =
         DashboardTimeUnit.WEEK -> "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${uiState.selectedTimeRange.week.end.formatDayMonth()}"
         DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${uiState.selectedTimeRange.custom.end.formatDayMonth()}"
     }
-
-@Composable
-private fun RangeButton(
-    uiState: DashboardScreenState,
-    onPreviousButtonClick: () -> Unit = {},
-    onNextButtonClick: () -> Unit = {},
-    showDatePickerDialog: () -> Unit
-) {
-    val selectedValue = when (uiState.selectedTimeUnit) {
-        DashboardTimeUnit.HOUR -> uiState.selectedTimeRange.hour.selectedValue
-        DashboardTimeUnit.SIXHOUR -> uiState.selectedTimeRange.sixHour.selectedValue
-        DashboardTimeUnit.DAY -> uiState.selectedTimeRange.day.selectedValue
-        DashboardTimeUnit.WEEK -> uiState.selectedTimeRange.week.selectedValue
-        DashboardTimeUnit.CUSTOM -> 0
-    }
-    val minBound = when (uiState.selectedTimeUnit) {
-        DashboardTimeUnit.HOUR -> 23
-        DashboardTimeUnit.SIXHOUR -> 7
-        DashboardTimeUnit.DAY -> 364
-        DashboardTimeUnit.WEEK -> 52
-        DashboardTimeUnit.CUSTOM -> 0
-    }
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = AppTheme.dimens.paddingNormal),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (uiState.selectedTimeUnit != DashboardTimeUnit.CUSTOM) {
-            OutlinedIconButton(
-                shape = ButtonDefaults.squareShape,
-                onClick = onPreviousButtonClick, enabled = selectedValue < minBound
-            ) {
-                Icon(AppIcons.ChevronLeft, contentDescription = "Previous")
-            }
-        }
-
-        TextButton(onClick = showDatePickerDialog, modifier = Modifier.weight(1f)) {
-            Column(
-                modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    when (uiState.selectedTimeUnit) {
-                        DashboardTimeUnit.HOUR -> pluralStringResource(
-                            Res.plurals.hour_range_selected_time,
-                            uiState.selectedTimeRange.hour.selectedValue + 1,
-                            uiState.selectedTimeRange.hour.selectedValue + 1
-                        )
-
-                        DashboardTimeUnit.SIXHOUR -> pluralStringResource(
-                            Res.plurals.six_hour_range_selected_time,
-                            (uiState.selectedTimeRange.sixHour.selectedValue * 3) + 6,
-                            (uiState.selectedTimeRange.sixHour.selectedValue * 3) + 6
-                        )
-
-                        DashboardTimeUnit.DAY -> when (uiState.selectedTimeRange.day.selectedValue) {
-                            0 -> stringResource(Res.string.day_range_selected_time_today)
-                            1 -> stringResource(Res.string.day_range_selected_time_yesterday)
-                            else -> stringResource(
-                                Res.string.day_range_selected_time_n_days_gao,
-                                uiState.selectedTimeRange.day.selectedValue
-                            )
-                        }
-
-                        DashboardTimeUnit.WEEK -> when (uiState.selectedTimeRange.week.selectedValue) {
-                            0 -> stringResource(Res.string.week_range_selected_time_past_seven_days)
-                            1 -> stringResource(Res.string.week_range_selected_time_one_week_ago)
-                            else -> stringResource(
-                                Res.string.week_range_selected_time_n_weeks_ago,
-                                uiState.selectedTimeRange.week.selectedValue
-                            )
-                        }
-
-                        DashboardTimeUnit.CUSTOM -> "${uiState.selectedTimeRange.custom.start.formatDayMonth()} - ${
-                            uiState.selectedTimeRange.custom.end.formatDayMonth()
-                        }"
-                    }
-                )
-
-                when (uiState.selectedTimeUnit) {
-                    DashboardTimeUnit.HOUR -> Text(
-                        text = "${uiState.selectedTimeRange.hour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.hour.end.formatHourMinutes()}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    DashboardTimeUnit.SIXHOUR -> Text(
-                        text = "${uiState.selectedTimeRange.sixHour.start.formatHourMinutes()} - ${uiState.selectedTimeRange.sixHour.end.formatHourMinutes()}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    DashboardTimeUnit.DAY -> Text(
-                        text = uiState.selectedTimeRange.day.end.formatDayMonth(),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    DashboardTimeUnit.WEEK -> Text(
-                        text = "${uiState.selectedTimeRange.week.start.formatDayMonth()} - ${
-                            uiState.selectedTimeRange.week.end.formatDayMonth()
-                        }", style = MaterialTheme.typography.bodySmall
-                    )
-
-                    DashboardTimeUnit.CUSTOM -> Text(
-                        text = "${uiState.selectedTimeRange.custom.start.formatHourMinutes()} - ${uiState.selectedTimeRange.custom.end.formatHourMinutes()}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
-
-        if (uiState.selectedTimeUnit != DashboardTimeUnit.CUSTOM) {
-            OutlinedIconButton(
-                shape = ButtonDefaults.squareShape,
-                onClick = onNextButtonClick,
-                enabled = selectedValue > 0
-            ) {
-                Icon(AppIcons.ChevronRight, contentDescription = "Next")
-            }
-        }
-    }
-}
-
-@Composable
-private fun TimeUnitBar(
-    uiState: DashboardScreenState, onTimeUnitSelected: (DashboardTimeUnit) -> Unit = {}
-) {
-    Row(
-        Modifier
-            .padding(horizontal = AppTheme.dimens.paddingSmall)
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(
-            space = ButtonGroupDefaults.ConnectedSpaceBetween,
-            alignment = Alignment.CenterHorizontally
-        )
-    ) {
-        val options = listOf(
-            stringResource(Res.string.range_picker_button_hour) to DashboardTimeUnit.HOUR,
-            stringResource(Res.string.range_picker_button_sixhour) to DashboardTimeUnit.SIXHOUR,
-            stringResource(Res.string.range_picker_button_day) to DashboardTimeUnit.DAY,
-            stringResource(Res.string.range_picker_button_week) to DashboardTimeUnit.WEEK,
-            stringResource(Res.string.range_picker_button_custom) to DashboardTimeUnit.CUSTOM
-        )
-        options.forEachIndexed { index, (label, timeUnit) ->
-            ToggleButton(
-                checked = timeUnit == uiState.selectedTimeUnit,
-                onCheckedChange = { onTimeUnitSelected(timeUnit) },
-                modifier = Modifier.semantics { role = Role.RadioButton },
-                shapes =
-                    when (index) {
-                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
-                        options.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
-                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
-                    },
-            ) {
-                Text(label, maxLines = 1)
-            }
-        }
-    }
-}
 
 /**
  * Top-app-bar trigger for the device filter. Shows a badge with the number of hidden
@@ -1147,8 +993,8 @@ fun TimeUnitBarPreview() {
 
     ComwattTheme {
         Column {
-            TimeUnitBar(uiState = sampleState)
-            TimeUnitBar(uiState = sampleState.copy(selectedTimeUnit = DashboardTimeUnit.CUSTOM))
+            TimeUnitBar(selectedTimeUnit = sampleState.selectedTimeUnit)
+            TimeUnitBar(selectedTimeUnit = DashboardTimeUnit.CUSTOM)
         }
     }
 }
@@ -1168,10 +1014,12 @@ fun RangeButtonPreview() {
 
     ComwattTheme {
         RangeButton(
-            uiState = sampleState,
-            onPreviousButtonClick = {},
-            onNextButtonClick = {},
-            showDatePickerDialog = {})
+            selectedTimeUnit = sampleState.selectedTimeUnit,
+            selectedTimeRange = sampleState.selectedTimeRange,
+            onPrevious = {},
+            onNext = {},
+            onOpenPicker = {}
+        )
     }
 }
 
