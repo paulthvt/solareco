@@ -17,7 +17,6 @@ import net.thevenot.comwatt.model.savings.TempoBreakdown
 import net.thevenot.comwatt.model.savings.TempoColorAmounts
 import net.thevenot.comwatt.model.PeakType
 import net.thevenot.comwatt.model.type.AggregationLevel
-import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.model.TempoDayValue
 
@@ -30,10 +29,13 @@ interface SavingsDataSource {
 
 class DataRepositorySavingsSource(private val dataRepository: DataRepository) : SavingsDataSource {
     override suspend fun siteTimeSeriesHourly(siteId: Int, start: Instant, end: Instant) =
+        // NB: no aggregationType — SUM collapses the whole range into a single total
+        // (used by FetchTopConsumersUseCase for daily totals), which would price all
+        // energy in one bucket. HOUR without SUM returns per-hour buckets, so each hour
+        // maps to its own Tempo peak/off-peak rate.
         dataRepository.api.fetchSiteTimeSeries(
             siteId = siteId, startTime = start, endTime = end,
             measureKind = MeasureKind.QUANTITY, aggregationLevel = AggregationLevel.HOUR,
-            aggregationType = AggregationType.SUM,
         )
 }
 

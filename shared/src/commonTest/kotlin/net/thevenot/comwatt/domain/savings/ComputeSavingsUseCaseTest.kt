@@ -72,6 +72,37 @@ class ComputeSavingsUseCaseTest {
     )
 
     @Test
+    fun tempoNightWithdrawalIsClassifiedOffPeak() = runTest {
+        // Blue day. Withdrawal at 02:00 (night, off-peak 22-06) and 12:00 (day, peak).
+        val nightDaySeries = SiteTimeSeriesDto(
+            timestamps = listOf("2026-07-10T02:00:00Z", "2026-07-10T12:00:00Z"),
+            productions = listOf(0.0, 0.0),
+            consumptions = listOf(1000.0, 1000.0),
+            injections = listOf(0.0, 0.0),
+            withdrawals = listOf(1000.0, 1000.0), // 1 kWh each
+            charges = emptyList(), discharges = emptyList(),
+            autoProductionRates = emptyList(), autoConsumptionRates = emptyList(),
+            injectionRates = emptyList(), withdrawalRates = emptyList()
+        )
+        val colorMap = mapOf(LocalDate.parse("2026-07-10") to TempoDayValue.BLUE)
+        val tempoRepo = TempoColorRepository(FakeTempoColorSource(colorMap))
+        val source = FakeSavingsDataSource(siteSeries = nightDaySeries.right())
+        val config = TariffConfig.defaults().copy(contractType = ContractType.TEMPO)
+
+        val result = ComputeSavingsUseCase(source, tempoRepo)(
+            siteId = 1,
+            start = Instant.parse("2026-07-10T00:00:00Z"),
+            end = Instant.parse("2026-07-10T13:00:00Z"),
+            config = config,
+            zone = TimeZone.UTC
+        )
+        val tempo = (result as Either.Right).value.tempo!!
+        // 02:00 → off-peak (blueHc 0.1296); 12:00 → peak (blueHp 0.1609)
+        assertEquals(0.1296, tempo.blue.spentHc, 1e-9)
+        assertEquals(0.1609, tempo.blue.spentHp, 1e-9)
+    }
+
+    @Test
     fun baseTariffComputesSavedEarnedSpentNet() = runTest {
         val source = FakeSavingsDataSource(siteSeries = series().right())
         val tempoRepo = TempoColorRepository(FakeTempoColorSource())
