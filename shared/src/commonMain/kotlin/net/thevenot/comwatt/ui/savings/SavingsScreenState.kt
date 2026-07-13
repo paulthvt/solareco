@@ -7,6 +7,7 @@ import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 
 data class SavingsScreenState(
     val isLoading: Boolean = true,
+    val isRefreshing: Boolean = false,
     val hasError: Boolean = false,
     val breakdown: SavingsBreakdown = SavingsBreakdown.EMPTY,
     val selectedTimeUnit: DashboardTimeUnit = DashboardTimeUnit.DAY,

@@ -85,12 +85,19 @@ class SavingsViewModel(
         refresh()
     }
 
-    fun refresh() {
+    /** Pull-to-refresh: keep existing content visible via [SavingsScreenState.isRefreshing]
+     *  instead of the full-screen [SavingsScreenState.isLoading] indicator. */
+    fun pullToRefresh() = refresh(isPullToRefresh = true)
+
+    fun refresh(isPullToRefresh: Boolean = false) {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, hasError = false) }
+            _uiState.update {
+                if (isPullToRefresh) it.copy(isRefreshing = true, hasError = false)
+                else it.copy(isLoading = true, hasError = false)
+            }
             val config = settingsProvider()
             val siteId = siteIdProvider()
-            if (siteId == null) { _uiState.update { it.copy(isLoading = false, hasError = true, config = config, configConfirmed = config.confirmedByUser) }; return@launch }
+            if (siteId == null) { _uiState.update { it.copy(isLoading = false, isRefreshing = false, hasError = true, config = config, configConfirmed = config.confirmedByUser) }; return@launch }
             val zone = TimeZone.currentSystemDefault()
             val state = _uiState.value
             val range = state.selectedTimeRange.withUpdatedRange() // refresh against "now"
@@ -100,10 +107,10 @@ class SavingsViewModel(
                 config = config, zone = zone,
             )
             _uiState.update {
-                val base = it.copy(selectedTimeRange = range, config = config, configConfirmed = config.confirmedByUser)
+                val base = it.copy(isLoading = false, isRefreshing = false, selectedTimeRange = range, config = config, configConfirmed = config.confirmedByUser)
                 when (result) {
-                    is Either.Right -> base.copy(isLoading = false, hasError = false, breakdown = result.value)
-                    is Either.Left -> base.copy(isLoading = false, hasError = true)
+                    is Either.Right -> base.copy(hasError = false, breakdown = result.value)
+                    is Either.Left -> base.copy(hasError = true)
                 }
             }
         }

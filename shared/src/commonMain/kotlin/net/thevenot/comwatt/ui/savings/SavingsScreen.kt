@@ -15,12 +15,16 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -49,16 +54,21 @@ import comwatt.shared.generated.resources.savings_tempo_title
 import comwatt.shared.generated.resources.savings_tempo_white
 import comwatt.shared.generated.resources.savings_title
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.model.savings.SavingsBreakdown
 import net.thevenot.comwatt.model.savings.TempoBreakdown
+import net.thevenot.comwatt.model.savings.TempoColorAmounts
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.common.timerange.RangeButton
 import net.thevenot.comwatt.ui.common.timerange.TimeUnitBar
 import net.thevenot.comwatt.ui.dashboard.RangeSelectionButton
+import net.thevenot.comwatt.ui.dashboard.SelectedTimeRange
 import net.thevenot.comwatt.ui.dashboard.TimePickerDialog
+import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.AppTheme
+import net.thevenot.comwatt.ui.theme.ComwattTheme
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import net.thevenot.comwatt.ui.theme.tempoBlue
 import net.thevenot.comwatt.ui.theme.tempoRed
@@ -91,12 +101,16 @@ fun SavingsScreen(
         LoadingView(
             isLoading = state.isLoading,
             hasError = state.hasError,
-            onRefresh = viewModel::refresh
+            onRefresh = { viewModel.refresh() }
         ) {
             SavingsScreenContent(
                 state = state,
-                viewModel = viewModel,
                 showDatePickerDialog = showDatePickerDialog.value,
+                onRefresh = viewModel::pullToRefresh,
+                onTimeUnitSelected = viewModel::onTimeUnitSelected,
+                onPreviousRange = { viewModel.dragRange(RangeSelectionButton.PREV) },
+                onNextRange = { viewModel.dragRange(RangeSelectionButton.NEXT) },
+                onRangeSelected = viewModel::onTimeSelected,
                 onOpenPicker = { showDatePickerDialog.value = true },
                 onDismissPicker = { showDatePickerDialog.value = false },
                 onEditRatesClick = { navController.navigate(Screen.Settings) }
@@ -105,16 +119,22 @@ fun SavingsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SavingsScreenContent(
     state: SavingsScreenState,
-    viewModel: SavingsViewModel,
     showDatePickerDialog: Boolean,
-    onOpenPicker: () -> Unit,
-    onDismissPicker: () -> Unit,
+    onRefresh: () -> Unit = {},
+    onTimeUnitSelected: (DashboardTimeUnit) -> Unit = {},
+    onPreviousRange: () -> Unit = {},
+    onNextRange: () -> Unit = {},
+    onRangeSelected: (SelectedTimeRange) -> Unit = {},
+    onOpenPicker: () -> Unit = {},
+    onDismissPicker: () -> Unit = {},
     onEditRatesClick: () -> Unit = {}
 ) {
     val scrollState = rememberScrollState()
+    val pullState = rememberPullToRefreshState()
 
     // Time picker dialog
     if (showDatePickerDialog) {
@@ -123,12 +143,24 @@ private fun SavingsScreenContent(
             onDismiss = onDismissPicker,
             defaultSelectedTimeRange = state.selectedTimeRange,
             onRangeSelected = { range ->
-                viewModel.onTimeSelected(range)
+                onRangeSelected(range)
                 onDismissPicker()
             }
         )
     }
 
+    PullToRefreshBox(
+        state = pullState,
+        isRefreshing = state.isRefreshing,
+        onRefresh = onRefresh,
+        indicator = {
+            PullToRefreshDefaults.LoadingIndicator(
+                state = pullState,
+                isRefreshing = state.isRefreshing,
+                modifier = Modifier.align(Alignment.TopCenter)
+            )
+        }
+    ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,14 +171,14 @@ private fun SavingsScreenContent(
         Spacer(modifier = Modifier.height(AppTheme.dimens.paddingSmall))
 
         // Time unit selector bar
-        TimeUnitBar(state.selectedTimeUnit) { viewModel.onTimeUnitSelected(it) }
+        TimeUnitBar(state.selectedTimeUnit, onTimeUnitSelected)
 
         // Range navigation button
         RangeButton(
             selectedTimeUnit = state.selectedTimeUnit,
             selectedTimeRange = state.selectedTimeRange,
-            onPrevious = { viewModel.dragRange(RangeSelectionButton.PREV) },
-            onNext = { viewModel.dragRange(RangeSelectionButton.NEXT) },
+            onPrevious = onPreviousRange,
+            onNext = onNextRange,
             onOpenPicker = onOpenPicker
         )
 
@@ -241,6 +273,7 @@ private fun SavingsScreenContent(
         }
 
         Spacer(modifier = Modifier.height(AppTheme.dimens.paddingNormal))
+    }
     }
 }
 
@@ -447,4 +480,44 @@ private fun formatKwh(value: Double): String {
     val fractionalPart = tenths % 10
     val formatted = if (value < 0) "-$wholePart.$fractionalPart" else "$wholePart.$fractionalPart"
     return "$formatted kWh"
+}
+
+@Preview
+@Composable
+private fun PreviewSavingsScreenConfigured() {
+    ComwattTheme {
+        SavingsScreenContent(
+            state = SavingsScreenState(
+                isLoading = false,
+                configConfirmed = true,
+                breakdown = SavingsBreakdown(
+                    savedEuros = 5.52,
+                    earnedEuros = 0.53,
+                    spentEuros = 1.61,
+                    netEuros = 4.44,
+                    selfConsumedKwh = 34.2,
+                    injectedKwh = 4.1,
+                    withdrawnKwh = 9.7,
+                    tempo = TempoBreakdown(
+                        blue = TempoColorAmounts(saved = 5.52, spentHp = 1.30, spentHc = 0.31),
+                        white = TempoColorAmounts(saved = 0.0, spentHp = 0.0, spentHc = 0.0),
+                        red = TempoColorAmounts(saved = 0.0, spentHp = 0.0, spentHc = 0.0),
+                    ),
+                    partial = false,
+                ),
+            ),
+            showDatePickerDialog = false,
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun PreviewSavingsScreenNotConfigured() {
+    ComwattTheme {
+        SavingsScreenContent(
+            state = SavingsScreenState(isLoading = false, configConfirmed = false),
+            showDatePickerDialog = false,
+        )
+    }
 }
