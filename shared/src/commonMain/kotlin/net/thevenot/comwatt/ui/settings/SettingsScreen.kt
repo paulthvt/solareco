@@ -132,8 +132,8 @@ fun SettingsContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .verticalScroll(rememberScrollState())
                 .imePadding()
+                .verticalScroll(rememberScrollState())
                 .padding(AppTheme.dimens.paddingNormal),
             verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
         ) {
@@ -396,6 +396,7 @@ fun RateField(
             newText.toDoubleOrNull()?.let { onValueChange(it) }
         },
         label = { Text(label) },
+        suffix = { Text("€/kWh") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         singleLine = true,
         modifier = modifier.fillMaxWidth()

@@ -172,6 +172,15 @@ class ComputeSavingsUseCaseTest {
         assertEquals(0.0, ts.blueEuros, 1e-9)
         assertEquals(0.0, ts.whiteEuros, 1e-9)
         assertTrue(!b.partial)
+
+        // Spent split: both hours RED PEAK; only h1 withdraws 1 kWh × redHp 0.7562.
+        val spent = b.tempoSpent!!
+        assertEquals(0.7562, spent.redHp, 1e-9)
+        assertEquals(0.0, spent.redHc, 1e-9)
+        assertEquals(0.0, spent.blueHp, 1e-9)
+        assertEquals(0.0, spent.blueHc, 1e-9)
+        assertEquals(0.0, spent.whiteHp, 1e-9)
+        assertEquals(0.0, spent.whiteHc, 1e-9)
     }
 
     @Test

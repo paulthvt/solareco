@@ -30,4 +30,7 @@ class TariffRateResolver(
 
     fun tempoColorAt(dateTime: LocalDateTime): TempoDayValue? =
         tempoCalendar[dateTime.date]?.color
+
+    fun peakTypeAt(dateTime: LocalDateTime): PeakType? =
+        tempoCalendar[dateTime.date]?.peakTypeAt(dateTime.time)
 }

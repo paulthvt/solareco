@@ -15,6 +15,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
@@ -41,11 +42,15 @@ import comwatt.shared.generated.resources.savings_saved
 import comwatt.shared.generated.resources.savings_set_rates_cta
 import comwatt.shared.generated.resources.savings_spent
 import comwatt.shared.generated.resources.savings_tempo_blue
+import comwatt.shared.generated.resources.savings_tempo_offpeak
+import comwatt.shared.generated.resources.savings_tempo_peak
 import comwatt.shared.generated.resources.savings_tempo_red
+import comwatt.shared.generated.resources.savings_tempo_spent_title
 import comwatt.shared.generated.resources.savings_tempo_title
 import comwatt.shared.generated.resources.savings_tempo_white
 import comwatt.shared.generated.resources.savings_title
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.model.savings.TempoSpentBreakdown
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.common.timerange.RangeButton
@@ -197,7 +202,8 @@ private fun SavingsScreenContent(
                 TempoSubtotalsCard(
                     blueEuros = tempo.blueEuros,
                     whiteEuros = tempo.whiteEuros,
-                    redEuros = tempo.redEuros
+                    redEuros = tempo.redEuros,
+                    spent = state.breakdown.tempoSpent
                 )
             }
 
@@ -323,7 +329,8 @@ private fun BreakdownCard(
 private fun TempoSubtotalsCard(
     blueEuros: Double,
     whiteEuros: Double,
-    redEuros: Double
+    redEuros: Double,
+    spent: TempoSpentBreakdown?
 ) {
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -358,9 +365,61 @@ private fun TempoSubtotalsCard(
                     color = MaterialTheme.colorScheme.tempoRed
                 )
             }
+
+            // Grid cost split by colour and peak/off-peak — only colours with spend are shown.
+            val spentRows = spent?.let {
+                listOfNotNull(
+                    tempoSpentRow(stringResource(Res.string.savings_tempo_blue), MaterialTheme.colorScheme.tempoBlue, it.blueHp, it.blueHc),
+                    tempoSpentRow(stringResource(Res.string.savings_tempo_white), MaterialTheme.colorScheme.tempoWhite, it.whiteHp, it.whiteHc),
+                    tempoSpentRow(stringResource(Res.string.savings_tempo_red), MaterialTheme.colorScheme.tempoRed, it.redHp, it.redHc),
+                )
+            }.orEmpty()
+
+            if (spentRows.isNotEmpty()) {
+                HorizontalDivider(modifier = Modifier.padding(vertical = AppTheme.dimens.paddingSmall))
+                Text(
+                    text = stringResource(Res.string.savings_tempo_spent_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                val peakLabel = stringResource(Res.string.savings_tempo_peak)
+                val offpeakLabel = stringResource(Res.string.savings_tempo_offpeak)
+                spentRows.forEach { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = row.label,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = row.color
+                        )
+                        Text(
+                            text = "$peakLabel ${formatEuros(row.hp)} · $offpeakLabel ${formatEuros(row.hc)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
         }
     }
 }
+
+private data class TempoSpentRow(
+    val label: String,
+    val color: androidx.compose.ui.graphics.Color,
+    val hp: Double,
+    val hc: Double,
+)
+
+private fun tempoSpentRow(
+    label: String,
+    color: androidx.compose.ui.graphics.Color,
+    hp: Double,
+    hc: Double,
+): TempoSpentRow? = if (hp > 0.0 || hc > 0.0) TempoSpentRow(label, color, hp, hc) else null
 
 @Composable
 private fun TempoSubtotalItem(

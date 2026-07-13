@@ -6,6 +6,16 @@ data class TempoSubtotals(
     val redEuros: Double,
 )
 
+/** Grid-withdrawal cost (euros) split by Tempo colour and peak/off-peak period. */
+data class TempoSpentBreakdown(
+    val blueHp: Double,
+    val blueHc: Double,
+    val whiteHp: Double,
+    val whiteHc: Double,
+    val redHp: Double,
+    val redHc: Double,
+)
+
 data class SavingsBreakdown(
     val savedEuros: Double,
     val earnedEuros: Double,
@@ -15,9 +25,10 @@ data class SavingsBreakdown(
     val injectedKwh: Double,
     val withdrawnKwh: Double,
     val tempoSubtotals: TempoSubtotals?,
+    val tempoSpent: TempoSpentBreakdown?,
     val partial: Boolean,
 ) {
     companion object {
-        val EMPTY = SavingsBreakdown(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null, false)
+        val EMPTY = SavingsBreakdown(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null, null, false)
     }
 }

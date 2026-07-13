@@ -13,7 +13,9 @@ import net.thevenot.comwatt.model.SiteTimeSeriesDto
 import net.thevenot.comwatt.model.savings.ContractType
 import net.thevenot.comwatt.model.savings.SavingsBreakdown
 import net.thevenot.comwatt.model.savings.TariffConfig
+import net.thevenot.comwatt.model.savings.TempoSpentBreakdown
 import net.thevenot.comwatt.model.savings.TempoSubtotals
+import net.thevenot.comwatt.model.PeakType
 import net.thevenot.comwatt.model.type.AggregationLevel
 import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
@@ -73,6 +75,9 @@ class ComputeSavingsUseCase(
         var saved = 0.0; var earned = 0.0; var spent = 0.0
         var selfKwh = 0.0; var injKwh = 0.0; var wKwh = 0.0
         var blue = 0.0; var white = 0.0; var red = 0.0
+        var blueHpSpent = 0.0; var blueHcSpent = 0.0
+        var whiteHpSpent = 0.0; var whiteHcSpent = 0.0
+        var redHpSpent = 0.0; var redHcSpent = 0.0
         var partial = false
         for (i in dto.timestamps.indices) {
             val instant = runCatching { Instant.parse(dto.timestamps[i]) }.getOrNull() ?: continue
@@ -88,11 +93,20 @@ class ComputeSavingsUseCase(
             val spentHour = withdrawn * rate
             saved += savedHour; earned += injected * config.resalePrice; spent += spentHour
             if (config.contractType == ContractType.TEMPO) {
+                val color = resolver.tempoColorAt(ldt)
                 // Per-colour subtotal = net euros (savings minus grid cost) for that colour.
-                when (resolver.tempoColorAt(ldt)) {
+                when (color) {
                     TempoDayValue.BLUE -> blue += savedHour - spentHour
                     TempoDayValue.WHITE -> white += savedHour - spentHour
                     TempoDayValue.RED -> red += savedHour - spentHour
+                    null -> {}
+                }
+                // Grid cost split by colour and peak/off-peak.
+                val peak = resolver.peakTypeAt(ldt) == PeakType.PEAK
+                when (color) {
+                    TempoDayValue.BLUE -> if (peak) blueHpSpent += spentHour else blueHcSpent += spentHour
+                    TempoDayValue.WHITE -> if (peak) whiteHpSpent += spentHour else whiteHcSpent += spentHour
+                    TempoDayValue.RED -> if (peak) redHpSpent += spentHour else redHcSpent += spentHour
                     null -> {}
                 }
             }
@@ -102,6 +116,9 @@ class ComputeSavingsUseCase(
             netEuros = saved + earned - spent,
             selfConsumedKwh = selfKwh, injectedKwh = injKwh, withdrawnKwh = wKwh,
             tempoSubtotals = if (config.contractType == ContractType.TEMPO) TempoSubtotals(blue, white, red) else null,
+            tempoSpent = if (config.contractType == ContractType.TEMPO)
+                TempoSpentBreakdown(blueHpSpent, blueHcSpent, whiteHpSpent, whiteHcSpent, redHpSpent, redHcSpent)
+            else null,
             partial = partial,
         )
     }
