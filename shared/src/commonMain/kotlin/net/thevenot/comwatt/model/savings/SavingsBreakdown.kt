@@ -1,19 +1,22 @@
 package net.thevenot.comwatt.model.savings
 
-data class TempoSubtotals(
-    val blueEuros: Double,
-    val whiteEuros: Double,
-    val redEuros: Double,
-)
+/**
+ * Per-Tempo-colour euro breakdown: self-consumption savings and grid-withdrawal
+ * cost, the latter split by peak (HP) and off-peak (HC). `spent = spentHp + spentHc`.
+ */
+data class TempoColorAmounts(
+    val saved: Double,
+    val spentHp: Double,
+    val spentHc: Double,
+) {
+    val spent: Double get() = spentHp + spentHc
+    val hasActivity: Boolean get() = saved > 0.0 || spent > 0.0
+}
 
-/** Grid-withdrawal cost (euros) split by Tempo colour and peak/off-peak period. */
-data class TempoSpentBreakdown(
-    val blueHp: Double,
-    val blueHc: Double,
-    val whiteHp: Double,
-    val whiteHc: Double,
-    val redHp: Double,
-    val redHc: Double,
+data class TempoBreakdown(
+    val blue: TempoColorAmounts,
+    val white: TempoColorAmounts,
+    val red: TempoColorAmounts,
 )
 
 data class SavingsBreakdown(
@@ -24,11 +27,10 @@ data class SavingsBreakdown(
     val selfConsumedKwh: Double,
     val injectedKwh: Double,
     val withdrawnKwh: Double,
-    val tempoSubtotals: TempoSubtotals?,
-    val tempoSpent: TempoSpentBreakdown?,
+    val tempo: TempoBreakdown?,
     val partial: Boolean,
 ) {
     companion object {
-        val EMPTY = SavingsBreakdown(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null, null, false)
+        val EMPTY = SavingsBreakdown(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, null, false)
     }
 }

@@ -144,7 +144,6 @@
     <string name="savings_tempo_blue">Bleu</string>
     <string name="savings_tempo_white">Blanc</string>
     <string name="savings_tempo_red">Rouge</string>
-    <string name="savings_tempo_spent_title">Dépensé par période</string>
     <string name="savings_tempo_peak">Pleines</string>
     <string name="savings_tempo_offpeak">Creuses</string>
     <string name="settings_tariff_title">Tarifs d\'électricité</string>

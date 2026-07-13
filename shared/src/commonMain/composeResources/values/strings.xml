@@ -150,7 +150,6 @@
     <string name="savings_tempo_blue">Blue</string>
     <string name="savings_tempo_white">White</string>
     <string name="savings_tempo_red">Red</string>
-    <string name="savings_tempo_spent_title">Spent by period</string>
     <string name="savings_tempo_peak">Peak</string>
     <string name="savings_tempo_offpeak">Off-peak</string>
     <string name="settings_tariff_title">Electricity rates</string>

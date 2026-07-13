@@ -45,12 +45,11 @@ import comwatt.shared.generated.resources.savings_tempo_blue
 import comwatt.shared.generated.resources.savings_tempo_offpeak
 import comwatt.shared.generated.resources.savings_tempo_peak
 import comwatt.shared.generated.resources.savings_tempo_red
-import comwatt.shared.generated.resources.savings_tempo_spent_title
 import comwatt.shared.generated.resources.savings_tempo_title
 import comwatt.shared.generated.resources.savings_tempo_white
 import comwatt.shared.generated.resources.savings_title
 import net.thevenot.comwatt.DataRepository
-import net.thevenot.comwatt.model.savings.TempoSpentBreakdown
+import net.thevenot.comwatt.model.savings.TempoBreakdown
 import net.thevenot.comwatt.ui.common.CenteredTitleWithIcon
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.common.timerange.RangeButton
@@ -197,14 +196,9 @@ private fun SavingsScreenContent(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // Tempo subtotals
-            state.breakdown.tempoSubtotals?.let { tempo ->
-                TempoSubtotalsCard(
-                    blueEuros = tempo.blueEuros,
-                    whiteEuros = tempo.whiteEuros,
-                    redEuros = tempo.redEuros,
-                    spent = state.breakdown.tempoSpent
-                )
+            // Tempo per-colour breakdown
+            state.breakdown.tempo?.let { tempo ->
+                TempoBreakdownCard(tempo = tempo)
             }
 
             // Partial data warning
@@ -326,18 +320,26 @@ private fun BreakdownCard(
 }
 
 @Composable
-private fun TempoSubtotalsCard(
-    blueEuros: Double,
-    whiteEuros: Double,
-    redEuros: Double,
-    spent: TempoSpentBreakdown?
-) {
+private fun TempoBreakdownCard(tempo: TempoBreakdown) {
+    val rows = listOf(
+        Triple(stringResource(Res.string.savings_tempo_blue), MaterialTheme.colorScheme.tempoBlue, tempo.blue),
+        Triple(stringResource(Res.string.savings_tempo_white), MaterialTheme.colorScheme.tempoWhite, tempo.white),
+        Triple(stringResource(Res.string.savings_tempo_red), MaterialTheme.colorScheme.tempoRed, tempo.red),
+    ).filter { it.third.hasActivity }
+
+    if (rows.isEmpty()) return
+
+    val savedLabel = stringResource(Res.string.savings_saved)
+    val spentLabel = stringResource(Res.string.savings_spent)
+    val peakLabel = stringResource(Res.string.savings_tempo_peak)
+    val offpeakLabel = stringResource(Res.string.savings_tempo_offpeak)
+
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(AppTheme.dimens.paddingNormal),
-            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingSmall)
+            verticalArrangement = Arrangement.spacedBy(AppTheme.dimens.paddingNormal)
         ) {
             Text(
                 text = stringResource(Res.string.savings_tempo_title),
@@ -345,102 +347,47 @@ private fun TempoSubtotalsCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                TempoSubtotalItem(
-                    label = stringResource(Res.string.savings_tempo_blue),
-                    euros = blueEuros,
-                    color = MaterialTheme.colorScheme.tempoBlue
-                )
-                TempoSubtotalItem(
-                    label = stringResource(Res.string.savings_tempo_white),
-                    euros = whiteEuros,
-                    color = MaterialTheme.colorScheme.tempoWhite
-                )
-                TempoSubtotalItem(
-                    label = stringResource(Res.string.savings_tempo_red),
-                    euros = redEuros,
-                    color = MaterialTheme.colorScheme.tempoRed
-                )
-            }
-
-            // Grid cost split by colour and peak/off-peak — only colours with spend are shown.
-            val spentRows = spent?.let {
-                listOfNotNull(
-                    tempoSpentRow(stringResource(Res.string.savings_tempo_blue), MaterialTheme.colorScheme.tempoBlue, it.blueHp, it.blueHc),
-                    tempoSpentRow(stringResource(Res.string.savings_tempo_white), MaterialTheme.colorScheme.tempoWhite, it.whiteHp, it.whiteHc),
-                    tempoSpentRow(stringResource(Res.string.savings_tempo_red), MaterialTheme.colorScheme.tempoRed, it.redHp, it.redHc),
-                )
-            }.orEmpty()
-
-            if (spentRows.isNotEmpty()) {
-                HorizontalDivider(modifier = Modifier.padding(vertical = AppTheme.dimens.paddingSmall))
-                Text(
-                    text = stringResource(Res.string.savings_tempo_spent_title),
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                val peakLabel = stringResource(Res.string.savings_tempo_peak)
-                val offpeakLabel = stringResource(Res.string.savings_tempo_offpeak)
-                spentRows.forEach { row ->
+            rows.forEachIndexed { index, (label, color, amounts) ->
+                if (index > 0) HorizontalDivider()
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = color
+                    )
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = row.label,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = row.color
+                            text = savedLabel,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "$peakLabel ${formatEuros(row.hp)} · $offpeakLabel ${formatEuros(row.hc)}",
+                            text = formatEuros(amounts.saved),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = spentLabel,
                             style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "$peakLabel ${formatEuros(amounts.spentHp)} · $offpeakLabel ${formatEuros(amounts.spentHc)}",
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
             }
         }
-    }
-}
-
-private data class TempoSpentRow(
-    val label: String,
-    val color: androidx.compose.ui.graphics.Color,
-    val hp: Double,
-    val hc: Double,
-)
-
-private fun tempoSpentRow(
-    label: String,
-    color: androidx.compose.ui.graphics.Color,
-    hp: Double,
-    hc: Double,
-): TempoSpentRow? = if (hp > 0.0 || hc > 0.0) TempoSpentRow(label, color, hp, hc) else null
-
-@Composable
-private fun TempoSubtotalItem(
-    label: String,
-    euros: Double,
-    color: androidx.compose.ui.graphics.Color
-) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = color
-        )
-        Text(
-            text = formatEuros(euros),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
     }
 }
 

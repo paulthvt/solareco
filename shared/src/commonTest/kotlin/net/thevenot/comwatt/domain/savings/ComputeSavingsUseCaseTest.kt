@@ -121,7 +121,7 @@ class ComputeSavingsUseCaseTest {
     }
 
     @Test
-    fun tempoSubtotalsAreNetEurosPerColor() = runTest {
+    fun tempoBreakdownHasSavedAndSpentSplitPerColor() = runTest {
         // Two hours on a RED day during PEAK hours (06:00-22:00), in Wh (divisor 1000.0).
         // prod=3000/2000 Wh (3/2 kWh), inj=1000/0 Wh (1/0 kWh), cons=2000/2000 Wh, wdr=0/1000 Wh (0/1 kWh)
         // selfConsumed = (3-1)=2, (2-0)=2 → 4 kWh total
@@ -166,21 +166,20 @@ class ComputeSavingsUseCaseTest {
         )
 
         val b = (result as Either.Right).value
-        val ts = b.tempoSubtotals!!
-        // Expected: RED = 2.2686 (net), BLUE = 0.0, WHITE = 0.0
-        assertEquals(2.2686, ts.redEuros, 1e-9)
-        assertEquals(0.0, ts.blueEuros, 1e-9)
-        assertEquals(0.0, ts.whiteEuros, 1e-9)
+        val tempo = b.tempo!!
+        // RED: saved = 2*0.7562 + 2*0.7562 = 3.0248; spent split: only h1 withdraws 1 kWh at PEAK.
+        assertEquals(3.0248, tempo.red.saved, 1e-9)
+        assertEquals(0.7562, tempo.red.spentHp, 1e-9)
+        assertEquals(0.0, tempo.red.spentHc, 1e-9)
+        assertEquals(0.7562, tempo.red.spent, 1e-9)
+        // Net for RED reconciles to saved - spent = 3.0248 - 0.7562 = 2.2686.
+        assertEquals(2.2686, tempo.red.saved - tempo.red.spent, 1e-9)
+        // BLUE and WHITE untouched.
+        assertEquals(0.0, tempo.blue.saved, 1e-9)
+        assertEquals(0.0, tempo.blue.spent, 1e-9)
+        assertEquals(0.0, tempo.white.saved, 1e-9)
+        assertEquals(0.0, tempo.white.spent, 1e-9)
         assertTrue(!b.partial)
-
-        // Spent split: both hours RED PEAK; only h1 withdraws 1 kWh × redHp 0.7562.
-        val spent = b.tempoSpent!!
-        assertEquals(0.7562, spent.redHp, 1e-9)
-        assertEquals(0.0, spent.redHc, 1e-9)
-        assertEquals(0.0, spent.blueHp, 1e-9)
-        assertEquals(0.0, spent.blueHc, 1e-9)
-        assertEquals(0.0, spent.whiteHp, 1e-9)
-        assertEquals(0.0, spent.whiteHc, 1e-9)
     }
 
     @Test
