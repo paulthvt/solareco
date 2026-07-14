@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -387,7 +389,14 @@ fun RateField(
     modifier: Modifier = Modifier
 ) {
     // Manual 4-decimal formatting: multiplatform-safe (String.format is JVM-only)
-    var text by remember(value) { mutableStateOf(formatRate(value)) }
+    var text by remember { mutableStateOf(formatRate(value)) }
+    var isFocused by remember { mutableStateOf(false) }
+    // Reformat to canonical form only when not actively editing (also reflects
+    // external value changes, e.g. "reset to official rates"). While focused, the
+    // user types freely without the field snapping back mid-entry.
+    LaunchedEffect(value, isFocused) {
+        if (!isFocused) text = formatRate(value)
+    }
 
     OutlinedTextField(
         value = text,
@@ -399,7 +408,9 @@ fun RateField(
         suffix = { Text("€/kWh") },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
         singleLine = true,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .onFocusChanged { isFocused = it.isFocused }
     )
 }
 
@@ -419,7 +430,12 @@ fun TimeField(
     modifier: Modifier = Modifier
 ) {
     // Manual HH:mm formatting: multiplatform-safe
-    var text by remember(value) { mutableStateOf(formatTime(value)) }
+    var text by remember { mutableStateOf(formatTime(value)) }
+    var isFocused by remember { mutableStateOf(false) }
+    // Reformat to canonical HH:mm only when not actively editing.
+    LaunchedEffect(value, isFocused) {
+        if (!isFocused) text = formatTime(value)
+    }
 
     OutlinedTextField(
         value = text,
@@ -439,6 +455,8 @@ fun TimeField(
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
         singleLine = true,
         modifier = modifier
+            .fillMaxWidth()
+            .onFocusChanged { isFocused = it.isFocused }
     )
 }
 

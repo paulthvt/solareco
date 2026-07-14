@@ -110,7 +110,9 @@ class SavingsViewModel(
                 val base = it.copy(isLoading = false, isRefreshing = false, selectedTimeRange = range, config = config, configConfirmed = config.confirmedByUser)
                 when (result) {
                     is Either.Right -> base.copy(hasError = false, breakdown = result.value)
-                    is Either.Left -> base.copy(hasError = true)
+                    // On pull-to-refresh, keep the existing content visible instead of
+                    // swapping to the full error view; only initial load shows the error state.
+                    is Either.Left -> base.copy(hasError = !isPullToRefresh)
                 }
             }
         }
