@@ -6,6 +6,7 @@ import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.ic_account_circle
 import comwatt.shared.generated.resources.ic_air
 import comwatt.shared.generated.resources.ic_analytics
+import comwatt.shared.generated.resources.ic_cloud
 import comwatt.shared.generated.resources.ic_arrow_back
 import comwatt.shared.generated.resources.ic_battery
 import comwatt.shared.generated.resources.ic_blender
@@ -21,6 +22,7 @@ import comwatt.shared.generated.resources.ic_code
 import comwatt.shared.generated.resources.ic_coffee
 import comwatt.shared.generated.resources.ic_computer
 import comwatt.shared.generated.resources.ic_dashboard
+import comwatt.shared.generated.resources.ic_delete
 import comwatt.shared.generated.resources.ic_dishwasher
 import comwatt.shared.generated.resources.ic_electric_bolt
 import comwatt.shared.generated.resources.ic_electric_car
@@ -310,5 +312,13 @@ object AppIcons {
     val Freezer: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_freezer)
+
+    val Delete: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_delete)
+
+    val Cloud: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_cloud)
 
 }

@@ -2,7 +2,6 @@ package net.thevenot.comwatt.ui.devices.settings
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -33,6 +32,7 @@ import comwatt.shared.generated.resources.device_settings_tab_planning
 import comwatt.shared.generated.resources.device_settings_title
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchDeviceDetailUseCase
+import net.thevenot.comwatt.ui.devices.settings.planning.PlanningTab
 import net.thevenot.comwatt.domain.UpdateDeviceUseCase
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
@@ -116,18 +116,14 @@ fun DeviceSettingsScreen(
                             onNameChanged = viewModel::onNameChanged,
                             onSave = viewModel::saveDevice,
                         )
-                        else -> PlanningTabPlaceholder()
+                        else -> PlanningTab(
+                            deviceId = deviceId,
+                            dataRepository = dataRepository,
+                            onEditTypicalDay = { _, _ -> },
+                        )
                     }
                 }
             }
         }
-    }
-}
-
-/** Replaced by the real PlanningTab in the next task. */
-@Composable
-private fun PlanningTabPlaceholder() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Planning")
     }
 }
