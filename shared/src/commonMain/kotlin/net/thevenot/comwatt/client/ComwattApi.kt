@@ -28,11 +28,14 @@ import net.thevenot.comwatt.model.ApiError
 import net.thevenot.comwatt.model.DailyWeatherResponseDto
 import net.thevenot.comwatt.model.DeviceDto
 import net.thevenot.comwatt.model.ElectricityPriceResponseDto
+import net.thevenot.comwatt.model.PagedResponseDto
+import net.thevenot.comwatt.model.PlanningDto
 import net.thevenot.comwatt.model.SiteDto
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
 import net.thevenot.comwatt.model.TileResponseDto
 import net.thevenot.comwatt.model.TileType
 import net.thevenot.comwatt.model.TimeSeriesDto
+import net.thevenot.comwatt.model.TypicalDayDto
 import net.thevenot.comwatt.model.UserDto
 import net.thevenot.comwatt.model.safeRequest
 import net.thevenot.comwatt.model.type.AggregationLevel
@@ -336,6 +339,124 @@ class ComwattApi(val client: HttpClient, val baseUrl: String) {
                 }
                 contentType(ContentType.Application.Json)
                 setBody(body)
+            }
+        }
+    }
+
+    suspend fun fetchTypicalDays(siteId: Int): Either<ApiError, PagedResponseDto<TypicalDayDto>> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/typicaldays")
+                    parameter("siteId", siteId)
+                }
+            }
+        }
+    }
+
+    /**
+     * `siteId` must be a query parameter — sending it in the body fails with
+     * 400 `Required parameter 'siteId' is not present.`
+     */
+    suspend fun createTypicalDay(
+        siteId: Int,
+        body: TypicalDayDto,
+    ): Either<ApiError, TypicalDayDto> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Post
+                    path("api/typicaldays")
+                    parameter("siteId", siteId)
+                }
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
+    suspend fun updateTypicalDay(
+        id: Int,
+        body: TypicalDayDto,
+    ): Either<ApiError, TypicalDayDto> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Put
+                    path("api/typicaldays/$id")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
+    suspend fun deleteTypicalDay(id: Int): Either<ApiError, Unit> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Delete
+                    path("api/typicaldays/$id")
+                }
+            }
+        }
+    }
+
+    /** Returns only the schedules that are currently active for this device. */
+    suspend fun fetchPlannings(deviceId: Int): Either<ApiError, PagedResponseDto<PlanningDto>> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/plannings")
+                    parameter("deviceId", deviceId)
+                }
+            }
+        }
+    }
+
+    /** Returns every schedule on the site, including expired generated ones. */
+    suspend fun fetchSitePlannings(siteId: Int): Either<ApiError, PagedResponseDto<PlanningDto>> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Get
+                    path("api/plannings")
+                    parameter("siteId", siteId)
+                }
+            }
+        }
+    }
+
+    /**
+     * Replaces the planning's whole `typicalDaySchedules` array. Build the body
+     * with [net.thevenot.comwatt.domain.PlanningRebuilder].
+     */
+    suspend fun updatePlanning(id: Int, body: PlanningDto): Either<ApiError, PlanningDto> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Put
+                    path("api/plannings/$id")
+                }
+                contentType(ContentType.Application.Json)
+                setBody(body)
+            }
+        }
+    }
+
+    suspend fun setCapacitySwitch(
+        capacityId: Int,
+        enable: Boolean,
+    ): Either<ApiError, JsonElement> {
+        return withContext(Dispatchers.IO) {
+            client.safeRequest {
+                url {
+                    method = HttpMethod.Put
+                    path("api/capacities/$capacityId/switch")
+                    parameter("enable", enable)
+                }
             }
         }
     }
