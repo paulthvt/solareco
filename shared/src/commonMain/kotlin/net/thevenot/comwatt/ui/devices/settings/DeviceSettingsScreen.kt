@@ -60,7 +60,7 @@ fun DeviceSettingsScreen(
         DeviceSettingsViewModel(
             deviceId = deviceId,
             fetchDeviceDetailUseCase = FetchDeviceDetailUseCase(dataRepository),
-            updateDeviceUseCase = UpdateDeviceUseCase(dataRepository),
+            updateDeviceUseCase = UpdateDeviceUseCase(dataRepository.api),
         )
     }
 ) {
