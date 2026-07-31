@@ -337,7 +337,7 @@ Append to `domain/PlanningMappers.kt` (add `import kotlinx.datetime.DayOfWeek`):
  * ignored.
  *
  * The bit order is inferred: every schedule observed on the live API used mask
- * 127, which is order-independent. See the plan's Task 15 for the manual
+ * 127, which is order-independent. See the plan's Task 16 for the manual
  * verification step.
  */
 fun Int.toDayOfWeekSet(): Set<DayOfWeek> =
