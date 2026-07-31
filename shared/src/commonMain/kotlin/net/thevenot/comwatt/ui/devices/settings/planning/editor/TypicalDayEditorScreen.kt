@@ -53,6 +53,8 @@ import comwatt.shared.generated.resources.typical_day_editor_title
 import comwatt.shared.generated.resources.typical_day_label
 import comwatt.shared.generated.resources.typical_day_no_ranges
 import comwatt.shared.generated.resources.typical_day_save
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import kotlinx.coroutines.flow.firstOrNull
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchDevicePlanningUseCase
@@ -100,7 +102,7 @@ fun TypicalDayEditorScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
 private fun EditorContent(
     route: Screen.TypicalDayEditor,
@@ -128,6 +130,8 @@ private fun EditorContent(
     val onBackRequested = {
         if (uiState.isDirty) showDiscardPrompt = true else onNavigateBack()
     }
+
+    BackHandler(enabled = uiState.isDirty) { showDiscardPrompt = true }
 
     if (showDiscardPrompt) {
         AlertDialog(
@@ -211,15 +215,17 @@ private fun EditorContent(
                 }
             }
 
-            itemsIndexed(uiState.ranges.toTimelineBands()) { _, band ->
-                val rangeIndex = uiState.ranges.indexOfFirst { it.start == band.start }
-                if (band.mode == null) {
-                    GapRow(band)
-                } else {
-                    RangeRow(
-                        range = TimeRange(band.start, band.end, band.mode),
-                        onClick = { viewModel.beginEdit(rangeIndex) },
-                    )
+            if (uiState.ranges.isNotEmpty()) {
+                itemsIndexed(uiState.ranges.toTimelineBands()) { _, band ->
+                    val rangeIndex = uiState.ranges.indexOfFirst { it.start == band.start }
+                    if (band.mode == null) {
+                        GapRow(band)
+                    } else {
+                        RangeRow(
+                            range = TimeRange(band.start, band.end, band.mode),
+                            onClick = { viewModel.beginEdit(rangeIndex) },
+                        )
+                    }
                 }
             }
 

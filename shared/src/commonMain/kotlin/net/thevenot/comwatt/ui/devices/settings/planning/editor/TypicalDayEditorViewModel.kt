@@ -6,6 +6,7 @@ import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -175,7 +176,7 @@ class TypicalDayEditorViewModel(
                         },
                         ifRight = {
                             _uiState.update { it.copy(isSaving = false, original = saved) }
-                            onDone()
+                            withContext(Dispatchers.Main) { onDone() }
                         }
                     )
                 }
