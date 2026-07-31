@@ -51,7 +51,10 @@ fun PlanningTab(
         siteIdResolved = true
     }
 
-    if (!siteIdResolved) return
+    if (!siteIdResolved) {
+        LoadingView(isLoading = true) { }
+        return
+    }
 
     val currentSiteId = siteId
     if (currentSiteId == null) {

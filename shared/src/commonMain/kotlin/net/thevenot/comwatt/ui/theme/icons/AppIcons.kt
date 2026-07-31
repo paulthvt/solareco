@@ -6,7 +6,6 @@ import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.ic_account_circle
 import comwatt.shared.generated.resources.ic_air
 import comwatt.shared.generated.resources.ic_analytics
-import comwatt.shared.generated.resources.ic_cloud
 import comwatt.shared.generated.resources.ic_arrow_back
 import comwatt.shared.generated.resources.ic_battery
 import comwatt.shared.generated.resources.ic_blender
@@ -18,6 +17,7 @@ import comwatt.shared.generated.resources.ic_chevron_left
 import comwatt.shared.generated.resources.ic_chevron_right
 import comwatt.shared.generated.resources.ic_close
 import comwatt.shared.generated.resources.ic_clothes_dryer
+import comwatt.shared.generated.resources.ic_cloud
 import comwatt.shared.generated.resources.ic_code
 import comwatt.shared.generated.resources.ic_coffee
 import comwatt.shared.generated.resources.ic_computer
