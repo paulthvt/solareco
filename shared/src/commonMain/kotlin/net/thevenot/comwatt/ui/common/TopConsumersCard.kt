@@ -223,7 +223,6 @@ private fun TopConsumersCardSingleDevicePreview() {
                         instantPowerWatts = 2500.0,
                         dailyEnergyWh = 45000.0,
                         hasToggle = false,
-                        isToggleEnabled = false,
                         category = DeviceCategoryGroup.CONSUMPTION
                     )
                 ),
@@ -251,7 +250,6 @@ private fun TopConsumersCardTwoDevicesPreview() {
                         instantPowerWatts = 2500.0,
                         dailyEnergyWh = 45000.0,
                         hasToggle = false,
-                        isToggleEnabled = false,
                         category = DeviceCategoryGroup.CONSUMPTION
                     ),
                     DeviceUiModel(
@@ -263,7 +261,6 @@ private fun TopConsumersCardTwoDevicesPreview() {
                         instantPowerWatts = 1800.0,
                         dailyEnergyWh = 22000.0,
                         hasToggle = false,
-                        isToggleEnabled = false,
                         category = DeviceCategoryGroup.CONSUMPTION
                     )
                 ),
@@ -291,7 +288,7 @@ private fun TopConsumersCardDailyEnergyPreview() {
                         instantPowerWatts = 500.0,
                         dailyEnergyWh = 3500.0,
                         hasToggle = true,
-                        isToggleEnabled = true,
+                        isSwitchOn = true,
                         category = DeviceCategoryGroup.CONSUMPTION
                     ),
                     DeviceUiModel(
@@ -303,7 +300,6 @@ private fun TopConsumersCardDailyEnergyPreview() {
                         instantPowerWatts = 450.0,
                         dailyEnergyWh = 2800.0,
                         hasToggle = false,
-                        isToggleEnabled = false,
                         category = DeviceCategoryGroup.CONSUMPTION
                     )
                 ),

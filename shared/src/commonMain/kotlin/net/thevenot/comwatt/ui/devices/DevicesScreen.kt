@@ -222,7 +222,7 @@ private fun OnlineDeviceCardContent(device: DeviceUiModel, onSettingsClick: () -
         // Toggle
         if (device.hasToggle) {
             Switch(
-                checked = device.isToggleEnabled,
+                checked = device.isSwitchOn,
                 onCheckedChange = { /* TODO */ },
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = getDeviceAccentColor(device)
@@ -435,7 +435,7 @@ private fun DeviceCardOnlineWithTogglePreview() {
                     instantPowerWatts = 2.0,
                     dailyEnergyWh = 48.0,
                     hasToggle = true,
-                    isToggleEnabled = true,
+                    isSwitchOn = true,
                     category = DeviceCategoryGroup.CONSUMPTION,
                 )
             )
@@ -459,7 +459,6 @@ private fun DeviceCardSolarProductionPreview() {
                     instantPowerWatts = 4.0,
                     dailyEnergyWh = 29450.0,
                     hasToggle = false,
-                    isToggleEnabled = false,
                     category = DeviceCategoryGroup.PRODUCTION,
                 )
             )
@@ -483,7 +482,6 @@ private fun DeviceCardHighPowerPreview() {
                     instantPowerWatts = 5390.0,
                     dailyEnergyWh = 0.0,
                     hasToggle = false,
-                    isToggleEnabled = false,
                     category = DeviceCategoryGroup.CONSUMPTION,
                 )
             )
@@ -507,7 +505,6 @@ private fun DeviceCardGridMeterPreview() {
                     instantPowerWatts = 0.0,
                     dailyEnergyWh = 20850.0,
                     hasToggle = false,
-                    isToggleEnabled = false,
                     category = DeviceCategoryGroup.GRID,
                 )
             )
@@ -531,7 +528,6 @@ private fun DeviceCardOfflinePreview() {
                     instantPowerWatts = null,
                     dailyEnergyWh = null,
                     hasToggle = true,
-                    isToggleEnabled = false,
                     category = DeviceCategoryGroup.CONSUMPTION,
                 )
             )
@@ -555,7 +551,7 @@ private fun DeviceCardToggleDisabledPreview() {
                     instantPowerWatts = 114.0,
                     dailyEnergyWh = 826.0,
                     hasToggle = true,
-                    isToggleEnabled = true,
+                    isSwitchOn = true,
                     category = DeviceCategoryGroup.CONSUMPTION,
                 )
             )
