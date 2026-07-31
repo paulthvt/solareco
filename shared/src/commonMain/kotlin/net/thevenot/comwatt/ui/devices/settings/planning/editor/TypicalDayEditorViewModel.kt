@@ -87,7 +87,7 @@ class TypicalDayEditorViewModel(
         val start = state.ranges.lastOrNull()?.end ?: LocalTime(0, 0)
         if (state.ranges.isNotEmpty() && start == LocalTime(0, 0)) return@update state
 
-        val end = LocalTime(((start.hour + 1) % 24), start.minute)
+        val end = if (start.hour == 23) LocalTime(0, 0) else LocalTime(start.hour + 1, start.minute)
         val appended = state.ranges + TimeRange(start, end, ScheduleMode.OFF)
         state.copy(ranges = appended, editingIndex = appended.lastIndex)
     }
@@ -121,6 +121,7 @@ class TypicalDayEditorViewModel(
      * choice, since deleting could fail in turn and lose the user's work.
      */
     fun save(onDone: () -> Unit) {
+        if (_uiState.value.isSaving) return
         val state = _uiState.value
         val current = planning?.rawPlanning ?: run {
             _uiState.update { it.copy(errorMessage = "No planning to save into") }
