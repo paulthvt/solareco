@@ -1060,7 +1060,7 @@ class PlanningRebuilderTest {
         assertEquals(2, body.typicalDaySchedules.size)
         val added = body.typicalDaySchedules.single { it.typicalDay.label == "Evening" }
         assertEquals(null, added.id)
-        assertEquals(64, added.activeDayMask)
+        assertEquals(32, added.activeDayMask)
     }
 }
 ```
