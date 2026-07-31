@@ -176,4 +176,6 @@
     <string name="device_control_on">On</string>
     <string name="device_control_auto">Auto</string>
     <string name="device_control_error">Could not change the device state</string>
+    <string name="device_settings_tab_general">General</string>
+    <string name="device_settings_tab_planning">Planning</string>
 </resources>
