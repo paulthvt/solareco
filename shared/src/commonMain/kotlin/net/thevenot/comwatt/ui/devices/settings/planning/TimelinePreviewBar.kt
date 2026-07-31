@@ -22,8 +22,8 @@ import net.thevenot.comwatt.domain.toTimelineBands
 import net.thevenot.comwatt.domain.model.ScheduleMode
 import net.thevenot.comwatt.domain.model.TimeRange
 import net.thevenot.comwatt.ui.theme.ComwattTheme
-import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerProduction
+import net.thevenot.comwatt.ui.theme.scheduleSolar
 
 /**
  * Read-only 24-hour strip. Uncovered hours render in the surface variant colour
@@ -58,7 +58,7 @@ fun TimelinePreviewBar(
 fun ScheduleMode?.color(): Color = when (this) {
     ScheduleMode.ON -> MaterialTheme.colorScheme.powerProduction
     ScheduleMode.OFF -> MaterialTheme.colorScheme.outlineVariant
-    ScheduleMode.SOLAR -> MaterialTheme.colorScheme.powerConsumption
+    ScheduleMode.SOLAR -> MaterialTheme.colorScheme.scheduleSolar
     null -> MaterialTheme.colorScheme.surfaceVariant
 }
 

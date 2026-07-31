@@ -45,4 +45,8 @@ val ColorScheme.powerWithdrawalsGaugeStart: Color get() = if (isLight()) powerWi
 @Stable
 val ColorScheme.powerWithdrawalsGaugeEnd: Color get() = if (isLight()) powerWithdrawalsGaugeEndLight else powerWithdrawalsGaugeEndDark
 
+// Schedule mode colors
+@Stable
+val ColorScheme.scheduleSolar: Color get() = if (isLight()) scheduleSolarLight else scheduleSolarDark
+
 private fun ColorScheme.isLight() = this.background.luminance() > 0.5f

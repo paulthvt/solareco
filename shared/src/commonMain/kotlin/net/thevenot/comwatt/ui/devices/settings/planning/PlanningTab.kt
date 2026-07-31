@@ -16,7 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -42,9 +45,13 @@ fun PlanningTab(
     dataRepository: DataRepository,
     onEditTypicalDay: (Int, Int?) -> Unit,
 ) {
+    var siteIdResolved by remember(deviceId) { mutableStateOf(false) }
     val siteId by produceState<Int?>(initialValue = null, deviceId) {
         value = dataRepository.getSettings().firstOrNull()?.siteId
+        siteIdResolved = true
     }
+
+    if (!siteIdResolved) return
 
     val currentSiteId = siteId
     if (currentSiteId == null) {
