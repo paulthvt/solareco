@@ -1,7 +1,15 @@
 package net.thevenot.comwatt.domain
 
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import net.thevenot.comwatt.domain.model.DeviceSchedule
 import net.thevenot.comwatt.domain.model.ScheduleMode
+import net.thevenot.comwatt.domain.model.TimeRange
+import net.thevenot.comwatt.domain.model.TypicalDay
+import net.thevenot.comwatt.model.TimeRangeConfigurationDto
+import net.thevenot.comwatt.model.TypicalDayDto
+import net.thevenot.comwatt.model.TypicalDayScheduleDto
 
 private const val API_MODE_ON = "ON"
 private const val API_MODE_OFF = "OFF"
@@ -40,3 +48,56 @@ fun Set<DayOfWeek>.toDayMask(): Int =
     DayOfWeek.entries.foldIndexed(0) { index, mask, day ->
         if (day in this) mask or (1 shl index) else mask
     }
+
+fun TypicalDayDto.toDomain(): TypicalDay = TypicalDay(
+    id = id,
+    label = label,
+    ranges = timeRangeConfigurations
+        .map { it.toDomain() }
+        .sortedBy { it.start },
+    isServerManaged = optimalPlanning,
+)
+
+private fun TimeRangeConfigurationDto.toDomain(): TimeRange = TimeRange(
+    start = LocalTime.parse(startTime),
+    end = LocalTime.parse(endTime),
+    mode = mode.toScheduleMode(),
+)
+
+fun TypicalDayScheduleDto.toDomain(): DeviceSchedule = DeviceSchedule(
+    id = id,
+    typicalDay = typicalDay.toDomain(),
+    days = activeDayMask.toDayOfWeekSet(),
+    startDate = LocalDate.parse(startDate),
+    endDate = LocalDate.parse(endDate),
+    // The flag appears on both levels in practice; either one makes it read-only.
+    isServerManaged = optimalPlanning || typicalDay.optimalPlanning,
+)
+
+fun TypicalDay.toDto(): TypicalDayDto = TypicalDayDto(
+    id = id,
+    label = label,
+    optimalPlanning = isServerManaged,
+    timeRangeConfigurations = ranges.map { range ->
+        TimeRangeConfigurationDto(
+            startTime = range.start.toApiTimeString(),
+            endTime = range.end.toApiTimeString(),
+            mode = range.mode.toApiValue(),
+        )
+    },
+)
+
+fun DeviceSchedule.toDto(): TypicalDayScheduleDto = TypicalDayScheduleDto(
+    id = id,
+    activeDayMask = days.toDayMask(),
+    startDate = startDate.toString(),
+    endDate = endDate.toString(),
+    optimalPlanning = isServerManaged,
+    typicalDay = typicalDay.toDto(),
+)
+
+/** The API always uses `HH:mm:ss`; [LocalTime.toString] drops zero seconds. */
+private fun LocalTime.toApiTimeString(): String =
+    "${hour.pad()}:${minute.pad()}:${second.pad()}"
+
+private fun Int.pad(): String = toString().padStart(2, '0')
