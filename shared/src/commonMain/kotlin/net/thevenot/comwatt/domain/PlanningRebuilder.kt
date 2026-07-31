@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.domain
 
+import co.touchlab.kermit.Logger
 import net.thevenot.comwatt.domain.model.DeviceSchedule
 import net.thevenot.comwatt.model.PlanningDeviceRefDto
 import net.thevenot.comwatt.model.PlanningDto
@@ -17,19 +18,30 @@ import net.thevenot.comwatt.model.PlanningDto
  */
 object PlanningRebuilder {
 
+    private const val TAG = "PlanningRebuilder"
+
     /**
      * @param current the planning as last read from the API, for its id and device
      * @param userSchedules the user-owned schedules that should survive the write
-     * @param allowEmpty must be set explicitly to write an empty schedule list,
-     *   so that an accidentally empty [userSchedules] cannot silently wipe a
-     *   device's planning
+     * @param allowEmpty must be set explicitly to write an empty schedule list
+     *   when the post-filter set is empty, so that an accidentally empty result
+     *   cannot silently wipe a device's planning. The guard applies to the list
+     *   after server-managed entries are removed.
      */
     fun buildWriteBody(
         current: PlanningDto,
         userSchedules: List<DeviceSchedule>,
         allowEmpty: Boolean = false,
     ): PlanningDto {
-        require(userSchedules.isNotEmpty() || allowEmpty) {
+        val filtered = userSchedules.filterNot { it.isServerManaged }
+        val dropped = userSchedules.size - filtered.size
+        if (dropped > 0) {
+            Logger.w(TAG) {
+                "Dropped $dropped server-managed schedule(s) from write body for planning ${current.id}"
+            }
+        }
+
+        require(filtered.isNotEmpty() || allowEmpty) {
             "Refusing to write an empty schedule list for planning ${current.id}: " +
                 "PUT replaces the whole array and would delete every schedule. " +
                 "Pass allowEmpty = true if the user really deleted all of them."
@@ -40,9 +52,7 @@ object PlanningRebuilder {
             isDefault = current.isDefault,
             status = current.status,
             device = PlanningDeviceRefDto(id = current.device.id),
-            typicalDaySchedules = userSchedules
-                .filterNot { it.isServerManaged }
-                .map { it.toDto() },
+            typicalDaySchedules = filtered.map { it.toDto() },
         )
     }
 }

@@ -175,6 +175,33 @@ class PlanningRebuilderTest {
     }
 
     @Test
+    fun `all server managed schedules in userSchedules throws unless explicitly allowed`() {
+        val serverManagedOnly = listOf(
+            schedule(244837, "Automatic").copy(isServerManaged = true),
+            schedule(300000, "Weekend").copy(isServerManaged = true),
+        )
+
+        val error = assertFailsWith<IllegalArgumentException> {
+            PlanningRebuilder.buildWriteBody(current = currentPlanning, userSchedules = serverManagedOnly)
+        }
+        assertTrue(error.message.orEmpty().isNotBlank())
+    }
+
+    @Test
+    fun `all server managed schedules with allowEmpty produces empty typicalDaySchedules`() {
+        val serverManagedOnly = listOf(
+            schedule(244837, "Automatic").copy(isServerManaged = true),
+        )
+
+        val body = PlanningRebuilder.buildWriteBody(
+            current = currentPlanning,
+            userSchedules = serverManagedOnly,
+            allowEmpty = true,
+        )
+        assertTrue(body.typicalDaySchedules.isEmpty())
+    }
+
+    @Test
     fun `a schedule with no id is written as a new schedule`() {
         val body = PlanningRebuilder.buildWriteBody(
             current = currentPlanning,
