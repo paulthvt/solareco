@@ -32,8 +32,9 @@ import comwatt.shared.generated.resources.device_settings_tab_planning
 import comwatt.shared.generated.resources.device_settings_title
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchDeviceDetailUseCase
-import net.thevenot.comwatt.ui.devices.settings.planning.PlanningTab
 import net.thevenot.comwatt.domain.UpdateDeviceUseCase
+import net.thevenot.comwatt.ui.devices.settings.planning.PlanningTab
+import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
@@ -119,7 +120,15 @@ fun DeviceSettingsScreen(
                         else -> PlanningTab(
                             deviceId = deviceId,
                             dataRepository = dataRepository,
-                            onEditTypicalDay = { _, _ -> },
+                            onEditTypicalDay = { scheduleIndex, typicalDayId ->
+                                navController.navigate(
+                                    Screen.TypicalDayEditor(
+                                        deviceId = deviceId,
+                                        scheduleIndex = scheduleIndex,
+                                        typicalDayId = typicalDayId,
+                                    )
+                                )
+                            },
                         )
                     }
                 }
