@@ -37,15 +37,17 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             val colors = Colors(isDarkMode)
             val chartBounds = ChartBounds(widthPx.toFloat(), heightPx.toFloat())
 
-            drawGridLines(canvas, chartBounds, colors.grid)
-
             val consumptions = data.consumptions.takeLast(60)
             val productions = data.productions.takeLast(60)
             val maxDataPoints = max(consumptions.size, productions.size)
             val maxValue = max(
                 max(data.maxConsumption, consumptions.maxOrNull() ?: 1.0),
                 max(data.maxProduction, productions.maxOrNull() ?: 1.0)
-            )
+            ).takeIf { it > 0.0 } ?: 1.0
+            val axisValues = ChartAxis.axisValues(maxValue)
+
+            drawGridLines(canvas, chartBounds, axisValues, maxValue, colors.grid)
+
             val stepX =
                 if (maxDataPoints > 1) chartBounds.width / (maxDataPoints - 1) else chartBounds.width
 
@@ -56,7 +58,7 @@ class AndroidChartImageGenerator : ChartImageGenerator {
                 drawDataLine(canvas, consumptions, colors.consumption, chartBounds, stepX, maxValue)
             }
 
-            drawYAxisLabels(canvas, chartBounds, maxValue, colors.text)
+            drawYAxisLabels(canvas, chartBounds, axisValues, maxValue, colors.text)
 
             val outputStream = ByteArrayOutputStream()
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
@@ -70,7 +72,13 @@ class AndroidChartImageGenerator : ChartImageGenerator {
         }
     }
 
-    private fun drawGridLines(canvas: Canvas, bounds: ChartBounds, gridColor: Int) {
+    private fun drawGridLines(
+        canvas: Canvas,
+        bounds: ChartBounds,
+        axisValues: List<Double>,
+        maxValue: Double,
+        gridColor: Int
+    ) {
         val paint = Paint().apply {
             color = gridColor
             style = Paint.Style.STROKE
@@ -78,9 +86,8 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             isAntiAlias = true
         }
 
-        val gridLineCount = 4
-        for (i in 0..gridLineCount) {
-            val y = bounds.bottom - (i.toFloat() / gridLineCount) * bounds.height
+        axisValues.forEach { value ->
+            val y = bounds.yFor(value, maxValue)
             canvas.drawLine(bounds.left, y, bounds.right, y, paint)
         }
     }
@@ -121,8 +128,7 @@ class AndroidChartImageGenerator : ChartImageGenerator {
 
         data.forEachIndexed { index, value ->
             val x = bounds.left + index * stepX
-            val normalizedValue = (value / maxValue).coerceIn(0.0, 1.0)
-            val y = bounds.bottom - (normalizedValue * bounds.height).toFloat()
+            val y = bounds.yFor(value, maxValue)
 
             if (index == 0) {
                 linePath.moveTo(x, y)
@@ -147,6 +153,7 @@ class AndroidChartImageGenerator : ChartImageGenerator {
     private fun drawYAxisLabels(
         canvas: Canvas,
         bounds: ChartBounds,
+        axisValues: List<Double>,
         maxValue: Double,
         textColor: Int
     ) {
@@ -157,12 +164,9 @@ class AndroidChartImageGenerator : ChartImageGenerator {
             textAlign = Paint.Align.RIGHT
         }
 
-        val gridLineCount = 4
-        for (i in 0..gridLineCount) {
-            val value = (i.toFloat() / gridLineCount) * maxValue
-            val y = bounds.bottom - (i.toFloat() / gridLineCount) * bounds.height
-            val label = if (value >= 1000) "${(value / 1000).toInt()}k" else "${value.toInt()}"
-            canvas.drawText(label, bounds.left - 6f, y + 6f, paint)
+        axisValues.forEach { value ->
+            val y = bounds.yFor(value, maxValue)
+            canvas.drawText(ChartAxis.formatLabel(value), bounds.left - 6f, y + 6f, paint)
         }
     }
 
@@ -185,6 +189,9 @@ class AndroidChartImageGenerator : ChartImageGenerator {
         val bottom = canvasHeight - paddingBottom
         val width = right - left
         val height = bottom - top
+
+        fun yFor(value: Double, maxValue: Double): Float =
+            bottom - ((value / maxValue).coerceIn(0.0, 1.0) * height).toFloat()
     }
 }
 
