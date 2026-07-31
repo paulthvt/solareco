@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.domain
 
+import kotlinx.datetime.DayOfWeek
 import net.thevenot.comwatt.domain.model.ScheduleMode
 
 private const val API_MODE_ON = "ON"
@@ -22,3 +23,20 @@ fun ScheduleMode.toApiValue(): String = when (this) {
     ScheduleMode.OFF -> API_MODE_OFF
     ScheduleMode.SOLAR -> API_MODE_COMWATT
 }
+
+/**
+ * Weekday bitmask conversion. Bit 0 is Monday, following [DayOfWeek]'s ISO
+ * ordering, so mask 127 is every day. Bits above the seven-day range are
+ * ignored.
+ *
+ * The bit order is inferred: every schedule observed on the live API used mask
+ * 127, which is order-independent. See the plan's Task 15 for the manual
+ * verification step.
+ */
+fun Int.toDayOfWeekSet(): Set<DayOfWeek> =
+    DayOfWeek.entries.filterIndexed { index, _ -> this shr index and 1 == 1 }.toSet()
+
+fun Set<DayOfWeek>.toDayMask(): Int =
+    DayOfWeek.entries.foldIndexed(0) { index, mask, day ->
+        if (day in this) mask or (1 shl index) else mask
+    }
