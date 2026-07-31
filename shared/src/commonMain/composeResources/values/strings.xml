@@ -193,4 +193,22 @@
     <string name="planning_mode_solar">Solar-driven</string>
     <string name="planning_mode_none">No rule</string>
     <string name="planning_save_error">Could not save the schedule</string>
+    <string name="typical_day_editor_title">Edit day</string>
+    <string name="typical_day_label">Name</string>
+    <string name="typical_day_add_range">Add time range</string>
+    <string name="typical_day_delete_range">Delete time range</string>
+    <string name="typical_day_save">Save</string>
+    <string name="typical_day_discard_title">Discard changes?</string>
+    <string name="typical_day_discard_message">Your changes to this day have not been saved.</string>
+    <string name="typical_day_discard_confirm">Discard</string>
+    <string name="typical_day_discard_cancel">Keep editing</string>
+    <string name="typical_day_shared_title">Used by %1$d devices</string>
+    <string name="typical_day_shared_message">Changes will affect all of them.</string>
+    <string name="typical_day_shared_edit_anyway">Edit anyway</string>
+    <string name="typical_day_shared_duplicate">Duplicate for this device only</string>
+    <string name="typical_day_duplicate_suffix">%1$s (copy)</string>
+    <string name="typical_day_range_start">Start</string>
+    <string name="typical_day_range_end">End</string>
+    <string name="typical_day_range_mode">Mode</string>
+    <string name="typical_day_no_ranges">No time ranges. The device follows no rule all day.</string>
 </resources>
