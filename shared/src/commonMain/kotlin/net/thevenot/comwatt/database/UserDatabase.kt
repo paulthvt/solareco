@@ -5,10 +5,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 
-@Database(entities = [User::class], version = 1)
+@Database(entities = [User::class, TempoColorEntity::class], version = 2)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class UserDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
+    abstract fun tempoColorDao(): TempoColorDao
 }
 
 @Suppress("NO_ACTUAL_FOR_EXPECT")

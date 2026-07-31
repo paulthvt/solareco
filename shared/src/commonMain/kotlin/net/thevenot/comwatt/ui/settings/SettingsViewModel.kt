@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.DataRepository
+import net.thevenot.comwatt.model.savings.TariffConfig
 
 class SettingsViewModel(val dataRepository: DataRepository) : ViewModel() {
 
@@ -18,11 +19,16 @@ class SettingsViewModel(val dataRepository: DataRepository) : ViewModel() {
     private val _productionNoiseThreshold = MutableStateFlow(DEFAULT_PRODUCTION_NOISE_THRESHOLD)
     val productionNoiseThreshold: StateFlow<Int> = _productionNoiseThreshold
 
+    private val _tariffConfig = MutableStateFlow(TariffConfig.defaults())
+    val tariffConfig: StateFlow<TariffConfig> = _tariffConfig
+
     init {
         dataRepository.getSettings()
             .onEach { settings ->
                 _productionNoiseThreshold.value =
                     settings.productionNoiseThreshold ?: DEFAULT_PRODUCTION_NOISE_THRESHOLD
+                _tariffConfig.value = settings.tariffConfigJson?.let { TariffConfig.decode(it) }
+                    ?: TariffConfig.defaults()
             }
             .launchIn(viewModelScope)
     }
@@ -30,6 +36,33 @@ class SettingsViewModel(val dataRepository: DataRepository) : ViewModel() {
     fun updateProductionNoiseThreshold(threshold: Int) {
         viewModelScope.launch {
             dataRepository.saveProductionNoiseThreshold(threshold)
+        }
+    }
+
+    fun updateTariffConfig(config: TariffConfig) {
+        _tariffConfig.value = config
+        viewModelScope.launch {
+            dataRepository.saveTariffConfig(config.copy(confirmedByUser = true))
+        }
+    }
+
+    fun resetTempoRatesToOfficial() {
+        viewModelScope.launch {
+            dataRepository.tempoApi.tarifs().onRight { t ->
+                val updated = _tariffConfig.value.copy(
+                    tempo = _tariffConfig.value.tempo.copy(
+                        blueHp = t.bleuHP,
+                        blueHc = t.bleuHC,
+                        whiteHp = t.blancHP,
+                        whiteHc = t.blancHC,
+                        redHp = t.rougeHP,
+                        redHc = t.rougeHC,
+                    ),
+                )
+                val confirmed = updated.copy(confirmedByUser = true)
+                _tariffConfig.value = confirmed
+                dataRepository.saveTariffConfig(confirmed)
+            }
         }
     }
 }

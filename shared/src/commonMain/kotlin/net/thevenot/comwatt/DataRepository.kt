@@ -8,14 +8,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.thevenot.comwatt.client.ComwattApi
 import net.thevenot.comwatt.client.Password
+import net.thevenot.comwatt.client.TempoApiClient
 import net.thevenot.comwatt.database.SettingsRepository
 import net.thevenot.comwatt.database.SolarEcoSettings
+import net.thevenot.comwatt.database.TempoColorDao
 import net.thevenot.comwatt.database.User
 import net.thevenot.comwatt.database.UserDatabase
 
 class DataRepository(
     private val userDatabase: UserDatabase,
     val api: ComwattApi,
+    val tempoApi: TempoApiClient,
     private val settingsRepository: SettingsRepository,
     private val scope: CoroutineScope,
 ) {
@@ -39,12 +42,20 @@ class DataRepository(
         settingsRepository.saveDashboardSelectedTimeUnitIndex(index)
     }
 
+    suspend fun saveSavingsSelectedTimeUnitIndex(index: Int) {
+        settingsRepository.saveSavingsSelectedTimeUnitIndex(index)
+    }
+
     suspend fun saveDashboardHiddenDevices(devices: Set<String>) {
         settingsRepository.saveDashboardHiddenDevices(devices)
     }
 
     suspend fun saveDashboardSortMode(mode: String) {
         settingsRepository.saveDashboardSortMode(mode)
+    }
+
+    suspend fun saveTariffConfig(config: net.thevenot.comwatt.model.savings.TariffConfig) {
+        settingsRepository.saveTariffConfig(config.encode())
     }
 
     fun getSettings(): Flow<SolarEcoSettings> {
@@ -89,5 +100,9 @@ class DataRepository(
 
     suspend fun getUser(): User? {
         return userDatabase.userDao().getFirstUser()
+    }
+
+    fun tempoColorDao(): TempoColorDao {
+        return userDatabase.tempoColorDao()
     }
 }

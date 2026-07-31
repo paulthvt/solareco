@@ -20,7 +20,7 @@ expect fun engine(): HttpClientEngine
 
 val cookiesStorage = AcceptAllCookiesStorage()
 
-fun createClient(): HttpClient {
+fun createClient(host: String = "energy.comwatt.com"): HttpClient {
     return HttpClient(engine()) {
         expectSuccess = true
         install(HttpTimeout) {
@@ -50,7 +50,7 @@ fun createClient(): HttpClient {
             apply {
                 url {
                     protocol = URLProtocol.HTTPS
-                    host = "energy.comwatt.com"
+                    this.host = host
                 }
             }
         }

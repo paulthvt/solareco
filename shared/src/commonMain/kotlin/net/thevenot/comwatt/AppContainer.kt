@@ -13,6 +13,7 @@ class AppContainer(private val factory: Factory) {
         DataRepository(
             userDatabase = getUserDatabase(factory.getDatabaseBuilder()),
             api = factory.createApi(),
+            tempoApi = factory.createTempoApi(),
             settingsRepository = SettingsRepository(factory.dataStore),
             scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
         )
