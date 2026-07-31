@@ -172,4 +172,8 @@
     <string name="settings_tempo_red_hp">Red peak</string>
     <string name="settings_tempo_red_hc">Red off-peak</string>
     <string name="settings_tempo_reset_rates">Reset to official rates</string>
+    <string name="device_control_off">Off</string>
+    <string name="device_control_on">On</string>
+    <string name="device_control_auto">Auto</string>
+    <string name="device_control_error">Could not change the device state</string>
 </resources>

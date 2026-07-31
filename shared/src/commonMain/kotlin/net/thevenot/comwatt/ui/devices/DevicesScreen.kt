@@ -19,8 +19,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
@@ -42,13 +40,19 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
+import comwatt.shared.generated.resources.device_control_error
 import comwatt.shared.generated.resources.devices_no_devices
 import comwatt.shared.generated.resources.devices_offline_message
 import comwatt.shared.generated.resources.devices_screen_title
 import comwatt.shared.generated.resources.error_fetching_data
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchDevicesUseCase
+import net.thevenot.comwatt.domain.SetDeviceControlUseCase
+import net.thevenot.comwatt.domain.UpdateDeviceUseCase
+import net.thevenot.comwatt.domain.controlState
+import net.thevenot.comwatt.domain.model.ControlMode
 import net.thevenot.comwatt.domain.model.DeviceCategoryGroup
+import net.thevenot.comwatt.domain.model.DeviceControlState
 import net.thevenot.comwatt.domain.model.DeviceUiModel
 import net.thevenot.comwatt.model.DeviceCode
 import net.thevenot.comwatt.ui.common.LoadingView
@@ -71,7 +75,11 @@ fun DevicesScreen(
     dataRepository: DataRepository,
     viewModel: DevicesViewModel = viewModel {
         DevicesViewModel(
-            fetchDevicesUseCase = FetchDevicesUseCase(dataRepository)
+            fetchDevicesUseCase = FetchDevicesUseCase(dataRepository),
+            setDeviceControlUseCase = SetDeviceControlUseCase(
+                api = dataRepository.api,
+                updateDeviceUseCase = UpdateDeviceUseCase(dataRepository.api),
+            ),
         )
     }
 ) {
@@ -82,10 +90,17 @@ fun DevicesScreen(
 
     val uiState by viewModel.uiState.collectAsState()
     val fetchErrorMessage = stringResource(Res.string.error_fetching_data)
+    val controlErrorMessage = stringResource(Res.string.device_control_error)
 
     LaunchedEffect(uiState.lastErrorMessage) {
         if (uiState.lastErrorMessage.isNotEmpty()) {
             snackbarHostState.showSnackbar(fetchErrorMessage)
+        }
+    }
+
+    LaunchedEffect(uiState.lastControlErrorId) {
+        if (uiState.lastControlErrorId > 0) {
+            snackbarHostState.showSnackbar(controlErrorMessage)
         }
     }
 
@@ -104,7 +119,8 @@ fun DevicesScreen(
                 onRefresh = { viewModel.refresh() },
                 onDeviceSettingsClick = { deviceId ->
                     navController.navigate(Screen.DeviceSettings(deviceId))
-                }
+                },
+                onDeviceStateSelected = viewModel::setDeviceState,
             )
         }
     }
@@ -115,6 +131,7 @@ private fun DevicesContent(
     uiState: DevicesScreenState,
     onRefresh: () -> Unit,
     onDeviceSettingsClick: (Int) -> Unit,
+    onDeviceStateSelected: (DeviceUiModel, DeviceControlState) -> Unit = { _, _ -> },
 ) {
     val pullToRefreshState = rememberPullToRefreshState()
 
@@ -153,7 +170,9 @@ private fun DevicesContent(
                 items(uiState.devices, key = { it.id }) { device ->
                     DeviceCard(
                         device = device,
-                        onSettingsClick = { onDeviceSettingsClick(device.id) }
+                        pendingState = uiState.pendingStates[device.id],
+                        onSettingsClick = { onDeviceSettingsClick(device.id) },
+                        onStateSelected = { target -> onDeviceStateSelected(device, target) },
                     )
                 }
                 item { Spacer(modifier = Modifier.height(8.dp)) }
@@ -163,12 +182,22 @@ private fun DevicesContent(
 }
 
 @Composable
-private fun DeviceCard(device: DeviceUiModel, onSettingsClick: () -> Unit = {}) {
+private fun DeviceCard(
+    device: DeviceUiModel,
+    pendingState: DeviceControlState? = null,
+    onSettingsClick: () -> Unit = {},
+    onStateSelected: (DeviceControlState) -> Unit = {},
+) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
         if (device.isOnline) {
-            OnlineDeviceCardContent(device, onSettingsClick = onSettingsClick)
+            OnlineDeviceCardContent(
+                device = device,
+                pendingState = pendingState,
+                onSettingsClick = onSettingsClick,
+                onStateSelected = onStateSelected,
+            )
         } else {
             OfflineDeviceCardContent(device, onSettingsClick = onSettingsClick)
         }
@@ -176,67 +205,71 @@ private fun DeviceCard(device: DeviceUiModel, onSettingsClick: () -> Unit = {}) 
 }
 
 @Composable
-private fun OnlineDeviceCardContent(device: DeviceUiModel, onSettingsClick: () -> Unit = {}) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Device icon
-        DeviceIcon(device)
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Device info
-        Column(
-            modifier = Modifier.weight(1f)
+private fun OnlineDeviceCardContent(
+    device: DeviceUiModel,
+    pendingState: DeviceControlState? = null,
+    onSettingsClick: () -> Unit = {},
+    onStateSelected: (DeviceControlState) -> Unit = {},
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = device.name,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            // Device icon
+            DeviceIcon(device)
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Device info
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
-                // Instant power
-                device.instantPowerWatts?.let { power ->
-                    PowerLabel(
-                        value = formatPowerValue(power),
-                        color = getDeviceAccentColor(device)
-                    )
+                Text(
+                    text = device.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Instant power
+                    device.instantPowerWatts?.let { power ->
+                        PowerLabel(
+                            value = formatPowerValue(power),
+                            color = getDeviceAccentColor(device)
+                        )
+                    }
+                    // Daily energy
+                    device.dailyEnergyWh?.let { energy ->
+                        EnergyLabel(
+                            value = formatEnergyValue(energy)
+                        )
+                    }
                 }
-                // Daily energy
-                device.dailyEnergyWh?.let { energy ->
-                    EnergyLabel(
-                        value = formatEnergyValue(energy)
-                    )
-                }
+            }
+
+            // Settings cog
+            IconButton(onClick = onSettingsClick) {
+                Icon(
+                    painter = AppIcons.Settings,
+                    contentDescription = "Settings",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
 
-        // Toggle
         if (device.hasToggle) {
-            Switch(
-                checked = device.isSwitchOn,
-                onCheckedChange = { /* TODO */ },
-                colors = SwitchDefaults.colors(
-                    checkedTrackColor = getDeviceAccentColor(device)
-                )
-            )
-        }
-
-        // Settings cog
-        IconButton(onClick = onSettingsClick) {
-            Icon(
-                painter = AppIcons.Settings,
-                contentDescription = "Settings",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
+            Spacer(modifier = Modifier.height(12.dp))
+            DeviceControlSegmentedButton(
+                state = pendingState ?: device.controlState(),
+                enabled = pendingState == null,
+                onStateSelected = onStateSelected,
+                modifier = Modifier.padding(start = 60.dp),
             )
         }
     }
@@ -555,6 +588,40 @@ private fun DeviceCardToggleDisabledPreview() {
                     category = DeviceCategoryGroup.CONSUMPTION,
                 )
             )
+        }
+    }
+}
+
+@PreviewLightDark
+@Preview
+@Composable
+private fun DeviceCardControlStatesPreview() {
+    ComwattTheme {
+        Surface {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(
+                    ControlMode.MANUAL to false,
+                    ControlMode.MANUAL to true,
+                    ControlMode.AUTO to false,
+                ).forEach { (mode, isOn) ->
+                    DeviceCard(
+                        device = DeviceUiModel(
+                            id = mode.ordinal * 10 + if (isOn) 1 else 0,
+                            name = "Chargeur",
+                            deviceCode = DeviceCode.ELECTRIC_CAR,
+                            isOnline = true,
+                            isProduction = false,
+                            instantPowerWatts = 0.0,
+                            dailyEnergyWh = 24.0,
+                            hasToggle = true,
+                            switchCapacityId = 318273,
+                            controlMode = mode,
+                            isSwitchOn = isOn,
+                            category = DeviceCategoryGroup.CONSUMPTION,
+                        ),
+                    )
+                }
+            }
         }
     }
 }
