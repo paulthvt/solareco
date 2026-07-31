@@ -41,9 +41,6 @@ import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.error_fetching_data
 import comwatt.shared.generated.resources.planning_mode_none
-import comwatt.shared.generated.resources.planning_mode_off
-import comwatt.shared.generated.resources.planning_mode_on
-import comwatt.shared.generated.resources.planning_mode_solar
 import comwatt.shared.generated.resources.typical_day_add_range
 import comwatt.shared.generated.resources.typical_day_discard_cancel
 import comwatt.shared.generated.resources.typical_day_discard_confirm
@@ -61,12 +58,13 @@ import net.thevenot.comwatt.domain.FetchDevicePlanningUseCase
 import net.thevenot.comwatt.domain.SaveDeviceScheduleUseCase
 import net.thevenot.comwatt.domain.SaveTypicalDayUseCase
 import net.thevenot.comwatt.domain.TimelineBand
-import net.thevenot.comwatt.domain.model.ScheduleMode
 import net.thevenot.comwatt.domain.model.TimeRange
 import net.thevenot.comwatt.domain.toTimelineBands
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.devices.settings.planning.TimelinePreviewBar
 import net.thevenot.comwatt.ui.devices.settings.planning.color
+import net.thevenot.comwatt.ui.devices.settings.planning.displayName
+import net.thevenot.comwatt.ui.devices.settings.planning.hhmm
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
@@ -312,13 +310,6 @@ private fun GapRow(band: TimelineBand) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
-}
-
-@Composable
-private fun ScheduleMode.displayName(): String = when (this) {
-    ScheduleMode.ON -> stringResource(Res.string.planning_mode_on)
-    ScheduleMode.OFF -> stringResource(Res.string.planning_mode_off)
-    ScheduleMode.SOLAR -> stringResource(Res.string.planning_mode_solar)
 }
 
 @Composable

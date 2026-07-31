@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,21 +42,30 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.device_control_error
+import comwatt.shared.generated.resources.device_summary_following
+import comwatt.shared.generated.resources.device_summary_no_rule
 import comwatt.shared.generated.resources.devices_no_devices
 import comwatt.shared.generated.resources.devices_offline_message
 import comwatt.shared.generated.resources.devices_screen_title
 import comwatt.shared.generated.resources.error_fetching_data
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchDevicesUseCase
+import net.thevenot.comwatt.domain.FetchSiteSchedulesUseCase
 import net.thevenot.comwatt.domain.SetDeviceControlUseCase
 import net.thevenot.comwatt.domain.UpdateDeviceUseCase
 import net.thevenot.comwatt.domain.controlState
 import net.thevenot.comwatt.domain.model.ControlMode
 import net.thevenot.comwatt.domain.model.DeviceCategoryGroup
 import net.thevenot.comwatt.domain.model.DeviceControlState
+import net.thevenot.comwatt.domain.model.DeviceSchedule
 import net.thevenot.comwatt.domain.model.DeviceUiModel
+import net.thevenot.comwatt.domain.summaryFor
 import net.thevenot.comwatt.model.DeviceCode
 import net.thevenot.comwatt.ui.common.LoadingView
+import net.thevenot.comwatt.ui.devices.settings.planning.displayName
+import net.thevenot.comwatt.ui.devices.settings.planning.hhmm
 import net.thevenot.comwatt.ui.nav.NestedAppScaffold
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -67,6 +77,7 @@ import net.thevenot.comwatt.ui.theme.powerWithdrawals
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.math.roundToInt
+import kotlinx.datetime.Clock
 
 @Composable
 fun DevicesScreen(
@@ -80,11 +91,13 @@ fun DevicesScreen(
                 api = dataRepository.api,
                 updateDeviceUseCase = UpdateDeviceUseCase(dataRepository.api),
             ),
+            fetchSiteSchedulesUseCase = FetchSiteSchedulesUseCase(dataRepository),
         )
     }
 ) {
     LifecycleResumeEffect(Unit) {
         viewModel.loadDevices()
+        viewModel.loadSchedules()
         onPauseOrDispose { }
     }
 
@@ -133,6 +146,9 @@ private fun DevicesContent(
     onDeviceSettingsClick: (Int) -> Unit,
     onDeviceStateSelected: (DeviceUiModel, DeviceControlState) -> Unit = { _, _ -> },
 ) {
+    val moment = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
+    val today = moment.date
+    val now = moment.time
     val pullToRefreshState = rememberPullToRefreshState()
 
     PullToRefreshBox(
@@ -171,6 +187,9 @@ private fun DevicesContent(
                     DeviceCard(
                         device = device,
                         pendingState = uiState.pendingStates[device.id],
+                        schedules = uiState.schedulesByDeviceId[device.id] ?: emptyList(),
+                        today = today,
+                        now = now,
                         onSettingsClick = { onDeviceSettingsClick(device.id) },
                         onStateSelected = { target -> onDeviceStateSelected(device, target) },
                     )
@@ -185,6 +204,9 @@ private fun DevicesContent(
 private fun DeviceCard(
     device: DeviceUiModel,
     pendingState: DeviceControlState? = null,
+    schedules: List<DeviceSchedule> = emptyList(),
+    today: kotlinx.datetime.LocalDate = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date },
+    now: kotlinx.datetime.LocalTime = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time },
     onSettingsClick: () -> Unit = {},
     onStateSelected: (DeviceControlState) -> Unit = {},
 ) {
@@ -195,6 +217,9 @@ private fun DeviceCard(
             OnlineDeviceCardContent(
                 device = device,
                 pendingState = pendingState,
+                schedules = schedules,
+                today = today,
+                now = now,
                 onSettingsClick = onSettingsClick,
                 onStateSelected = onStateSelected,
             )
@@ -208,6 +233,9 @@ private fun DeviceCard(
 private fun OnlineDeviceCardContent(
     device: DeviceUiModel,
     pendingState: DeviceControlState? = null,
+    schedules: List<DeviceSchedule> = emptyList(),
+    today: kotlinx.datetime.LocalDate = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date },
+    now: kotlinx.datetime.LocalTime = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time },
     onSettingsClick: () -> Unit = {},
     onStateSelected: (DeviceControlState) -> Unit = {},
 ) {
@@ -264,9 +292,27 @@ private fun OnlineDeviceCardContent(
         }
 
         if (device.hasToggle) {
+            val effectiveState = pendingState ?: device.controlState()
+            if (effectiveState == DeviceControlState.AUTO) {
+                val summary = schedules.summaryFor(today = today, now = now)
+                Text(
+                    text = when {
+                        summary == null -> stringResource(Res.string.device_summary_no_rule)
+                        else -> stringResource(
+                            Res.string.device_summary_following,
+                            summary.mode.displayName(),
+                            summary.start.hhmm(),
+                            summary.end.hhmm(),
+                        )
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 60.dp, top = 2.dp),
+                )
+            }
             Spacer(modifier = Modifier.height(12.dp))
             DeviceControlSegmentedButton(
-                state = pendingState ?: device.controlState(),
+                state = effectiveState,
                 enabled = pendingState == null,
                 onStateSelected = onStateSelected,
                 modifier = Modifier.padding(start = 60.dp),

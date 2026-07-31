@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import net.thevenot.comwatt.domain.FetchDevicesUseCase
+import net.thevenot.comwatt.domain.FetchSiteSchedulesUseCase
 import net.thevenot.comwatt.domain.SetDeviceControlUseCase
 import net.thevenot.comwatt.domain.model.DeviceControlState
 import net.thevenot.comwatt.domain.model.DeviceUiModel
@@ -17,6 +18,7 @@ import net.thevenot.comwatt.domain.model.DeviceUiModel
 class DevicesViewModel(
     private val fetchDevicesUseCase: FetchDevicesUseCase,
     private val setDeviceControlUseCase: SetDeviceControlUseCase,
+    private val fetchSiteSchedulesUseCase: FetchSiteSchedulesUseCase,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(DevicesScreenState())
@@ -54,6 +56,15 @@ class DevicesViewModel(
 
     fun refresh() {
         loadDevices()
+    }
+
+    fun loadSchedules() {
+        if (_uiState.value.schedulesByDeviceId.isNotEmpty()) return
+
+        viewModelScope.launch(Dispatchers.IO) {
+            val schedules = fetchSiteSchedulesUseCase()
+            _uiState.update { it.copy(schedulesByDeviceId = schedules) }
+        }
     }
 
     /**

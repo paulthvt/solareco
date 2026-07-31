@@ -1,6 +1,7 @@
 package net.thevenot.comwatt.ui.devices
 
 import net.thevenot.comwatt.domain.model.DeviceControlState
+import net.thevenot.comwatt.domain.model.DeviceSchedule
 import net.thevenot.comwatt.domain.model.DeviceUiModel
 
 data class DevicesScreenState(
@@ -16,4 +17,6 @@ data class DevicesScreenState(
     val pendingStates: Map<Int, DeviceControlState> = emptyMap(),
     /** Incremented on each control write failure, to re-trigger the snackbar. */
     val lastControlErrorId: Int = 0,
+    /** Active schedules keyed by device id, used to render the AUTO summary line. */
+    val schedulesByDeviceId: Map<Int, List<DeviceSchedule>> = emptyMap(),
 )

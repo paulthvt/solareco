@@ -32,6 +32,7 @@ import comwatt.shared.generated.resources.typical_day_save
 import kotlinx.datetime.LocalTime
 import net.thevenot.comwatt.domain.model.ScheduleMode
 import net.thevenot.comwatt.domain.model.TimeRange
+import net.thevenot.comwatt.ui.devices.settings.planning.hhmm
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -161,6 +162,3 @@ private fun Int.toLocalTime(): LocalTime {
     return LocalTime(clamped / 60, clamped % 60)
 }
 
-/** Formats a [LocalTime] as HH:MM. Shared with [TypicalDayEditorScreen]. */
-internal fun LocalTime.hhmm(): String =
-    "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
