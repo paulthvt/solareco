@@ -19,4 +19,10 @@ data class DevicesScreenState(
     val lastControlErrorId: Int = 0,
     /** Active schedules keyed by device id, used to render the AUTO summary line. */
     val schedulesByDeviceId: Map<Int, List<DeviceSchedule>> = emptyMap(),
+    /**
+     * Incremented each time a device load completes (success or error). Used to
+     * re-key the clock `remember` in the UI so the schedule summary re-reads the
+     * current time after every refresh rather than keeping the first-composition value.
+     */
+    val refreshCount: Int = 0,
 )

@@ -48,6 +48,8 @@ import comwatt.shared.generated.resources.devices_no_devices
 import comwatt.shared.generated.resources.devices_offline_message
 import comwatt.shared.generated.resources.devices_screen_title
 import comwatt.shared.generated.resources.error_fetching_data
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
@@ -146,7 +148,7 @@ private fun DevicesContent(
     onDeviceSettingsClick: (Int) -> Unit,
     onDeviceStateSelected: (DeviceUiModel, DeviceControlState) -> Unit = { _, _ -> },
 ) {
-    val moment = remember(uiState.devices, uiState.schedulesByDeviceId) {
+    val moment = remember(uiState.refreshCount) {
         Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     }
     val today = moment.date
@@ -207,8 +209,8 @@ private fun DeviceCard(
     device: DeviceUiModel,
     pendingState: DeviceControlState? = null,
     schedules: List<DeviceSchedule> = emptyList(),
-    today: kotlinx.datetime.LocalDate = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date },
-    now: kotlinx.datetime.LocalTime = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time },
+    today: LocalDate,
+    now: LocalTime,
     onSettingsClick: () -> Unit = {},
     onStateSelected: (DeviceControlState) -> Unit = {},
 ) {
@@ -236,8 +238,8 @@ private fun OnlineDeviceCardContent(
     device: DeviceUiModel,
     pendingState: DeviceControlState? = null,
     schedules: List<DeviceSchedule> = emptyList(),
-    today: kotlinx.datetime.LocalDate = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date },
-    now: kotlinx.datetime.LocalTime = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).time },
+    today: LocalDate,
+    now: LocalTime,
     onSettingsClick: () -> Unit = {},
     onStateSelected: (DeviceControlState) -> Unit = {},
 ) {
@@ -518,7 +520,9 @@ private fun DeviceCardOnlineWithTogglePreview() {
                     hasToggle = true,
                     isSwitchOn = true,
                     category = DeviceCategoryGroup.CONSUMPTION,
-                )
+                ),
+                today = LocalDate(2026, 1, 1),
+                now = LocalTime(12, 0),
             )
         }
     }
@@ -541,7 +545,9 @@ private fun DeviceCardSolarProductionPreview() {
                     dailyEnergyWh = 29450.0,
                     hasToggle = false,
                     category = DeviceCategoryGroup.PRODUCTION,
-                )
+                ),
+                today = LocalDate(2026, 1, 1),
+                now = LocalTime(12, 0),
             )
         }
     }
@@ -564,7 +570,9 @@ private fun DeviceCardHighPowerPreview() {
                     dailyEnergyWh = 0.0,
                     hasToggle = false,
                     category = DeviceCategoryGroup.CONSUMPTION,
-                )
+                ),
+                today = LocalDate(2026, 1, 1),
+                now = LocalTime(12, 0),
             )
         }
     }
@@ -587,7 +595,9 @@ private fun DeviceCardGridMeterPreview() {
                     dailyEnergyWh = 20850.0,
                     hasToggle = false,
                     category = DeviceCategoryGroup.GRID,
-                )
+                ),
+                today = LocalDate(2026, 1, 1),
+                now = LocalTime(12, 0),
             )
         }
     }
@@ -610,7 +620,9 @@ private fun DeviceCardOfflinePreview() {
                     dailyEnergyWh = null,
                     hasToggle = true,
                     category = DeviceCategoryGroup.CONSUMPTION,
-                )
+                ),
+                today = LocalDate(2026, 1, 1),
+                now = LocalTime(12, 0),
             )
         }
     }
@@ -634,7 +646,9 @@ private fun DeviceCardToggleDisabledPreview() {
                     hasToggle = true,
                     isSwitchOn = true,
                     category = DeviceCategoryGroup.CONSUMPTION,
-                )
+                ),
+                today = LocalDate(2026, 1, 1),
+                now = LocalTime(12, 0),
             )
         }
     }
@@ -667,6 +681,8 @@ private fun DeviceCardControlStatesPreview() {
                             isSwitchOn = isOn,
                             category = DeviceCategoryGroup.CONSUMPTION,
                         ),
+                        today = LocalDate(2026, 1, 1),
+                        now = LocalTime(12, 0),
                     )
                 }
             }

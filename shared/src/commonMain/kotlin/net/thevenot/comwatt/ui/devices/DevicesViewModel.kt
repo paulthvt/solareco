@@ -36,7 +36,8 @@ class DevicesViewModel(
                         it.copy(
                             isRefreshing = false,
                             isDataLoaded = true,
-                            lastErrorMessage = error.toString()
+                            lastErrorMessage = error.toString(),
+                            refreshCount = it.refreshCount + 1,
                         )
                     }
                 },
@@ -46,7 +47,8 @@ class DevicesViewModel(
                         it.copy(
                             isRefreshing = false,
                             isDataLoaded = true,
-                            devices = devices
+                            devices = devices,
+                            refreshCount = it.refreshCount + 1,
                         )
                     }
                 }
@@ -56,10 +58,20 @@ class DevicesViewModel(
 
     fun refresh() {
         loadDevices()
+        loadSchedules(force = true)
     }
 
-    fun loadSchedules() {
-        if (_uiState.value.schedulesByDeviceId.isNotEmpty()) return
+    /**
+     * Loads schedules for the AUTO summary line.
+     *
+     * On resume ([force] = false) the cached result is reused — schedules change
+     * on the order of days and refetching per-resume is waste. On an explicit
+     * pull-to-refresh ([force] = true) the cache is bypassed so a user who just
+     * edited a schedule in Device Settings → Planning sees the updated summary.
+     * A failed fetch leaves the map empty, which the resume path will retry.
+     */
+    fun loadSchedules(force: Boolean = false) {
+        if (!force && _uiState.value.schedulesByDeviceId.isNotEmpty()) return
 
         viewModelScope.launch(Dispatchers.IO) {
             val schedules = fetchSiteSchedulesUseCase()
