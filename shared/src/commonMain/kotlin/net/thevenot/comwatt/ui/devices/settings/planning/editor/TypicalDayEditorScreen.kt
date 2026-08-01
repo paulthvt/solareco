@@ -39,13 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
-import comwatt.shared.generated.resources.error_fetching_data
 import comwatt.shared.generated.resources.planning_mode_none
 import comwatt.shared.generated.resources.typical_day_add_range
 import comwatt.shared.generated.resources.typical_day_discard_cancel
 import comwatt.shared.generated.resources.typical_day_discard_confirm
 import comwatt.shared.generated.resources.typical_day_discard_message
 import comwatt.shared.generated.resources.typical_day_discard_title
+import comwatt.shared.generated.resources.typical_day_duplicate_suffix
 import comwatt.shared.generated.resources.typical_day_editor_title
 import comwatt.shared.generated.resources.typical_day_label
 import comwatt.shared.generated.resources.typical_day_no_ranges
@@ -150,11 +150,13 @@ private fun EditorContent(
     }
 
     if (uiState.needsSharingWarning) {
+        val copiedLabel =
+            stringResource(Res.string.typical_day_duplicate_suffix, uiState.label)
         SharedDayWarningSheet(
             deviceCount = uiState.sharingCount,
             onDismiss = { viewModel.acknowledgeSharing() },
             onEditAnyway = { viewModel.acknowledgeSharing() },
-            onDuplicate = { viewModel.duplicateForThisDevice() },
+            onDuplicate = { viewModel.duplicateForThisDevice(copiedLabel) },
         )
     }
 
@@ -215,8 +217,8 @@ private fun EditorContent(
 
             if (uiState.ranges.isNotEmpty()) {
                 itemsIndexed(uiState.ranges.toTimelineBands()) { _, band ->
-                    val rangeIndex = uiState.ranges.indexOfFirst { it.start == band.start }
-                    if (band.mode == null) {
+                    val rangeIndex = band.sourceRangeIndex
+                    if (band.mode == null || rangeIndex == null) {
                         GapRow(band)
                     } else {
                         RangeRow(
@@ -236,10 +238,10 @@ private fun EditorContent(
                 }
             }
 
-            if (uiState.errorMessage.isNotEmpty()) {
+            uiState.error?.let { error ->
                 item {
                     Text(
-                        text = stringResource(Res.string.error_fetching_data),
+                        text = stringResource(error),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                     )

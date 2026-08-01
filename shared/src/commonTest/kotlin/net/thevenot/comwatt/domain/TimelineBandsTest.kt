@@ -21,6 +21,58 @@ class TimelineBandsTest {
         assertNull(bands.single().mode)
         assertEquals(LocalTime(0, 0), bands.single().start)
         assertEquals(1f, bands.single().widthFraction)
+        assertNull(bands.single().sourceRangeIndex, "a gap has no source range")
+    }
+
+    @Test
+    fun `every gap band has no source range index`() {
+        val bands = listOf(range("10:00", "17:00", ScheduleMode.SOLAR)).toTimelineBands()
+
+        assertEquals(listOf(null, 0, null), bands.map { it.sourceRangeIndex })
+    }
+
+    @Test
+    fun `source range index points at the position in the unsorted input`() {
+        val ranges = listOf(
+            range("18:00", "20:00", ScheduleMode.ON),
+            range("06:00", "08:00", ScheduleMode.OFF),
+        )
+
+        val bands = ranges.toTimelineBands().filter { it.mode != null }
+
+        assertEquals(listOf(1, 0), bands.map { it.sourceRangeIndex })
+        bands.forEach { band ->
+            assertEquals(ranges[band.sourceRangeIndex!!].start, band.start)
+            assertEquals(ranges[band.sourceRangeIndex!!].mode, band.mode)
+        }
+    }
+
+    @Test
+    fun `duplicate start times keep distinct source range indices`() {
+        // The old reverse lookup matched bands to ranges by start time, which
+        // collapsed these two onto index 0.
+        val ranges = listOf(
+            range("09:00", "09:00", ScheduleMode.OFF), // zero-length, skipped
+            range("09:00", "12:00", ScheduleMode.ON),
+        )
+
+        val bands = ranges.toTimelineBands().filter { it.mode != null }
+
+        assertEquals(listOf(1), bands.map { it.sourceRangeIndex })
+        assertEquals(ScheduleMode.ON, bands.single().mode)
+    }
+
+    @Test
+    fun `a skipped zero length range shifts no other index`() {
+        val ranges = listOf(
+            range("06:00", "08:00", ScheduleMode.OFF),
+            range("10:00", "10:00", ScheduleMode.ON), // skipped
+            range("12:00", "14:00", ScheduleMode.SOLAR),
+        )
+
+        val bands = ranges.toTimelineBands().filter { it.mode != null }
+
+        assertEquals(listOf(0, 2), bands.map { it.sourceRangeIndex })
     }
 
     @Test

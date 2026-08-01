@@ -3,6 +3,9 @@ package net.thevenot.comwatt.ui.devices.settings.planning.editor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
+import comwatt.shared.generated.resources.Res
+import comwatt.shared.generated.resources.error_fetching_data
+import comwatt.shared.generated.resources.planning_save_error
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,13 +40,15 @@ class TypicalDayEditorViewModel(
     private var planning: DevicePlanning? = null
 
     fun load() {
-        _uiState.update { it.copy(isLoading = true, errorMessage = "") }
+        _uiState.update { it.copy(isLoading = true, error = null) }
 
         viewModelScope.launch(Dispatchers.IO) {
             fetchDevicePlanningUseCase.invoke(deviceId = route.deviceId, siteId = siteId).fold(
                 ifLeft = { error ->
                     Logger.e(TAG) { "Error loading planning for editor: $error" }
-                    _uiState.update { it.copy(isLoading = false, errorMessage = error.toString()) }
+                    _uiState.update {
+                        it.copy(isLoading = false, error = Res.string.error_fetching_data)
+                    }
                 },
                 ifRight = { loaded ->
                     planning = loaded
@@ -105,11 +110,15 @@ class TypicalDayEditorViewModel(
     /**
      * The escape hatch from the shared-day warning: forget the loaded day's id
      * so the next save POSTs a new one instead of mutating the shared original.
+     *
+     * @param copiedLabel the new day's name, resolved from
+     *   `typical_day_duplicate_suffix` by the caller — the ViewModel holds no
+     *   user-facing text.
      */
-    fun duplicateForThisDevice() = _uiState.update { state ->
+    fun duplicateForThisDevice(copiedLabel: String) = _uiState.update { state ->
         state.copy(
             original = null,
-            label = "${state.label} (copy)",
+            label = copiedLabel,
             sharingCount = 0,
             hasAcknowledgedSharing = true,
         )
@@ -120,16 +129,21 @@ class TypicalDayEditorViewModel(
      * The second only runs if the first succeeds. If the second fails the new
      * typical day is left orphaned rather than blind-deleted — the spec's
      * choice, since deleting could fail in turn and lose the user's work.
+     *
+     * The planning is re-read between the two writes: the PUT replaces the whole
+     * schedule array, so rebuilding from the snapshot taken at [load] would
+     * delete anything added elsewhere in the meantime.
      */
     fun save(onDone: () -> Unit) {
         if (_uiState.value.isSaving) return
         val state = _uiState.value
-        val current = planning?.rawPlanning ?: run {
-            _uiState.update { it.copy(errorMessage = "No planning to save into") }
+        if (planning?.rawPlanning == null) {
+            Logger.e(TAG) { "No planning to save into for device ${route.deviceId}" }
+            _uiState.update { it.copy(error = Res.string.planning_save_error) }
             return
         }
 
-        _uiState.update { it.copy(isSaving = true, errorMessage = "") }
+        _uiState.update { it.copy(isSaving = true, error = null) }
 
         viewModelScope.launch(Dispatchers.IO) {
             val draft = TypicalDay(
@@ -137,51 +151,80 @@ class TypicalDayEditorViewModel(
                 label = state.label.trim(),
                 ranges = state.ranges,
                 isServerManaged = false,
+                isDefault = state.original?.isDefault ?: false,
             )
 
             saveTypicalDayUseCase.invoke(siteId = siteId, day = draft).fold(
                 ifLeft = { error ->
                     Logger.e(TAG) { "Error saving typical day: $error" }
-                    _uiState.update { it.copy(isSaving = false, errorMessage = error.toString()) }
-                },
-                ifRight = { saved ->
-                    val userSchedules = planning?.schedules
-                        ?.filterNot { it.isServerManaged }
-                        .orEmpty()
-
-                    val rebuilt = if (route.scheduleIndex in userSchedules.indices) {
-                        userSchedules.mapIndexed { index, schedule ->
-                            if (index == route.scheduleIndex) {
-                                schedule.copy(typicalDay = saved)
-                            } else {
-                                schedule
-                            }
-                        }
-                    } else {
-                        userSchedules + newSchedule(saved)
+                    _uiState.update {
+                        it.copy(isSaving = false, error = Res.string.planning_save_error)
                     }
-
-                    saveDeviceScheduleUseCase.invoke(
-                        current = current,
-                        schedules = rebuilt,
-                        allowEmpty = false,
-                    ).fold(
-                        ifLeft = { error ->
-                            Logger.e(TAG) {
-                                "Typical day ${saved.id} saved but planning write failed: $error"
-                            }
-                            _uiState.update {
-                                it.copy(isSaving = false, errorMessage = error.toString())
-                            }
-                        },
-                        ifRight = {
-                            _uiState.update { it.copy(isSaving = false, original = saved) }
-                            withContext(Dispatchers.Main) { onDone() }
-                        }
-                    )
-                }
+                },
+                ifRight = { saved -> writePlanning(saved, onDone) }
             )
         }
+    }
+
+    /**
+     * Second half of [save]. Re-reads the planning so the wholesale PUT carries
+     * every schedule that exists *now*, not the ones that existed at [load].
+     */
+    private suspend fun writePlanning(saved: TypicalDay, onDone: () -> Unit) {
+        val fresh = fetchDevicePlanningUseCase.invoke(deviceId = route.deviceId, siteId = siteId)
+            .fold(
+                ifLeft = { error ->
+                    Logger.e(TAG) {
+                        "Typical day ${saved.id} saved but re-reading the planning failed: $error"
+                    }
+                    null
+                },
+                ifRight = { it },
+            )
+
+        val current = fresh?.rawPlanning
+        if (current == null) {
+            _uiState.update { it.copy(isSaving = false, error = Res.string.planning_save_error) }
+            return
+        }
+        planning = fresh
+
+        val userSchedules = fresh.schedules.filterNot { it.isServerManaged }
+
+        // An existing day is matched by typical day id rather than by position:
+        // the list may have been reordered since load. A new day (no id yet), or
+        // one whose schedule has since been deleted, is appended.
+        val editedIndex = when (val editedDayId = _uiState.value.original?.id) {
+            null -> route.scheduleIndex
+            else -> userSchedules.indexOfFirst { it.typicalDay.id == editedDayId }
+        }
+
+        val rebuilt = if (editedIndex in userSchedules.indices) {
+            userSchedules.mapIndexed { index, schedule ->
+                if (index == editedIndex) schedule.copy(typicalDay = saved) else schedule
+            }
+        } else {
+            userSchedules + newSchedule(saved)
+        }
+
+        saveDeviceScheduleUseCase.invoke(
+            current = current,
+            schedules = rebuilt,
+            allowEmpty = false,
+        ).fold(
+            ifLeft = { error ->
+                Logger.e(TAG) {
+                    "Typical day ${saved.id} saved but planning write failed: $error"
+                }
+                _uiState.update {
+                    it.copy(isSaving = false, error = Res.string.planning_save_error)
+                }
+            },
+            ifRight = {
+                _uiState.update { it.copy(isSaving = false, original = saved) }
+                withContext(Dispatchers.Main) { onDone() }
+            }
+        )
     }
 
     /**

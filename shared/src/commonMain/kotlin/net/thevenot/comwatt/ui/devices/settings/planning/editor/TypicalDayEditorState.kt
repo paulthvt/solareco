@@ -3,13 +3,19 @@ package net.thevenot.comwatt.ui.devices.settings.planning.editor
 import kotlinx.datetime.LocalTime
 import net.thevenot.comwatt.domain.model.TimeRange
 import net.thevenot.comwatt.domain.model.TypicalDay
+import org.jetbrains.compose.resources.StringResource
 
 private val MIDNIGHT = LocalTime(0, 0)
 
 data class TypicalDayEditorState(
     val isLoading: Boolean = true,
     val isSaving: Boolean = false,
-    val errorMessage: String = "",
+    /**
+     * Which message to show, as a resource the composable resolves — a load
+     * failure and a save failure read very differently to the user. Null means
+     * no error. Diagnostic detail stays in the logs.
+     */
+    val error: StringResource? = null,
     val label: String = "",
     val ranges: List<TimeRange> = emptyList(),
     /** Null when creating a new day; otherwise the loaded server copy. */

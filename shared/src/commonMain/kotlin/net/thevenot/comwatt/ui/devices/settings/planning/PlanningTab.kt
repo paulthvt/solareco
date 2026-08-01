@@ -90,9 +90,15 @@ private fun PlanningTabContent(
 
     LaunchedEffect(deviceId) { viewModel.load() }
 
+    val hasLoadError = uiState.hasError && uiState.planning == null
+
+    // LoadingView only renders its error branch while isLoading is also true, and
+    // other screens rely on that, so the flag is forced here instead. Without it
+    // a failed load would fall through to an empty list with an Add button, which
+    // reads as "this device has no schedules".
     LoadingView(
-        isLoading = uiState.isLoading,
-        hasError = uiState.hasError && uiState.planning == null,
+        isLoading = uiState.isLoading || hasLoadError,
+        hasError = hasLoadError,
         onRefresh = { viewModel.load() },
     ) {
         LazyColumn(
