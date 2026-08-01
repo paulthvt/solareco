@@ -16,22 +16,27 @@ import net.thevenot.comwatt.domain.model.DeviceSchedule
 class FetchSiteSchedulesUseCase(private val dataRepository: DataRepository) {
 
     suspend operator fun invoke(): Map<Int, List<DeviceSchedule>> {
-        val siteId = dataRepository.getSettings().firstOrNull()?.siteId ?: run {
-            Logger.w(TAG) { "No site selected, cards render without summaries" }
-            return emptyMap()
-        }
-
-        return dataRepository.api.fetchSitePlannings(siteId).fold(
-            ifLeft = { error ->
-                Logger.w(TAG) { "Site plannings unavailable, cards render without summaries: $error" }
-                emptyMap()
-            },
-            ifRight = { paged ->
-                paged.content.associate { planning ->
-                    planning.device.id to planning.typicalDaySchedules.map { it.toDomain() }
-                }
+        return try {
+            val siteId = dataRepository.getSettings().firstOrNull()?.siteId ?: run {
+                Logger.w(TAG) { "No site selected, cards render without summaries" }
+                return emptyMap()
             }
-        )
+
+            dataRepository.api.fetchSitePlannings(siteId).fold(
+                ifLeft = { error ->
+                    Logger.w(TAG) { "Site plannings unavailable, cards render without summaries: $error" }
+                    emptyMap()
+                },
+                ifRight = { paged ->
+                    paged.content.associate { planning ->
+                        planning.device.id to planning.typicalDaySchedules.map { it.toDomain() }
+                    }
+                }
+            )
+        } catch (e: Exception) {
+            Logger.w(TAG) { "Failed to parse site schedules, cards render without summaries: ${e.message}" }
+            emptyMap()
+        }
     }
 
     companion object {

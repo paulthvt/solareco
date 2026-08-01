@@ -74,10 +74,10 @@ import net.thevenot.comwatt.ui.theme.powerConsumption
 import net.thevenot.comwatt.ui.theme.powerInjection
 import net.thevenot.comwatt.ui.theme.powerProduction
 import net.thevenot.comwatt.ui.theme.powerWithdrawals
-import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
 import kotlin.math.roundToInt
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun DevicesScreen(
@@ -146,7 +146,9 @@ private fun DevicesContent(
     onDeviceSettingsClick: (Int) -> Unit,
     onDeviceStateSelected: (DeviceUiModel, DeviceControlState) -> Unit = { _, _ -> },
 ) {
-    val moment = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()) }
+    val moment = remember(uiState.devices, uiState.schedulesByDeviceId) {
+        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+    }
     val today = moment.date
     val now = moment.time
     val pullToRefreshState = rememberPullToRefreshState()
