@@ -22,11 +22,23 @@ data class DevicePlanning(
 
 class FetchDevicePlanningUseCase(private val api: ComwattApi) {
 
+    /**
+     * The schedule list comes from the **site** endpoint, never from
+     * `GET /api/plannings?deviceId=`: the device endpoint returns only the
+     * schedules active today, and since `PUT /api/plannings/{id}` replaces the
+     * whole array, writing back a today-only list silently deletes every
+     * schedule whose date window lies outside it. The site endpoint returns all
+     * of them, so a failure here is fatal rather than advisory.
+     */
     suspend fun invoke(deviceId: Int, siteId: Int): Either<DomainError, DevicePlanning> {
         return try {
-            val planning = api.fetchPlannings(deviceId)
+            val sitePlannings = api.fetchSitePlannings(siteId)
                 .mapLeft { DomainError.Api(it) }
-                .fold({ return Either.Left(it) }, { it.content.firstOrNull() })
+                .onLeft { Logger.e(TAG) { "Could not load site plannings: $it" } }
+                .fold({ return Either.Left(it) }, { it.content })
+
+            // A device with no planning yet is legitimate: the tab renders empty.
+            val planning = sitePlannings.firstOrNull { it.device.id == deviceId }
 
             val typicalDays = api.fetchTypicalDays(siteId)
                 .getOrNull()
@@ -35,13 +47,7 @@ class FetchDevicePlanningUseCase(private val api: ComwattApi) {
                 ?.filterNot { it.isServerManaged }
                 .orEmpty()
 
-            // Advisory only: a failure here costs the "shared with N devices" lines.
-            val usage = api.fetchSitePlannings(siteId)
-                .onLeft { Logger.w(TAG) { "Could not load site plannings for sharing counts: $it" } }
-                .getOrNull()
-                ?.content
-                ?.countTypicalDayUsage()
-                .orEmpty()
+            val usage = sitePlannings.countTypicalDayUsage()
 
             Either.Right(
                 DevicePlanning(
