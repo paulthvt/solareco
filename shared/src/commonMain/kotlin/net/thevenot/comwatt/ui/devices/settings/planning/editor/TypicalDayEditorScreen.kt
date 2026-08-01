@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
+import comwatt.shared.generated.resources.error_fetching_data
 import comwatt.shared.generated.resources.planning_mode_none
 import comwatt.shared.generated.resources.typical_day_add_range
 import comwatt.shared.generated.resources.typical_day_discard_cancel
@@ -69,6 +70,7 @@ import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TypicalDayEditorScreen(
     navController: NavController,
@@ -82,13 +84,22 @@ fun TypicalDayEditorScreen(
     }
 
     if (!siteIdResolved) {
-        LoadingView(isLoading = true) { }
+        EditorShell(onNavigateBack = { navController.popBackStack() }) {
+            LoadingView(isLoading = true) { }
+        }
         return
     }
 
     val currentSiteId = siteId
     if (currentSiteId == null) {
-        LoadingView(isLoading = true) { }
+        EditorShell(onNavigateBack = { navController.popBackStack() }) {
+            Text(
+                text = stringResource(Res.string.error_fetching_data),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(16.dp),
+            )
+        }
         return
     }
 
@@ -98,6 +109,34 @@ fun TypicalDayEditorScreen(
         dataRepository = dataRepository,
         onNavigateBack = { navController.popBackStack() },
     )
+}
+
+/** Minimal Scaffold with the standard editor top bar, used for pre-content states. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditorShell(
+    onNavigateBack: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            painter = AppIcons.ArrowBack,
+                            contentDescription = null,
+                        )
+                    }
+                },
+                title = { Text(stringResource(Res.string.typical_day_editor_title)) },
+            )
+        },
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            content()
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)

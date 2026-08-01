@@ -62,18 +62,20 @@ fun TimeRangeEditSheet(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 28.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            // Clamp start's upper bound one step below end so start == end is unreachable.
             TimeStepperRow(
                 label = stringResource(Res.string.typical_day_range_start),
                 value = start,
                 lower = lower,
-                upper = end,
+                upper = stepBelowEnd(end),
                 onChange = { start = it },
             )
 
+            // Clamp end's lower bound one step above start so end == start is unreachable.
             TimeStepperRow(
                 label = stringResource(Res.string.typical_day_range_end),
                 value = end,
-                lower = start,
+                lower = stepAboveStart(start),
                 upper = upper,
                 onChange = { end = it },
             )
@@ -160,5 +162,22 @@ private fun LocalTime.toMinutes(): Int = hour * 60 + minute
 private fun Int.toLocalTime(): LocalTime {
     val clamped = coerceIn(0, MINUTES_PER_DAY) % MINUTES_PER_DAY
     return LocalTime(clamped / 60, clamped % 60)
+}
+
+/**
+ * Returns the LocalTime one step (15 min) below [end], treating LocalTime(0,0) as minute 1440.
+ * Used as the start stepper's upper bound so start can never equal end.
+ */
+internal fun stepBelowEnd(end: LocalTime): LocalTime {
+    val endMinutes = if (end == LocalTime(0, 0)) MINUTES_PER_DAY else end.toMinutes()
+    return (endMinutes - STEP_MINUTES).toLocalTime()
+}
+
+/**
+ * Returns the LocalTime one step (15 min) above [start].
+ * Used as the end stepper's lower bound so end can never equal start.
+ */
+internal fun stepAboveStart(start: LocalTime): LocalTime {
+    return (start.toMinutes() + STEP_MINUTES).toLocalTime()
 }
 
