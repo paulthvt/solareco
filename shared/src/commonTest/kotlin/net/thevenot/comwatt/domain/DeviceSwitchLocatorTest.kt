@@ -16,9 +16,14 @@ import kotlin.test.assertNull
 
 class DeviceSwitchLocatorTest {
 
-    private fun capacity(id: Int, nature: String, enable: Boolean?) = CapacityDto(
+    /**
+     * The wrapper id and the inner capacity id are deliberately different: the
+     * switch endpoint takes the inner one, and identical ids would hide a
+     * regression that picks the wrong level.
+     */
+    private fun capacity(id: Int, nature: String, enable: Boolean?, wrapperId: Int = 736302) = CapacityDto(
         atId = null,
-        id = id,
+        id = wrapperId,
         capacity = CapacityDetailDto(
             atId = null, atRef = null, id = id, capacityId = null, type = null,
             nature = nature, sgReady = null, instance = null, connectedObjectId = null,
@@ -73,6 +78,41 @@ class DeviceSwitchLocatorTest {
 
         assertEquals(318273, switch?.capacityId)
         assertEquals(false, switch?.isOn)
+    }
+
+    /**
+     * Verified against the live API on device 124758: `/api/capacities/736302/switch`
+     * (the wrapper id) returns 403 Forbidden, while the web app calls
+     * `/api/capacities/318273/switch` (the inner capacity id) successfully.
+     */
+    @Test
+    fun `uses the inner capacity id, not the wrapper id`() {
+        val switch = device(
+            capacities = listOf(
+                capacity(318273, "POWER_SWITCH", enable = true, wrapperId = 736302),
+            ),
+        ).findPowerSwitch()
+
+        assertEquals(318273, switch?.capacityId)
+    }
+
+    @Test
+    fun `returns null when the wrapper has an id but the capacity does not`() {
+        val orphan = CapacityDto(
+            atId = null,
+            id = 736302,
+            capacity = CapacityDetailDto(
+                atId = null, atRef = null, id = null, capacityId = null, type = null,
+                nature = "POWER_SWITCH", sgReady = null, instance = null,
+                connectedObjectId = null, measureKinds = null, measureKind = null,
+                measureType = null, nativeMeasureType = null, deviceId = null,
+                global = null, production = null, enable = true, tadoCapacity = null,
+                selectValues = null, calibration = null, valorisationIndex = null,
+                multiplication = null,
+            ),
+        )
+
+        assertNull(device(capacities = listOf(orphan)).findPowerSwitch())
     }
 
     @Test

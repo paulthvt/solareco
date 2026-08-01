@@ -24,9 +24,15 @@ fun DeviceDto.findPowerSwitch(): DeviceSwitch? {
     return candidates.firstNotNullOfOrNull { it.toDeviceSwitch() }
 }
 
+/**
+ * The switch endpoint takes the **inner** `capacity.id`, not the wrapper's own
+ * `id`. On device 124758 the wrapper is 736302 and the capacity is 318273; the
+ * web app calls `/api/capacities/318273/switch`, and passing 736302 returns
+ * 403 Forbidden with an empty body.
+ */
 private fun CapacityDto.toDeviceSwitch(): DeviceSwitch? {
     if (capacity?.nature != POWER_SWITCH_NATURE) return null
-    val capacityId = id ?: return null
+    val capacityId = capacity.id ?: return null
     return DeviceSwitch(capacityId = capacityId, isOn = capacity.enable == true)
 }
 
