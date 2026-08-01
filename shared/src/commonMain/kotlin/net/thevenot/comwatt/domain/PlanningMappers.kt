@@ -33,21 +33,22 @@ fun ScheduleMode.toApiValue(): String = when (this) {
 }
 
 /**
- * Weekday bitmask conversion. Bit 0 is Monday, following [DayOfWeek]'s ISO
- * ordering, so mask 127 is every day. Bits above the seven-day range are
- * ignored.
+ * Weekday bitmask conversion. The API counts bits **down** from Monday: Monday
+ * is bit 6 and Sunday is bit 0. [DayOfWeek.entries] is Monday-first, so a day's
+ * bit is `6 - ordinal`. Mask 127 is every day, and bits above the seven-day
+ * range are ignored.
  *
- * The bit order is inferred: every schedule observed on the live API used mask
- * 127, which is order-independent. See the plan's Task 16 for the manual
- * verification step.
+ * Verified against the live API on device 124758 by setting one day at a time
+ * in the web app and reading `activeDayMask` back: Monday 64, Tuesday 32,
+ * Wednesday 16, Thursday 8, Friday 4, Saturday 2, Sunday 1.
  */
+private fun DayOfWeek.maskBit(): Int = 1 shl (6 - ordinal)
+
 fun Int.toDayOfWeekSet(): Set<DayOfWeek> =
-    DayOfWeek.entries.filterIndexed { index, _ -> this shr index and 1 == 1 }.toSet()
+    DayOfWeek.entries.filterTo(mutableSetOf()) { this and it.maskBit() != 0 }
 
 fun Set<DayOfWeek>.toDayMask(): Int =
-    DayOfWeek.entries.foldIndexed(0) { index, mask, day ->
-        if (day in this) mask or (1 shl index) else mask
-    }
+    fold(0) { mask, day -> mask or day.maskBit() }
 
 fun TypicalDayDto.toDomain(): TypicalDay = TypicalDay(
     id = id,

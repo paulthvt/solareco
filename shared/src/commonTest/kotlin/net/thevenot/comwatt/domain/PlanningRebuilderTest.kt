@@ -214,6 +214,7 @@ class PlanningRebuilderTest {
         assertEquals(2, body.typicalDaySchedules.size)
         val added = body.typicalDaySchedules.single { it.typicalDay.label == "Evening" }
         assertEquals(null, added.id)
-        assertEquals(32, added.activeDayMask)
+        // Bits count down from Monday, so Saturday is bit 1.
+        assertEquals(2, added.activeDayMask)
     }
 }

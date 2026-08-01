@@ -46,11 +46,32 @@ class PlanningMappersTest {
         assertEquals(emptySet(), 0.toDayOfWeekSet())
     }
 
+    /**
+     * Verified against the live API on device 124758: each day was set alone in
+     * the web app and `activeDayMask` read back. The API counts bits down from
+     * Monday, so a day's bit is `7 - isoDayNumber` — not the ascending order
+     * this mapping originally assumed.
+     */
     @Test
-    fun `single bits map to single days`() {
-        assertEquals(setOf(DayOfWeek.MONDAY), 1.toDayOfWeekSet())
-        assertEquals(setOf(DayOfWeek.TUESDAY), 2.toDayOfWeekSet())
-        assertEquals(setOf(DayOfWeek.SUNDAY), 64.toDayOfWeekSet())
+    fun `single bits map to the days observed on the live api`() {
+        assertEquals(setOf(DayOfWeek.MONDAY), 64.toDayOfWeekSet())
+        assertEquals(setOf(DayOfWeek.TUESDAY), 32.toDayOfWeekSet())
+        assertEquals(setOf(DayOfWeek.WEDNESDAY), 16.toDayOfWeekSet())
+        assertEquals(setOf(DayOfWeek.THURSDAY), 8.toDayOfWeekSet())
+        assertEquals(setOf(DayOfWeek.FRIDAY), 4.toDayOfWeekSet())
+        assertEquals(setOf(DayOfWeek.SATURDAY), 2.toDayOfWeekSet())
+        assertEquals(setOf(DayOfWeek.SUNDAY), 1.toDayOfWeekSet())
+    }
+
+    @Test
+    fun `single days map to the masks observed on the live api`() {
+        assertEquals(64, setOf(DayOfWeek.MONDAY).toDayMask())
+        assertEquals(32, setOf(DayOfWeek.TUESDAY).toDayMask())
+        assertEquals(16, setOf(DayOfWeek.WEDNESDAY).toDayMask())
+        assertEquals(8, setOf(DayOfWeek.THURSDAY).toDayMask())
+        assertEquals(4, setOf(DayOfWeek.FRIDAY).toDayMask())
+        assertEquals(2, setOf(DayOfWeek.SATURDAY).toDayMask())
+        assertEquals(1, setOf(DayOfWeek.SUNDAY).toDayMask())
     }
 
     @Test
