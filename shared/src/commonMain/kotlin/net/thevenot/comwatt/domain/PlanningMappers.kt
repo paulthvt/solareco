@@ -56,6 +56,7 @@ fun TypicalDayDto.toDomain(): TypicalDay = TypicalDay(
         .map { it.toDomain() }
         .sortedBy { it.start },
     isServerManaged = optimalPlanning,
+    isDefault = isDefault,
 )
 
 private fun TimeRangeConfigurationDto.toDomain(): TimeRange = TimeRange(
@@ -78,6 +79,9 @@ fun TypicalDay.toDto(): TypicalDayDto = TypicalDayDto(
     id = id,
     label = label,
     optimalPlanning = isServerManaged,
+    // Must round-trip: encodeDefaults would otherwise write false and demote the
+    // site's default typical day on every save.
+    isDefault = isDefault,
     timeRangeConfigurations = ranges.map { range ->
         TimeRangeConfigurationDto(
             startTime = range.start.toApiTimeString(),

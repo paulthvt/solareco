@@ -40,6 +40,39 @@ class PlanningDomainMappingTest {
     }
 
     @Test
+    fun `the default flag round trips so a save cannot demote the site default`() {
+        val defaultDto = automaticDto.copy(isDefault = true)
+        val day = defaultDto.toDomain()
+
+        assertTrue(day.isDefault)
+        assertTrue(
+            day.toDto().isDefault,
+            "encodeDefaults writes this field, so losing it demotes the site's default typical day",
+        )
+        assertEquals(defaultDto.isDefault, day.toDto().isDefault)
+    }
+
+    @Test
+    fun `a non default typical day stays non default through a round trip`() {
+        assertFalse(automaticDto.toDomain().isDefault)
+        assertFalse(automaticDto.toDomain().toDto().isDefault)
+    }
+
+    @Test
+    fun `the default flag survives a schedule round trip`() {
+        val schedule = TypicalDayScheduleDto(
+            id = 244837,
+            activeDayMask = 127,
+            startDate = "2026-01-01",
+            endDate = "2026-12-31",
+            optimalPlanning = false,
+            typicalDay = automaticDto.copy(isDefault = true),
+        )
+
+        assertTrue(schedule.toDomain().toDto().typicalDay.isDefault)
+    }
+
+    @Test
     fun `optimal planning becomes server managed`() {
         val day = automaticDto.copy(label = "TD-ML-1-Dev-124758", optimalPlanning = true).toDomain()
         assertTrue(day.isServerManaged)

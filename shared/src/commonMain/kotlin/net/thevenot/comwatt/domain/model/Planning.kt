@@ -17,12 +17,18 @@ data class TimeRange(
  * A named 24-hour template. Site-level: the same typical day may be used by
  * several devices. [isServerManaged] marks the ones Comwatt generates itself,
  * which must never be edited or written back.
+ *
+ * [isDefault] mirrors the API's flag for the site's default typical day. It is
+ * carried purely so that a write round-trips it: the JSON config sets
+ * `encodeDefaults`, so dropping it would emit `"isDefault": false` and demote
+ * the site default on every save.
  */
 data class TypicalDay(
     val id: Int?,
     val label: String,
     val ranges: List<TimeRange>,
     val isServerManaged: Boolean,
+    val isDefault: Boolean = false,
 )
 
 /** Binds a [TypicalDay] to a set of weekdays and a date window. */
