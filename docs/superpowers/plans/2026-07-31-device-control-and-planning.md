@@ -1060,7 +1060,8 @@ class PlanningRebuilderTest {
         assertEquals(2, body.typicalDaySchedules.size)
         val added = body.typicalDaySchedules.single { it.typicalDay.label == "Evening" }
         assertEquals(null, added.id)
-        assertEquals(32, added.activeDayMask)
+        // Bits count down from Monday, so Saturday is bit 1.
+        assertEquals(2, added.activeDayMask)
     }
 }
 ```
@@ -1763,7 +1764,7 @@ data class DeviceUiModel(
 
 `switchCapacityId`, `controlMode` and `isSwitchOn` get defaults (`null`, `ControlMode.MANUAL`, `false`) so the eleven preview and test constructions do not all need new arguments — but `isToggleEnabled` is **removed**, so every one of them still needs that line deleted. Grep for it before committing: `grep -rn isToggleEnabled shared/src` must come back empty.
 
-Field facts, from the DTOs already in the repo: `CapacityDetailDto` has `nature: String?` and `enable: Boolean?`; `CapacityDto` has `id: Int?` and `capacity: CapacityDetailDto?`; `ConfigurationDto.controlMode` is a non-null `String`. The capacity id used by `PUT /api/capacities/{id}/switch` is `CapacityDto.id`, not `capacity.id`.
+Field facts, from the DTOs already in the repo: `CapacityDetailDto` has `nature: String?` and `enable: Boolean?`; `CapacityDto` has `id: Int?` and `capacity: CapacityDetailDto?`; `ConfigurationDto.controlMode` is a non-null `String`. The capacity id used by `PUT /api/capacities/{id}/switch` is the inner `capacity.id`, not the wrapper's `CapacityDto.id` — verified live: the wrapper id returns 403 Forbidden.
 
 - [ ] **Step 1: Write the failing test**
 
