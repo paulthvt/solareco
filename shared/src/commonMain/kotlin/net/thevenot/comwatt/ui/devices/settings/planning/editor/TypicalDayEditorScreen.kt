@@ -1,32 +1,41 @@
 package net.thevenot.comwatt.ui.devices.settings.planning.editor
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -47,6 +56,7 @@ import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.error_fetching_data
 import comwatt.shared.generated.resources.planning_mode_none
 import comwatt.shared.generated.resources.typical_day_add_range
+import comwatt.shared.generated.resources.typical_day_add_rule
 import comwatt.shared.generated.resources.typical_day_discard_cancel
 import comwatt.shared.generated.resources.typical_day_discard_confirm
 import comwatt.shared.generated.resources.typical_day_discard_message
@@ -54,7 +64,9 @@ import comwatt.shared.generated.resources.typical_day_discard_title
 import comwatt.shared.generated.resources.typical_day_duplicate_suffix
 import comwatt.shared.generated.resources.typical_day_editor_title
 import comwatt.shared.generated.resources.typical_day_label
+import comwatt.shared.generated.resources.typical_day_delete_range
 import comwatt.shared.generated.resources.typical_day_no_ranges
+import comwatt.shared.generated.resources.typical_day_rule_hint
 import comwatt.shared.generated.resources.typical_day_save
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.backhandler.BackHandler
@@ -65,11 +77,12 @@ import net.thevenot.comwatt.domain.SaveDeviceScheduleUseCase
 import net.thevenot.comwatt.domain.SaveTypicalDayUseCase
 import net.thevenot.comwatt.domain.TimelineBand
 import net.thevenot.comwatt.domain.model.TimeRange
-import net.thevenot.comwatt.domain.toTimelineBands
 import net.thevenot.comwatt.ui.common.LoadingView
 import net.thevenot.comwatt.ui.devices.settings.planning.TimelinePreviewBar
 import net.thevenot.comwatt.ui.devices.settings.planning.color
 import net.thevenot.comwatt.ui.devices.settings.planning.displayName
+import net.thevenot.comwatt.ui.devices.settings.planning.durationLabel
+import net.thevenot.comwatt.ui.devices.settings.planning.icon
 import net.thevenot.comwatt.ui.devices.settings.planning.hhmm
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
@@ -249,35 +262,62 @@ private fun EditorContent(
 
             item { HourAxis() }
 
-            if (uiState.ranges.isEmpty()) {
-                item {
-                    Text(
-                        text = stringResource(Res.string.typical_day_no_ranges),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
+            item {
+                Text(
+                    text = stringResource(
+                        if (uiState.ranges.isEmpty()) {
+                            Res.string.typical_day_no_ranges
+                        } else {
+                            Res.string.typical_day_rule_hint
+                        }
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
-            if (uiState.ranges.isNotEmpty()) {
-                itemsIndexed(uiState.ranges.toTimelineBands()) { _, band ->
-                    val rangeIndex = band.sourceRangeIndex
-                    if (band.mode == null || rangeIndex == null) {
-                        GapRow(band)
-                    } else {
-                        RangeRow(
-                            range = TimeRange(band.start, band.end, band.mode),
-                            onClick = { viewModel.beginEdit(rangeIndex) },
-                        )
-                    }
+            // Every slot of the day is a row, gaps included: the previous list
+            // showed gaps too but left them inert, so a user tapping one of the
+            // three visible rows got a response from only the middle one.
+            // Keyed by the slot's start so a deleted or split slot animates in
+            // place: without a key every row below the change would be recycled
+            // and the list would jump instead of sliding.
+            // Rule slots key on their source range index and gaps on their start
+            // — both unique per list, where start alone would collide if two
+            // ranges ever shared one and crash the list.
+            items(
+                uiState.bands,
+                key = { it.sourceRangeIndex?.let { index -> "rule-$index" } ?: "gap-${it.start}" },
+            ) { band ->
+                val rangeIndex = band.sourceRangeIndex
+                if (band.mode == null || rangeIndex == null) {
+                    GapCard(
+                        band = band,
+                        onClick = { viewModel.addRangeCovering(band.start, band.end) },
+                        modifier = Modifier.animateItem(),
+                    )
+                } else {
+                    RuleCard(
+                        range = TimeRange(band.start, band.end, band.mode),
+                        onClick = { viewModel.beginEdit(rangeIndex) },
+                        onDelete = { viewModel.deleteRange(rangeIndex) },
+                        modifier = Modifier.animateItem(),
+                    )
                 }
             }
 
             item {
                 OutlinedButton(
                     onClick = { viewModel.addRange() },
+                    enabled = uiState.canAddRange,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
+                    Icon(
+                        painter = AppIcons.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(stringResource(Res.string.typical_day_add_range))
                 }
             }
@@ -318,56 +358,143 @@ private fun EditorContent(
     }
 }
 
-/** One tappable range. Modes are named, never shown as their API values. */
+private val CARD_SHAPE = RoundedCornerShape(16.dp)
+
+/**
+ * One covered slot. A card rather than a bare row so the tap highlight is clipped
+ * to a rounded shape — a full-bleed rectangular ripple over a flat row read as a
+ * rendering glitch. Delete sits on the card as its own button: reaching it
+ * through the edit sheet made removing a slot feel like a hidden gesture.
+ */
 @Composable
-private fun RangeRow(range: TimeRange, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+private fun RuleCard(
+    range: TimeRange,
+    onClick: () -> Unit,
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    // The rail and glyph cross-fade between modes, so changing a slot's mode in
+    // the sheet reads as the same slot changing rather than a new row.
+    val accent by animateColorAsState(
+        targetValue = range.mode.color(),
+        animationSpec = tween(durationMillis = 280),
+    )
+
+    Card(
+        onClick = onClick,
+        shape = CARD_SHAPE,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        ),
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Surface(
-            shape = CircleShape,
-            color = range.mode.color(),
-            modifier = Modifier.size(10.dp),
-        ) {}
-        Text(
-            text = "${range.start.hhmm()} – ${range.end.hhmm()}",
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        Box(modifier = Modifier.weight(1f))
-        Text(
-            text = range.mode.displayName(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Colour rail instead of a dot: it ties the row to its band in the
+            // strip above and survives being read at a glance.
+            Box(modifier = Modifier.width(6.dp).fillMaxHeight().background(accent))
+
+            Row(
+                modifier = Modifier.weight(1f).padding(start = 14.dp, top = 12.dp, bottom = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Crossfade(targetState = range.mode) { mode ->
+                    Icon(
+                        painter = mode.icon(),
+                        contentDescription = null,
+                        tint = accent,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = "${range.start.hhmm()} – ${range.end.hhmm()}",
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    AnimatedContent(
+                        targetState = "${range.mode.displayName()} · ${
+                            durationLabel(range.start, range.end)
+                        }",
+                    ) { summary ->
+                        Text(
+                            text = summary,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+            }
+
+            IconButton(onClick = onDelete, modifier = Modifier.padding(end = 4.dp)) {
+                Icon(
+                    painter = AppIcons.Delete,
+                    contentDescription = stringResource(Res.string.typical_day_delete_range),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp),
+                )
+            }
+        }
     }
 }
 
-/** A stretch of the day no range covers: Comwatt applies no rule, device holds its state. */
+/**
+ * A stretch of the day no rule covers: the device holds whatever state it was
+ * already in. Tapping it claims the whole stretch, so the row that explains the
+ * gap is also the way to close it — outlined and dimmer than a rule card so the
+ * two never read as the same kind of thing.
+ */
 @Composable
-private fun GapRow(band: TimelineBand) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+private fun GapCard(band: TimelineBand, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Card(
+        onClick = onClick,
+        shape = CARD_SHAPE,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            modifier = Modifier.size(10.dp),
-        ) {}
-        Text(
-            text = "${band.start.hhmm()} – ${band.end.hhmm()}",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Box(modifier = Modifier.weight(1f))
-        Text(
-            text = stringResource(Res.string.planning_mode_none),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+            ) {
+                Text(
+                    text = "${band.start.hhmm()} – ${band.end.hhmm()}",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    text = "${stringResource(Res.string.planning_mode_none)} · ${
+                        durationLabel(band.start, band.end)
+                    }",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    painter = AppIcons.Add,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    text = stringResource(Res.string.typical_day_add_rule),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
     }
 }
 

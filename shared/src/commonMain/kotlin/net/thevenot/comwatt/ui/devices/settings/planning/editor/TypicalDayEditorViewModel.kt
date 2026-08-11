@@ -86,16 +86,38 @@ class TypicalDayEditorViewModel(
     }
 
     /**
-     * Appends an hour-long OFF range after the last one, then opens its sheet.
-     * If the day is already full to midnight, nothing is added.
+     * Fills the first uncovered stretch of the day, then opens its sheet. Does
+     * nothing when rules already cover every hour.
      */
     fun addRange() = _uiState.update { state ->
-        val start = state.ranges.lastOrNull()?.end ?: LocalTime(0, 0)
-        if (state.ranges.isNotEmpty() && start == LocalTime(0, 0)) return@update state
+        val gap = state.firstGap ?: return@update state
+        state.withRangeCovering(gap.first, gap.second)
+    }
 
-        val end = if (start.hour == 23) LocalTime(0, 0) else LocalTime(start.hour + 1, start.minute)
-        val appended = state.ranges + TimeRange(start, end, ScheduleMode.OFF)
-        state.copy(ranges = appended, editingIndex = appended.lastIndex)
+    /**
+     * Covers one specific uncovered stretch — what tapping a gap row does. The
+     * whole gap is claimed rather than a fixed hour: the row the user tapped is
+     * the range they asked for, and the sheet opens on it so narrowing it down
+     * is the next tap.
+     */
+    fun addRangeCovering(start: LocalTime, end: LocalTime) = _uiState.update { state ->
+        state.withRangeCovering(start, end)
+    }
+
+    /**
+     * Defaults to solar-driven: it is the mode the app exists for, and the sheet
+     * opens on the new range anyway, so a different one is one tap away.
+     */
+    private fun TypicalDayEditorState.withRangeCovering(
+        start: LocalTime,
+        end: LocalTime,
+    ): TypicalDayEditorState {
+        val added = ranges + TimeRange(start, end, ScheduleMode.SOLAR)
+        val sorted = added.sortedBy { it.start }
+        return copy(
+            ranges = sorted,
+            editingIndex = sorted.indexOfFirst { it.start == start && it.end == end },
+        )
     }
 
     fun deleteRange(index: Int) = _uiState.update { state ->

@@ -1,6 +1,8 @@
 package net.thevenot.comwatt.ui.devices.settings.planning.editor
 
 import kotlinx.datetime.LocalTime
+import net.thevenot.comwatt.domain.TimelineBand
+import net.thevenot.comwatt.domain.toTimelineBands
 import net.thevenot.comwatt.domain.model.TimeRange
 import net.thevenot.comwatt.domain.model.TypicalDay
 import org.jetbrains.compose.resources.StringResource
@@ -41,6 +43,21 @@ data class TypicalDayEditorState(
 
     val canSave: Boolean
         get() = !isLoading && !isSaving && label.isNotBlank() && isDirty
+
+    /**
+     * The day split into covered slots and gaps, one row per entry. Gaps are
+     * part of the list on purpose: an uncovered stretch is a real state of the
+     * day, and offering it as a row is what makes every row tappable.
+     */
+    val bands: List<TimelineBand>
+        get() = ranges.toTimelineBands()
+
+    /** First uncovered stretch, or null when rules already fill the day. */
+    val firstGap: Pair<LocalTime, LocalTime>?
+        get() = bands.firstOrNull { it.mode == null }?.let { it.start to it.end }
+
+    val canAddRange: Boolean
+        get() = firstGap != null
 
     /**
      * The window the range at [index] may occupy without overlapping its

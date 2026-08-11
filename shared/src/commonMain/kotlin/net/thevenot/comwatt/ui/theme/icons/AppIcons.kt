@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.ic_account_circle
+import comwatt.shared.generated.resources.ic_add
 import comwatt.shared.generated.resources.ic_air
 import comwatt.shared.generated.resources.ic_analytics
 import comwatt.shared.generated.resources.ic_arrow_back
@@ -208,6 +209,10 @@ object AppIcons {
     val Close: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_close)
+
+    val Add: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_add)
 
     val AccountCircle: Painter
         @Composable

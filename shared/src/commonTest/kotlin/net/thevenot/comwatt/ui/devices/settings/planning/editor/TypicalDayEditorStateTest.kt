@@ -81,6 +81,42 @@ class TypicalDayEditorStateTest {
     }
 
     @Test
+    fun `every stretch of the day is a slot, gaps included`() {
+        assertEquals(
+            listOf(
+                LocalTime(0, 0) to LocalTime(6, 0),
+                LocalTime(6, 0) to LocalTime(9, 0),
+                LocalTime(9, 0) to LocalTime(10, 0),
+                LocalTime(10, 0) to LocalTime(17, 0),
+                LocalTime(17, 0) to LocalTime(0, 0),
+            ),
+            loaded.bands.map { it.start to it.end },
+        )
+    }
+
+    @Test
+    fun `the first gap is the one offered to fill`() {
+        assertEquals(LocalTime(0, 0) to LocalTime(6, 0), loaded.firstGap)
+        assertTrue(loaded.canAddRange)
+    }
+
+    @Test
+    fun `a day covered end to end offers nothing to add`() {
+        val full = loaded.copy(
+            ranges = listOf(TimeRange(LocalTime(0, 0), LocalTime(0, 0), ScheduleMode.ON)),
+        )
+        assertEquals(null, full.firstGap)
+        assertFalse(full.canAddRange)
+    }
+
+    @Test
+    fun `an empty day is one full-day gap`() {
+        val empty = TypicalDayEditorState(isLoading = false)
+        assertEquals(1, empty.bands.size)
+        assertEquals(LocalTime(0, 0) to LocalTime(0, 0), empty.firstGap)
+    }
+
+    @Test
     fun `bounds for an out of range index span the whole day`() {
         assertEquals(LocalTime(0, 0) to LocalTime(0, 0), loaded.boundsFor(9))
     }

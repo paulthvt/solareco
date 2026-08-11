@@ -210,6 +210,8 @@
     <string name="typical_day_range_start">Start</string>
     <string name="typical_day_range_end">End</string>
     <string name="typical_day_range_mode">Mode</string>
+    <string name="typical_day_add_rule">Add a rule</string>
+    <string name="typical_day_rule_hint">Tap a slot to set what the device does then.</string>
     <string name="typical_day_no_ranges">No time ranges. The device follows no rule all day.</string>
     <string name="device_summary_following">Following schedule · %1$s %2$s–%3$s</string>
     <string name="device_summary_no_rule">Following schedule · no rule right now</string>

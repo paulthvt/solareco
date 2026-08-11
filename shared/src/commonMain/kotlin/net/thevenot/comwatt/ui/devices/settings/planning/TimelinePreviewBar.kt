@@ -1,5 +1,8 @@
 package net.thevenot.comwatt.ui.devices.settings.planning
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,6 +13,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -42,13 +47,27 @@ fun TimelinePreviewBar(
             .height(height)
             .clip(RoundedCornerShape(height / 2)),
     ) {
-        bands.forEach { band ->
-            Box(
-                modifier = Modifier
-                    .weight(band.widthFraction)
-                    .fillMaxHeight()
-                    .background(band.mode.color()),
-            )
+        bands.forEachIndexed { index, band ->
+            // Keyed by position so an edit animates the band that moved rather
+            // than swapping the whole strip: widths and colours slide instead of
+            // cutting. Bands appearing or vanishing grow from the neighbour's
+            // edge, which is the cheapest honest way to show a split.
+            key(index) {
+                val width by animateFloatAsState(
+                    targetValue = band.widthFraction,
+                    animationSpec = tween(durationMillis = 280),
+                )
+                val color by animateColorAsState(
+                    targetValue = band.mode.color(),
+                    animationSpec = tween(durationMillis = 280),
+                )
+                Box(
+                    modifier = Modifier
+                        .weight(width.coerceAtLeast(0.0001f))
+                        .fillMaxHeight()
+                        .background(color),
+                )
+            }
         }
     }
 }
