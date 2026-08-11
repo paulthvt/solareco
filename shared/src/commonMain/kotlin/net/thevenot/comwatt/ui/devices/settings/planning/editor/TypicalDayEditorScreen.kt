@@ -53,6 +53,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -383,20 +385,16 @@ private fun SwipeToDeleteSlot(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    val state = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.Settled) {
-                false
-            } else {
-                onDelete()
-                true
-            }
-        },
-    )
+    val haptics = LocalHapticFeedback.current
+    val state = rememberSwipeToDismissBoxState()
 
     SwipeToDismissBox(
         state = state,
         modifier = modifier,
+        onDismiss = {
+            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            onDelete()
+        },
         backgroundContent = {
             // The bin sits on whichever edge the card is being pulled away from,
             // so the gesture names itself before it completes.
@@ -447,8 +445,11 @@ private fun RuleCard(
     Card(
         onClick = onClick,
         shape = CARD_SHAPE,
+        // Opaque on purpose: a translucent container let the swipe-to-delete
+        // background bleed through, so an untouched card looked pink and
+        // half-erased on load.
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         ),
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -492,7 +493,14 @@ private fun RuleCard(
                 }
             }
 
-            IconButton(onClick = onDelete, modifier = Modifier.padding(end = 4.dp)) {
+            val haptics = LocalHapticFeedback.current
+            IconButton(
+                onClick = {
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onDelete()
+                },
+                modifier = Modifier.padding(end = 4.dp),
+            ) {
                 Icon(
                     painter = AppIcons.Delete,
                     contentDescription = stringResource(Res.string.typical_day_delete_range),
