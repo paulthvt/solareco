@@ -36,6 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -49,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -297,12 +301,16 @@ private fun EditorContent(
                         modifier = Modifier.animateItem(),
                     )
                 } else {
-                    RuleCard(
-                        range = TimeRange(band.start, band.end, band.mode),
-                        onClick = { viewModel.beginEdit(rangeIndex) },
+                    SwipeToDeleteSlot(
                         onDelete = { viewModel.deleteRange(rangeIndex) },
                         modifier = Modifier.animateItem(),
-                    )
+                    ) {
+                        RuleCard(
+                            range = TimeRange(band.start, band.end, band.mode),
+                            onClick = { viewModel.beginEdit(rangeIndex) },
+                            onDelete = { viewModel.deleteRange(rangeIndex) },
+                        )
+                    }
                 }
             }
 
@@ -359,6 +367,62 @@ private fun EditorContent(
 }
 
 private val CARD_SHAPE = RoundedCornerShape(16.dp)
+
+/**
+ * Swipe either way to delete the wrapped slot. The card keeps its own delete
+ * button as well: a swipe is undiscoverable on its own, and pointer platforms
+ * (desktop) make it awkward.
+ *
+ * Deletion is committed straight away because it is not yet persisted — Save
+ * writes the day, and leaving the editor still prompts to discard — so an undo
+ * affordance here would only shadow the one the screen already has.
+ */
+@Composable
+private fun SwipeToDeleteSlot(
+    onDelete: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    val state = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.Settled) {
+                false
+            } else {
+                onDelete()
+                true
+            }
+        },
+    )
+
+    SwipeToDismissBox(
+        state = state,
+        modifier = modifier,
+        backgroundContent = {
+            // The bin sits on whichever edge the card is being pulled away from,
+            // so the gesture names itself before it completes.
+            val alignment = when (state.dismissDirection) {
+                SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
+                else -> Alignment.CenterEnd
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .clip(CARD_SHAPE)
+                    .background(MaterialTheme.colorScheme.errorContainer)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = alignment,
+            ) {
+                Icon(
+                    painter = AppIcons.Delete,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.size(22.dp),
+                )
+            }
+        },
+        content = { content() },
+    )
+}
 
 /**
  * One covered slot. A card rather than a bare row so the tap highlight is clipped
