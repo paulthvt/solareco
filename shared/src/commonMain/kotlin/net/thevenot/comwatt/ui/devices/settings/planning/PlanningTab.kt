@@ -28,7 +28,10 @@ import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.error_fetching_data
 import comwatt.shared.generated.resources.planning_add_schedule
 import comwatt.shared.generated.resources.planning_no_schedules
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchDevicePlanningUseCase
 import net.thevenot.comwatt.domain.SaveDeviceScheduleUseCase
@@ -90,6 +93,12 @@ private fun PlanningTabContent(
 
     LaunchedEffect(deviceId) { viewModel.load() }
 
+    // Read per composition rather than remembered: a remember keyed on the state
+    // compares structurally, so an identical reload would keep a stale date and
+    // hide a schedule that has since become current.
+    val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+    val serverSchedules = uiState.serverSchedules(today)
+
     val hasLoadError = uiState.hasError && uiState.planning == null
 
     // LoadingView only renders its error branch while isLoading is also true, and
@@ -114,7 +123,7 @@ private fun PlanningTabContent(
                 )
             }
 
-            items(uiState.serverSchedules) { schedule ->
+            items(serverSchedules) { schedule ->
                 ScheduleCard(
                     schedule = schedule,
                     sharingCount = 0,
@@ -123,7 +132,7 @@ private fun PlanningTabContent(
                 )
             }
 
-            if (uiState.userSchedules.isEmpty() && uiState.serverSchedules.isEmpty()) {
+            if (uiState.userSchedules.isEmpty() && serverSchedules.isEmpty()) {
                 item {
                     Text(
                         text = stringResource(Res.string.planning_no_schedules),

@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
@@ -214,8 +213,11 @@ private fun DeviceCard(
     onSettingsClick: () -> Unit = {},
     onStateSelected: (DeviceControlState) -> Unit = {},
 ) {
+    // The whole card opens the device's settings; the segmented control consumes
+    // its own taps, so it never triggers navigation.
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth()
+        onClick = onSettingsClick,
+        modifier = Modifier.fillMaxWidth(),
     ) {
         if (device.isOnline) {
             OnlineDeviceCardContent(
@@ -224,11 +226,10 @@ private fun DeviceCard(
                 schedules = schedules,
                 today = today,
                 now = now,
-                onSettingsClick = onSettingsClick,
                 onStateSelected = onStateSelected,
             )
         } else {
-            OfflineDeviceCardContent(device, onSettingsClick = onSettingsClick)
+            OfflineDeviceCardContent(device)
         }
     }
 }
@@ -240,7 +241,6 @@ private fun OnlineDeviceCardContent(
     schedules: List<DeviceSchedule> = emptyList(),
     today: LocalDate,
     now: LocalTime,
-    onSettingsClick: () -> Unit = {},
     onStateSelected: (DeviceControlState) -> Unit = {},
 ) {
     Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -283,16 +283,6 @@ private fun OnlineDeviceCardContent(
                     }
                 }
             }
-
-            // Settings cog
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    painter = AppIcons.Settings,
-                    contentDescription = "Settings",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
         }
 
         if (device.hasToggle) {
@@ -326,7 +316,7 @@ private fun OnlineDeviceCardContent(
 }
 
 @Composable
-private fun OfflineDeviceCardContent(device: DeviceUiModel, onSettingsClick: () -> Unit = {}) {
+private fun OfflineDeviceCardContent(device: DeviceUiModel) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -345,14 +335,6 @@ private fun OfflineDeviceCardContent(device: DeviceUiModel, onSettingsClick: () 
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f)
             )
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    painter = AppIcons.Settings,
-                    contentDescription = "Settings",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         Surface(

@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.ui.devices.settings.planning.editor
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,14 +9,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -293,6 +298,19 @@ private fun EditorContent(
                     enabled = uiState.canSave,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
+                    // A disabled button alone reads as "nothing happened". The
+                    // spinner slides in beside the unchanged label so the row
+                    // never jumps and the wording stays stable.
+                    AnimatedVisibility(visible = uiState.isSaving) {
+                        Row {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                                color = LocalContentColor.current,
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                        }
+                    }
                     Text(stringResource(Res.string.typical_day_save))
                 }
             }

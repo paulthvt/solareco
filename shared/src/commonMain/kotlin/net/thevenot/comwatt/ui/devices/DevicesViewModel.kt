@@ -25,35 +25,42 @@ class DevicesViewModel(
     val uiState: StateFlow<DevicesScreenState> get() = _uiState
 
     fun loadDevices() {
+        viewModelScope.launch(Dispatchers.IO) { fetchDevices() }
+    }
+
+    /**
+     * Suspending body of [loadDevices], so a caller can await the refreshed list
+     * before dropping its optimistic state. Returns without fetching if a
+     * refresh is already running.
+     */
+    private suspend fun fetchDevices() {
         if (_uiState.value.isRefreshing) return
         _uiState.update { it.copy(isRefreshing = true, lastErrorMessage = "") }
 
-        viewModelScope.launch(Dispatchers.IO) {
-            fetchDevicesUseCase.invoke().fold(
-                ifLeft = { error ->
-                    Logger.e(TAG) { "Error loading devices: $error" }
-                    _uiState.update {
-                        it.copy(
-                            isRefreshing = false,
-                            isDataLoaded = true,
-                            lastErrorMessage = error.toString(),
-                            refreshCount = it.refreshCount + 1,
-                        )
-                    }
-                },
-                ifRight = { devices ->
-                    Logger.d(TAG) { "Loaded ${devices.size} devices" }
-                    _uiState.update {
-                        it.copy(
-                            isRefreshing = false,
-                            isDataLoaded = true,
-                            devices = devices,
-                            refreshCount = it.refreshCount + 1,
-                        )
-                    }
+        fetchDevicesUseCase.invoke().fold(
+            ifLeft = { error ->
+                Logger.e(TAG) { "Error loading devices: $error" }
+                _uiState.update {
+                    it.copy(
+                        isRefreshing = false,
+                        isDataLoaded = true,
+                        lastErrorMessage = error.toString(),
+                        refreshCount = it.refreshCount + 1,
+                    )
                 }
-            )
-        }
+            },
+            ifRight = { devices ->
+                Logger.d(TAG) { "Loaded ${devices.size} devices" }
+                _uiState.update {
+                    it.copy(
+                        isRefreshing = false,
+                        isDataLoaded = true,
+                        devices = devices,
+                        refreshCount = it.refreshCount + 1,
+                    )
+                }
+            }
+        )
     }
 
     fun refresh() {
@@ -106,8 +113,11 @@ class DevicesViewModel(
                 },
                 ifRight = {
                     Logger.d(TAG) { "Device ${device.id} set to $target" }
+                    // Await the refreshed list before dropping the optimistic
+                    // value. Clearing first briefly re-renders the stale cached
+                    // device, which read as a flicker through the old state.
+                    fetchDevices()
                     _uiState.update { it.copy(pendingStates = it.pendingStates - device.id) }
-                    loadDevices()
                 }
             )
         }
