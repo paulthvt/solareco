@@ -46,6 +46,18 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.6.0](https://github.com/paulthvt/solareco/compare/2.5.0...2.6.0) (2026-08-12)
+
+
+### Features
+
+* device control and planning ([#313](https://github.com/paulthvt/solareco/issues/313)) ([540f7fc](https://github.com/paulthvt/solareco/commit/540f7fcc9a2e18fff3744cc65a260ade9a4066f3))
+
+
+### Bug Fixes
+
+* **widget:** align chart Y axis with the in-app chart ([#310](https://github.com/paulthvt/solareco/issues/310)) ([16a7de3](https://github.com/paulthvt/solareco/commit/16a7de3a1c965c6fa53f53ed77171ca4a0808db7))
+
 ## [2.5.0](https://github.com/paulthvt/solareco/compare/2.4.0...2.5.0) (2026-06-09)
 
 
