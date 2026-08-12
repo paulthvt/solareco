@@ -385,6 +385,11 @@ private fun SwipeToDeleteSlot(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
+    // Confirm rather than LongPress: it maps to a distinct completion effect on
+    // Android 11+, where LongPress is the weakest constant there is and easy to
+    // miss. Either one is still dropped when the system's touch-feedback setting
+    // is off — Compose performs haptics through the View, without the flags that
+    // would override that.
     val haptics = LocalHapticFeedback.current
     val state = rememberSwipeToDismissBoxState()
 
@@ -392,7 +397,7 @@ private fun SwipeToDeleteSlot(
         state = state,
         modifier = modifier,
         onDismiss = {
-            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
             onDelete()
         },
         backgroundContent = {
@@ -496,7 +501,7 @@ private fun RuleCard(
             val haptics = LocalHapticFeedback.current
             IconButton(
                 onClick = {
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    haptics.performHapticFeedback(HapticFeedbackType.Confirm)
                     onDelete()
                 },
                 modifier = Modifier.padding(end = 4.dp),
