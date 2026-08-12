@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.ic_account_circle
+import comwatt.shared.generated.resources.ic_add
 import comwatt.shared.generated.resources.ic_air
 import comwatt.shared.generated.resources.ic_analytics
 import comwatt.shared.generated.resources.ic_arrow_back
@@ -17,10 +18,12 @@ import comwatt.shared.generated.resources.ic_chevron_left
 import comwatt.shared.generated.resources.ic_chevron_right
 import comwatt.shared.generated.resources.ic_close
 import comwatt.shared.generated.resources.ic_clothes_dryer
+import comwatt.shared.generated.resources.ic_cloud
 import comwatt.shared.generated.resources.ic_code
 import comwatt.shared.generated.resources.ic_coffee
 import comwatt.shared.generated.resources.ic_computer
 import comwatt.shared.generated.resources.ic_dashboard
+import comwatt.shared.generated.resources.ic_delete
 import comwatt.shared.generated.resources.ic_dishwasher
 import comwatt.shared.generated.resources.ic_electric_bolt
 import comwatt.shared.generated.resources.ic_electric_car
@@ -207,6 +210,10 @@ object AppIcons {
         @Composable
         get() = painterResource(Res.drawable.ic_close)
 
+    val Add: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_add)
+
     val AccountCircle: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_account_circle)
@@ -310,5 +317,13 @@ object AppIcons {
     val Freezer: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_freezer)
+
+    val Delete: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_delete)
+
+    val Cloud: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_cloud)
 
 }

@@ -87,7 +87,7 @@ class FetchDevicesUseCase(private val dataRepository: DataRepository) {
             Logger.w(TAG) { "Device $deviceId ${device.name} is offline" }
         }
         val category = mapCategory(deviceCode, isProduction)
-        val hasToggle = hasPowerSwitch(device)
+        val powerSwitch = device.findPowerSwitch()
         return DeviceUiModel(
             id = deviceId,
             name = name.normalizeDeviceName(),
@@ -96,8 +96,10 @@ class FetchDevicesUseCase(private val dataRepository: DataRepository) {
             isProduction = isProduction,
             instantPowerWatts = instantPower,
             dailyEnergyWh = dailyEnergy,
-            hasToggle = hasToggle,
-            isToggleEnabled = hasToggle && isOnline,
+            hasToggle = powerSwitch != null,
+            switchCapacityId = powerSwitch?.capacityId,
+            controlMode = device.readControlMode(),
+            isSwitchOn = powerSwitch?.isOn == true,
             category = category,
         )
     }
@@ -110,15 +112,6 @@ class FetchDevicesUseCase(private val dataRepository: DataRepository) {
             DeviceCode.SOLAR_PANEL, DeviceCode.SOLAR_PANEL_RESALE -> DeviceCategoryGroup.PRODUCTION
             else -> DeviceCategoryGroup.CONSUMPTION
         }
-    }
-
-    private fun hasPowerSwitch(device: DeviceDto): Boolean {
-        // Check direct capacities
-        val directCapacities = device.capacities.orEmpty()
-        if (directCapacities.any { it.capacity?.nature == "POWER_SWITCH" }) return true
-        // Check capacities nested in features
-        val featureCapacities = device.features.orEmpty().flatMap { it.capacities.orEmpty() }
-        return featureCapacities.any { it.capacity?.nature == "POWER_SWITCH" }
     }
 
     companion object {

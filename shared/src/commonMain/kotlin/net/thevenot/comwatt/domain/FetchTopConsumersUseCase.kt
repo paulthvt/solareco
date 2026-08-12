@@ -87,7 +87,7 @@ class FetchTopConsumersUseCase(private val dataRepository: DataRepository) {
         }
 
         val category = mapCategory(deviceCode, isProduction)
-        val hasToggle = hasPowerSwitch(device)
+        val powerSwitch = device.findPowerSwitch()
 
         return DeviceUiModel(
             id = deviceId,
@@ -97,8 +97,10 @@ class FetchTopConsumersUseCase(private val dataRepository: DataRepository) {
             isProduction = isProduction,
             instantPowerWatts = instantPower,
             dailyEnergyWh = dailyEnergy,
-            hasToggle = hasToggle,
-            isToggleEnabled = hasToggle && isOnline,
+            hasToggle = powerSwitch != null,
+            switchCapacityId = powerSwitch?.capacityId,
+            controlMode = device.readControlMode(),
+            isSwitchOn = powerSwitch?.isOn == true,
             category = category,
         )
     }
@@ -168,13 +170,6 @@ class FetchTopConsumersUseCase(private val dataRepository: DataRepository) {
             DeviceCode.SOLAR_PANEL, DeviceCode.SOLAR_PANEL_RESALE -> DeviceCategoryGroup.PRODUCTION
             else -> DeviceCategoryGroup.CONSUMPTION
         }
-    }
-
-    private fun hasPowerSwitch(device: DeviceDto): Boolean {
-        val directCapacities = device.capacities.orEmpty()
-        if (directCapacities.any { it.capacity?.nature == "POWER_SWITCH" }) return true
-        val featureCapacities = device.features.orEmpty().flatMap { it.capacities.orEmpty() }
-        return featureCapacities.any { it.capacity?.nature == "POWER_SWITCH" }
     }
 
     companion object {

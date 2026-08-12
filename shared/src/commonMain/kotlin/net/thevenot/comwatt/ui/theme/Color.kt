@@ -253,6 +253,10 @@ val powerWithdrawalsDark = Color(0xFFF57C00)           // Orange 700
 val powerWithdrawalsGaugeStartDark = Color(0xFFFF9800) // Orange 500
 val powerWithdrawalsGaugeEndDark = Color(0xFFE65100)   // Orange 900
 
+// SCHEDULE SOLAR - Blue for solar-driven schedule mode
+val scheduleSolarLight = Color(0xFF1976D2)              // Blue 700
+val scheduleSolarDark = Color(0xFF42A5F5)               // Blue 400
+
 // =============================================================================
 // Tempo Tariff Colors (EDF Tempo pricing days: Blue, White, Red)
 // =============================================================================

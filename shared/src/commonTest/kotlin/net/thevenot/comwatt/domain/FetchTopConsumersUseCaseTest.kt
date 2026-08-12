@@ -21,7 +21,6 @@ class FetchTopConsumersUseCaseTest {
             instantPowerWatts = 1000.0,
             dailyEnergyWh = 15000.0,
             hasToggle = false,
-            isToggleEnabled = false,
             category = DeviceCategoryGroup.CONSUMPTION
         ),
         DeviceUiModel(
@@ -33,7 +32,6 @@ class FetchTopConsumersUseCaseTest {
             instantPowerWatts = 500.0,
             dailyEnergyWh = 2000.0,
             hasToggle = true,
-            isToggleEnabled = true,
             category = DeviceCategoryGroup.CONSUMPTION
         ),
         DeviceUiModel(
@@ -45,7 +43,6 @@ class FetchTopConsumersUseCaseTest {
             instantPowerWatts = 50.0,
             dailyEnergyWh = 500.0,
             hasToggle = false,
-            isToggleEnabled = false,
             category = DeviceCategoryGroup.CONSUMPTION
         ),
         DeviceUiModel(
@@ -57,7 +54,6 @@ class FetchTopConsumersUseCaseTest {
             instantPowerWatts = 2000.0,
             dailyEnergyWh = 30000.0,
             hasToggle = false,
-            isToggleEnabled = false,
             category = DeviceCategoryGroup.PRODUCTION
         ),
         DeviceUiModel(
@@ -69,7 +65,6 @@ class FetchTopConsumersUseCaseTest {
             instantPowerWatts = null,
             dailyEnergyWh = null,
             hasToggle = false,
-            isToggleEnabled = false,
             category = DeviceCategoryGroup.CONSUMPTION
         )
     )
@@ -146,8 +141,7 @@ class FetchTopConsumersUseCaseTest {
                 instantPowerWatts = 2000.0,
                 dailyEnergyWh = 30000.0,
                 hasToggle = false,
-                isToggleEnabled = false,
-                category = DeviceCategoryGroup.PRODUCTION
+                    category = DeviceCategoryGroup.PRODUCTION
             )
         )
 
@@ -172,8 +166,7 @@ class FetchTopConsumersUseCaseTest {
                 instantPowerWatts = 100.0,
                 dailyEnergyWh = 1000.0,
                 hasToggle = false,
-                isToggleEnabled = false,
-                category = DeviceCategoryGroup.CONSUMPTION
+                    category = DeviceCategoryGroup.CONSUMPTION
             )
         )
 

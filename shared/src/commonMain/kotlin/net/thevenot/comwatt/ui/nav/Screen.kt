@@ -35,4 +35,11 @@ sealed interface Screen {
 
     @Serializable
     data class DeviceSettings(val deviceId: Int) : Screen
+
+    @Serializable
+    data class TypicalDayEditor(
+        val deviceId: Int,
+        val scheduleIndex: Int,
+        val typicalDayId: Int? = null,
+    ) : Screen
 }

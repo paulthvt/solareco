@@ -1,0 +1,59 @@
+{
+  "content": [
+    {
+      "@id": "1",
+      "id": 1451230,
+      "label": "Auto",
+      "timeRangeConfigurations": [
+        {
+          "@id": "2",
+          "id": 51577766,
+          "startTime": "10:00:00",
+          "endTime": "17:00:00",
+          "mode": "COMWATT"
+        }
+      ],
+      "optimalPlanning": false,
+      "siteId": 18734,
+      "isDefault": false
+    },
+    {
+      "@id": "89",
+      "id": 1429676,
+      "label": "Enti\u00e8rement automatis\u00e9",
+      "timeRangeConfigurations": [
+        {
+          "@id": "90",
+          "id": 44346392,
+          "startTime": "00:00:00",
+          "endTime": "07:45:00",
+          "mode": "OFF"
+        },
+        {
+          "@id": "91",
+          "id": 44346393,
+          "startTime": "07:45:00",
+          "endTime": "23:00:00",
+          "mode": "ON"
+        },
+        {
+          "@id": "92",
+          "id": 44346394,
+          "startTime": "23:00:00",
+          "endTime": "23:59:00",
+          "mode": "OFF"
+        }
+      ],
+      "optimalPlanning": false,
+      "siteId": 18734,
+      "isDefault": false
+    }
+  ],
+  "totalElements": 2,
+  "currentPageIndex": 0,
+  "paginationSize": 50,
+  "first": true,
+  "last": true,
+  "numberOfElements": 2,
+  "totalPages": 1
+}

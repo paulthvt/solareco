@@ -11,7 +11,11 @@ data class DeviceUiModel(
     val instantPowerWatts: Double?,
     val dailyEnergyWh: Double?,
     val hasToggle: Boolean,
-    val isToggleEnabled: Boolean,
+    /** Capacity id for the switch endpoint; null when the device has no switch. */
+    val switchCapacityId: Int? = null,
+    val controlMode: ControlMode = ControlMode.MANUAL,
+    /** The POWER_SWITCH capacity's real `enable` state. */
+    val isSwitchOn: Boolean = false,
     val category: DeviceCategoryGroup,
 )
 

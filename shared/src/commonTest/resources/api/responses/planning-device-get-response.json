@@ -1,0 +1,155 @@
+{
+  "content": [
+    {
+      "id": 115292,
+      "typicalDaySchedules": [
+        {
+          "@id": "1",
+          "id": 244837,
+          "activeDayMask": 127,
+          "startDate": "2026-01-01",
+          "endDate": "2026-12-31",
+          "typicalDay": {
+            "@id": "2",
+            "id": 1451230,
+            "label": "Automatic",
+            "timeRangeConfigurations": [
+              {
+                "@id": "3",
+                "id": 51577766,
+                "startTime": "10:00:00",
+                "endTime": "17:00:00",
+                "mode": "COMWATT"
+              }
+            ],
+            "optimalPlanning": false,
+            "siteId": 18734,
+            "isDefault": false
+          },
+          "optimalPlanning": false,
+          "isDefault": false,
+          "isActive": true,
+          "isInactive": false,
+          "isNotDefault": true
+        },
+        {
+          "@id": "90",
+          "id": 244948,
+          "activeDayMask": 127,
+          "startDate": "2026-07-31",
+          "endDate": "2026-08-06",
+          "typicalDay": {
+            "@id": "91",
+            "id": 1429858,
+            "label": "TD-ML-2-Dev-124758",
+            "timeRangeConfigurations": [
+              {
+                "@id": "92",
+                "id": 52652454,
+                "startTime": "10:00:00",
+                "endTime": "17:00:00",
+                "mode": "ON"
+              }
+            ],
+            "optimalPlanning": true,
+            "siteId": 18734,
+            "isDefault": false
+          },
+          "optimalPlanning": true,
+          "isDefault": false,
+          "isActive": true,
+          "isInactive": false,
+          "isNotDefault": true
+        }
+      ],
+      "device": {
+        "id": 124758,
+        "name": "chargeur",
+        "deviceKind": {
+          "@id": "179",
+          "id": 1,
+          "code": "HOUSEHOLD_APPLIANCES",
+          "icon": "icon-ap-householdappliance",
+          "category": "ELECTRICAL_APPLIANCES",
+          "production": false,
+          "global": false,
+          "onlyInfo": false,
+          "injection": false,
+          "withdrawal": false,
+          "displayOrder": 515,
+          "features": [
+            {
+              "@id": "180",
+              "id": 1,
+              "code": "STANDBY",
+              "featureName": "STANDBY"
+            },
+            {
+              "@id": "181",
+              "id": 3,
+              "code": "DELAYED_SETUP",
+              "featureName": "DELAYED_SETUP"
+            },
+            {
+              "@id": "182",
+              "id": 4,
+              "code": "ALERT_ON_STATE",
+              "featureName": "ALERT_ON_STATE"
+            },
+            {
+              "@id": "183",
+              "id": 5,
+              "code": "ALERT_ON_VALUE",
+              "featureName": "ALERT_ON_VALUE"
+            },
+            {
+              "@id": "184",
+              "id": 6,
+              "code": "PLANNING",
+              "featureName": "PLANNING"
+            },
+            {
+              "@id": "185",
+              "id": 9,
+              "code": "PROFILING",
+              "featureName": "PROFILING"
+            },
+            {
+              "@id": "186",
+              "id": 10,
+              "code": "CYCLE",
+              "featureName": "CYCLE"
+            },
+            {
+              "@id": "187",
+              "id": 7,
+              "code": "TRIGGERING",
+              "featureName": "TRIGGERING"
+            },
+            {
+              "@id": "188",
+              "id": 2,
+              "code": "ASSERVISSEMENT",
+              "featureName": "ASSERVISSEMENT"
+            }
+          ],
+          "codeEnum": "HOUSEHOLD_APPLIANCES",
+          "eligibleToSgReady": false,
+          "partKindId": 1
+        },
+        "uuid": "957fb064-07eb-4805-b96a-0ed4da7d8589",
+        "archived": false,
+        "coState": "WORKING"
+      },
+      "status": "OK",
+      "isDefault": false
+    }
+  ],
+  "totalElements": 1,
+  "currentPageIndex": 0,
+  "paginationSize": 50,
+  "first": true,
+  "last": true,
+  "numberOfElements": 1,
+  "totalPages": 1
+}
