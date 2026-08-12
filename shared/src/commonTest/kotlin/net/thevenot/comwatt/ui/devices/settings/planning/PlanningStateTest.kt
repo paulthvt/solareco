@@ -19,6 +19,7 @@ class PlanningStateTest {
         label: String,
         typicalDayId: Int?,
         isServerManaged: Boolean,
+        startDate: LocalDate = LocalDate(2026, 1, 1),
         endDate: LocalDate = LocalDate(2026, 12, 31),
     ) = DeviceSchedule(
         id = null,
@@ -29,7 +30,7 @@ class PlanningStateTest {
             isServerManaged = isServerManaged,
         ),
         days = DayOfWeek.entries.toSet(),
-        startDate = LocalDate(2026, 1, 1),
+        startDate = startDate,
         endDate = endDate,
         isServerManaged = isServerManaged,
     )
@@ -77,6 +78,40 @@ class PlanningStateTest {
         assertEquals(
             listOf("Current"),
             expired.serverSchedules(today).map { it.typicalDay.label },
+        )
+    }
+
+    @Test
+    fun `overlapping generated windows collapse to the newest`() {
+        val overlapping = PlanningState(
+            isLoading = false,
+            planning = DevicePlanning(
+                planningId = 115292,
+                schedules = listOf(
+                    schedule(
+                        "Yesterday's",
+                        1,
+                        isServerManaged = true,
+                        startDate = LocalDate(2026, 8, 11),
+                        endDate = LocalDate(2026, 8, 17),
+                    ),
+                    schedule(
+                        "Today's",
+                        2,
+                        isServerManaged = true,
+                        startDate = LocalDate(2026, 8, 12),
+                        endDate = LocalDate(2026, 8, 18),
+                    ),
+                ),
+                availableTypicalDays = emptyList(),
+                usageCountByTypicalDayId = emptyMap(),
+                rawPlanning = null,
+            ),
+        )
+
+        assertEquals(
+            listOf("Today's"),
+            overlapping.serverSchedules(today).map { it.typicalDay.label },
         )
     }
 

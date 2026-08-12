@@ -16,17 +16,23 @@ data class PlanningState(
         get() = planning?.schedules?.filterNot { it.isServerManaged }.orEmpty()
 
     /**
-     * Schedules Comwatt generated: shown for explanation, never touched.
+     * The schedule Comwatt generated: shown for explanation, never touched.
      *
-     * Only those still relevant on [today] are listed. Comwatt generates one per
-     * week and the site endpoint returns every past one, so an unfiltered list
-     * showed several identical "Comwatt automatic" cards whose windows had
-     * expired months earlier. Expired ones are hidden from display only — the
-     * write body has always excluded server-managed schedules regardless.
+     * At most one is listed. Comwatt regenerates on a rolling seven-day window
+     * and the site endpoint returns every past generation, so the raw list holds
+     * both months-old windows and several current ones that overlap today —
+     * which showed up as the same "Comwatt automatic" card two or three times.
+     * The newest window that has not ended is the one that describes what the
+     * device is doing now, so that is the one kept.
+     *
+     * Filtering is display-only: the write body has always excluded
+     * server-managed schedules regardless.
      */
     fun serverSchedules(today: LocalDate): List<DeviceSchedule> =
         planning?.schedules
             ?.filter { it.isServerManaged && it.endDate >= today }
+            ?.maxWithOrNull(compareBy({ it.startDate }, { it.endDate }))
+            ?.let { listOf(it) }
             .orEmpty()
 
     /**
