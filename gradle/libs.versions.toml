@@ -23,7 +23,7 @@ testResources = "0.10.1"
 vico = "2.5.1"
 
 gradlePlugins-crashlytics = "3.0.7"
-gradlePlugins-google-services = "4.4.4"
+gradlePlugins-google-services = "4.5.0"
 firebase-bom = "34.14.1"
 firebase-gitlive-sdk = "2.4.0"
 material3 = "1.10.0-alpha05"
