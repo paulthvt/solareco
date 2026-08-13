@@ -46,6 +46,16 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.6.1](https://github.com/paulthvt/solareco/compare/2.6.0...2.6.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* **deps:** update dependency androidx.sqlite:sqlite-bundled to v2.7.0 ([#308](https://github.com/paulthvt/solareco/issues/308)) ([727a170](https://github.com/paulthvt/solareco/commit/727a170a2c33230ecd4009782ee2406ac15a2c42))
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.17.0 ([#302](https://github.com/paulthvt/solareco/issues/302)) ([3f7dc29](https://github.com/paulthvt/solareco/commit/3f7dc297d0f884d5f5db8160cfe83d86e2ae5472))
+* **deps:** update kotlin monorepo to v2.4.10 ([#316](https://github.com/paulthvt/solareco/issues/316)) ([4636f6b](https://github.com/paulthvt/solareco/commit/4636f6b9f25c7832cda7c91dfd54dcd6fce39367))
+* **deps:** update ktor monorepo to v3.5.2 ([#307](https://github.com/paulthvt/solareco/issues/307)) ([082d3ff](https://github.com/paulthvt/solareco/commit/082d3ff5eff5681d410a65a6fd50a47cf480c97b))
+
 ## [2.6.0](https://github.com/paulthvt/solareco/compare/2.5.0...2.6.0) (2026-08-12)
 
 
