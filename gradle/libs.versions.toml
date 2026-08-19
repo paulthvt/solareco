@@ -22,7 +22,7 @@ kermit = "2.1.0"
 testResources = "0.10.1"
 vico = "2.5.1"
 
-gradlePlugins-crashlytics = "3.0.7"
+gradlePlugins-crashlytics = "3.0.8"
 gradlePlugins-google-services = "4.5.0"
 firebase-bom = "34.17.0"
 firebase-gitlive-sdk = "2.4.0"
