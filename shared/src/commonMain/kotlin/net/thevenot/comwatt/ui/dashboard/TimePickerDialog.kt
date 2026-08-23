@@ -41,7 +41,7 @@ fun TimePickerDialog(
     var selectedCustomStart by
     remember { mutableStateOf(defaultSelectedTimeRange.custom.selectedStartValue) }
     var selectedCustomEnd by
-    remember { mutableStateOf(defaultSelectedTimeRange.custom.selectedStartValue) }
+    remember { mutableStateOf(defaultSelectedTimeRange.custom.selectedEndValue) }
     var isRangeValid by remember { mutableStateOf(true) }
 
     AlertDialog(

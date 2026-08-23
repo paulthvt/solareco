@@ -370,14 +370,20 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
         timeUnit: TimeUnit,
         startTime: Instant?,
         endTime: Instant
-    ): AggregationLevel {
+    ): AggregationLevel = getSeriesResolution(timeUnit, startTime, endTime).aggregationLevel
+
+    private fun getSeriesResolution(
+        timeUnit: TimeUnit,
+        startTime: Instant?,
+        endTime: Instant
+    ): SeriesResolution {
         val durationSeconds = if (startTime != null) {
             (endTime.epochSeconds - startTime.epochSeconds).seconds
         } else {
             0.seconds
         }
 
-        return when (timeUnit) {
+        val level = when (timeUnit) {
             TimeUnit.HOUR -> AggregationLevel.NONE
             TimeUnit.DAY -> AggregationLevel.NONE
             TimeUnit.WEEK -> AggregationLevel.HOUR
@@ -392,20 +398,8 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
             }
             else -> AggregationLevel.NONE
         }
-    }
 
-    private fun getMeasureKind(
-        timeUnit: TimeUnit,
-        startTime: Instant?,
-        endTime: Instant
-    ): MeasureKind {
-        val durationSeconds = if (startTime != null) {
-            (endTime.epochSeconds - startTime.epochSeconds).seconds
-        } else {
-            0.seconds
-        }
-
-        return when (timeUnit) {
+        val kind = when (timeUnit) {
             TimeUnit.HOUR -> MeasureKind.FLOW
             TimeUnit.DAY -> MeasureKind.FLOW
             TimeUnit.WEEK -> MeasureKind.QUANTITY
@@ -417,7 +411,16 @@ class FetchTimeSeriesUseCase(private val dataRepository: DataRepository) {
                 }
             }
         }
+
+        return SeriesResolution(level, kind)
+            .coarsenedIfRawSamplesExpired(endTime, Clock.System.now())
     }
+
+    private fun getMeasureKind(
+        timeUnit: TimeUnit,
+        startTime: Instant?,
+        endTime: Instant
+    ): MeasureKind = getSeriesResolution(timeUnit, startTime, endTime).measureKind
 
     /**
      * Computes statistics for a ChartTimeSeries using API-based sum calculations

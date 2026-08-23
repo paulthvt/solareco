@@ -7,12 +7,9 @@ import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
-import kotlin.time.Instant
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -21,33 +18,24 @@ fun DayPicker(
     defaultSelectedDay: Int,
     onDateSelected: (Int) -> Unit
 ) {
-    val dayInMillis = 24 * 60 * 60 * 1000L
-    val currentMillis =
-        currentDateTime.toInstant(TimeZone.currentSystemDefault()).toEpochMilliseconds()
-    val initialMillis = currentMillis - (defaultSelectedDay * dayInMillis)
+    val currentDate = currentDateTime.date
+    val initialMillis = currentDate
+        .minus(defaultSelectedDay, DateTimeUnit.DAY)
+        .toDatePickerMillis()
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = initialMillis,
         selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val selectedDateTime = Instant.fromEpochMilliseconds(utcTimeMillis)
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                return selectedDateTime <= currentDateTime
-            }
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                isSelectableDatePickerMillis(utcTimeMillis, currentDate)
         }
     )
 
     LaunchedEffect(datePickerState.selectedDateMillis) {
         datePickerState.selectedDateMillis?.let { timeMillis ->
-            val selectedDate = Instant.fromEpochMilliseconds(timeMillis)
-                .toLocalDateTime(TimeZone.currentSystemDefault())
+            val selectedDate = datePickerMillisToLocalDate(timeMillis)
 
-            val currentDate = currentDateTime.date
-            val selectedDateOnly = selectedDate.date
-
-            val daysDifference = currentDate.minus(selectedDateOnly).days
-
-            onDateSelected(daysDifference)
+            onDateSelected(dayOffsetBetween(selectedDate, currentDate))
         }
     }
 

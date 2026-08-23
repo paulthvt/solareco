@@ -21,6 +21,8 @@ import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.domain.FetchParameters
 import net.thevenot.comwatt.domain.FetchTimeSeriesUseCase
 import net.thevenot.comwatt.domain.FetchTopConsumersUseCase
+import net.thevenot.comwatt.domain.SeriesResolution
+import net.thevenot.comwatt.domain.coarsenedIfRawSamplesExpired
 import net.thevenot.comwatt.domain.exception.DomainError
 import net.thevenot.comwatt.domain.model.ChartTimeSeries
 import net.thevenot.comwatt.domain.model.ConsumerMetric
@@ -31,6 +33,7 @@ import net.thevenot.comwatt.model.type.AggregationType
 import net.thevenot.comwatt.model.type.MeasureKind
 import net.thevenot.comwatt.ui.dashboard.types.DashboardTimeUnit
 import net.thevenot.comwatt.ui.settings.SettingsViewModel.Companion.DEFAULT_PRODUCTION_NOISE_THRESHOLD
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 class DashboardViewModel(
@@ -376,12 +379,15 @@ class DashboardViewModel(
             _uiState.value.selectedTimeRange
         )
 
+        val endTime = end.toInstant(TimeZone.currentSystemDefault())
+        val resolution = SeriesResolution(AggregationLevel.NONE, MeasureKind.QUANTITY)
+            .coarsenedIfRawSamplesExpired(endTime, Clock.System.now())
         val result = dataRepository.api.fetchSiteTimeSeries(
             siteId = siteId,
             startTime = start.toInstant(TimeZone.currentSystemDefault()),
-            endTime = end.toInstant(TimeZone.currentSystemDefault()),
-            measureKind = MeasureKind.QUANTITY,
-            aggregationLevel = AggregationLevel.NONE,
+            endTime = endTime,
+            measureKind = resolution.measureKind,
+            aggregationLevel = resolution.aggregationLevel,
             aggregationType = AggregationType.SUM
         )
         result.onRight { ts ->
