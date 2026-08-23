@@ -343,14 +343,10 @@ private fun DatePickerDialogComponent(
     onDateSelected: (LocalDate) -> Unit
 ) {
     val datePickerState = rememberDatePickerState(
-        initialSelectedDateMillis = initialDate.toInstant(TimeZone.currentSystemDefault())
-            .toEpochMilliseconds(),
+        initialSelectedDateMillis = initialDate.date.toDatePickerMillis(),
         selectableDates = object : SelectableDates {
-            override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                val selectedDateTime = Instant.fromEpochMilliseconds(utcTimeMillis)
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                return selectedDateTime <= currentDateTime
-            }
+            override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+                isSelectableDatePickerMillis(utcTimeMillis, currentDateTime.date)
         }
     )
 
@@ -360,10 +356,7 @@ private fun DatePickerDialogComponent(
             TextButton(
                 onClick = {
                     datePickerState.selectedDateMillis?.let { millis ->
-                        val instant = Instant.fromEpochMilliseconds(millis)
-                        val localDate =
-                            instant.toLocalDateTime(TimeZone.currentSystemDefault()).date
-                        onDateSelected(localDate)
+                        onDateSelected(datePickerMillisToLocalDate(millis))
                     }
                     onDismissRequest()
                 }
