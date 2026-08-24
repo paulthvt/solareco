@@ -59,17 +59,19 @@ internal class ExportDataUseCase(
         }
 
         val semaphore = Semaphore(CONCURRENT_REQUESTS)
+        // One login per export, shared by however many series 401 at once.
+        val loginOnce = LoginOnce(onUnauthorized)
         val (site, deviceSeries) = coroutineScope {
             val siteDeferred = async {
                 semaphore.withPermit {
-                    withUnauthorizedRetry { fetchSite(siteId, startTime, endTime) }
+                    withUnauthorizedRetry(loginOnce) { fetchSite(siteId, startTime, endTime) }
                         .also { reportOne() }
                 }
             }
             val deviceDeferreds = devices.map { device ->
                 async {
                     semaphore.withPermit {
-                        withUnauthorizedRetry { fetchDevice(device.id!!, startTime, endTime) }
+                        withUnauthorizedRetry(loginOnce) { fetchDevice(device.id!!, startTime, endTime) }
                             .map { device.toExportColumn() to it }
                             .also { reportOne() }
                     }
@@ -97,15 +99,19 @@ internal class ExportDataUseCase(
     /**
      * The export has no retry loop of its own: a single 401 means the session expired mid-export,
      * so re-login once and re-issue that one series. Anything else fails the export.
+     *
+     * Concurrent 401s all wait on [loginOnce], so the session is renewed once per export rather
+     * than once per in-flight series.
      */
     private suspend fun <T> withUnauthorizedRetry(
+        loginOnce: LoginOnce,
         block: suspend () -> Either<ApiError, T>
     ): Either<ApiError, T> {
         val first = block()
         val error = first.leftOrNull() ?: return first
         if (error !is ApiError.HttpError || error.code != 401) return first
         Logger.d(TAG) { "401 during export, re-authenticating once" }
-        onUnauthorized()
+        loginOnce.await()
         return block()
     }
 
@@ -144,6 +150,23 @@ internal class ExportDataUseCase(
 
         /** Three at a time keeps a year-long export around five seconds without hammering the API. */
         private const val CONCURRENT_REQUESTS = 3
+    }
+}
+
+/**
+ * Runs [login] at most once, however many callers reach it. Late callers suspend until the first
+ * one's attempt has finished, so their retry carries the renewed session cookie.
+ */
+private class LoginOnce(private val login: suspend () -> Unit) {
+    private val mutex = Mutex()
+    private var done = false
+
+    suspend fun await() {
+        mutex.withLock {
+            if (done) return
+            done = true
+            login()
+        }
     }
 }
 

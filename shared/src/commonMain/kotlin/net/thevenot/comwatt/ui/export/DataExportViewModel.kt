@@ -31,7 +31,8 @@ class DataExportViewModel(
     private val exportDataUseCase = ExportDataUseCase(
         api = dataRepository.api,
         siteIdProvider = { dataRepository.getSettings().firstOrNull()?.siteId },
-        onUnauthorized = { dataRepository.tryAutoLogin({}, {}) }
+        // Suspending, so the retry below goes out with the renewed session cookie.
+        onUnauthorized = { dataRepository.autoLogin() }
     )
 
     private val _uiState = MutableStateFlow(DataExportScreenState())

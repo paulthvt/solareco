@@ -62,27 +62,23 @@ class DataRepository(
         return settingsRepository.settings
     }
 
+    /**
+     * Re-authenticates with the stored credentials and only returns once that has finished. Left
+     * carries the failure message, if any. Callers that must not race the new session — an export
+     * retrying a request right after a 401, for instance — need this rather than [tryAutoLogin].
+     */
+    suspend fun autoLogin(): Either<String?, Unit> {
+        val user = getUser() ?: return Either.Left(null)
+        return api.authenticate(user.email, Password(user.password))
+            .mapLeft { it.errorMessage }
+    }
+
     fun tryAutoLogin(onLogin: () -> Unit, onFail: (String?) -> Unit) {
         scope.launch {
-            val user = getUser()
-            user?.let {
-                val authenticateResponse = api.authenticate(it.email, Password(it.password))
-                when (authenticateResponse) {
-                    is Either.Left -> {
-                        onFail(authenticateResponse.value.errorMessage)
-                    }
-
-                    is Either.Right -> {
-                        withContext(Dispatchers.Main) {
-                            onLogin()
-                        }
-                    }
-                }
-            } ?: run {
-                withContext(Dispatchers.Main) {
-                    onFail(null)
-                }
-            }
+            autoLogin().fold(
+                ifLeft = { withContext(Dispatchers.Main) { onFail(it) } },
+                ifRight = { withContext(Dispatchers.Main) { onLogin() } }
+            )
         }
     }
 

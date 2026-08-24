@@ -183,6 +183,31 @@ class ExportDataUseCaseTest {
     }
 
     @Test
+    fun concurrentUnauthorizedSeriesShareASingleAutoLogin() = runTest {
+        var autoLogins = 0
+        val attemptsPerUrl = mutableMapOf<String, Int>()
+        // Every series 401s on its first attempt: three in-flight requests, still one login.
+        val engine = MockEngine { request ->
+            val url = request.url.toString()
+            val json = headersOf(HttpHeaders.ContentType, "application/json")
+            val attempt = (attemptsPerUrl[url] ?: 0) + 1
+            attemptsPerUrl[url] = attempt
+            when {
+                url.contains("/api/devices") -> respond(devicesBody, HttpStatusCode.OK, json)
+                attempt == 1 -> respondError(HttpStatusCode.Unauthorized)
+                url.contains("site-time-series") -> respond(siteBody, HttpStatusCode.OK, json)
+                else -> respond(deviceBody(10.0), HttpStatusCode.OK, json)
+            }
+        }
+
+        val result = useCase(engine = engine, onUnauthorized = { autoLogins++ })
+            .execute(start, end, TimeZone.UTC) { _, _ -> }
+
+        assertEquals(1, autoLogins)
+        assertTrue(result.isRight())
+    }
+
+    @Test
     fun allEmptySeriesGiveNoDataAndNoFile() = runTest {
         val result = useCase(
             engine(site = emptySiteBody, device = { emptyDeviceBody })
