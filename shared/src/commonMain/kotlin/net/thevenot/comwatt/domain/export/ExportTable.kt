@@ -1,5 +1,6 @@
 package net.thevenot.comwatt.domain.export
 
+import co.touchlab.kermit.Logger
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
 import net.thevenot.comwatt.model.TimeSeriesDto
 import kotlin.time.Instant
@@ -42,8 +43,10 @@ internal fun buildExportTable(
 
     val uniqueNames = dedupeNames(devices.map { it.first.name })
     val deviceSeries = devices.mapIndexed { index, (column, dto) ->
+        val name = uniqueNames[index]
+        warnOnLengthMismatch(name, dto.timestamps.size, dto.values.size)
         ExportSeries(
-            column = column.copy(name = uniqueNames[index]),
+            column = column.copy(name = name),
             valuesByTimestamp = dto.timestamps
                 .map { Instant.parse(it) }
                 .zip(dto.values)
@@ -64,10 +67,27 @@ private fun siteSeriesOf(
     name: String,
     instants: List<Instant>,
     values: List<Double>
-): ExportSeries = ExportSeries(
-    column = ExportColumn(name = name, isSiteTotal = true),
-    valuesByTimestamp = instants.zip(values).toMap()
-)
+): ExportSeries {
+    warnOnLengthMismatch(name, instants.size, values.size)
+    return ExportSeries(
+        column = ExportColumn(name = name, isSiteTotal = true),
+        valuesByTimestamp = instants.zip(values).toMap()
+    )
+}
+
+/**
+ * `zip` truncates to the shorter list, which renders as blank cells — correct, but otherwise
+ * indistinguishable from a device that drew no power. Say so in the log.
+ */
+private fun warnOnLengthMismatch(name: String, timestamps: Int, values: Int) {
+    if (timestamps == values) return
+    Logger.w(TAG) {
+        "column $name has $timestamps timestamps for $values values; " +
+            "the extra entries render as blank cells"
+    }
+}
+
+private const val TAG = "ExportTable"
 
 /** Two devices sharing a name would otherwise collapse into one column downstream. */
 private fun dedupeNames(names: List<String>): List<String> {

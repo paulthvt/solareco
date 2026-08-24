@@ -1,12 +1,26 @@
 package net.thevenot.comwatt.domain.export
 
+import co.touchlab.kermit.LogWriter
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.Severity
+import co.touchlab.kermit.platformLogWriter
 import net.thevenot.comwatt.model.DeviceCode
 import net.thevenot.comwatt.model.SiteTimeSeriesDto
 import net.thevenot.comwatt.model.TimeSeriesDto
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Instant
+
+/** Kermit writes to the global logger, so capturing it is the only way to assert on a warning. */
+private class CapturingLogWriter : LogWriter() {
+    val messages = mutableListOf<Pair<Severity, String>>()
+
+    override fun log(severity: Severity, message: String, tag: String, throwable: Throwable?) {
+        messages += severity to message
+    }
+}
 
 class ExportTableTest {
     private fun site(
@@ -111,6 +125,47 @@ class ExportTableTest {
             table.series.map { it.column.name }
         )
         assertEquals(4, table.series.count { it.column.isSiteTotal })
+    }
+
+    @Test
+    fun mismatchedSeriesLengthsAreLoggedRatherThanSilentlyTruncated() {
+        val captor = CapturingLogWriter()
+        Logger.setLogWriters(captor)
+        try {
+            val table = buildExportTable(
+                // Three timestamps but two consumptions, and a device with one value too few.
+                site = site(
+                    timestamps = listOf(
+                        "2026-01-12T00:00:00Z",
+                        "2026-01-12T01:00:00Z",
+                        "2026-01-12T02:00:00Z"
+                    ),
+                    consumptions = listOf(100.0, 200.0)
+                ),
+                devices = listOf(
+                    device("four") to TimeSeriesDto(
+                        timestamps = listOf("2026-01-12T00:00:00Z", "2026-01-12T01:00:00Z"),
+                        values = listOf(10.0)
+                    )
+                )
+            )
+
+            // Truncation is unchanged: the extra timestamp simply has no value.
+            val consumption = table.series.first { it.column.name == SITE_CONSUMPTION_COLUMN }
+            assertEquals(2, consumption.valuesByTimestamp.size)
+
+            val warnings = captor.messages.filter { it.first == Severity.Warn }.map { it.second }
+            assertTrue(
+                warnings.any { it.contains(SITE_CONSUMPTION_COLUMN) && it.contains("3") && it.contains("2") },
+                "no warning naming $SITE_CONSUMPTION_COLUMN and its lengths in $warnings"
+            )
+            assertTrue(
+                warnings.any { it.contains("four") && it.contains("2") && it.contains("1") },
+                "no warning naming the device column and its lengths in $warnings"
+            )
+        } finally {
+            Logger.setLogWriters(platformLogWriter())
+        }
     }
 
     @Test
