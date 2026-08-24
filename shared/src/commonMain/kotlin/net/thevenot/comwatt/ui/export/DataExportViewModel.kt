@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.firstOrNull
@@ -71,9 +73,21 @@ class DataExportViewModel(
             // End of the last day, so the final day's hours are included.
             val endTime = range.endInclusive.plus(DatePeriod(days = 1)).atStartOfDayIn(timeZone)
 
-            exportDataUseCase.execute(startTime, endTime, timeZone) { completed, total ->
-                _uiState.update { it.copy(status = ExportStatus.Fetching(completed, total)) }
-            }.fold(
+            val outcome = exportDataUseCase.execute(startTime, endTime, timeZone) { completed, total ->
+                _uiState.update { state ->
+                    // Completions can land out of order under bounded concurrency; never let the
+                    // displayed count go backwards.
+                    val shown = state.status as? ExportStatus.Fetching
+                    val highest = maxOf(completed, shown?.completed ?: 0)
+                    state.copy(status = ExportStatus.Fetching(highest, total))
+                }
+            }
+
+            // A cancel that arrives after the last suspension point must not be overwritten by
+            // the terminal state below.
+            currentCoroutineContext().ensureActive()
+
+            outcome.fold(
                 ifLeft = { error -> _uiState.update { it.copy(status = ExportStatus.Failed(error.text())) } },
                 ifRight = { outcome -> handleOutcome(outcome) }
             )
