@@ -59,17 +59,29 @@ Four units, each independently testable.
 
 ### `domain/export/ExportTable.kt` — pure assembly
 
-Takes the site `SiteTimeSeriesDto` plus a list of `(deviceName, TimeSeriesDto)` and produces a
+Takes the site `SiteTimeSeriesDto` plus a list of `(ExportColumn, TimeSeriesDto)` and produces a
 table: the sorted union of every series' timestamps, and per column a `Map<Instant, Double>`
 lookup.
+
+```kotlin
+internal data class ExportColumn(
+    val name: String,
+    val deviceCode: DeviceCode?,
+    val isSiteLevelMeter: Boolean
+)
+```
+
+`isSiteLevelMeter` comes from `deviceKind.global`, `deviceCode` from `deviceKind.code`. Both are
+null-tolerant: 3 of the 13 devices on site 18734 (`chargeur`, `PC bureau Paul`, `Prises Cuisine`)
+have no `deviceKind` at all, and those get no annotation rather than a wrong one.
 
 Missing cells stay missing rather than becoming `0.0`. A device that did not exist in January must
 read as blank, not as "consumed nothing". This unit owns finding 3.
 
 ### `domain/export/CsvWriter.kt` — pure formatting
 
-`ExportTable` → `Sequence<String>`. Owns quoting, header naming, decimal formatting and blank-cell
-rendering. No knowledge of the API or the filesystem.
+`ExportTable` → `Sequence<String>`. Owns the `#` preamble, quoting, header naming, decimal
+formatting and blank-cell rendering. No knowledge of the API or the filesystem.
 
 ### `domain/export/ExportDataUseCase.kt` — orchestration
 
@@ -77,6 +89,9 @@ Resolves `siteId` from settings, calls `fetchDevices`, then issues 1 site + N de
 through a `Semaphore(3)` with `AggregationLevel.HOUR`, `MeasureKind.QUANTITY` and no
 `aggregationType`. Emits progress as each series lands, hands results to `ExportTable`, returns
 `Either<DomainError, String>` — the CSV text.
+
+Also maps each `DeviceDto` to an `ExportColumn`, which is where `deviceKind.global` and
+`deviceKind.code` are read.
 
 `fetchDevices` returned 15 entries for site 18734, of which 2 have a null `id` and null `name`.
 Entries without an id are skipped before any request is issued, so they neither produce a column nor
@@ -108,6 +123,21 @@ formatting and saving stay three concerns, so a change to the CSV shape cannot b
 ## CSV Format
 
 ```
+# SolarEco export — site 18734
+# range: 2025-08-24T00:00:00+02:00 to 2026-08-24T00:00:00+02:00
+# granularity: hourly buckets, energy per bucket in Wh
+# timestamps: local time with UTC offset
+# blank cell: no measurement for that hour
+#
+# columns:
+#   production_wh, consumption_wh, injection_wh, withdrawal_wh — site totals
+#   "échange réseau (soutirage/injection)" — GRID_METER, site-level meter:
+#       duplicates injection_wh and withdrawal_wh
+#   "solaire en autoproduction" — SOLAR_PANEL, site-level meter:
+#       duplicates production_wh
+#   "four" — OVEN
+#   …
+#   Summing all device columns will double-count the site-level meters above.
 timestamp,production_wh,consumption_wh,injection_wh,withdrawal_wh,four,pompe à chaleur,Piscine,…
 2026-01-12T00:00:00+01:00,0,1240.5,0,1240.5,0,980.2,120,…
 2026-01-12T01:00:00+01:00,0,1180,0,1180,0,950.7,,…
@@ -125,6 +155,24 @@ timestamp,production_wh,consumption_wh,injection_wh,withdrawal_wh,four,pompe à 
 - **Rates omitted.** `autoproductionRates`, `autoconsumptionRates`, `injectionRates` and
   `withdrawalRates` are all derivable from the four energy columns and noisy at hourly resolution.
   `charges`/`discharges` are empty (no battery).
+
+### Preamble
+
+`#`-prefixed lines above the header carry the export's metadata and, per column, the device code
+plus a note when the column duplicates a site total. Devices with `deviceKind.global == true` are
+site-level meters: `GRID_METER` mirrors `injection_wh`/`withdrawal_wh`, `SOLAR_PANEL` mirrors
+`production_wh`. The closing line — "Summing all device columns will double-count the site-level
+meters above" — is the point of the whole preamble; it is the mistake a reader would otherwise make
+unprompted.
+
+The annotation is derived from `deviceKind`, never from matching device names. Names are
+user-editable and site-specific, so string matching on `échange réseau` would break on rename and on
+anyone else's site.
+
+Notes live in the CSV rather than a sidecar file so they cannot be separated from the data, and so a
+tool reading the raw text gets the context for free. The cost is that `#` comments are not standard
+CSV: pandas needs `comment='#'`, and Excel shows the lines as rows until skipped. Accepted, since the
+intended consumer reads the file as text.
 
 Filename: `solareco-2025-08-24_2026-08-24-hourly.csv`.
 
@@ -164,7 +212,11 @@ Plus: a device added mid-range leaves blanks before its first sample; duplicate 
 distinct columns; all-empty input produces an empty table.
 
 **`CsvWriterTest`** — header order and naming; quoting for names containing a comma or quote; blank
-rendering; `1240.0` → `1240`; and the two Europe/Paris DST cases — the October night where 02:00
+rendering; `1240.0` → `1240`. Preamble cases: a `global` device is annotated as duplicating the
+matching site total, `GRID_METER` naming injection and withdrawal while `SOLAR_PANEL` names
+production; a non-global device gets its code but no duplication note; a device with a null
+`deviceKind` gets neither; and the double-counting warning appears only when at least one site-level
+meter is present. Plus the two Europe/Paris DST cases — the October night where 02:00
 appears twice with different offsets (`+02:00` then `+01:00`), and the March night where 02:00 is
 absent. Write the DST cases first: wrong local-time formatting is silent, the file looks fine and
 the timeline is off by an hour for half the year.
