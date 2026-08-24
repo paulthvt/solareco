@@ -18,6 +18,7 @@ import platform.Foundation.writeToFile
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 import platform.UIKit.UISceneActivationStateForegroundActive
+import platform.UIKit.UIWindow
 import platform.UIKit.UIWindowScene
 import platform.UIKit.popoverPresentationController
 
@@ -35,11 +36,17 @@ actual class FileSaver {
         }
 
         return withContext(Dispatchers.Main) {
-            val root = UIApplication.sharedApplication.connectedScenes
+            val scenes = UIApplication.sharedApplication.connectedScenes
                 .filterIsInstance<UIWindowScene>()
+            // A long export can finish while the scene is only ForegroundInactive (app switcher,
+            // a system sheet mid-transition); fall back to any window rather than failing.
+            val window = scenes
                 .firstOrNull { it.activationState == UISceneActivationStateForegroundActive }
                 ?.keyWindow
-                ?.rootViewController
+                ?: scenes.firstNotNullOfOrNull { scene ->
+                    scene.keyWindow ?: scene.windows.filterIsInstance<UIWindow>().firstOrNull()
+                }
+            val root = window?.rootViewController
                 ?: return@withContext Either.Left(DomainError.Generic("No window to present from"))
             val controller = UIActivityViewController(
                 activityItems = listOf(NSURL.fileURLWithPath(path)),
