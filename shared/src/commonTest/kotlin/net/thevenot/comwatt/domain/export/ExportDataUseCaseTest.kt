@@ -6,6 +6,8 @@ import io.ktor.client.engine.mock.respondError
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import net.thevenot.comwatt.client.ComwattApi
@@ -185,16 +187,17 @@ class ExportDataUseCaseTest {
     @Test
     fun concurrentUnauthorizedSeriesShareASingleAutoLogin() = runTest {
         var autoLogins = 0
-        val attemptsPerUrl = mutableMapOf<String, Int>()
+        // MockEngine may serve requests off the test thread, so the bookkeeping needs a lock.
+        val alreadyRefused = mutableSetOf<String>()
+        val lock = Mutex()
         // Every series 401s on its first attempt: three in-flight requests, still one login.
         val engine = MockEngine { request ->
             val url = request.url.toString()
             val json = headersOf(HttpHeaders.ContentType, "application/json")
-            val attempt = (attemptsPerUrl[url] ?: 0) + 1
-            attemptsPerUrl[url] = attempt
+            val firstAttempt = lock.withLock { alreadyRefused.add(url) }
             when {
                 url.contains("/api/devices") -> respond(devicesBody, HttpStatusCode.OK, json)
-                attempt == 1 -> respondError(HttpStatusCode.Unauthorized)
+                firstAttempt -> respondError(HttpStatusCode.Unauthorized)
                 url.contains("site-time-series") -> respond(siteBody, HttpStatusCode.OK, json)
                 else -> respond(deviceBody(10.0), HttpStatusCode.OK, json)
             }
