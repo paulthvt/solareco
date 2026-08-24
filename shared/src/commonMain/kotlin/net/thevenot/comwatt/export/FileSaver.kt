@@ -9,5 +9,6 @@ import net.thevenot.comwatt.domain.exception.DomainError
  * Called last, after fetching and rendering, so a cancelled export has written nothing.
  */
 expect class FileSaver {
-    suspend fun save(fileName: String, content: String): Either<DomainError, Unit>
+    /** Returns false when the user dismissed the share/save sheet without saving. */
+    suspend fun save(fileName: String, content: String): Either<DomainError, Boolean>
 }

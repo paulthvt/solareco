@@ -104,8 +104,11 @@ class DataExportViewModel(
                     ifLeft = { error ->
                         _uiState.update { it.copy(status = ExportStatus.Failed(error.text())) }
                     },
-                    ifRight = {
-                        _uiState.update { it.copy(status = ExportStatus.Saved(outcome.fileName)) }
+                    ifRight = { saved ->
+                        // A dismissed save dialog wrote nothing: back to Idle, not Saved.
+                        val status =
+                            if (saved) ExportStatus.Saved(outcome.fileName) else ExportStatus.Idle
+                        _uiState.update { it.copy(status = status) }
                     }
                 )
             }

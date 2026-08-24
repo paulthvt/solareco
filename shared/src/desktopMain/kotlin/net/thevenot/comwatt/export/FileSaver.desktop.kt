@@ -10,7 +10,7 @@ import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 
 actual class FileSaver {
-    actual suspend fun save(fileName: String, content: String): Either<DomainError, Unit> =
+    actual suspend fun save(fileName: String, content: String): Either<DomainError, Boolean> =
         withContext(Dispatchers.IO) {
             runCatching {
                 var chosen: File? = null
@@ -23,10 +23,14 @@ actual class FileSaver {
                         chosen = chooser.selectedFile
                     }
                 }
-                // A cancelled dialog is not an error: the user changed their mind, nothing is written.
-                chosen?.writeText(content)
+                // A cancelled dialog is not an error: the user changed their mind, nothing is
+                // written, and false tells the caller not to claim a saved file.
+                chosen?.let {
+                    it.writeText(content)
+                    true
+                } ?: false
             }.fold(
-                onSuccess = { Either.Right(Unit) },
+                onSuccess = { saved -> Either.Right(saved) },
                 onFailure = { error ->
                     Logger.e(TAG) { "Failed to save $fileName: $error" }
                     Either.Left(DomainError.Generic(error.message ?: "Could not save the file"))
