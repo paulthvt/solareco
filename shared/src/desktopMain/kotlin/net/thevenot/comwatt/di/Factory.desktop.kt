@@ -10,6 +10,7 @@ import net.thevenot.comwatt.database.UserDatabase
 import net.thevenot.comwatt.database.createDataStore
 import net.thevenot.comwatt.database.dataStoreFileName
 import net.thevenot.comwatt.database.dbFileName
+import net.thevenot.comwatt.export.FileSaver
 
 actual class Factory(
     private val appVersion: String
@@ -31,6 +32,8 @@ actual class Factory(
     actual fun createTempoApi(): TempoApiClient = commonCreateTempoApi()
 
     actual fun getAppVersion(): String = appVersion
+
+    actual fun createFileSaver(): FileSaver = FileSaver()
 }
 
 /**

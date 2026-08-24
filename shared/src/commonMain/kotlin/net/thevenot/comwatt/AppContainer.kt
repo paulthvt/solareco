@@ -7,6 +7,7 @@ import net.thevenot.comwatt.database.SettingsRepository
 import net.thevenot.comwatt.database.getUserDatabase
 import net.thevenot.comwatt.di.Factory
 import net.thevenot.comwatt.di.dataStore
+import net.thevenot.comwatt.export.FileSaver
 
 class AppContainer(private val factory: Factory) {
     val dataRepository: DataRepository by lazy {
@@ -21,4 +22,6 @@ class AppContainer(private val factory: Factory) {
 
     val appVersion: String
         get() = factory.getAppVersion()
+
+    val fileSaver: FileSaver by lazy { factory.createFileSaver() }
 }

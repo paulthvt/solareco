@@ -11,6 +11,7 @@ import net.thevenot.comwatt.database.UserDatabase
 import net.thevenot.comwatt.database.createDataStore
 import net.thevenot.comwatt.database.dataStoreFileName
 import net.thevenot.comwatt.database.dbFileName
+import net.thevenot.comwatt.export.FileSaver
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
@@ -54,6 +55,8 @@ actual class Factory(
     actual fun createTempoApi(): TempoApiClient = commonCreateTempoApi()
 
     actual fun getAppVersion(): String = appVersion
+
+    actual fun createFileSaver(): FileSaver = FileSaver()
 }
 
 private val dataStoreSingleton: DataStore<Preferences> by lazy {
