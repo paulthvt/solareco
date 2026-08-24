@@ -11,11 +11,16 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +35,7 @@ import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
 import comwatt.shared.generated.resources.data_export_action
 import comwatt.shared.generated.resources.data_export_cancel
+import comwatt.shared.generated.resources.data_export_confirm
 import comwatt.shared.generated.resources.data_export_estimate
 import comwatt.shared.generated.resources.data_export_failed
 import comwatt.shared.generated.resources.data_export_fetching
@@ -51,7 +57,9 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.thevenot.comwatt.DataRepository
 import net.thevenot.comwatt.export.FileSaver
+import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
 import kotlin.time.Instant
 
 @Composable
@@ -63,75 +71,87 @@ fun DataExportScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val timeZone = TimeZone.currentSystemDefault()
-    val range = resolveRange(state.preset, state.customStart, state.customEnd, viewModel.today(timeZone))
+    val range = remember(state.preset, state.customStart, state.customEnd) {
+        resolveRange(state.preset, state.customStart, state.customEnd, viewModel.today(timeZone))
+    }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = stringResource(Res.string.data_export_title),
-            style = MaterialTheme.typography.titleLarge
-        )
-        Text(
-            text = stringResource(Res.string.data_export_range_label),
-            style = MaterialTheme.typography.labelLarge
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                navigationIcon = {
+                    IconButton(onClick = { navController.popBackStack() }) {
+                        Icon(painter = AppIcons.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                title = { Text(stringResource(Res.string.data_export_title)) }
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(Res.string.data_export_range_label),
+                style = MaterialTheme.typography.labelLarge
+            )
 
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            ExportRangePreset.entries.forEach { preset ->
-                FilterChip(
-                    selected = state.preset == preset,
-                    onClick = { viewModel.onPresetSelected(preset) },
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ExportRangePreset.entries.forEach { preset ->
+                    FilterChip(
+                        selected = state.preset == preset,
+                        onClick = { viewModel.onPresetSelected(preset) },
+                        enabled = !state.isExporting,
+                        label = { Text(preset.label()) }
+                    )
+                }
+            }
+
+            if (state.preset == ExportRangePreset.CUSTOM) {
+                CustomRangePickers(
+                    start = state.customStart,
+                    end = state.customEnd,
                     enabled = !state.isExporting,
-                    label = { Text(preset.label()) }
+                    onRangeSelected = viewModel::onCustomRangeSelected
                 )
             }
-        }
 
-        if (state.preset == ExportRangePreset.CUSTOM) {
-            CustomRangePickers(
-                start = state.customStart,
-                end = state.customEnd,
-                enabled = !state.isExporting,
-                onRangeSelected = viewModel::onCustomRangeSelected
-            )
-        }
-
-        if (range != null) {
-            Text(
-                text = stringResource(
-                    Res.string.data_export_estimate,
-                    estimatedRowCount(range).toString()
-                ),
-                style = MaterialTheme.typography.bodyMedium
-            )
-        } else {
-            Text(
-                text = stringResource(Res.string.data_export_invalid_range),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        if (state.isExporting) {
-            OutlinedButton(onClick = viewModel::cancel, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(Res.string.data_export_cancel))
+            if (range != null) {
+                Text(
+                    text = stringResource(
+                        Res.string.data_export_estimate,
+                        estimatedRowCount(range).toString()
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Text(
+                    text = stringResource(Res.string.data_export_invalid_range),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
             }
-        } else {
-            Button(
-                onClick = { viewModel.export(timeZone) },
-                enabled = range != null,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(stringResource(Res.string.data_export_action))
-            }
-        }
 
-        ExportStatusRow(state.status)
+            if (state.isExporting) {
+                OutlinedButton(onClick = viewModel::cancel, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(Res.string.data_export_cancel))
+                }
+            } else {
+                Button(
+                    onClick = { viewModel.export(timeZone) },
+                    enabled = range != null,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(Res.string.data_export_action))
+                }
+            }
+
+            ExportStatusRow(state.status)
+        }
     }
 }
 
@@ -210,7 +230,13 @@ private fun CustomRangePickers(
     }
 
     val bound = editing ?: return
-    val pickerState = rememberDatePickerState()
+    // No point offering days that have not happened yet — they would export as NoData.
+    val pickerState = rememberDatePickerState(
+        selectableDates = object : SelectableDates {
+            override fun isSelectableDate(utcTimeMillis: Long) =
+                utcTimeMillis <= Clock.System.now().toEpochMilliseconds()
+        }
+    )
     DatePickerDialog(
         onDismissRequest = { editing = null },
         confirmButton = {
@@ -226,7 +252,7 @@ private fun CustomRangePickers(
                     }
                 }
                 editing = null
-            }) { Text("OK") }
+            }) { Text(stringResource(Res.string.data_export_confirm)) }
         },
         dismissButton = {
             TextButton(onClick = { editing = null }) {

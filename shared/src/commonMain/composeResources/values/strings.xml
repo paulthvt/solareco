@@ -191,6 +191,7 @@
     <string name="data_export_no_data">No data for that period</string>
     <string name="data_export_failed">Export failed: %1$s</string>
     <string name="data_export_invalid_range">Select a start and an end date</string>
+    <string name="data_export_confirm">OK</string>
     <string name="device_control_off">Off</string>
     <string name="device_control_on">On</string>
     <string name="device_control_auto">Auto</string>
