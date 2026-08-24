@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +43,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import comwatt.shared.generated.resources.Res
+import comwatt.shared.generated.resources.data_export_action
+import comwatt.shared.generated.resources.data_export_settings_description
+import comwatt.shared.generated.resources.data_export_title
 import comwatt.shared.generated.resources.settings_contract_base
 import comwatt.shared.generated.resources.settings_contract_hphc
 import comwatt.shared.generated.resources.settings_contract_tempo
@@ -74,6 +78,7 @@ import net.thevenot.comwatt.model.savings.TariffConfig
 import net.thevenot.comwatt.model.savings.TimeWindow
 import net.thevenot.comwatt.ui.theme.AppTheme
 import net.thevenot.comwatt.ui.theme.ComwattTheme
+import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.theme.icons.AppIcons
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.abs
@@ -101,7 +106,8 @@ fun SettingsScreen(
         onTariffConfigChange = { newConfig ->
             viewModel.updateTariffConfig(newConfig)
         },
-        onResetTempoRates = viewModel::resetTempoRatesToOfficial
+        onResetTempoRates = viewModel::resetTempoRatesToOfficial,
+        onDataExport = { navController.navigate(Screen.DataExport) }
     )
 }
 
@@ -113,7 +119,8 @@ fun SettingsContent(
     onProductionNoiseThresholdChange: (Float) -> Unit = {},
     tariffConfig: TariffConfig = TariffConfig.defaults(),
     onTariffConfigChange: (TariffConfig) -> Unit = {},
-    onResetTempoRates: () -> Unit = {}
+    onResetTempoRates: () -> Unit = {},
+    onDataExport: () -> Unit = {}
 ) {
     Scaffold(
         topBar = {
@@ -205,6 +212,20 @@ fun SettingsContent(
                     onConfigChange = onTariffConfigChange,
                     onResetTempoRates = onResetTempoRates
                 )
+            }
+            SettingCard(
+                title = stringResource(Res.string.data_export_title),
+                description = stringResource(Res.string.data_export_settings_description),
+                icon = {
+                    Icon(
+                        painter = AppIcons.Download,
+                        contentDescription = null
+                    )
+                }
+            ) {
+                Button(onClick = onDataExport) {
+                    Text(stringResource(Res.string.data_export_action))
+                }
             }
         }
     }

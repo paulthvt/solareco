@@ -29,6 +29,8 @@ import net.thevenot.comwatt.ui.home.HomeScreen
 import net.thevenot.comwatt.ui.login.LoginScreen
 import net.thevenot.comwatt.ui.nav.Screen
 import net.thevenot.comwatt.ui.savings.SavingsScreen
+import net.thevenot.comwatt.export.FileSaver
+import net.thevenot.comwatt.ui.export.DataExportScreen
 import net.thevenot.comwatt.ui.settings.SettingsScreen
 import net.thevenot.comwatt.ui.site.SiteChooserScreen
 import net.thevenot.comwatt.ui.theme.ComwattTheme
@@ -77,7 +79,7 @@ fun MainAppNavHost(
                 }
             }
         }
-        mainGraph(navController, dataRepository, viewModelStoreOwner, snackbarHostState)
+        mainGraph(navController, dataRepository, viewModelStoreOwner, snackbarHostState, appContainer.fileSaver)
         addUserSettingsDialog(navController, dataRepository, appContainer.appVersion)
     }
 }
@@ -86,7 +88,8 @@ fun NavGraphBuilder.mainGraph(
     navController: NavHostController,
     dataRepository: DataRepository,
     viewModelStoreOwner: ViewModelStoreOwner,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    fileSaver: FileSaver
 ) {
     navigation<Screen.Main>(
         startDestination = Screen.Home
@@ -113,6 +116,9 @@ fun NavGraphBuilder.mainGraph(
         }
         composable<Screen.Settings> {
             SettingsScreen(navController, dataRepository)
+        }
+        composable<Screen.DataExport> {
+            DataExportScreen(navController, dataRepository, fileSaver)
         }
         composable<Screen.FullscreenChart> { backStackEntry ->
             val route = backStackEntry.toRoute<Screen.FullscreenChart>()
