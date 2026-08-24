@@ -902,12 +902,16 @@ class ExportDataUseCaseTest {
 
     @Test
     fun progressReachesTheTotal() = runTest {
-        var completed = 0
+        var highest = 0
         var total = 0
 
-        useCase(engine()).execute(start, end, TimeZone.UTC) { c, t -> completed = c; total = t }
+        // Callbacks may arrive out of order under concurrency; only the peak is meaningful.
+        useCase(engine()).execute(start, end, TimeZone.UTC) { c, t ->
+            highest = maxOf(highest, c)
+            total = t
+        }
 
-        assertEquals(total, completed)
+        assertEquals(total, highest)
     }
 
     @Test
