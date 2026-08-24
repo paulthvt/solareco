@@ -136,11 +136,13 @@ fun DataExportScreen(
                 )
             }
 
-            if (state.isExporting) {
+            // Cancel only while fetching: once Writing shows, the file is already written, so
+            // there is nothing left to call off.
+            if (state.status is ExportStatus.Fetching) {
                 OutlinedButton(onClick = viewModel::cancel, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(Res.string.data_export_cancel))
                 }
-            } else {
+            } else if (!state.isExporting) {
                 Button(
                     onClick = { viewModel.export(timeZone) },
                     enabled = range != null,
