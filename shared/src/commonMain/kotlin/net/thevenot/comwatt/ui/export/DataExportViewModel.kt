@@ -2,6 +2,7 @@ package net.thevenot.comwatt.ui.export
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import arrow.core.Either
 import co.touchlab.kermit.Logger
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -23,16 +24,26 @@ import net.thevenot.comwatt.domain.export.ExportDataUseCase
 import net.thevenot.comwatt.domain.export.ExportOutcome
 import net.thevenot.comwatt.export.FileSaver
 import kotlin.time.Clock
+import kotlin.time.Instant
 
-class DataExportViewModel(
-    dataRepository: DataRepository,
-    private val fileSaver: FileSaver
+/** Matches `ExportDataUseCase.execute`, as a function value so tests can fake it. */
+internal typealias ExportFn = suspend (
+    startTime: Instant,
+    endTime: Instant,
+    timeZone: TimeZone,
+    onProgress: suspend (completed: Int, total: Int) -> Unit
+) -> Either<DomainError, ExportOutcome>
+
+/** Matches `FileSaver.save`, which is an `expect class` and so cannot be faked directly. */
+internal typealias SaveFn = suspend (fileName: String, content: String) -> Either<DomainError, Boolean>
+
+class DataExportViewModel internal constructor(
+    private val export: ExportFn,
+    private val save: SaveFn
 ) : ViewModel() {
-    private val exportDataUseCase = ExportDataUseCase(
-        api = dataRepository.api,
-        siteIdProvider = { dataRepository.getSettings().firstOrNull()?.siteId },
-        // Suspending, so the retry below goes out with the renewed session cookie.
-        onUnauthorized = { dataRepository.autoLogin() }
+    constructor(dataRepository: DataRepository, fileSaver: FileSaver) : this(
+        export = exportFn(dataRepository),
+        save = { fileName, content -> fileSaver.save(fileName, content) }
     )
 
     private val _uiState = MutableStateFlow(DataExportScreenState())
@@ -74,7 +85,7 @@ class DataExportViewModel(
             // End of the last day, so the final day's hours are included.
             val endTime = range.endInclusive.plus(DatePeriod(days = 1)).atStartOfDayIn(timeZone)
 
-            val outcome = exportDataUseCase.execute(startTime, endTime, timeZone) { completed, total ->
+            val outcome = export(startTime, endTime, timeZone) { completed, total ->
                 _uiState.update { state ->
                     // Completions can land out of order under bounded concurrency; never let the
                     // displayed count go backwards.
@@ -100,7 +111,7 @@ class DataExportViewModel(
             is ExportOutcome.NoData -> _uiState.update { it.copy(status = ExportStatus.NoData) }
             is ExportOutcome.Csv -> {
                 _uiState.update { it.copy(status = ExportStatus.Writing) }
-                fileSaver.save(outcome.fileName, outcome.content).fold(
+                save(outcome.fileName, outcome.content).fold(
                     ifLeft = { error ->
                         _uiState.update { it.copy(status = ExportStatus.Failed(error.text())) }
                     },
@@ -135,5 +146,17 @@ class DataExportViewModel(
 
     companion object {
         private const val TAG = "DataExportViewModel"
+    }
+}
+
+private fun exportFn(dataRepository: DataRepository): ExportFn {
+    val useCase = ExportDataUseCase(
+        api = dataRepository.api,
+        siteIdProvider = { dataRepository.getSettings().firstOrNull()?.siteId },
+        // Suspending, so the retry goes out with the renewed session cookie.
+        onUnauthorized = { dataRepository.autoLogin() }
+    )
+    return { startTime, endTime, timeZone, onProgress ->
+        useCase.execute(startTime, endTime, timeZone, onProgress)
     }
 }
