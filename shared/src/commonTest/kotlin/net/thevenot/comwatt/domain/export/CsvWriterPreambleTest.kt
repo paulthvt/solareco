@@ -82,7 +82,23 @@ class CsvWriterPreambleTest {
     fun deviceWithoutAKindIsListedWithoutAnnotation() {
         val line = preambleOf(unknownKind).first { it.contains("chargeur") }
 
-        assertEquals("#   \"chargeur\"", line)
+        // Unquoted, as in the header: "chargeur" holds no CSV metacharacter.
+        assertEquals("#   chargeur", line)
+    }
+
+    @Test
+    fun aNameContainingAQuoteIsEscapedTheSameWayInThePreambleAndTheHeader() {
+        val awkward = ExportColumn(name = "Salle \"TV\"", deviceCode = DeviceCode.OVEN)
+        val table = tableWith(awkward)
+
+        val preambleName = CsvWriter.preamble(table, metadata, paris)
+            .first { it.contains("Salle") }
+            .removePrefix("#   ")
+            .substringBefore(" — ")
+        val headerName = CsvWriter.rows(table, paris).first().substringAfter("timestamp,")
+
+        assertEquals(headerName, preambleName)
+        assertEquals("\"Salle \"\"TV\"\"\"", headerName)
     }
 
     @Test

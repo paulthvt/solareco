@@ -53,7 +53,8 @@ internal object CsvWriter {
     }
 
     private fun columnLine(column: ExportColumn): String {
-        val quotedName = "\"${column.name}\""
+        // Same escaping as the header, so a name is spelled identically in both places.
+        val quotedName = escape(column.name)
         val code = column.deviceCode?.name ?: return "#   $quotedName"
         if (!column.isSiteLevelMeter) return "#   $quotedName — $code"
         val duplicated = duplicatedSiteColumns(column.deviceCode)
