@@ -2,6 +2,7 @@ package net.thevenot.comwatt.export
 
 import arrow.core.Either
 import co.touchlab.kermit.Logger
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,7 +16,7 @@ import platform.Foundation.writeToFile
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.UIApplication
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 actual class FileSaver {
     actual suspend fun save(fileName: String, content: String): Either<DomainError, Unit> {
         val path = NSTemporaryDirectory() + fileName
