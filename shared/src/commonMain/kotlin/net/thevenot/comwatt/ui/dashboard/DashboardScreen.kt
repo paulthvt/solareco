@@ -327,16 +327,16 @@ fun DashboardScreenContent(
                         val filteredCharts = sortDashboardCharts(visibleCharts, uiState.sortMode)
 
                         items(
-                            items = filteredCharts.withIndex()
-                                .filter { it.value.timeSeries.any { series -> series.values.isNotEmpty() } },
-                            key = { it.index to it.value.name }) { (index, chart) ->
+                            items = filteredCharts
+                                .filter { it.timeSeries.any { series -> series.values.isNotEmpty() } },
+                            key = { it.name ?: "" }) { chart ->
                             LazyGraphCard(
                                 uiState = uiState,
                                 chart = chart,
                                 onFullscreenClick = {
                                     navController.navigate(
                                         Screen.FullscreenChart(
-                                            index
+                                            chart.name
                                         )
                                     )
                                 },

@@ -77,7 +77,7 @@ private val FullscreenLegendLabelKey = ExtraStore.Key<Set<String>>()
 fun FullscreenChartScreen(
     navController: NavController,
     dataRepository: DataRepository,
-    chartIndex: Int,
+    chartName: String?,
     viewModel: DashboardViewModel = viewModel {
         DashboardViewModel(
             FetchTimeSeriesUseCase(dataRepository),
@@ -104,7 +104,7 @@ fun FullscreenChartScreen(
     val charts by viewModel.charts.collectAsState()
     val uiState by viewModel.uiState.collectAsState()
 
-    val chart = charts.getOrNull(chartIndex)
+    val chart = charts.firstOrNull { it.name?.trim() == chartName?.trim() }
 
     Scaffold(
         topBar = {

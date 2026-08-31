@@ -34,7 +34,7 @@ sealed interface Screen {
     data object DataExport : Screen
 
     @Serializable
-    data class FullscreenChart(val chartIndex: Int) : Screen
+    data class FullscreenChart(val chartName: String?) : Screen
 
     @Serializable
     data class DeviceSettings(val deviceId: Int) : Screen
