@@ -46,6 +46,30 @@
 
 * replace extended icons dependency with custom icon mapping ([#228](https://github.com/paulthvt/solareco/issues/228)) ([5e931c5](https://github.com/paulthvt/solareco/commit/5e931c586a9dbd5d0155b01334083e2235474b05))
 
+## [2.7.0](https://github.com/paulthvt/solareco/compare/2.6.0...2.7.0) (2026-08-31)
+
+
+### Features
+
+* data export ([#327](https://github.com/paulthvt/solareco/issues/327)) ([3e7d26e](https://github.com/paulthvt/solareco/commit/3e7d26e34129f89966a26d661e975eaa314c259d))
+
+
+### Bug Fixes
+
+* dashboard range picker and old ranges ([#322](https://github.com/paulthvt/solareco/issues/322)) ([8974764](https://github.com/paulthvt/solareco/commit/897476442d29df9c939f76829c5413c863acd037))
+* **dashboard:** open correct device from fullscreen chart ([#329](https://github.com/paulthvt/solareco/issues/329)) ([324f7c0](https://github.com/paulthvt/solareco/commit/324f7c043cd51b2b37d323db4ba4f27ba098fee6))
+* **deps:** update androidx.glance to v1.2.0 ([#325](https://github.com/paulthvt/solareco/issues/325)) ([1d2930c](https://github.com/paulthvt/solareco/commit/1d2930c86b5ab3944ec869db44db4319203532b5))
+* **deps:** update compose.multiplatform to v1.12.0 ([#323](https://github.com/paulthvt/solareco/issues/323)) ([07fe5b2](https://github.com/paulthvt/solareco/commit/07fe5b27eb83ed5d2a0385d4de5ff2628b09ab73))
+* **deps:** update dependency androidx.core:core-ktx to v1.19.0 ([#328](https://github.com/paulthvt/solareco/issues/328)) ([e36706e](https://github.com/paulthvt/solareco/commit/e36706ed46dc1106aa0f648a7024cfc3be005e18))
+* **deps:** update dependency androidx.sqlite:sqlite-bundled to v2.7.0 ([#308](https://github.com/paulthvt/solareco/issues/308)) ([727a170](https://github.com/paulthvt/solareco/commit/727a170a2c33230ecd4009782ee2406ac15a2c42))
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.17.0 ([#302](https://github.com/paulthvt/solareco/issues/302)) ([3f7dc29](https://github.com/paulthvt/solareco/commit/3f7dc297d0f884d5f5db8160cfe83d86e2ae5472))
+* **deps:** update dependency com.google.firebase:firebase-bom to v34.18.0 ([#321](https://github.com/paulthvt/solareco/issues/321)) ([b5b62ac](https://github.com/paulthvt/solareco/commit/b5b62acb63db4c070f9e3b8fd2968cb4d8432b50))
+* **deps:** update dependency dev.gitlive:firebase-crashlytics to v2.6.0 ([#319](https://github.com/paulthvt/solareco/issues/319)) ([387afcd](https://github.com/paulthvt/solareco/commit/387afcd16109e90486d7fb5398718ea6a5f34673))
+* **deps:** update kotlin monorepo to v2.4.10 ([#316](https://github.com/paulthvt/solareco/issues/316)) ([4636f6b](https://github.com/paulthvt/solareco/commit/4636f6b9f25c7832cda7c91dfd54dcd6fce39367))
+* **deps:** update ktor monorepo to v3.5.2 ([#307](https://github.com/paulthvt/solareco/issues/307)) ([082d3ff](https://github.com/paulthvt/solareco/commit/082d3ff5eff5681d410a65a6fd50a47cf480c97b))
+* **deps:** update testresources to v0.16.0 ([#198](https://github.com/paulthvt/solareco/issues/198)) ([46d46ac](https://github.com/paulthvt/solareco/commit/46d46ac0aa6b4d2e42997af44df905a81895bd52))
+* **deps:** update vico to v2.5.2 ([#305](https://github.com/paulthvt/solareco/issues/305)) ([80f517d](https://github.com/paulthvt/solareco/commit/80f517dfd2d052e9718278a2716847393b663bd7))
+
 ## [2.6.0](https://github.com/paulthvt/solareco/compare/2.5.0...2.6.0) (2026-08-12)
 
 
