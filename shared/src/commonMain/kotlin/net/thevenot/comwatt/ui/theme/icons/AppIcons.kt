@@ -23,6 +23,7 @@ import comwatt.shared.generated.resources.ic_code
 import comwatt.shared.generated.resources.ic_coffee
 import comwatt.shared.generated.resources.ic_computer
 import comwatt.shared.generated.resources.ic_dashboard
+import comwatt.shared.generated.resources.ic_download
 import comwatt.shared.generated.resources.ic_delete
 import comwatt.shared.generated.resources.ic_dishwasher
 import comwatt.shared.generated.resources.ic_electric_bolt
@@ -325,5 +326,9 @@ object AppIcons {
     val Cloud: Painter
         @Composable
         get() = painterResource(Res.drawable.ic_cloud)
+
+    val Download: Painter
+        @Composable
+        get() = painterResource(Res.drawable.ic_download)
 
 }

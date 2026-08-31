@@ -1,5 +1,6 @@
 [versions]
 activityCompose = "1.13.0"
+androidxCore = "1.13.1"
 agp = "9.2.1"
 android-compileSdk = "36"
 android-minSdk = "24"
@@ -32,6 +33,7 @@ androidx-work = "2.11.2"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 

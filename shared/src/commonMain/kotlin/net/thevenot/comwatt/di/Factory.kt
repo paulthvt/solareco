@@ -9,12 +9,14 @@ import net.thevenot.comwatt.client.ComwattApi
 import net.thevenot.comwatt.client.TempoApiClient
 import net.thevenot.comwatt.client.createClient
 import net.thevenot.comwatt.database.UserDatabase
+import net.thevenot.comwatt.export.FileSaver
 
 expect class Factory {
     fun getDatabaseBuilder(): RoomDatabase.Builder<UserDatabase>
     fun createApi(): ComwattApi
     fun createTempoApi(): TempoApiClient
     fun getAppVersion(): String
+    fun createFileSaver(): FileSaver
 }
 
 expect fun Factory.getDataStoreSingleton(): DataStore<Preferences>
