@@ -124,7 +124,7 @@ fun NavGraphBuilder.mainGraph(
             val route = backStackEntry.toRoute<Screen.FullscreenChart>()
             FullscreenChartScreen(
                 navController = navController,
-                chartIndex = route.chartIndex,
+                chartName = route.chartName,
                 dataRepository = dataRepository
             )
         }
