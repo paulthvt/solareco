@@ -21,7 +21,7 @@ class ComwattApiTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/api/devices?siteId=$siteId"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/devices-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/devices-response.json").readText(),
                 httpMethod = HttpMethod.Get
             )
         )
@@ -49,7 +49,7 @@ class ComwattApiTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/api/aggregations/time-series?id=$deviceId&measureKind=FLOW&aggregationLevel=NONE&timeAgoUnit=DAY&timeAgoValue=1&end=$encodedEndTime"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/time-series-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/time-series-response.json").readText(),
                 httpMethod = HttpMethod.Get
             )
         )
@@ -75,7 +75,7 @@ class ComwattApiTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/api/tiles?siteId=$siteId&tileTypes=THIRD_PARTY&tileTypes=VALUATION"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/tiles-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/tiles-response.json").readText(),
                 httpMethod = HttpMethod.Get
             )
         )
@@ -93,7 +93,7 @@ class ComwattApiTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/api/sites"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/sites-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/sites-response.json").readText(),
                 httpMethod = HttpMethod.Get
             )
         )
@@ -112,7 +112,7 @@ class ComwattApiTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/api/users/authenticated"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/user-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/user-response.json").readText(),
                 httpMethod = HttpMethod.Get
             )
         )
@@ -132,7 +132,7 @@ class ComwattApiTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/weather/data/2.5/forecast/daily?zip=83560%2CFR&units=metric&lang=en"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/daily-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/daily-response.json").readText(),
                 httpMethod = HttpMethod.Get
             )
         )
@@ -170,7 +170,7 @@ class ComwattApiTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$serverBaseUrl/api/electricityprice"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/eletricity-price.json").readText(),
+                expectedResponseBody = Resource("api/responses/eletricity-price.json").readText(),
                 httpMethod = HttpMethod.Get
             )
         )

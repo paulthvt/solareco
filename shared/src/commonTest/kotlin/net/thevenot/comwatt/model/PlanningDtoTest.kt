@@ -16,7 +16,7 @@ class PlanningDtoTest {
     }
 
     private fun readFixture(name: String) =
-        Resource("src/commonTest/resources/api/responses/$name").readText()
+        Resource("api/responses/$name").readText()
 
     @Test
     fun `parses the device planning fixture`() {

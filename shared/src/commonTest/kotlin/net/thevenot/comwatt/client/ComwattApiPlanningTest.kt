@@ -53,7 +53,7 @@ class ComwattApiPlanningTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$baseUrl/api/typicaldays?siteId=18734"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/typical-days-get.json").readText(),
+                expectedResponseBody = Resource("api/responses/typical-days-get.json").readText(),
                 httpMethod = HttpMethod.Get,
             )
         )
@@ -108,7 +108,7 @@ class ComwattApiPlanningTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$baseUrl/api/plannings?deviceId=124758"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/planning-device-get-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/planning-device-get-response.json").readText(),
                 httpMethod = HttpMethod.Get,
             )
         )
@@ -124,7 +124,7 @@ class ComwattApiPlanningTest {
         val client = mockHttpClient(
             configureMockEngine(
                 url = Url("$baseUrl/api/plannings?siteId=18734"),
-                expectedResponseBody = Resource("src/commonTest/resources/api/responses/planning-device-get-response.json").readText(),
+                expectedResponseBody = Resource("api/responses/planning-device-get-response.json").readText(),
                 httpMethod = HttpMethod.Get,
             )
         )
