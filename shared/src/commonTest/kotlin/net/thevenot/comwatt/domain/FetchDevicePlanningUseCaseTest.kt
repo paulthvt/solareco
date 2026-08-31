@@ -21,9 +21,9 @@ import kotlin.test.fail
 class FetchDevicePlanningUseCaseTest {
 
     private val planningsJson =
-        Resource("src/commonTest/resources/api/responses/planning-device-get-response.json").readText()
+        Resource("api/responses/planning-device-get-response.json").readText()
     private val typicalDaysJson =
-        Resource("src/commonTest/resources/api/responses/typical-days-get.json").readText()
+        Resource("api/responses/typical-days-get.json").readText()
 
     /**
      * The device endpoint is deliberately wired to fail: the use case must never
