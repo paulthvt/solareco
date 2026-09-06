@@ -67,7 +67,7 @@ touchlab-kermit = { group = "co.touchlab", name = "kermit", version.ref = "kermi
 vico = { group = "com.patrykandpatrick.vico", name = "multiplatform", version.ref = "vico" }
 vico-multiplatform-m3 = { group = "com.patrykandpatrick.vico", name = "multiplatform-m3", version.ref = "vico" }
 test-resources = { module = "com.goncalossilva:resources", version.ref = "testResources" }
-kastro = { module = "dev.jamesyox:kastro", version = "0.5.0" }
+kastro = { module = "dev.jamesyox:kastro", version = "0.6.0" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
 androidx-glance = { group = "androidx.glance", name = "glance-appwidget", version.ref = "androidx-glance" }
