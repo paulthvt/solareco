@@ -19,7 +19,7 @@ sqlite = "2.7.0"
 androidx-room = "2.8.4"
 dataStoreVersion = "1.2.1"
 arrow = "2.2.3"
-kermit = "2.1.0"
+kermit = "2.2.0"
 testResources = "0.16.0"
 vico = "2.5.2"
 
